@@ -1,0 +1,53 @@
+{
+  "apiVersion": 1,
+  "version": "d94d22f",
+  "data": {
+    "list": [
+      {
+        "size": 1,
+        "id": "DtAAke5g",
+        "geo": [-98.40472, 19.158945],
+        "url": "/visit/huejotzingo/DtAAke5g",
+        "boost": false,
+        "title": "Huejotzingo",
+        "country": "Mexico"
+      },
+      {
+        "size": 2,
+        "id": "ddk6tEsl",
+        "geo": [-117.29276, 34.536217],
+        "url": "/visit/victorville-ca/ddk6tEsl",
+        "boost": false,
+        "title": "Victorville CA",
+        "country": "United States"
+      },
+      {
+        "size": 1,
+        "id": "uk5ZgHx8",
+        "geo": [-101.25736, 21.019014],
+        "url": "/visit/guanajuato/uk5ZgHx8",
+        "boost": false,
+        "title": "Guanajuato",
+        "country": "Mexico"
+      },
+      {
+        "size": 1,
+        "id": "XxPHUR21",
+        "geo": [-99.59107, 18.96134],
+        "url": "/visit/tenancingo/XxPHUR21",
+        "boost": false,
+        "title": "Tenancingo",
+        "country": "Mexico"
+      },
+      {
+        "size": 1,
+        "id": "TE2AhPQz",
+        "geo": [-93.21061, 17.096561],
+        "url": "/visit/copainal/TE2AhPQz",
+        "boost": false,
+        "title": "Copainalá",
+        "country": "Mexico"
+      }
+    ]
+  }
+}
