@@ -10,11 +10,14 @@
     "lint": "prettier --write --ignore-unknown ."
   },
   "dependencies": {
+    "d3": "^7.6.1",
+    "datamaps": "^0.5.9",
     "vue": "^3.2.41"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^3.4.0",
     "@vitejs/plugin-vue": "^3.2.0",
+    "@vue-leaflet/vue-leaflet": "^0.6.1",
     "autoprefixer": "^10.4.13",
     "postcss": "^8.4.18",
     "prettier": "^2.7.1",
