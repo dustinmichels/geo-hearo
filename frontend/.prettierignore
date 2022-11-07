@@ -1,2 +1,5 @@
-dist/
-coverage/
+build
+dist
+coverage
+yarn.lock
+package-lock.json
