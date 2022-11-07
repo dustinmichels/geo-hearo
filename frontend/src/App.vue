@@ -4,10 +4,9 @@ import { ref } from 'vue'
 import AudioPlayer from './components/AudioPlayer/Player.vue'
 import Search from './components/Search.vue'
 
-// let guessed = ref(['Germany', 'Switzerland', 'Austria'])
-
 const NUM_GUESS = 7
 
+// let guessed = ref(['Germany', 'Switzerland', 'Austria'])
 let guessed = ref(Array(NUM_GUESS).fill(''))
 
 let guessCount = 1

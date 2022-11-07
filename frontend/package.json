@@ -10,7 +10,6 @@
     "lint": "prettier --write --ignore-unknown ."
   },
   "dependencies": {
-    "@trevoreyre/autocomplete-vue": "^2.3.0",
     "vue": "^3.2.41"
   },
   "devDependencies": {
