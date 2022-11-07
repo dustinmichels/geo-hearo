@@ -1,19 +1,18 @@
 <script setup lang="ts">
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import AudioPlayer from './components/AudioPlayer/player.vue'
-import HelloWorld from './components/HelloWorld.vue'
+import AudioPlayer from './components/AudioPlayer/Player.vue'
+import Search from './components/Search.vue'
+
+const guessed: string[] = []
 </script>
 
 <template>
-  <HelloWorld msg="Vite + Vue" />
   <AudioPlayer
     :option="{
       src: 'https://radio.garden/api/ara/content/listen/dKofB-bG/channel.mp3',
-      // title: 'your-audio-title',
-      // coverImage: 'https://your-cover-image.png',
     }"
   />
+
+  <Search />
 </template>
 
 <style scoped></style>

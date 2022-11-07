@@ -34,6 +34,7 @@
     ></audio>
   </div>
 </template>
+
 <script lang="ts">
 import {
   PropType,
@@ -133,6 +134,8 @@ export default defineComponent({
       },
       { deep: true }
     )
+
+    onAudioPause()
 
     return {
       audioPlayer,
