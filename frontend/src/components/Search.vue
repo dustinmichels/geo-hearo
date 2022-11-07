@@ -22,60 +22,39 @@
           {{ country.name }}
         </li>
       </ul>
-
-      <p v-if="selectedCountry" class="text-lg pt-2 absolute">
-        You have selected:
-        <span class="font-semibold">{{ selectedCountry }}</span>
-      </p>
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, ref } from 'vue'
+<script setup lang="ts">
+import { computed, ref } from 'vue'
 
 import countries from '../assets/data/countries.json'
 
-export default defineComponent({
-  emits: {
-    addBook(payload: { bookName: string }) {
-      // perform runtime validation
-      return payload.bookName.length > 0
-    },
-  },
+const emit = defineEmits(['addToHistory'])
 
-  setup(props, context) {
-    let searchTerm = ref('')
-    let selectedCountry = ref('')
+let searchTerm = ref('')
+let selectedCountry = ref('')
 
-    const searchCountries = computed(() => {
-      if (searchTerm.value === '') {
-        return []
-      }
-      let matches = 0
-      return countries.filter((country) => {
-        if (
-          country.name.toLowerCase().includes(searchTerm.value.toLowerCase()) &&
-          matches < 10
-        ) {
-          matches++
-          return country
-        }
-      })
-    })
-
-    const selectCountry = (country: string) => {
-      selectedCountry.value = country
-      searchTerm.value = ''
+const searchCountries = computed(() => {
+  if (searchTerm.value === '') {
+    return []
+  }
+  let matches = 0
+  return countries.filter((country) => {
+    if (
+      country.name.toLowerCase().includes(searchTerm.value.toLowerCase()) &&
+      matches < 10
+    ) {
+      matches++
+      return country
     }
-
-    return {
-      countries,
-      searchTerm,
-      searchCountries,
-      selectCountry,
-      selectedCountry,
-    }
-  },
+  })
 })
+
+const selectCountry = (country: string) => {
+  selectedCountry.value = country
+  emit('addToHistory', country)
+  searchTerm.value = ''
+}
 </script>
