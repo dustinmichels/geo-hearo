@@ -10,8 +10,6 @@
     "lint": "prettier --write --ignore-unknown ."
   },
   "dependencies": {
-    "@any-touch/core": "^2.2.0",
-    "@any-touch/pan": "^2.2.0",
     "vue": "^3.2.41"
   },
   "devDependencies": {
