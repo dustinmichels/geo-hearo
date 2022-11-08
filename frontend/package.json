@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "d3": "^7.6.1",
+    "d3-scale-chromatic": "^3.0.0",
     "datamaps": "^0.5.9",
+    "leaflet": "^1.9.2",
     "vue": "^3.2.41"
   },
   "devDependencies": {
