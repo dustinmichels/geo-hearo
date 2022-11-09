@@ -112,32 +112,32 @@ function makeGuess(guess) {
   }, 500)
 }
 
+// Set projection
+function setProj(element) {
+  const width = element.offsetWidth
+  const height = element.offsetHeight
+  var projection = proj
+    .scale((width + 1) / 1.6 / Math.PI)
+    .translate([width / 2.5, height / 1.7])
+  var path = geoPath().projection(projection)
+  return { path, projection }
+}
+
 onMounted(() => {
   const container = document.getElementById('container')
+
+  const projs = ['equirectangular', 'mercator', 'orthographic']
 
   map = new Datamap({
     element: container,
     responsive: true,
-    // projection: 'equirectangular', // mercator, equirectangular, orthographic
-
-    setProjection: function (element) {
-      const width = element.offsetWidth
-      const height = element.offsetHeight
-      var projection = proj
-        .scale((width + 1) / 1.5 / Math.PI)
-        .translate([width / 2.4, height / 1.7])
-      // var projection = proj.translate([width / 2, height / 2])
-      var path = geoPath().projection(projection)
-      return { path, projection }
-    },
-
+    projection: projs[1],
+    // setProjection: setProj,
     geographyConfig: {
       hideAntarctica: true,
       hideHawaiiAndAlaska: false,
       borderWidth: 1,
       borderOpacity: 1,
-      // borderColor: '#FDFDFD',
-      // borderColor: '#A1A1AA',
       borderColor: mapBorder,
       popupOnHover: true, // True to show the popup while hovering
       highlightOnHover: true,
@@ -199,11 +199,12 @@ onMounted(() => {
 
   <div class="">
     <div id="outer" class="max-w-screen-lg">
-      <div
+      <!-- <div
         id="container"
         ref="container"
-        class="bg-gradient-to-r from-cyan-500 to-blue-500"
-      ></div>
+        class="bg-gradient-to-r from-cyan-500 to-blue-500 rounded-[100px]"
+      ></div> -->
+      <div id="container" ref="container"></div>
     </div>
   </div>
 </template>
