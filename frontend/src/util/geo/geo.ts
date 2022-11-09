@@ -1,6 +1,6 @@
 import L from 'leaflet'
 
-import { Centers, FeaturesEntity } from './types'
+import { Centers, FeaturesEntity } from '../types'
 
 const MAX_DISTANCE = 19968.927678453987
 
@@ -26,16 +26,7 @@ export class MapUtil {
   getDistance(guessCountry: string, targetCountry: string) {
     const getLatLong = (countryName: string) => {
       const feature = this.getFeatureByCountry(countryName)
-
-      const lon = feature.geometry.coordinates[0]
-      const lat = feature.geometry.coordinates[1]
-
-      // console.log({
-      //   countryName,
-      //   lat,
-      //   lon,
-      // })
-
+      const [lon, lat, _] = feature.geometry.coordinates
       return L.latLng(lat, lon)
     }
     const loc1 = getLatLong(guessCountry)

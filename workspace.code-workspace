@@ -12,5 +12,8 @@
       "name": "frontend",
       "path": "frontend"
     }
-  ]
+  ],
+  "settings": {
+    "cSpell.words": ["Datamaps"]
+  }
 }

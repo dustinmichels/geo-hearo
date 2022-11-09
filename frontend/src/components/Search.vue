@@ -15,11 +15,11 @@
       >
         <li
           v-for="country in searchCountries"
-          :key="country.name"
-          @click="selectCountry(country.name)"
+          :key="country.id"
+          @click="selectCountry(country.properties.name)"
           class="cursor-pointer hover:bg-gray-100 p-1"
         >
-          {{ country.name }}
+          {{ country.properties.name }}
         </li>
       </ul>
     </div>
@@ -29,7 +29,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-import countries from '../assets/data/countries.json'
+import data from '../assets/data/datamaps.json'
+import { DatamapsJson } from '../util/geo/datamaps'
+
+const countries = data as DatamapsJson[]
 
 const emit = defineEmits(['addToHistory'])
 
@@ -43,7 +46,9 @@ const searchCountries = computed(() => {
   let matches = 0
   return countries.filter((country) => {
     if (
-      country.name.toLowerCase().includes(searchTerm.value.toLowerCase()) &&
+      country.properties.name
+        .toLowerCase()
+        .includes(searchTerm.value.toLowerCase()) &&
       matches < 10
     ) {
       matches++
