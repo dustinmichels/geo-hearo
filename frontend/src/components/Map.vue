@@ -102,14 +102,14 @@ function makeGuess(guess) {
   map.updateChoropleth(d)
 
   // TODO: look at updateChoropleth code to match transition/animation
-  setTimeout(() => {
-    customLabels[code] = LEFT_ARROW
-    map.labels({
-      customLabelText: customLabels,
-      labelColor: 'blue',
-      fontSize: 22,
-    })
-  }, 500)
+  // setTimeout(() => {
+  //   customLabels[code] = LEFT_ARROW
+  //   map.labels({
+  //     customLabelText: customLabels,
+  //     labelColor: 'blue',
+  //     fontSize: 22,
+  //   })
+  // }, 500)
 }
 
 // Set projection
@@ -172,7 +172,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- <div>
+  <div>
     Target: Peru <br />
 
     <button
@@ -195,7 +195,7 @@ onMounted(() => {
     >
       Mexico
     </button>
-  </div> -->
+  </div>
 
   <div class="">
     <div id="outer" class="max-w-screen-lg">

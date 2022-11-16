@@ -4,16 +4,31 @@ import { ref } from 'vue'
 import AudioPlayer from './components/AudioPlayer/Player.vue'
 import Map from './components/Map.vue'
 import Search from './components/Search.vue'
+import { SourceData, getRandomCountry, loadSourceData } from './util/data'
+import {
+  getStationUrls,
+  getStationsByCountry,
+  getStreamingUrlFromStationId,
+} from './util/radio'
 
 const NUM_GUESS = 7
+
+// const radioData = loadRadioData()
+const sourceData = loadSourceData()
+
+const secretCountry = getRandomCountry()
+
+const stations = getStationsByCountry(secretCountry)
+const stationUrls = getStationUrls(stations)
+// const firstStationUrl = getStreamingUrlFromStationId(stations[0].id)
 
 // let guessed = ref(['Germany', 'Switzerland', 'Austria'])
 let guessed = ref(Array(NUM_GUESS).fill(''))
 
 let guessCount = 1
 
-const handleAddToHistory = (country: string) => {
-  guessed.value[guessCount] = country
+const handleSearched = (country: SourceData) => {
+  guessed.value[guessCount] = country.name
   guessCount += 1
   if (guessCount == NUM_GUESS) {
     alert('Game over!')
@@ -23,8 +38,16 @@ const handleAddToHistory = (country: string) => {
 
 <template>
   <div class="container mx-auto">
+    <p>
+      <span style="font-weight: bold">Secret country:</span> {{ secretCountry }}
+    </p>
+    <p>
+      <span style="font-weight: bold">First Radio URL:</span>
+      {{ stationUrls[0] }}
+    </p>
+
     <!-- SEARCH BAR -->
-    <Search @add-to-history="handleAddToHistory" />
+    <Search @searched="handleSearched" />
 
     <div class="grid grid-rows-3 grid-flow-col gap-4 pt-10">
       <div class="row-span-3 col-span-2">
@@ -35,7 +58,7 @@ const handleAddToHistory = (country: string) => {
         <!-- AUDIO PLAYER -->
         <AudioPlayer
           :option="{
-            src: 'https://radio.garden/api/ara/content/listen/dKofB-bG/channel.mp3',
+            src: stationUrls[0],
           }"
         />
       </div>

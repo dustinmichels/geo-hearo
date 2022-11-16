@@ -15,11 +15,11 @@
       >
         <li
           v-for="country in searchCountries"
-          :key="country.id"
-          @click="selectCountry(country.properties.name)"
+          :key="country.three_code"
+          @click="selectCountry(country)"
           class="cursor-pointer hover:bg-gray-100 p-1"
         >
-          {{ country.properties.name }}
+          {{ country.name }}
         </li>
       </ul>
     </div>
@@ -29,12 +29,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-import data from '../assets/data/datamaps.json'
-import { DatamapsJson } from '../util/geo/datamaps'
+import { SourceData, loadSourceData } from '../util/data'
 
-const countries = data as DatamapsJson[]
+const countries = loadSourceData()
 
-const emit = defineEmits(['addToHistory'])
+const emit = defineEmits(['searched'])
 
 let searchTerm = ref('')
 let selectedCountry = ref('')
@@ -46,9 +45,7 @@ const searchCountries = computed(() => {
   let matches = 0
   return countries.filter((country) => {
     if (
-      country.properties.name
-        .toLowerCase()
-        .includes(searchTerm.value.toLowerCase()) &&
+      country.name.toLowerCase().includes(searchTerm.value.toLowerCase()) &&
       matches < 10
     ) {
       matches++
@@ -57,9 +54,10 @@ const searchCountries = computed(() => {
   })
 })
 
-const selectCountry = (country: string) => {
-  selectedCountry.value = country
-  emit('addToHistory', country)
+const selectCountry = (country: SourceData) => {
+  // Does this do anything?
+  selectedCountry.value = country.name
+  emit('searched', country)
   searchTerm.value = ''
 }
 </script>
