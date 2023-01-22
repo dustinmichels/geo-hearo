@@ -18,6 +18,13 @@
     }
   ],
   "settings": {
-    "cSpell.words": ["Datamap", "datamaps", "equirectangular", "pbar", "tqdm"]
+    "cSpell.words": [
+      "Datamap",
+      "datamaps",
+      "equirectangular",
+      "pbar",
+      "radiogarden",
+      "tqdm"
+    ]
   }
 }

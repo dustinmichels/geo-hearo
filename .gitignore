@@ -1,4 +1,5 @@
 dist/
 .env
 
-data_prep/data/
+data-prep/data/
+data-prep/go/out/
