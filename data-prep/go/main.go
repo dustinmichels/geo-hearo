@@ -12,6 +12,8 @@ import (
 
 func main() {
 
+	// ---------- Get All Places ----------
+
 	log.Println("GET Places")
 	placesResp, err := radiogarden.GetPlaces()
 	if err != nil {
@@ -23,13 +25,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	err = os.WriteFile("out/places.json", file, 0644)
+	createDirIfNotExist("./out")
+	err = os.WriteFile("./out/places.json", file, 0644)
 	if err != nil {
 		log.Fatalf("WriteFile: %s", err)
 	}
 	log.Println("WROTE out/places.json")
 
-	// ---------- Get Places ----------
+	// ---------- Get Each Place ----------
 
 	places := placesResp.Data.List[:10]
 
@@ -55,7 +58,7 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
-			err = os.WriteFile(fmt.Sprintf("out/place_%d.json", i), file, 0644)
+			err = os.WriteFile(fmt.Sprintf("./out/place_%d.json", i), file, 0644)
 			if err != nil {
 				log.Fatalf("WriteFile: %s", err)
 			}
@@ -65,4 +68,13 @@ func main() {
 
 	wg.Wait()
 
+}
+
+func createDirIfNotExist(dir string) {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err = os.MkdirAll(dir, 0755)
+		if err != nil {
+			panic(err)
+		}
+	}
 }
