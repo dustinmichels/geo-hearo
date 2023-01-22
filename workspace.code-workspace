@@ -13,8 +13,8 @@
       "path": "frontend"
     },
     {
-      "name": "data_prep",
-      "path": "data_prep"
+      "name": "data-prep",
+      "path": "data-prep"
     }
   ],
   "settings": {
