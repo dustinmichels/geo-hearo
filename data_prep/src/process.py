@@ -33,11 +33,11 @@ def sample_places_by_country(
     places_by_country: PlacesByCountry, n=5
 ) -> PlacesByCountry:
     """
-    Take a sample of [up-to] n places for each country.
+    Take a sample of (up-to) n places for each country.
     """
     sample_places = {}
     for country, places in places_by_country.items():
-        use_n = min(len(places), n)
+        use_n = min(len(places), n)  # If n is larger than sample, will cause error
         sample_places[country] = random.sample(places, use_n)
     return sample_places
 
