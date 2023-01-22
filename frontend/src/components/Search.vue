@@ -11,7 +11,7 @@
 
       <ul
         v-if="searchCountries.length"
-        class="w-full rounded bg-white border border-gray-300 px-4 py-2 space-y-1 absolute z-10"
+        class="w-full rounded border border-gray-300 bg-white px-4 py-2 space-y-1 absolute z-10"
       >
         <li
           v-for="country in searchCountries"

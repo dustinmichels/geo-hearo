@@ -11,7 +11,7 @@ import {
   getStreamingUrlFromStationId,
 } from './util/radio'
 
-const NUM_GUESS = 7
+const ALLOWED_GUESSES = 3
 
 // const radioData = loadRadioData()
 const sourceData = loadSourceData()
@@ -23,14 +23,14 @@ const stationUrls = getStationUrls(stations)
 // const firstStationUrl = getStreamingUrlFromStationId(stations[0].id)
 
 // let guessed = ref(['Germany', 'Switzerland', 'Austria'])
-let guessed = ref(Array(NUM_GUESS).fill(''))
+let guessed = ref(Array(ALLOWED_GUESSES).fill(''))
 
 let guessCount = 1
 
 const handleSearched = (country: SourceData) => {
   guessed.value[guessCount] = country.name
   guessCount += 1
-  if (guessCount == NUM_GUESS) {
+  if (guessCount == ALLOWED_GUESSES) {
     alert('Game over!')
   }
 }
