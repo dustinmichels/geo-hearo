@@ -7,16 +7,7 @@ import (
 	"net/http"
 )
 
-type PlacesResp struct {
-	APIVersion int    `json:"apiVersion"`
-	Version    string `json:"version"`
-	Data       struct {
-		List    []PlacesResp_Place `json:"list"`
-		Version string             `json:"version"`
-	} `json:"data"`
-}
-
-type PlacesResp_Place struct {
+type Place struct {
 	Size    int       `json:"size"`
 	ID      string    `json:"id"`
 	Geo     []float64 `json:"geo"`
@@ -26,7 +17,7 @@ type PlacesResp_Place struct {
 	Country string    `json:"country"`
 }
 
-func GetPlaces() (*PlacesResp, error) {
+func GetPlaces() ([]Place, error) {
 
 	url := "https://radio.garden/api/ara/content/places"
 	resp, err := http.Get(url)
@@ -44,10 +35,19 @@ func GetPlaces() (*PlacesResp, error) {
 		return nil, fmt.Errorf("GetPlaces: API error: %s", string(body))
 	}
 
-	var places PlacesResp
+	var places GetPlacesResponse
 	if err := json.Unmarshal(body, &places); err != nil {
 		return nil, fmt.Errorf("GetPlaces: unmarshal error: %w", err)
 	}
 
-	return &places, nil
+	return places.Data.List, nil
+}
+
+type GetPlacesResponse struct {
+	APIVersion int    `json:"apiVersion"`
+	Version    string `json:"version"`
+	Data       struct {
+		List    []Place `json:"list"`
+		Version string  `json:"version"`
+	} `json:"data"`
 }
