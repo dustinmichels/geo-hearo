@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/dustinmichels/geo-hearo/crawl"
 	"github.com/gocarina/gocsv"
 )
 
@@ -16,7 +15,7 @@ func main() {
 	os.Remove("./out/output.csv")
 
 	log.Println("**** Starting crawl ****")
-	output := crawl.Run()
+	output := Crawl(10)
 
 	log.Println("**** Saving './out/output.csv' ****")
 	saveToCsv(output)
@@ -33,7 +32,7 @@ func createDirIfNotExist(dir string) {
 	}
 }
 
-func saveToCsv(output []*crawl.OutputRow) {
+func saveToCsv(output []*OutputRow) {
 	outCSV, err := os.OpenFile("out/output.csv", os.O_RDWR|os.O_CREATE, os.ModePerm)
 	if err != nil {
 		panic(err)
