@@ -35,7 +35,7 @@ func GetPlaces() ([]Place, error) {
 		return nil, fmt.Errorf("GetPlaces: API error: %s", string(body))
 	}
 
-	var places GetPlacesResponse
+	var places getPlacesResponse
 	if err := json.Unmarshal(body, &places); err != nil {
 		return nil, fmt.Errorf("GetPlaces: unmarshal error: %w", err)
 	}
@@ -43,7 +43,7 @@ func GetPlaces() ([]Place, error) {
 	return places.Data.List, nil
 }
 
-type GetPlacesResponse struct {
+type getPlacesResponse struct {
 	APIVersion int    `json:"apiVersion"`
 	Version    string `json:"version"`
 	Data       struct {
