@@ -1,0 +1,4 @@
+out/*.json
+crawl/out/*.csv
+
+crawl/crawl

@@ -11,6 +11,21 @@
     {
       "name": "frontend",
       "path": "frontend"
+    },
+    {
+      "name": "data-prep",
+      "path": "data-prep"
     }
-  ]
+  ],
+  "settings": {
+    "cSpell.words": [
+      "Datamap",
+      "datamaps",
+      "equirectangular",
+      "gocsv",
+      "pbar",
+      "radiogarden",
+      "tqdm"
+    ]
+  }
 }
