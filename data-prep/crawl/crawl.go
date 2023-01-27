@@ -57,7 +57,7 @@ func Crawl(n_threads int) []*OutputRow {
 		go func(i int) {
 			defer wg.Done()
 
-			ch <- i
+			ch <- i // add to channel; block if full
 
 			place := places[i]
 			log.Printf("GET [%d] - %s\n", i, place.Title)
@@ -74,7 +74,7 @@ func Crawl(n_threads int) []*OutputRow {
 				output = append(output, out)
 			}
 
-			<-ch
+			<-ch // free the channel #FreeTheChannel
 
 		}(i)
 	}

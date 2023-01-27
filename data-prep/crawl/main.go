@@ -8,18 +8,12 @@ import (
 )
 
 func main() {
-
 	createDirIfNotExist("./out")
 
-	log.Println("**** Deleting './out/output.csv' ****")
-	os.Remove("./out/output.csv")
-
 	log.Println("**** Starting crawl ****")
-	output := Crawl(10)
+	output := Crawl(1)
 
-	log.Println("**** Saving './out/output.csv' ****")
 	saveToCsv(output)
-
 }
 
 func createDirIfNotExist(dir string) {
@@ -33,6 +27,10 @@ func createDirIfNotExist(dir string) {
 }
 
 func saveToCsv(output []*OutputRow) {
+	log.Println("**** Deleting './out/output.csv' ****")
+	os.Remove("./out/output.csv")
+
+	log.Println("**** Saving './out/output.csv' ****")
 	outCSV, err := os.OpenFile("out/output.csv", os.O_RDWR|os.O_CREATE, os.ModePerm)
 	if err != nil {
 		panic(err)
