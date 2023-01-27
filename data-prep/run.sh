@@ -7,7 +7,7 @@ go build .
 
 cd ..
 
-# process with python
-cd process
+# process data with python
+source ~/opt/anaconda3/etc/profile.d/conda.sh
 conda activate geohearo
-python process
+python process.py
