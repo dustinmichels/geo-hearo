@@ -87,7 +87,6 @@ export default defineComponent({
   setup(props, { emit }) {
     const audioPlayer = ref()
     const option_ = ref(mergeOption(props.option))
-    let toucher: any = null
     const state = reactive({
       isPlaying: false,
       isDragging: false,
@@ -135,7 +134,7 @@ export default defineComponent({
       { deep: true }
     )
 
-    onAudioPause()
+    // onAudioPause()
 
     return {
       audioPlayer,

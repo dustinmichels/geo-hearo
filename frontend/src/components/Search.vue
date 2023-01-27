@@ -11,12 +11,12 @@
 
       <ul
         v-if="searchCountries.length"
-        class="w-full rounded bg-white border border-gray-300 px-4 py-2 space-y-1 absolute z-10"
+        class="w-full rounded border border-gray-300 bg-white px-4 py-2 space-y-1 absolute z-10"
       >
         <li
           v-for="country in searchCountries"
-          :key="country.name"
-          @click="selectCountry(country.name)"
+          :key="country.three_code"
+          @click="selectCountry(country)"
           class="cursor-pointer hover:bg-gray-100 p-1"
         >
           {{ country.name }}
@@ -29,9 +29,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-import countries from '../assets/data/countries.json'
+import { SourceData, loadSourceData } from '../util/data'
 
-const emit = defineEmits(['addToHistory'])
+const countries = loadSourceData()
+
+const emit = defineEmits(['searched'])
 
 let searchTerm = ref('')
 let selectedCountry = ref('')
@@ -52,9 +54,10 @@ const searchCountries = computed(() => {
   })
 })
 
-const selectCountry = (country: string) => {
-  selectedCountry.value = country
-  emit('addToHistory', country)
+const selectCountry = (country: SourceData) => {
+  // Does this do anything?
+  selectedCountry.value = country.name
+  emit('searched', country)
   searchTerm.value = ''
 }
 </script>
