@@ -2,9 +2,9 @@
 
 ## About sources
 
-### `ne_50m_admin_0_countries.geojson`
+### `ne_110m_admin_0_countries.geojson`
 
-- Downloaded from [nvkelso/natural-earth-vector](https://github.com/nvkelso/natural-earth-vector)
+- Natural Earth dataset. Downloaded from [nvkelso/natural-earth-vector](https://github.com/nvkelso/natural-earth-vector)
 
 ### `datamaps.json`
 

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/dustinmichels/geo-hearo/radiogarden"
+	"github.com/dustinmichels/geo-hearo/crawl/radiogarden"
 )
 
 type OutputRow struct {

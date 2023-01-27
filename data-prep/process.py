@@ -1,6 +1,5 @@
-import pandas as pd
-import json
 import geopandas as gpd
+import pandas as pd
 
 
 def load_radio():

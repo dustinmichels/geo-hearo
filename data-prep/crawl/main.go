@@ -11,7 +11,7 @@ func main() {
 	createDirIfNotExist("./out")
 
 	log.Println("**** Starting crawl ****")
-	output := Crawl(1)
+	output := Crawl(20)
 
 	saveToCsv(output)
 }

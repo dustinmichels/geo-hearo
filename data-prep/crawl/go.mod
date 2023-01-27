@@ -1,4 +1,4 @@
-module github.com/dustinmichels/geo-hearo
+module github.com/dustinmichels/geo-hearo/crawl
 
 go 1.19
 
