@@ -8,8 +8,21 @@ import (
 )
 
 type Channel struct {
-	Href  string `json:"href"`
-	Title string `json:"title"`
+	Page struct {
+		URL   string `json:"url"`
+		Type  string `json:"type"`
+		Place struct {
+			ID    string `json:"id"`
+			Title string `json:"title"`
+		} `json:"place"`
+		Title   string `json:"title"`
+		Secure  bool   `json:"secure"`
+		Country struct {
+			ID    string `json:"id"`
+			Title string `json:"title"`
+		} `json:"country"`
+		Stream string `json:"stream"`
+	} `json:"page"`
 }
 
 func GetPlaceChannels(placeId string) ([]Channel, error) {

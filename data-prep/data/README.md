@@ -2,18 +2,24 @@
 
 ## About sources
 
-### `ne_110m_admin_0_countries.geojson`
+### Natural Earth
 
-- Natural Earth dataset. Downloaded from [nvkelso/natural-earth-vector](https://github.com/nvkelso/natural-earth-vector)
+- `ne_110m_admin_0_countries.geojson`
 
-### `datamaps.json`
+Natural Earth dataset. Downloaded from [nvkelso/natural-earth-vector](https://github.com/nvkelso/natural-earth-vector)
 
-- This is the data source built into the datamaps library. It can be obtained by running the following in the browser console:
+### Datamaps
+
+- `datamaps.json`
+
+This is the data source built into the datamaps javascript library. It can be obtained by running the following in the browser console:
 
 ```js
 Datamap.prototype.worldTopo.objects.world.geometries;
 ```
 
-### `centers.geojson`
+### Centers
 
-- Downloaded from [centers.geojson](https://github.com/gavinr/world-countries-centroids/releases)
+- `centers.geojson`
+
+Downloaded from [centers.geojson](https://github.com/gavinr/world-countries-centroids/releases)

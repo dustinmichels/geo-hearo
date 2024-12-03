@@ -1,18 +1,19 @@
 import geopandas as gpd
 import pandas as pd
 
+N_STATIONS = 8
 
 def load_radio():
     df = pd.read_csv("crawl/out/output.csv")
     print(f"\nLoaded {len(df):,} rows from 'output.csv'")
 
     # Filter to only include countries with at least 3 stations
-    s = df.groupby("country").size() >= 3
+    s = df.groupby("country").size() >= N_STATIONS
     df = df[df["country"].isin(s[s].index)]
-    print(f"> Filtered to countries with >= 3 stations - {len(df):,} rows")
+    print(f"> Filtered to countries with >= {N_STATIONS} stations - {len(df):,} rows")
 
-    radio = df.groupby("country").sample(3)
-    print(f"> Sampled 3 stations from each country - {len(radio):,} rows")
+    radio = df.groupby("country").sample(N_STATIONS)
+    print(f"> Sampled {N_STATIONS} stations from each country - {len(radio):,} rows")
 
     return radio
 

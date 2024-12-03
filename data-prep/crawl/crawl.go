@@ -13,26 +13,28 @@ import (
 type OutputRow struct {
 	PlaceID     string  `json:"placeId" csv:"place_id"`
 	ChannelID   string  `json:"channelId" csv:"channel_id"`
+	ChannelURL  string  `json:"channelURL" csv:"channel_url"`
 	PlaceName   string  `json:"placeName" csv:"place_name"`
 	ChannelName string  `json:"channelName" csv:"channel_name"`
 	PlaceSize   int     `json:"placeSize" csv:"place_size"`
 	Boost       bool    `json:"boost" csv:"boost"`
 	Country     string  `json:"country" csv:"country"`
-	GeoLat      float64 `json:"geoLat" csv:"geo_lat"`
-	GeoLon      float64 `json:"geoLon"  csv:"geo_lon"`
+	Latitude    float64 `json:"latitude" csv:"geo_lat"`
+	Longitude   float64 `json:"longitude"  csv:"geo_lon"`
 }
 
 func MakeOutputRow(p *radiogarden.Place, c *radiogarden.Channel) *OutputRow {
 	return &OutputRow{
 		PlaceID:     p.ID,
-		ChannelID:   strings.Split(c.Href, "/")[2],
+		ChannelID:   strings.Split(c.Page.URL, "/")[3],
+		ChannelURL:  c.Page.URL,
 		PlaceName:   p.Title,
-		ChannelName: c.Title,
+		ChannelName: c.Page.Title,
 		PlaceSize:   p.Size,
 		Boost:       p.Boost,
 		Country:     p.Country,
-		GeoLat:      p.Geo[1],
-		GeoLon:      p.Geo[0],
+		Latitude:    p.Geo[1],
+		Longitude:   p.Geo[0],
 	}
 }
 
@@ -43,6 +45,9 @@ func Crawl(n_threads int) []*OutputRow {
 	if err != nil {
 		panic(err)
 	}
+
+	// print msg
+	log.Printf("Successfully got %d places\n", len(places))
 
 	// places = SamplePlaces(places, 10)
 	output := []*OutputRow{}
@@ -81,7 +86,7 @@ func Crawl(n_threads int) []*OutputRow {
 
 	wg.Wait()
 
-	log.Printf("Successfully got %d/%d (%v%%) places\n", len(places)-len(errors), len(places), (len(places)-len(errors)/len(places))*100)
+	log.Printf("Successfully got %d/%d (%.2f%%) places\n", len(places)-len(errors), len(places), float64(len(places)-len(errors))/float64(len(places))*100)
 	fmt.Println("Errors:")
 	for _, idx := range errors {
 		fmt.Printf("  !! - [%d] - %s, %s", idx, places[idx].Title, places[idx].Country)

@@ -1,14 +1,38 @@
 # Data Prep
 
-## Setup
+- The go code in `crawl` scrapes the radio garden API to get radio stations from different places.
+- The python code in `process.py` cleans up the data for use in the frontend.
 
-Create conda env from file:
+## Usage
 
-```bash
-conda env create -f environment.yml
+### Step 1 - Crawl
+
+To run the go code,
+
+```sh
+cd crawl
+go build
+./crawl
 ```
 
-## Data Sources
+The output is `crawl/out/output.csv`.
+
+### Step 2 - Process
+
+Setup environment:
+
+```sh
+conda create --name geohearo -c conda-forge python=3.12 pandas geopandas
+conda activate geohearo
+```
+
+Run the code:
+
+```sh
+python process.py
+```
+
+## Data Notes
 
 ### Radio Garden
 
@@ -65,7 +89,7 @@ I have a dataset of the centerpoint of each country, `centers.json`, where count
 
 ### `ne_50`
 
-- One idea is to use the natural earth dataset as the underlying source of truth for matching countries. It has many two-letter and three-letter codes for each country.
+- The idea is to use the natural earth dataset as the underlying source of truth for matching countries. It has many two-letter and three-letter codes for each country.
 
 ```json
 {
