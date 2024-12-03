@@ -61,4 +61,4 @@ if __name__ == "__main__":
     )
 
     print("final shape:", out.shape)
-    out.to_json("out/radio.json", orient="records")
+    out.to_json("out/radio.json", orient="records", force_ascii=False)
