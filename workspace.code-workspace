@@ -13,6 +13,10 @@
       "path": "frontend"
     },
     {
+      "name": "frontend-old",
+      "path": "frontend-old"
+    },
+    {
       "name": "data-prep",
       "path": "data-prep"
     },
