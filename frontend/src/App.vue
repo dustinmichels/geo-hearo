@@ -13,11 +13,9 @@
     <div class="container mt-2">
       <h3>Secret country: {{ secretCountry.name }}</h3>
 
-      <SearchBar
-        :countries="countries"
-        :guessed="guessed"
-        @searched="handleSearched"
-      />
+      <div class="box has-text-centered">
+        <Radio :radioStations="radioStations" />
+      </div>
 
       <!-- Two Columns -->
       <div class="columns">
@@ -30,9 +28,11 @@
 
         <!-- Right Column: Radio + Guesses Components -->
         <div class="column">
-          <div class="box has-text-centered">
-            <Radio :radioStations="radioStations" />
-          </div>
+          <SearchBar
+            :countries="countries"
+            :guessed="guessed"
+            @searched="handleSearched"
+          />
           <GuessList :guessed="guessed" />
         </div>
       </div>
@@ -74,12 +74,22 @@ const radioStations = addStreamingUrl(
 const handleSearched = (country: Country) => {
   guessed.value[guessCount] = country
   guessCount += 1
-  if (guessCount == ALLOWED_GUESSES) {
-    // wait a moment
-    setTimeout(() => {
-      gameOver()
-    }, 200)
+
+  if (country.three_code === secretCountry.three_code) {
+    gameWon()
+  } else {
+    if (guessCount == ALLOWED_GUESSES) {
+      // wait a moment
+      setTimeout(() => {
+        gameOver()
+      }, 200)
+    }
   }
+}
+
+const gameWon = () => {
+  alert('Perfect! You won!')
+  resetGame()
 }
 
 const gameOver = () => {
