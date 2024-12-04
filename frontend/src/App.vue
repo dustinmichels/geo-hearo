@@ -27,7 +27,7 @@
       <!-- Left Column: Map Component -->
       <div class="column is-two-thirds">
         <div class="box">
-          <Map msg="Map" />
+          <Map :guessed="guessed" />
         </div>
       </div>
 

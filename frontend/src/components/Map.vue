@@ -9,6 +9,10 @@
 <script setup>
 import { onMounted } from 'vue'
 
+defineProps({
+  guessed: Array,
+})
+
 const mapBorder = '#ffffff'
 const mapFill = '#D4D4D8'
 
@@ -56,6 +60,13 @@ onMounted(() => {
       map.updateChoropleth({
         PER: 'black',
       })
+
+      let updateMap = (country) => {
+        const fillKey = country.name === country.guess ? 'defaultFill' : 'wrong'
+        map.updateChoropleth({
+          [country.two_code]: fillKey,
+        })
+      }
 
       // getCenters()
     },
