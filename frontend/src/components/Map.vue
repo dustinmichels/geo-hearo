@@ -13,12 +13,15 @@ import { Country } from '../types'
 
 const props = defineProps<{
   guessed: Country[]
+  secretCountry: Country
 }>()
 
 const mapBorder = '#ffffff'
 const mapFill = '#D4D4D8'
 
 let map: Datamap
+
+// const projs = ['equirectangular', 'mercator', 'orthographic']
 
 onMounted(() => {
   map = new window.Datamap({
@@ -42,6 +45,21 @@ onMounted(() => {
       defaultFill: mapFill,
       wrong: '#ff0000',
       dot: '#000000',
+    },
+    done: function (map: Datamap) {
+      // responsive
+      window.addEventListener('resize', function () {
+        map.resize()
+      })
+
+      // update map if secret country is set
+      if (!props.secretCountry.three_code) {
+        return
+      }
+      const updateObject: { [key: string]: string } = {}
+      const code = props.secretCountry.three_code
+      updateObject[code] = 'black'
+      map.updateChoropleth(updateObject)
     },
   })
 })

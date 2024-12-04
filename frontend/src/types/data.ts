@@ -22,3 +22,6 @@ export interface Country {
   two_code: string
   three_code: string
 }
+
+// A JSON.stringify-ed version of a country object
+export type CountryString = 'string'
