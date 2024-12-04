@@ -26,7 +26,12 @@ declare module 'datamaps' {
   class Datamap {
     constructor(options: DatamapOptions)
     resize(): void
+    updateChoropleth(data: Record<string, string>): void
   }
 
   export default Datamap
+}
+
+interface Window {
+  Datamap: typeof import('datamaps').Datamap
 }

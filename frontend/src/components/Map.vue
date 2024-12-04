@@ -6,72 +6,87 @@
   </div>
 </template>
 
-<script setup>
-import { onMounted } from 'vue'
+<script setup lang="ts">
+import Datamap from 'datamaps'
+import { onMounted, watch } from 'vue'
+import { Country } from '../types'
 
-defineProps({
-  guessed: Array,
-})
+const props = defineProps<{
+  guessed: Country[]
+}>()
 
 const mapBorder = '#ffffff'
 const mapFill = '#D4D4D8'
 
-onMounted(() => {
+const updateMap = () => {
   const container = document.getElementById('container')
-  const projs = ['equirectangular', 'mercator', 'orthographic']
-
   if (!container) {
     return
   }
 
-  new Datamap({
+  // Clear the container
+  while (container.firstChild) {
+    container.removeChild(container.firstChild)
+  }
+
+  new window.Datamap({
     element: container,
     responsive: true,
-    projection: projs[1],
-    // setProjection: setProj,
+    projection: 'mercator',
     geographyConfig: {
       hideAntarctica: true,
       hideHawaiiAndAlaska: false,
       borderWidth: 1,
       borderOpacity: 1,
       borderColor: mapBorder,
-      popupOnHover: true, // True to show the popup while hovering
+      popupOnHover: true,
       highlightOnHover: true,
       highlightFillColor: '#FC8D59',
       highlightBorderColor: 'rgba(250, 15, 160, 0.2)',
       highlightBorderWidth: 2,
       highlightBorderOpacity: 1,
     },
-
     fills: {
-      // defaultFill: '#D4D4D8',
       defaultFill: mapFill,
       wrong: '#ff0000',
       dot: '#000000',
     },
-    done: function (map) {
-      // map.graticule()
-
-      // responsive
-      window.addEventListener('resize', function () {
-        map.resize()
+    done: function (map: Datamap) {
+      // For each country in the guessed list, update the map
+      props.guessed.forEach((country) => {
+        if (!country.three_code) {
+          return
+        }
+        if (country.name === 'Peru') {
+          map.updateChoropleth({
+            [country.three_code]: 'dot',
+          })
+        } else {
+          console.log(country)
+          map.updateChoropleth({
+            [country.three_code]: 'red',
+          })
+        }
       })
 
       map.updateChoropleth({
         PER: 'black',
       })
-
-      let updateMap = (country) => {
-        const fillKey = country.name === country.guess ? 'defaultFill' : 'wrong'
-        map.updateChoropleth({
-          [country.two_code]: fillKey,
-        })
-      }
-
-      // getCenters()
     },
   })
+}
+
+onMounted(() => {
+  updateMap()
 })
+
+watch(
+  () => props.guessed,
+  () => {
+    updateMap()
+  },
+  { deep: true }
+)
 </script>
 
 <style scoped></style>
