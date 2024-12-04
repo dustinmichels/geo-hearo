@@ -50,7 +50,6 @@ const ALLOWED_GUESSES = 5
 
 let guessed = ref(Array(ALLOWED_GUESSES).fill(''))
 let guessCount = 0
-const showRedFlash = ref(false)
 
 const radioData = loadData()
 const countries = getCountries(radioData)
