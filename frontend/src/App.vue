@@ -1,37 +1,44 @@
 <template>
-  <div>
-    <!-- Search Bar -->
-    <section class="section">
-      <div class="container">
-        <SearchBar
-          :countries="countries"
-          :guessed="guessed"
-          @searched="handleSearched"
-        />
+  <section class="hero is-small is-info">
+    <div class="hero-body">
+      <div class="container has-text-centered">
+        <h1 class="title">🌍 GeoHearo 🦸</h1>
+        <h2 class="subtitle">
+          Guess the country by its radio. Become the Geo Hearo!
+        </h2>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Two Columns -->
-    <section class="section">
-      <div class="container">
-        <div class="columns">
-          <!-- Left Column: Map Component -->
-          <div class="column is-two-thirds">
-            <div class="box">
-              <Map msg="Map" />
-            </div>
-          </div>
+  <!-- Search Bar -->
+  <section class="section">
+    <div class="container">
+      <SearchBar
+        :countries="countries"
+        :guessed="guessed"
+        @searched="handleSearched"
+      />
+    </div>
+  </section>
 
-          <!-- Right Column: Radio + Guesses Components -->
-          <div class="column">
-            <div class="box has-text-centered">
-              <Radio msg="Radio" />
-            </div>
-            <GuessList :guessed="guessed" />
-          </div>
+  <!-- Two Columns -->
+  <div class="container">
+    <div class="columns">
+      <!-- Left Column: Map Component -->
+      <div class="column is-two-thirds">
+        <div class="box">
+          <Map msg="Map" />
         </div>
       </div>
-    </section>
+
+      <!-- Right Column: Radio + Guesses Components -->
+      <div class="column">
+        <div class="box has-text-centered">
+          <Radio msg="Radio" />
+        </div>
+        <GuessList :guessed="guessed" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -48,14 +55,17 @@ import SearchBar from './components/SearchBar.vue'
 
 const ALLOWED_GUESSES = 5
 
-let guessed = ref(Array(ALLOWED_GUESSES).fill(''))
+// guessed is type Country[]
+let guessed = ref<Country[]>(
+  Array(ALLOWED_GUESSES).fill({ name: '', two_code: '', three_code: '' })
+)
 let guessCount = 0
 
 const radioData = loadData()
 const countries = getCountries(radioData)
 
 const handleSearched = (country: Country) => {
-  guessed.value[guessCount] = country.name
+  guessed.value[guessCount] = country
   guessCount += 1
   if (guessCount == ALLOWED_GUESSES) {
     // wait a moment

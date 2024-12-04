@@ -4,6 +4,7 @@
       <input
         class="input"
         type="text"
+        autocomplete="off"
         v-model="searchTerm"
         placeholder="Guess a country..."
         @keydown.down.prevent="highlightNext"
@@ -38,7 +39,7 @@ import { Country } from '../types'
 
 const props = defineProps<{
   countries: Country[]
-  guessed: string[]
+  guessed: Country[]
 }>()
 
 const emit = defineEmits(['searched'])
@@ -55,7 +56,9 @@ const filteredCountries = computed(() => {
     .filter(
       (country) =>
         country.name.toLowerCase().includes(searchTerm.value.toLowerCase()) &&
-        !props.guessed.includes(country.name)
+        !props.guessed.some(
+          (guessedCountry) => guessedCountry.name === country.name
+        )
     )
     .sort((a, b) => {
       const searchTermLower = searchTerm.value.toLowerCase()
@@ -89,6 +92,7 @@ function displayFormatted(name: string) {
 function selectCountry(country: Country) {
   searchTerm.value = ''
   highlightedIndex.value = -1
+  console.log('Selected:', country)
   emit('searched', country)
 }
 
