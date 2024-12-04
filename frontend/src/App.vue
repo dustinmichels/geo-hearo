@@ -3,7 +3,7 @@
     <!-- Search Bar -->
     <section class="section">
       <div class="container">
-        <SearchBar />
+        <SearchBar :countries="countries" @searched="handleSearched" />
       </div>
     </section>
 
@@ -33,16 +33,32 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { ref } from 'vue'
+import { Country } from './types'
+import { getCountries, loadData } from './util/load'
+
+// components
 import GuessList from './components/GuessList.vue'
 import Map from './components/Map.vue'
 import Radio from './components/Radio.vue'
 import SearchBar from './components/SearchBar.vue'
 
-import { getCountries, loadData } from './util/load'
+const ALLOWED_GUESSES = 3
+
+let guessed = ref(Array(ALLOWED_GUESSES).fill(''))
+let guessCount = 0
 
 const radioData = loadData()
 const countries = getCountries(radioData)
+
+const handleSearched = (country: Country) => {
+  guessed.value[guessCount] = country.name
+  guessCount += 1
+  if (guessCount == ALLOWED_GUESSES) {
+    alert('Game over!')
+  }
+}
 </script>
 
 <style>

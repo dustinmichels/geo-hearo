@@ -1,4 +1,4 @@
-export interface RadioData {
+export interface RadioStation {
   place_id: string
   channel_id: string
   channel_url: string
@@ -11,4 +11,10 @@ export interface RadioData {
   geo_lon: number
   three_code: string
   two_code: string
+}
+
+export interface Country {
+  name: string
+  two_code: string
+  three_code: string
 }
