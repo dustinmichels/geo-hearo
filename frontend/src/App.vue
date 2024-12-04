@@ -3,7 +3,11 @@
     <!-- Search Bar -->
     <section class="section">
       <div class="container">
-        <SearchBar :countries="countries" @searched="handleSearched" />
+        <SearchBar
+          :countries="countries"
+          :guessed="guessed"
+          @searched="handleSearched"
+        />
       </div>
     </section>
 
@@ -23,9 +27,7 @@
             <div class="box has-text-centered">
               <Radio msg="Radio" />
             </div>
-            <div class="box has-text-centered">
-              <GuessList msg="GuessList" />
-            </div>
+            <GuessList :guessed="guessed" />
           </div>
         </div>
       </div>
@@ -39,15 +41,16 @@ import { Country } from './types'
 import { getCountries, loadData } from './util/load'
 
 // components
-import GuessList from './components/GuessList.vue'
+import GuessList from './components/GuessedList.vue'
 import Map from './components/Map.vue'
 import Radio from './components/Radio.vue'
 import SearchBar from './components/SearchBar.vue'
 
-const ALLOWED_GUESSES = 3
+const ALLOWED_GUESSES = 5
 
 let guessed = ref(Array(ALLOWED_GUESSES).fill(''))
 let guessCount = 0
+const showRedFlash = ref(false)
 
 const radioData = loadData()
 const countries = getCountries(radioData)
@@ -56,11 +59,22 @@ const handleSearched = (country: Country) => {
   guessed.value[guessCount] = country.name
   guessCount += 1
   if (guessCount == ALLOWED_GUESSES) {
-    alert('Game over!')
+    // wait a moment
+    setTimeout(() => {
+      gameOver()
+    }, 500)
   }
+}
+
+const gameOver = () => {
+  alert('Game over!')
+  resetGame()
+}
+
+const resetGame = () => {
+  guessed.value = Array(ALLOWED_GUESSES).fill('')
+  guessCount = 0
 }
 </script>
 
-<style>
-/* Optional custom styles */
-</style>
+<style scoped></style>

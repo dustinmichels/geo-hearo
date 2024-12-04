@@ -6,6 +6,9 @@
         type="text"
         v-model="searchTerm"
         placeholder="Guess a country..."
+        @keydown.down.prevent="highlightNext"
+        @keydown.up.prevent="highlightPrev"
+        @keydown.enter.prevent="selectHighlighted"
       />
       <span class="icon is-left">
         <i class="fas fa-search"></i>
@@ -14,14 +17,15 @@
     <div :class="['dropdown', { 'is-active': filteredCountries.length > 0 }]">
       <div class="dropdown-menu" id="dropdown-menu" role="menu">
         <div class="dropdown-content">
-          <a
-            v-for="country in filteredCountries"
+          <p
+            v-for="(country, index) in filteredCountries"
             :key="country.three_code"
             href="#"
             class="dropdown-item"
-            v-html="highlightMatch(country.name)"
+            :class="{ 'is-active': index === highlightedIndex }"
+            v-html="displayFormatted(country.name)"
             @click.prevent="selectCountry(country)"
-          ></a>
+          ></p>
         </div>
       </div>
     </div>
@@ -34,20 +38,24 @@ import { Country } from '../types'
 
 const props = defineProps<{
   countries: Country[]
+  guessed: string[]
 }>()
 
 const emit = defineEmits(['searched'])
 
 let searchTerm = ref('')
+let highlightedIndex = ref(-1)
 
-// Return the first n countries that match the search term, sorted to ensure those that start with the search term come first
 const filteredCountries = computed(() => {
   if (searchTerm.value === '') {
+    highlightedIndex.value = -1
     return []
   }
-  return props.countries
-    .filter((country) =>
-      country.name.toLowerCase().includes(searchTerm.value.toLowerCase())
+  const results = props.countries
+    .filter(
+      (country) =>
+        country.name.toLowerCase().includes(searchTerm.value.toLowerCase()) &&
+        !props.guessed.includes(country.name)
     )
     .sort((a, b) => {
       const searchTermLower = searchTerm.value.toLowerCase()
@@ -61,17 +69,12 @@ const filteredCountries = computed(() => {
       }
       return a.name.localeCompare(b.name)
     })
-    .slice(0, 20)
+    .slice(0, 10)
+  highlightedIndex.value = results.length > 0 ? 0 : -1
+  return results
 })
 
-const selectCountry = (country: Country) => {
-  console.log('selected!!!', country)
-  emit('searched', country)
-  searchTerm.value = ''
-}
-
-// Display the country name with the search term highlighted
-function highlightMatch(name: string) {
+function displayFormatted(name: string) {
   const searchTermLower = searchTerm.value.toLowerCase()
   const index = name.toLowerCase().indexOf(searchTermLower)
   if (index === -1) {
@@ -82,6 +85,40 @@ function highlightMatch(name: string) {
   const afterMatch = name.slice(index + searchTerm.value.length)
   return `${beforeMatch}<strong>${match}</strong>${afterMatch}`
 }
+
+function selectCountry(country: Country) {
+  searchTerm.value = ''
+  highlightedIndex.value = -1
+  emit('searched', country)
+}
+
+// Down arrow key
+function highlightNext() {
+  if (highlightedIndex.value < filteredCountries.value.length - 1) {
+    highlightedIndex.value++
+  }
+}
+
+// Up arrow key
+function highlightPrev() {
+  if (highlightedIndex.value > 0) {
+    highlightedIndex.value--
+  }
+}
+
+// Enter key
+function selectHighlighted() {
+  if (
+    highlightedIndex.value >= 0 &&
+    highlightedIndex.value < filteredCountries.value.length
+  ) {
+    selectCountry(filteredCountries.value[highlightedIndex.value])
+  }
+}
 </script>
 
-<style scoped></style>
+<style scoped>
+.dropdown-item.is-active {
+  background-color: #f5f5f5;
+}
+</style>
