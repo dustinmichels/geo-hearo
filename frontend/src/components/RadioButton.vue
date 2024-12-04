@@ -15,6 +15,8 @@ const isSelected = ref(false)
 const toggleRadio = () => {
   isSelected.value = !isSelected.value
 }
+
+toggleRadio
 </script>
 
 <style scoped></style>
