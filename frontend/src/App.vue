@@ -3,14 +3,7 @@
     <!-- Search Bar -->
     <section class="section">
       <div class="container">
-        <div class="field">
-          <p class="control has-icons-left">
-            <input class="input" type="text" placeholder="Search..." />
-            <span class="icon is-left">
-              <i class="fas fa-search"></i>
-            </span>
-          </p>
-        </div>
+        <SearchBar />
       </div>
     </section>
 
@@ -21,14 +14,17 @@
           <!-- Left Column: Map Component -->
           <div class="column is-two-thirds">
             <div class="box">
-              <MapComponent />
+              <Map msg="Map" />
             </div>
           </div>
 
-          <!-- Right Column: Play/Pause Component -->
+          <!-- Right Column: Radio + Guesses Components -->
           <div class="column">
             <div class="box has-text-centered">
-              <PlayPauseComponent />
+              <Radio msg="Radio" />
+            </div>
+            <div class="box has-text-centered">
+              <GuessList msg="GuessList" />
             </div>
           </div>
         </div>
@@ -38,22 +34,10 @@
 </template>
 
 <script setup>
-import { defineComponent } from "vue";
-
-// MapComponent - Placeholder for the map
-const MapComponent = defineComponent({
-  template: `<h3>Map Component</h3>`,
-});
-
-// PlayPauseComponent - Play and pause buttons
-const PlayPauseComponent = defineComponent({
-  template: `
-      <div>
-        <button class="button is-primary">Play</button>
-        <button class="button is-danger">Pause</button>
-      </div>
-    `,
-});
+import GuessList from './components/GuessList.vue'
+import Map from './components/Map.vue'
+import Radio from './components/Radio.vue'
+import SearchBar from './components/SearchBar.vue'
 </script>
 
 <style>
