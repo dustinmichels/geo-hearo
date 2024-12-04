@@ -1,32 +1,52 @@
 <template>
-  <div class="audio__player">
-    <div class="audio__player-play" @click="togglePlay">
-      <img
-        :src="CoverImageDefault"
-        alt=""
-        :class="`${isPlaying ? 'audio__player-spin-anim' : ''}`"
-      />
-      <div class="audio__player-play-icon">
-        <img :src="isPlaying ? IconPause : IconPlay" />
+  <div class="fixed-grid has-3-cols">
+    <div class="grid">
+      <div class="cell">
+        <div class="audio__player-button">
+          <img :src="IconPrev" />
+        </div>
       </div>
-    </div>
 
-    <div class="square-radio-group">
-      <div class="square-radio">
-        <input type="radio" id="option1" name="square-radio" checked />
-        <label for="option1"></label>
+      <div class="cell">
+        <div class="audio__player">
+          <div class="audio__player-play" @click="togglePlay">
+            <img
+              :src="CoverImageDefault"
+              alt=""
+              :class="`${isPlaying ? 'audio__player-spin-anim' : ''}`"
+            />
+            <div class="audio__player-play-icon">
+              <img :src="isPlaying ? IconPause : IconPlay" />
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="square-radio">
-        <input type="radio" id="option2" name="square-radio" />
-        <label for="option2"></label>
+
+      <div class="cell">
+        <div class="audio__player-button">
+          <img :src="IconNext" />
+        </div>
       </div>
-      <div class="square-radio">
-        <input type="radio" id="option3" name="square-radio" />
-        <label for="option3"></label>
-      </div>
-      <div class="square-radio">
-        <input type="radio" id="option4" name="square-radio" />
-        <label for="option3"></label>
+
+      <div class="cell is-col-span-3 flex-center">
+        <div class="square-radio-group">
+          <div class="square-radio">
+            <input type="radio" id="option1" name="square-radio" checked />
+            <label for="option1">1</label>
+          </div>
+          <div class="square-radio">
+            <input type="radio" id="option2" name="square-radio" />
+            <label for="option2">2</label>
+          </div>
+          <div class="square-radio">
+            <input type="radio" id="option3" name="square-radio" />
+            <label for="option3">3</label>
+          </div>
+          <div class="square-radio">
+            <input type="radio" id="option4" name="square-radio" />
+            <label for="option4">4</label>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -41,8 +61,10 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 import CoverImageDefault from '../assets/images/cover.png'
+import IconNext from '../assets/images/next.png'
 import IconPause from '../assets/images/pause.png'
 import IconPlay from '../assets/images/play.png'
+import IconPrev from '../assets/images/prev.png'
 
 import { RadioStationWithStreamingUrl } from '../types'
 
@@ -102,10 +124,31 @@ onUnmounted(() => {
   opacity: 0.8;
   will-change: filter;
 }
+
 .audio__player-play-icon:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
 .audio__player-play-icon img {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+}
+
+.audio__player-button {
+  top: 1.8rem;
+  left: 1.8rem;
+  background: #f0f0f0;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.5rem;
+  opacity: 0.8;
+  will-change: filter;
+}
+.audio__player-button:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.audio__player-button img {
   width: 2rem;
   height: 2rem;
   border-radius: 9999px;
