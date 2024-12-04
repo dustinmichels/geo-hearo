@@ -86,4 +86,8 @@ const resetGame = () => {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.no-padding {
+  padding: 0 !important;
+}
+</style>

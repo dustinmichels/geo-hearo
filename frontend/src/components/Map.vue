@@ -18,19 +18,11 @@ const props = defineProps<{
 const mapBorder = '#ffffff'
 const mapFill = '#D4D4D8'
 
-const updateMap = () => {
-  const container = document.getElementById('container')
-  if (!container) {
-    return
-  }
+let map: Datamap
 
-  // Clear the container
-  while (container.firstChild) {
-    container.removeChild(container.firstChild)
-  }
-
-  new window.Datamap({
-    element: container,
+onMounted(() => {
+  map = new window.Datamap({
+    element: document.getElementById('container'),
     responsive: true,
     projection: 'mercator',
     geographyConfig: {
@@ -51,28 +43,27 @@ const updateMap = () => {
       wrong: '#ff0000',
       dot: '#000000',
     },
-    done: function (map: Datamap) {
-      // For each country in the guessed list, update the map
-      props.guessed.forEach((country) => {
-        if (!country.three_code) {
-          return
-        }
-        if (country.name === 'Peru') {
-          map.updateChoropleth({
-            [country.three_code]: 'dot',
-          })
-        } else {
-          console.log(country)
-          map.updateChoropleth({
-            [country.three_code]: 'red',
-          })
-        }
-      })
+  })
+})
 
+const updateMap = () => {
+  if (!map) {
+    return
+  }
+  props.guessed.forEach((country) => {
+    if (!country.three_code) {
+      return
+    }
+    if (country.name === 'Peru') {
       map.updateChoropleth({
-        PER: 'black',
+        [country.three_code]: 'dot',
       })
-    },
+    } else {
+      console.log(country)
+      map.updateChoropleth({
+        [country.three_code]: 'red',
+      })
+    }
   })
 }
 
