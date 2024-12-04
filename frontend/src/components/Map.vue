@@ -56,7 +56,7 @@ const updateMap = () => {
     }
     if (country.name === 'Peru') {
       map.updateChoropleth({
-        [country.three_code]: 'dot',
+        [country.three_code]: 'green',
       })
     } else {
       console.log(country)

@@ -3,43 +3,39 @@
     <div class="hero-body">
       <div class="container has-text-centered">
         <h1 class="title">🌍 GeoHearo 🦸</h1>
-        <h2 class="subtitle">
-          Guess the country by its radio. Become the Geo Hearo!
-        </h2>
+        <h2 class="subtitle">Guess the country by its radio</h2>
       </div>
     </div>
   </section>
 
-  <!-- Search Bar -->
-  <section class="section">
-    <div class="container">
+  <section>
+    <!-- Search Bar -->
+    <div class="container mt-2">
       <SearchBar
         :countries="countries"
         :guessed="guessed"
         @searched="handleSearched"
       />
+
+      <!-- Two Columns -->
+      <div class="columns">
+        <!-- Left Column: Map Component -->
+        <div class="column is-two-thirds">
+          <div class="box">
+            <Map :guessed="guessed" />
+          </div>
+        </div>
+
+        <!-- Right Column: Radio + Guesses Components -->
+        <div class="column">
+          <div class="box has-text-centered">
+            <Radio msg="Radio" />
+          </div>
+          <GuessList :guessed="guessed" />
+        </div>
+      </div>
     </div>
   </section>
-
-  <!-- Two Columns -->
-  <div class="container">
-    <div class="columns">
-      <!-- Left Column: Map Component -->
-      <div class="column is-two-thirds">
-        <div class="box">
-          <Map :guessed="guessed" />
-        </div>
-      </div>
-
-      <!-- Right Column: Radio + Guesses Components -->
-      <div class="column">
-        <div class="box has-text-centered">
-          <Radio msg="Radio" />
-        </div>
-        <GuessList :guessed="guessed" />
-      </div>
-    </div>
-  </div>
 </template>
 
 <script setup lang="ts">

@@ -1,5 +1,5 @@
 <template>
-  <div class="field">
+  <div class="field mb-0">
     <p class="control has-icons-left">
       <input
         class="input"
@@ -11,7 +11,7 @@
         @keydown.up.prevent="highlightPrev"
         @keydown.enter.prevent="selectHighlighted"
       />
-      <span class="icon is-left">
+      <span class="icon is-small is-left">
         <i class="fas fa-search"></i>
       </span>
     </p>
