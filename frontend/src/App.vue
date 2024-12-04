@@ -1,30 +1,61 @@
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
   <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+    <!-- Search Bar -->
+    <section class="section">
+      <div class="container">
+        <div class="field">
+          <p class="control has-icons-left">
+            <input class="input" type="text" placeholder="Search..." />
+            <span class="icon is-left">
+              <i class="fas fa-search"></i>
+            </span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Two Columns -->
+    <section class="section">
+      <div class="container">
+        <div class="columns">
+          <!-- Left Column: Map Component -->
+          <div class="column is-two-thirds">
+            <div class="box">
+              <MapComponent />
+            </div>
+          </div>
+
+          <!-- Right Column: Play/Pause Component -->
+          <div class="column">
+            <div class="box has-text-centered">
+              <PlayPauseComponent />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
+<script setup>
+import { defineComponent } from "vue";
+
+// MapComponent - Placeholder for the map
+const MapComponent = defineComponent({
+  template: `<h3>Map Component</h3>`,
+});
+
+// PlayPauseComponent - Play and pause buttons
+const PlayPauseComponent = defineComponent({
+  template: `
+      <div>
+        <button class="button is-primary">Play</button>
+        <button class="button is-danger">Pause</button>
+      </div>
+    `,
+});
+</script>
+
+<style>
+/* Optional custom styles */
 </style>
