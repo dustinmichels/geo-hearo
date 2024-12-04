@@ -61,7 +61,7 @@ const handleSearched = (country: Country) => {
     // wait a moment
     setTimeout(() => {
       gameOver()
-    }, 500)
+    }, 200)
   }
 }
 
