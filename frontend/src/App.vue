@@ -38,6 +38,11 @@ import GuessList from './components/GuessList.vue'
 import Map from './components/Map.vue'
 import Radio from './components/Radio.vue'
 import SearchBar from './components/SearchBar.vue'
+
+import { getCountries, loadData } from './util/load'
+
+const radioData = loadData()
+const countries = getCountries(radioData)
 </script>
 
 <style>

@@ -1,9 +1,6 @@
-<script setup lang="ts">
-defineProps<{ msg: string }>()
-</script>
+<script setup lang="ts"></script>
 
 <template>
-  <h1>{{ msg }}</h1>
   <div class="field">
     <p class="control has-icons-left">
       <input class="input" type="text" placeholder="Search..." />
