@@ -13,6 +13,10 @@ export interface RadioStation {
   two_code: string
 }
 
+export interface RadioStationWithStreamingUrl extends RadioStation {
+  streamingUrl: string
+}
+
 export interface Country {
   name: string
   two_code: string

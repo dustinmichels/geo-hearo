@@ -11,6 +11,8 @@
   <section>
     <!-- Search Bar -->
     <div class="container mt-2">
+      <h3>Secret country: {{ secretCountry.name }}</h3>
+
       <SearchBar
         :countries="countries"
         :guessed="guessed"
@@ -29,7 +31,7 @@
         <!-- Right Column: Radio + Guesses Components -->
         <div class="column">
           <div class="box has-text-centered">
-            <Radio msg="Radio" />
+            <Radio :radioStations="radioStations" />
           </div>
           <GuessList :guessed="guessed" />
         </div>
@@ -42,6 +44,9 @@
 import { ref } from 'vue'
 import { Country } from './types'
 import { getCountries, loadData } from './util/load'
+
+import { addStreamingUrl } from './util/radio'
+import { getRandomCountry, pickRadioStations } from './util/random'
 
 // components
 import GuessList from './components/GuessedList.vue'
@@ -59,6 +64,12 @@ let guessCount = 0
 
 const radioData = loadData()
 const countries = getCountries(radioData)
+
+// SETUP
+const secretCountry = getRandomCountry(countries)
+const radioStations = addStreamingUrl(
+  pickRadioStations(radioData, secretCountry, 4)
+)
 
 const handleSearched = (country: Country) => {
   guessed.value[guessCount] = country
