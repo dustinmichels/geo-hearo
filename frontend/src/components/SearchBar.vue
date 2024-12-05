@@ -7,9 +7,11 @@
         autocomplete="off"
         v-model="searchTerm"
         placeholder="Guess a country..."
+        @focus="scrollToSearchBar"
         @keydown.down.prevent="highlightNext"
         @keydown.up.prevent="highlightPrev"
         @keydown.enter.prevent="selectHighlighted"
+        ref="searchInput"
       />
       <span class="icon is-small is-left">
         <i class="fas fa-search"></i>
@@ -46,6 +48,7 @@ const emit = defineEmits(['searched'])
 
 let searchTerm = ref('')
 let highlightedIndex = ref(-1)
+const searchInput = ref<HTMLInputElement | null>(null)
 
 const filteredCountries = computed(() => {
   if (searchTerm.value === '') {
@@ -117,6 +120,12 @@ function selectHighlighted() {
     highlightedIndex.value < filteredCountries.value.length
   ) {
     selectCountry(filteredCountries.value[highlightedIndex.value])
+  }
+}
+
+function scrollToSearchBar() {
+  if (searchInput.value) {
+    searchInput.value.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 }
 </script>
