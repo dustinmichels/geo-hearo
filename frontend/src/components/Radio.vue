@@ -2,7 +2,7 @@
   <div class="audio__player">
     <div class="audio__player-controls">
       <div class="audio__player-button">
-        <img :src="IconPrev" />
+        <img :src="IconPrev" @click="decreaseStation" />
       </div>
       <div class="audio__player-play" @click="togglePlay">
         <img
@@ -15,27 +15,24 @@
         </div>
       </div>
       <div class="audio__player-button">
-        <img :src="IconNext" />
+        <img :src="IconNext" @click="increaseStation" />
       </div>
     </div>
 
     <div>
       <div class="square-radio-group">
-        <div class="square-radio">
-          <input type="radio" id="option1" name="square-radio" checked />
-          <label for="option1">1</label>
-        </div>
-        <div class="square-radio">
-          <input type="radio" id="option2" name="square-radio" />
-          <label for="option2">2</label>
-        </div>
-        <div class="square-radio">
-          <input type="radio" id="option3" name="square-radio" />
-          <label for="option3">3</label>
-        </div>
-        <div class="square-radio">
-          <input type="radio" id="option4" name="square-radio" />
-          <label for="option4">4</label>
+        <div
+          class="square-radio"
+          v-for="(station, index) in radioStations"
+          :key="station.channel_id"
+        >
+          <input
+            type="radio"
+            :id="station.channel_id"
+            name="square-radio"
+            :checked="index === selectedStation"
+          />
+          <label :for="station.channel_id">{{ index + 1 }}</label>
         </div>
       </div>
     </div>
@@ -58,14 +55,26 @@ import IconPrev from '../assets/images/prev.png'
 
 import { RadioStationWithStreamingUrl } from '../types'
 
-defineProps<{
+const props = defineProps<{
   radioStations: RadioStationWithStreamingUrl[]
 }>()
 
 const isPlaying = ref(false)
+const selectedStation = ref(0)
 
 const togglePlay = () => {
   isPlaying.value = !isPlaying.value
+}
+
+const increaseStation = () => {
+  selectedStation.value =
+    (selectedStation.value + 1) % props.radioStations.length
+}
+
+const decreaseStation = () => {
+  selectedStation.value =
+    (selectedStation.value - 1 + props.radioStations.length) %
+    props.radioStations.length
 }
 
 // capture space bar events
