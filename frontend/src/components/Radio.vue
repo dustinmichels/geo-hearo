@@ -1,57 +1,41 @@
 <template>
-  <div class="fixed-grid has-3-cols">
-    <div class="grid">
-      <!-- Top Left -->
-      <div class="cell">
-        <div class="">
-          <img :src="IconPrev" />
+  <div class="audio__player">
+    <div class="audio__player-controls">
+      <div class="audio__player-button">
+        <img :src="IconPrev" />
+      </div>
+      <div class="audio__player-play" @click="togglePlay">
+        <img
+          :src="CoverImageDefault"
+          alt=""
+          :class="`${isPlaying ? 'audio__player-spin-anim' : ''}`"
+        />
+        <div class="audio__player-play-icon">
+          <img :src="isPlaying ? IconPause : IconPlay" />
         </div>
       </div>
-
-      <!-- Top Center -->
-      <div class="cell">
-        <div class="">
-          <div class="" @click="togglePlay">
-            <img
-              :src="CoverImageDefault"
-              alt=""
-              :class="`${isPlaying ? 'audio__player-spin-anim' : ''}`"
-            />
-            <div class="">
-              <img :src="isPlaying ? IconPause : IconPlay" />
-            </div>
-          </div>
-        </div>
+      <div class="audio__player-button">
+        <img :src="IconNext" />
       </div>
+    </div>
 
-      <!-- Top Right -->
-      <div class="cell">
-        <div class="">
-          <img :src="IconNext" />
+    <div>
+      <div class="square-radio-group">
+        <div class="square-radio">
+          <input type="radio" id="option1" name="square-radio" checked />
+          <label for="option1">1</label>
         </div>
-      </div>
-
-      <!-- Bottom -->
-      <div class="cell is-col-span-3 flex-center">
-        <div>
-          <div class="square-radio-group">
-            <div class="square-radio">
-              <input type="radio" id="option1" name="square-radio" checked />
-              <label for="option1">1</label>
-            </div>
-            <div class="square-radio">
-              <input type="radio" id="option2" name="square-radio" />
-              <label for="option2">2</label>
-            </div>
-            <div class="square-radio">
-              <input type="radio" id="option3" name="square-radio" />
-              <label for="option3">3</label>
-            </div>
-            <div class="square-radio">
-              <input type="radio" id="option4" name="square-radio" />
-              <label for="option4">4</label>
-            </div>
-          </div>
+        <div class="square-radio">
+          <input type="radio" id="option2" name="square-radio" />
+          <label for="option2">2</label>
+        </div>
+        <div class="square-radio">
+          <input type="radio" id="option3" name="square-radio" />
+          <label for="option3">3</label>
+        </div>
+        <div class="square-radio">
+          <input type="radio" id="option4" name="square-radio" />
+          <label for="option4">4</label>
         </div>
       </div>
     </div>
@@ -100,16 +84,18 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.cell {
-  border: 1px solid #ccc;
-}
-
 /* ----- audio player ----- */
 .audio__player {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+
+.audio__player-controls {
+  display: flex;
+  align-items: center;
+}
+
 .audio__player-play {
   position: relative;
 }

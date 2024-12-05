@@ -48,6 +48,8 @@ const emit = defineEmits(['searched'])
 
 let searchTerm = ref('')
 let highlightedIndex = ref(-1)
+
+// todo: is it working?
 const searchInput = ref<HTMLInputElement | null>(null)
 
 const filteredCountries = computed(() => {
@@ -123,6 +125,8 @@ function selectHighlighted() {
   }
 }
 
+// use ref to scroll when touched.
+// todo: is it working?
 function scrollToSearchBar() {
   if (searchInput.value) {
     searchInput.value.scrollIntoView({ behavior: 'smooth', block: 'center' })
