@@ -25,11 +25,13 @@
           class="square-radio"
           v-for="(station, index) in radioStations"
           :key="station.channel_id"
+          @click="selectedStation = index"
         >
           <input
             type="radio"
             :id="station.channel_id"
             name="square-radio"
+            :value="index"
             :checked="index === selectedStation"
           />
           <label :for="station.channel_id">{{ index + 1 }}</label>
@@ -37,12 +39,6 @@
       </div>
     </div>
   </div>
-
-  <ul>
-    <li v-for="station in radioStations" :key="station.channel_id">
-      {{ station.channel_url }}
-    </li>
-  </ul>
 </template>
 
 <script setup lang="ts">
@@ -82,6 +78,12 @@ const handleKeydown = (event: KeyboardEvent) => {
   if (event.code === 'Space') {
     event.preventDefault() // Prevent the default spacebar action (scrolling)
     togglePlay()
+  } else if (event.code === 'ArrowRight') {
+    event.preventDefault() // Prevent the default right arrow action (scrolling)
+    increaseStation()
+  } else if (event.code === 'ArrowLeft') {
+    event.preventDefault() // Prevent the default left arrow action (scrolling)
+    decreaseStation()
   }
 }
 onMounted(() => {

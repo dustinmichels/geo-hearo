@@ -11,8 +11,6 @@
   <section>
     <!-- Search Bar -->
     <div class="container mt-2">
-      <h3>Secret country: {{ secretCountry.name }}</h3>
-
       <div class="box has-text-centered">
         <Radio :radioStations="radioStations" />
       </div>
@@ -38,6 +36,8 @@
       </div>
     </div>
   </section>
+
+  <h3>Secret country: {{ secretCountry.name }}</h3>
 </template>
 
 <script setup lang="ts">
