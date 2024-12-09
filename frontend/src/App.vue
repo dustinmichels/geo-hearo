@@ -37,7 +37,11 @@
         <!-- Right Column: Map Component -->
         <div class="column is-two-thirds">
           <div class="box">
-            <Map :guessed="guessed" :secretCountry="secretCountry" />
+            <Map
+              :guessed="guessed"
+              :secretCountry="secretCountry"
+              :isGameOver="isGameOver"
+            />
           </div>
         </div>
       </div>
@@ -50,6 +54,17 @@
       >Secret country: {{ secretCountry.name }}</span
     >
   </h3>
+
+  <footer class="footer">
+    <div class="content has-text-centered">
+      <p>
+        Made by <a href="https://dustinmichels.com/">Dustin Michels</a>.
+        Inspired by <a href="https://worldle.teuteuf.fr">worldle.teuteuf</a>.
+        See
+        <a href="https://github.com/dustinmichels/geo-hearo">GitHub.</a>
+      </p>
+    </div>
+  </footer>
 </template>
 
 <script setup lang="ts">

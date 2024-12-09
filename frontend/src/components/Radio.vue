@@ -61,7 +61,8 @@
             <td>City</td>
             <td>
               <span v-if="isGameOver">
-                {{ radioStations[selectedStationIdx].place_name }}
+                {{ radioStations[selectedStationIdx].place_name }},
+                {{ radioStations[selectedStationIdx].country }}
               </span>
               <span v-else>????</span>
             </td>

@@ -14,6 +14,7 @@ import { Country } from '../types'
 const props = defineProps<{
   guessed: Country[]
   secretCountry: Country
+  isGameOver: boolean
 }>()
 
 const mapBorder = '#ffffff'
@@ -81,6 +82,12 @@ const updateMap = () => {
       })
     }
   })
+
+  if (props.isGameOver) {
+    map.updateChoropleth({
+      [props.secretCountry.three_code]: 'lightgreen',
+    })
+  }
 }
 
 onMounted(() => {
@@ -89,6 +96,14 @@ onMounted(() => {
 
 watch(
   () => props.guessed,
+  () => {
+    updateMap()
+  },
+  { deep: true }
+)
+
+watch(
+  () => props.isGameOver,
   () => {
     updateMap()
   },
