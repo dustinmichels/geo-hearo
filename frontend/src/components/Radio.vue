@@ -42,7 +42,6 @@
     {{ audioSrc }}
 
     <audio ref="audioPlayer" :src="audioSrc"></audio>
-    <audio ref="audioPlayer2" @play="onAudioPlay" @pause="onAudioPause"></audio>
   </div>
 </template>
 
@@ -67,6 +66,11 @@ const audioSrc = ref(props.radioStations[0].streamingUrl)
 
 const togglePlay = () => {
   isPlaying.value = !isPlaying.value
+
+  // try to play/pause the audio
+  if (audioPlayer === null || audioPlayer.value === null) {
+    return
+  }
   if (isPlaying.value) {
     audioPlayer.value.play().catch((error: any) => {
       console.error('play error', error)
@@ -80,36 +84,18 @@ const togglePlay = () => {
 watch(selectedStationIdx, async (newIdx, oldIdx) => {
   console.log('selectedStationIdx changed', oldIdx, newIdx)
   audioSrc.value = props.radioStations[newIdx].streamingUrl
+
+  if (audioPlayer === null || audioPlayer.value === null) {
+    return
+  }
   audioPlayer.value.load() //preload
   audioPlayer.value.addEventListener('loadeddata', () => {
+    if (audioPlayer === null || audioPlayer.value === null) {
+      return
+    }
     audioPlayer.value.play() //playing
   })
 })
-
-const play = () => {
-  if (audioPlayer === null || audioPlayer.value === null) {
-    return
-  }
-  audioPlayer.value.play().catch((error: any) => {
-    console.error('play error', error)
-    // emit('play-error', error)
-  })
-}
-
-const pause = () => {
-  if (audioPlayer === null || audioPlayer.value === null) {
-    return
-  }
-  audioPlayer.value.pause()
-}
-
-const togglePlayer = () => {
-  if (state.isPlaying) {
-    pause()
-  } else {
-    play()
-  }
-}
 
 const increaseStation = () => {
   selectedStationIdx.value =
@@ -120,15 +106,6 @@ const decreaseStation = () => {
   selectedStationIdx.value =
     (selectedStationIdx.value - 1 + props.radioStations.length) %
     props.radioStations.length
-}
-
-const onAudioPause = () => {
-  console.log('onAudioPause')
-  isPlaying.value = false
-}
-const onAudioPlay = () => {
-  console.log('onAudioPlay')
-  isPlaying.value = true
 }
 
 // capture space bar events
