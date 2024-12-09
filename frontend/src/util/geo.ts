@@ -101,14 +101,14 @@ export class MapUtil {
 
 export function directionToArrow(direction: Bearing) {
   const arrowMap = {
-    N: '↑',
-    NE: '↗',
-    E: '→',
-    SE: '↘',
-    S: '↓',
+    N: '⬆️',
+    NE: '↗️',
+    E: '➡️',
+    SE: '↘️',
+    S: '⬇️',
     SW: '↙️',
-    W: '←',
-    NW: '↖',
+    W: '⬅️',
+    NW: '↖️',
   }
   return arrowMap[direction]
 }

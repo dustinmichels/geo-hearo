@@ -4,7 +4,7 @@
 
     <label class="panel-block" v-for="(guess, index) in guessed">
       <span v-if="guess.name">
-        {{ index + 1 }}) {{ guess.name }} ❌
+        {{ index + 1 }}) {{ guess.name }}
         {{ directionToArrow(guess.direction) }}
         ({{ guess.distance.toFixed(0) }} km)
       </span>
