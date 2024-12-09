@@ -7,12 +7,13 @@
 </template>
 
 <script setup lang="ts">
+import * as d3 from 'd3'
 import Datamap from 'datamaps'
 import { onMounted, watch } from 'vue'
-import { Country } from '../types'
+import { Country, CountryGuessed } from '../types'
 
 const props = defineProps<{
-  guessed: Country[]
+  guessed: CountryGuessed[]
   secretCountry: Country
   isGameOver: boolean
 }>()
@@ -21,6 +22,10 @@ const mapBorder = '#ffffff'
 const mapFill = '#D4D4D8'
 
 let map: Datamap
+
+const getColor = d3.scaleLinear([19935, 0], ['#ffffcc', '#238b45'])
+
+// const proj = geoAitoff()
 
 // const projs = ['equirectangular', 'mercator', 'orthographic']
 
@@ -71,6 +76,7 @@ const updateMap = () => {
     if (!country.three_code) {
       return
     }
+    let fillColor = getColor(country.distance)
     if (country.name === props.secretCountry.name) {
       map.updateChoropleth({
         [country.three_code]: 'green',
@@ -78,7 +84,7 @@ const updateMap = () => {
     } else {
       console.log(country)
       map.updateChoropleth({
-        [country.three_code]: 'red',
+        [country.three_code]: fillColor,
       })
     }
   })

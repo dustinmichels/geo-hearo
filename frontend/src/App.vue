@@ -93,6 +93,8 @@ const radioData = loadData()
 const countries = getCountries(radioData)
 const mapUtil = new MapUtil()
 
+console.log('Max distance: ', mapUtil.getMaxDistance())
+
 // SETUP
 let guessed = ref<CountryGuessed[]>(
   Array(ALLOWED_GUESSES).fill({ name: '', two_code: '', three_code: '' })
