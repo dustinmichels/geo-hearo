@@ -37,7 +37,7 @@ export class MapUtil {
 
   // Return a bearing from guessCountry to targetCountry (eg, 'NW' or 'S')
   // If the guess is within MARGIN of the target, only a single direction is returned
-  computeDirection(guessCountry: Country, targetCountry: Country) {
+  computeDirection(guessCountry: Country, targetCountry: Country): Bearing {
     const targetLoc = this.getLatLong(guessCountry)
     const guessLoc = this.getLatLong(targetCountry)
 
@@ -69,7 +69,7 @@ export class MapUtil {
       }
     }
 
-    return direction
+    return direction as Bearing
   }
 
   // helper function to getMaxDistance
