@@ -3,7 +3,7 @@
     <div class="hero-body">
       <div class="container has-text-centered">
         <h1 class="title">🌍 GeoHearo 🦸</h1>
-        <h2 class="subtitle">Guess the country from its radio stations</h2>
+        <h2 class="subtitle">Guess the country from its radio</h2>
       </div>
     </div>
   </section>
