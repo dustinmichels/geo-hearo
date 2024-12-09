@@ -85,7 +85,7 @@ const updateMap = () => {
 
   if (props.isGameOver) {
     map.updateChoropleth({
-      [props.secretCountry.three_code]: 'lightgreen',
+      [props.secretCountry.three_code]: 'green',
     })
   }
 }

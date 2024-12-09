@@ -1,5 +1,5 @@
 <template>
-  <div class="grid is-col-min-16">
+  <div class="grid is-col-min-12">
     <div class="cell is-flex is-justify-content-center is-align-items-center">
       <h3>Mystery country:</h3>
       <h3 style="padding-left: 4px" v-if="isGameOver">
