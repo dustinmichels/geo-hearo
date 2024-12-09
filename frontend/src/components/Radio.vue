@@ -41,9 +41,6 @@
         </div>
       </div>
     </div>
-
-    {{ audioSrc }}
-
     <audio ref="audioPlayer" :src="audioSrc"></audio>
   </div>
 </template>
