@@ -25,24 +25,29 @@
           class="square-radio"
           v-for="(station, index) in radioStations"
           :key="station.channel_id"
-          @click="selectedStation = index"
+          @click="selectedStationIdx = index"
         >
           <input
             type="radio"
             :id="station.channel_id"
             name="square-radio"
             :value="index"
-            :checked="index === selectedStation"
+            :checked="index === selectedStationIdx"
           />
           <label :for="station.channel_id">{{ index + 1 }}</label>
         </div>
       </div>
     </div>
+
+    {{ audioSrc }}
+
+    <audio ref="audioPlayer" :src="audioSrc"></audio>
+    <audio ref="audioPlayer2" @play="onAudioPlay" @pause="onAudioPause"></audio>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue'
 import CoverImageDefault from '../assets/images/cover.png'
 import IconNext from '../assets/images/next.png'
 import IconPause from '../assets/images/pause.png'
@@ -55,22 +60,75 @@ const props = defineProps<{
   radioStations: RadioStationWithStreamingUrl[]
 }>()
 
+const audioPlayer = useTemplateRef('audioPlayer')
 const isPlaying = ref(false)
-const selectedStation = ref(0)
+const selectedStationIdx = ref(0)
+const audioSrc = ref(props.radioStations[0].streamingUrl)
 
 const togglePlay = () => {
   isPlaying.value = !isPlaying.value
+  if (isPlaying.value) {
+    audioPlayer.value.play().catch((error: any) => {
+      console.error('play error', error)
+    })
+  } else {
+    audioPlayer.value.pause()
+  }
+}
+
+// change streaming url when selected station changes
+watch(selectedStationIdx, async (newIdx, oldIdx) => {
+  console.log('selectedStationIdx changed', oldIdx, newIdx)
+  audioSrc.value = props.radioStations[newIdx].streamingUrl
+  audioPlayer.value.load() //preload
+  audioPlayer.value.addEventListener('loadeddata', () => {
+    audioPlayer.value.play() //playing
+  })
+})
+
+const play = () => {
+  if (audioPlayer === null || audioPlayer.value === null) {
+    return
+  }
+  audioPlayer.value.play().catch((error: any) => {
+    console.error('play error', error)
+    // emit('play-error', error)
+  })
+}
+
+const pause = () => {
+  if (audioPlayer === null || audioPlayer.value === null) {
+    return
+  }
+  audioPlayer.value.pause()
+}
+
+const togglePlayer = () => {
+  if (state.isPlaying) {
+    pause()
+  } else {
+    play()
+  }
 }
 
 const increaseStation = () => {
-  selectedStation.value =
-    (selectedStation.value + 1) % props.radioStations.length
+  selectedStationIdx.value =
+    (selectedStationIdx.value + 1) % props.radioStations.length
 }
 
 const decreaseStation = () => {
-  selectedStation.value =
-    (selectedStation.value - 1 + props.radioStations.length) %
+  selectedStationIdx.value =
+    (selectedStationIdx.value - 1 + props.radioStations.length) %
     props.radioStations.length
+}
+
+const onAudioPause = () => {
+  console.log('onAudioPause')
+  isPlaying.value = false
+}
+const onAudioPlay = () => {
+  console.log('onAudioPlay')
+  isPlaying.value = true
 }
 
 // capture space bar events

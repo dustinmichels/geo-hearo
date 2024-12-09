@@ -37,7 +37,11 @@
     </div>
   </section>
 
-  <h3>Secret country: {{ secretCountry.name }}</h3>
+  <h3>
+    <span style="background-color: lightcoral"
+      >Secret country: {{ secretCountry.name }}</span
+    >
+  </h3>
 </template>
 
 <script setup lang="ts">
