@@ -1,8 +1,8 @@
 <template>
-  <div class="audio__player" style="border: 1px solid red">
+  <div class="audio__player">
     <div class="audio__player-controls">
       <div class="audio__player-button">
-        <img :src="IconPrev" @click="decreaseStation" />
+        <img :src="IconPrev" @click="decreaseStationIdx" />
       </div>
       <div class="audio__player-play" @click="togglePlay">
         <img
@@ -18,7 +18,7 @@
         </div>
       </div>
       <div class="audio__player-button">
-        <img :src="IconNext" @click="increaseStation" />
+        <img :src="IconNext" @click="increaseStationIdx" />
       </div>
     </div>
 
@@ -86,8 +86,7 @@ const togglePlay = () => {
 }
 
 // change streaming url when selected station changes
-watch(selectedStationIdx, async (newIdx, oldIdx) => {
-  console.log('selectedStationIdx changed', oldIdx, newIdx)
+watch(selectedStationIdx, async (newIdx, _oldIdx) => {
   audioSrc.value = props.radioStations[newIdx].streamingUrl
 
   if (audioPlayer === null || audioPlayer.value === null) return
@@ -102,12 +101,12 @@ watch(selectedStationIdx, async (newIdx, oldIdx) => {
   })
 })
 
-const increaseStation = () => {
+const increaseStationIdx = () => {
   selectedStationIdx.value =
     (selectedStationIdx.value + 1) % props.radioStations.length
 }
 
-const decreaseStation = () => {
+const decreaseStationIdx = () => {
   selectedStationIdx.value =
     (selectedStationIdx.value - 1 + props.radioStations.length) %
     props.radioStations.length
@@ -120,16 +119,24 @@ const handleKeydown = (event: KeyboardEvent) => {
     togglePlay()
   } else if (event.code === 'ArrowRight') {
     event.preventDefault() // Prevent the default right arrow action (scrolling)
-    increaseStation()
+    increaseStationIdx()
   } else if (event.code === 'ArrowLeft') {
     event.preventDefault() // Prevent the default left arrow action (scrolling)
-    decreaseStation()
+    decreaseStationIdx()
   }
 }
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
   if (audioPlayer === null || audioPlayer.value === null) return
   audioPlayer.value.load() //preload
+  isLoading.value = true
+  audioPlayer.value.addEventListener('loadeddata', () => {
+    isLoading.value = false
+    if (audioPlayer === null || audioPlayer.value === null) return
+    if (isPlaying.value) {
+      audioPlayer.value.play() //playing
+    }
+  })
 })
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
@@ -243,5 +250,8 @@ onUnmounted(() => {
 }
 .audio__player-spin-anim {
   animation: audio__player-spin 5s linear infinite;
+}
+.audio__player-spin-slow {
+  animation: audio__player-spin 10s linear infinite;
 }
 </style>
