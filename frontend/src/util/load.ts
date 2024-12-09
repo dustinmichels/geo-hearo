@@ -1,8 +1,13 @@
+import centers from '../assets/data/centers.json'
 import data from '../assets/data/radio.json'
-import { Country, RadioStation } from '../types'
+import { Centers, Country, RadioStation } from '../types'
 
 export function loadData() {
   return data as RadioStation[]
+}
+
+export function loadCenters() {
+  return centers as Centers
 }
 
 // Create a list of unique countries from the radio data

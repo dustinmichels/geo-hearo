@@ -53,9 +53,7 @@ onMounted(() => {
       })
 
       // update map if secret country is set
-      if (!props.secretCountry.three_code) {
-        return
-      }
+      if (!props.secretCountry.three_code) return
       const updateObject: { [key: string]: string } = {}
       const code = props.secretCountry.three_code
       updateObject[code] = 'black'

@@ -46,7 +46,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Country } from './types'
+import { Country, CountryWithDistance } from './types'
+import { MapUtil } from './util/geo'
 import { getCountries, loadData } from './util/load'
 
 import { addStreamingUrl } from './util/radio'
@@ -59,24 +60,35 @@ import Radio from './components/Radio.vue'
 import SearchBar from './components/SearchBar.vue'
 
 const ALLOWED_GUESSES = 5
+const NUM_STATIONS = 5
 
 // guessed is type Country[]
-let guessed = ref<Country[]>(
+let guessed = ref<CountryWithDistance[]>(
   Array(ALLOWED_GUESSES).fill({ name: '', two_code: '', three_code: '' })
 )
 let guessCount = 0
 
 const radioData = loadData()
 const countries = getCountries(radioData)
+const mapUtil = new MapUtil()
 
 // SETUP
 const secretCountry = getRandomCountry(countries)
 const radioStations = addStreamingUrl(
-  pickRadioStations(radioData, secretCountry, 6)
+  pickRadioStations(radioData, secretCountry, NUM_STATIONS)
 )
 
 const handleSearched = (country: Country) => {
-  guessed.value[guessCount] = country
+  // compute distance
+  const distance = mapUtil.computeDistance(country, secretCountry)
+  console.log('Distance:', distance)
+
+  // compute direction
+  const direction = mapUtil.computeDirection(country, secretCountry)
+  console.log('Direction:', direction)
+
+  // add guess to list
+  guessed.value[guessCount] = { ...country, distance, direction }
   guessCount += 1
 
   if (country.three_code === secretCountry.three_code) {
@@ -110,5 +122,17 @@ const resetGame = () => {
 <style scoped>
 .no-padding {
   padding: 0 !important;
+}
+
+.knewave-regular {
+  font-family: 'Knewave', system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.hero.is-info .title {
+  font-family: 'Knewave', system-ui;
+  font-weight: 400;
+  font-style: normal;
 }
 </style>
