@@ -1,52 +1,96 @@
 <template>
-  <div class="audio__player">
-    <div class="audio__player-controls">
-      <div class="audio__player-button">
-        <img :src="IconPrev" @click="decreaseStationIdx" />
-      </div>
-      <div class="audio__player-play" @click="togglePlay">
-        <img
-          :src="CoverImageDefault"
-          alt=""
-          :class="`${isPlaying ? 'audio__player-spin-anim' : ''}`"
-        />
-        <div class="audio__player-play-icon" v-show="!isLoading">
-          <img :src="isPlaying ? IconPause : IconPlay" />
-        </div>
-        <div class="audio__player-play-icon" v-show="isLoading">
-          <img :src="IconLoading" />
-        </div>
-      </div>
-      <div class="audio__player-button">
-        <img :src="IconNext" @click="increaseStationIdx" />
-      </div>
-    </div>
+  <div class="container">
+    <div class="columns">
+      <div class="column">
+        <div class="audio__player">
+          <div class="audio__player-controls">
+            <div class="audio__player-button">
+              <img :src="IconPrev" @click="decreaseStationIdx" />
+            </div>
+            <div class="audio__player-play" @click="togglePlay">
+              <img
+                :src="CoverImageDefault"
+                alt=""
+                :class="`${isPlaying ? 'audio__player-spin-anim' : ''}`"
+              />
+              <div class="audio__player-play-icon" v-show="!isLoading">
+                <img :src="isPlaying ? IconPause : IconPlay" />
+              </div>
+              <div class="audio__player-play-icon" v-show="isLoading">
+                <img :src="IconLoading" />
+              </div>
+            </div>
+            <div class="audio__player-button">
+              <img :src="IconNext" @click="increaseStationIdx" />
+            </div>
+          </div>
 
-    <div>
-      <div class="square-radio-group">
-        <div
-          class="square-radio"
-          v-for="(station, index) in radioStations"
-          :key="station.channel_id"
-          @click="selectedStationIdx = index"
-        >
-          <input
-            type="radio"
-            :id="station.channel_id"
-            name="square-radio"
-            :value="index"
-            :checked="index === selectedStationIdx"
-          />
-          <label :for="station.channel_id">{{ index + 1 }}</label>
+          <div>
+            <div class="square-radio-group">
+              <div
+                class="square-radio"
+                v-for="(station, index) in radioStations"
+                :key="station.channel_id"
+                @click="selectedStationIdx = index"
+              >
+                <input
+                  type="radio"
+                  :id="station.channel_id"
+                  name="square-radio"
+                  :value="index"
+                  :checked="index === selectedStationIdx"
+                />
+                <label :for="station.channel_id">{{ index + 1 }}</label>
+              </div>
+            </div>
+          </div>
+          <audio ref="audioPlayer" :src="audioSrc"></audio>
         </div>
       </div>
+      <div class="column">
+        <table class="table">
+          <tr>
+            <td>Station Name</td>
+            <td>
+              <span v-if="isGameOver">
+                {{ radioStations[selectedStationIdx].channel_name }}
+              </span>
+              <span v-else>????</span>
+            </td>
+          </tr>
+          <tr>
+            <td>City</td>
+            <td>
+              <span v-if="isGameOver">
+                {{ radioStations[selectedStationIdx].place_name }}
+              </span>
+              <span v-else>????</span>
+            </td>
+          </tr>
+          <tr>
+            <td>Link</td>
+            <td>
+              <a v-if="isGameOver" :href="stationLink" target="_blank">
+                radio.garden
+              </a>
+              <span v-else>????</span>
+            </td>
+          </tr>
+        </table>
+      </div>
     </div>
-    <audio ref="audioPlayer" :src="audioSrc"></audio>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue'
+import {
+  computed,
+  onMounted,
+  onUnmounted,
+  ref,
+  useTemplateRef,
+  watch,
+} from 'vue'
 import CoverImageDefault from '../assets/images/cover.png'
 import IconLoading from '../assets/images/loading.png'
 import IconNext from '../assets/images/next.png'
@@ -58,6 +102,7 @@ import { RadioStationWithStreamingUrl } from '../types'
 
 const props = defineProps<{
   radioStations: RadioStationWithStreamingUrl[]
+  isGameOver: boolean
 }>()
 
 const audioPlayer = useTemplateRef('audioPlayer')
@@ -96,6 +141,12 @@ watch(selectedStationIdx, async (newIdx, _oldIdx) => {
       audioPlayer.value.play() //playing
     }
   })
+})
+
+const stationLink = computed(() => {
+  return `https://radio.garden${
+    props.radioStations[selectedStationIdx.value].channel_url
+  }`
 })
 
 const increaseStationIdx = () => {

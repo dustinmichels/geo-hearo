@@ -12,18 +12,11 @@
     <!-- Search Bar -->
     <div class="container mt-2">
       <div class="box has-text-centered">
-        <Radio :radioStations="radioStations" />
+        <Radio :radioStations="radioStations" :isGameOver="isGameOver" />
       </div>
 
       <!-- Two Columns -->
       <div class="columns">
-        <!-- Left Column: Map Component -->
-        <div class="column is-two-thirds">
-          <div class="box">
-            <Map :guessed="guessed" :secretCountry="secretCountry" />
-          </div>
-        </div>
-
         <!-- Right Column: Radio + Guesses Components -->
         <div class="column">
           <SearchBar
@@ -39,6 +32,13 @@
           >
             Reset
           </button>
+        </div>
+
+        <!-- Left Column: Map Component -->
+        <div class="column is-two-thirds">
+          <div class="box">
+            <Map :guessed="guessed" :secretCountry="secretCountry" />
+          </div>
         </div>
       </div>
     </div>
