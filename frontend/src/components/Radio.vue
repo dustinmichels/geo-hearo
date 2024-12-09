@@ -52,7 +52,9 @@
             <td>Station Name</td>
             <td>
               <span v-if="isGameOver">
-                {{ radioStations[selectedStationIdx].channel_name }}
+                <a v-if="isGameOver" :href="stationLink" target="_blank">
+                  {{ radioStations[selectedStationIdx].channel_name }}
+                </a>
               </span>
               <span v-else>????</span>
             </td>
@@ -64,15 +66,6 @@
                 {{ radioStations[selectedStationIdx].place_name }},
                 {{ radioStations[selectedStationIdx].country }}
               </span>
-              <span v-else>????</span>
-            </td>
-          </tr>
-          <tr>
-            <td>Link</td>
-            <td>
-              <a v-if="isGameOver" :href="stationLink" target="_blank">
-                radio.garden
-              </a>
               <span v-else>????</span>
             </td>
           </tr>
