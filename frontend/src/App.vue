@@ -3,7 +3,7 @@
     <div class="hero-body">
       <div class="container has-text-centered">
         <h1 class="title">🌍 GeoHearo 🦸</h1>
-        <h2 class="subtitle">Guess the country by its radio</h2>
+        <h2 class="subtitle">Guess the country from its radio stations</h2>
       </div>
     </div>
   </section>
@@ -17,7 +17,7 @@
 
       <!-- Two Columns -->
       <div class="columns">
-        <!-- Right Column: Radio + Guesses Components -->
+        <!-- Left Column: Radio + Guesses Components -->
         <div class="column">
           <SearchBar
             :countries="countries"
@@ -34,7 +34,7 @@
           </button>
         </div>
 
-        <!-- Left Column: Map Component -->
+        <!-- Right Column: Map Component -->
         <div class="column is-two-thirds">
           <div class="box">
             <Map :guessed="guessed" :secretCountry="secretCountry" />

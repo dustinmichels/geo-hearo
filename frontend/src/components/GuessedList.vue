@@ -6,10 +6,13 @@
       <span v-if="guess.name" class="panel-row">
         <span class="panel-index">{{ index + 1 }})</span>
         <span class="panel-name">{{ guess.name }}</span>
-        <span class="panel-direction">{{
+        <span class="panel-direction" v-if="guess.isCorrect">🎉</span>
+        <span class="panel-direction" v-else>{{
           directionToArrow(guess.direction)
         }}</span>
-        <span class="panel-distance"
+
+        <span class="panel-distance" v-if="guess.isCorrect">🎉</span>
+        <span class="panel-distance" v-else
           >({{ formatNumber(guess.distance) }} km)</span
         >
       </span>
@@ -44,7 +47,7 @@ const formatNumber = (num: number) => {
 }
 
 .panel-name {
-  flex: 2; /* Takes up twice the space of the other flexible elements */
+  flex: 1.5; /* Takes up twice the space of the other flexible elements */
 }
 
 .panel-direction {
