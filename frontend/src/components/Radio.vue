@@ -1,5 +1,12 @@
 <template>
   <div class="grid is-col-min-16">
+    <div class="cell is-flex is-justify-content-center is-align-items-center">
+      <h3>Mystery country:</h3>
+      <h3 style="padding-left: 4px" v-if="isGameOver">
+        <strong>{{ secretCountry.name }}</strong>
+      </h3>
+      <h3 class="tag is-warning is-light" v-else>????</h3>
+    </div>
     <div class="cell">
       <div class="audio__player">
         <div class="audio__player-controls">
@@ -56,7 +63,7 @@
                   {{ radioStations[selectedStationIdx].channel_name }}
                 </a>
               </span>
-              <span v-else>????</span>
+              <span class="tag is-warning is-light" v-else>????</span>
             </td>
           </tr>
           <tr>
@@ -66,7 +73,7 @@
                 {{ radioStations[selectedStationIdx].place_name }},
                 {{ radioStations[selectedStationIdx].country }}
               </span>
-              <span v-else>????</span>
+              <span class="tag is-warning is-light" v-else>????</span>
             </td>
           </tr>
         </tbody>
@@ -96,6 +103,7 @@ import { RadioStationWithStreamingUrl } from '../types'
 const props = defineProps<{
   radioStations: RadioStationWithStreamingUrl[]
   isGameOver: boolean
+  secretCountry: { name: string }
 }>()
 
 const audioPlayer = useTemplateRef('audioPlayer')
@@ -278,6 +286,12 @@ onUnmounted(() => {
 .square-radio-group {
   display: flex;
   gap: 10px; /* Space between the buttons */
+}
+
+/* mystery tags */
+.mystery {
+  background-color: hsl(0, 0%, 96%);
+  padding: 4px;
 }
 
 /* ----- spinning animation ----- */

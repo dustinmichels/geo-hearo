@@ -12,7 +12,11 @@
     <!-- Search Bar -->
     <div class="container mt-2">
       <div class="box has-text-centered">
-        <Radio :radioStations="radioStations" :isGameOver="isGameOver" />
+        <Radio
+          :radioStations="radioStations"
+          :isGameOver="isGameOver"
+          :secretCountry="secretCountry"
+        />
       </div>
 
       <!-- Two Columns -->
