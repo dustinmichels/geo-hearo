@@ -18,7 +18,7 @@
       <!-- Two Columns -->
       <div class="columns">
         <!-- Left Column: Radio + Guesses Components -->
-        <div class="column">
+        <div class="column has-text-centered">
           <SearchBar
             :countries="countries"
             :guessed="guessed"
