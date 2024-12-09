@@ -1,5 +1,5 @@
 <template>
-  <div class="grid">
+  <div class="grid is-col-min-16">
     <div class="cell">
       <div class="audio__player">
         <div class="audio__player-controls">
@@ -45,35 +45,37 @@
         <audio ref="audioPlayer" :src="audioSrc"></audio>
       </div>
     </div>
-    <div class="cell">
+    <div class="cell is-flex is-justify-content-center is-align-items-center">
       <table class="table">
-        <tr>
-          <td>Station Name</td>
-          <td>
-            <span v-if="isGameOver">
-              {{ radioStations[selectedStationIdx].channel_name }}
-            </span>
-            <span v-else>????</span>
-          </td>
-        </tr>
-        <tr>
-          <td>City</td>
-          <td>
-            <span v-if="isGameOver">
-              {{ radioStations[selectedStationIdx].place_name }}
-            </span>
-            <span v-else>????</span>
-          </td>
-        </tr>
-        <tr>
-          <td>Link</td>
-          <td>
-            <a v-if="isGameOver" :href="stationLink" target="_blank">
-              radio.garden
-            </a>
-            <span v-else>????</span>
-          </td>
-        </tr>
+        <tbody>
+          <tr>
+            <td>Station Name</td>
+            <td>
+              <span v-if="isGameOver">
+                {{ radioStations[selectedStationIdx].channel_name }}
+              </span>
+              <span v-else>????</span>
+            </td>
+          </tr>
+          <tr>
+            <td>City</td>
+            <td>
+              <span v-if="isGameOver">
+                {{ radioStations[selectedStationIdx].place_name }}
+              </span>
+              <span v-else>????</span>
+            </td>
+          </tr>
+          <tr>
+            <td>Link</td>
+            <td>
+              <a v-if="isGameOver" :href="stationLink" target="_blank">
+                radio.garden
+              </a>
+              <span v-else>????</span>
+            </td>
+          </tr>
+        </tbody>
       </table>
     </div>
   </div>
