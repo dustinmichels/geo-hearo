@@ -133,7 +133,7 @@ const gameOver = () => {
   isGameOver.value = true
   // wait a moment before showing alert
   setTimeout(() => {
-    alert('Game over!')
+    alert('Good try! The write answer was ' + secretCountry.name)
   }, 200)
 }
 

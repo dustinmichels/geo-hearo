@@ -1,7 +1,7 @@
 import geopandas as gpd
 import pandas as pd
 
-N_STATIONS = 8
+N_STATIONS = 10
 
 def load_radio():
     df = pd.read_csv("crawl/out/output.csv")
