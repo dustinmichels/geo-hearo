@@ -72,7 +72,7 @@ const countries = getCountries(radioData)
 // SETUP
 const secretCountry = getRandomCountry(countries)
 const radioStations = addStreamingUrl(
-  pickRadioStations(radioData, secretCountry, 5)
+  pickRadioStations(radioData, secretCountry, 6)
 )
 
 const handleSearched = (country: Country) => {

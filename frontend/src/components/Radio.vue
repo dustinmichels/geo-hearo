@@ -1,5 +1,5 @@
 <template>
-  <div class="audio__player">
+  <div class="audio__player" style="border: 1px solid red">
     <div class="audio__player-controls">
       <div class="audio__player-button">
         <img :src="IconPrev" @click="decreaseStation" />
@@ -10,8 +10,11 @@
           alt=""
           :class="`${isPlaying ? 'audio__player-spin-anim' : ''}`"
         />
-        <div class="audio__player-play-icon">
+        <div class="audio__player-play-icon" v-show="!isLoading">
           <img :src="isPlaying ? IconPause : IconPlay" />
+        </div>
+        <div class="audio__player-play-icon" v-show="isLoading">
+          <img :src="IconLoading" />
         </div>
       </div>
       <div class="audio__player-button">
@@ -48,6 +51,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue'
 import CoverImageDefault from '../assets/images/cover.png'
+import IconLoading from '../assets/images/loading.png'
 import IconNext from '../assets/images/next.png'
 import IconPause from '../assets/images/pause.png'
 import IconPlay from '../assets/images/play.png'
@@ -61,6 +65,7 @@ const props = defineProps<{
 
 const audioPlayer = useTemplateRef('audioPlayer')
 const isPlaying = ref(false)
+const isLoading = ref(false)
 const selectedStationIdx = ref(0)
 const audioSrc = ref(props.radioStations[0].streamingUrl)
 
@@ -85,15 +90,15 @@ watch(selectedStationIdx, async (newIdx, oldIdx) => {
   console.log('selectedStationIdx changed', oldIdx, newIdx)
   audioSrc.value = props.radioStations[newIdx].streamingUrl
 
-  if (audioPlayer === null || audioPlayer.value === null) {
-    return
-  }
+  if (audioPlayer === null || audioPlayer.value === null) return
   audioPlayer.value.load() //preload
+  isLoading.value = true
   audioPlayer.value.addEventListener('loadeddata', () => {
-    if (audioPlayer === null || audioPlayer.value === null) {
-      return
+    isLoading.value = false
+    if (audioPlayer === null || audioPlayer.value === null) return
+    if (isPlaying.value) {
+      audioPlayer.value.play() //playing
     }
-    audioPlayer.value.play() //playing
   })
 })
 
@@ -123,6 +128,8 @@ const handleKeydown = (event: KeyboardEvent) => {
 }
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
+  if (audioPlayer === null || audioPlayer.value === null) return
+  audioPlayer.value.load() //preload
 })
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
