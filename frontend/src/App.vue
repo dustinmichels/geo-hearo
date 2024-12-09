@@ -32,12 +32,20 @@
             @searched="handleSearched"
           />
           <GuessList :guessed="guessed" />
+          <button
+            class="button is-warning"
+            v-show="isGameOver"
+            @click="resetGame"
+          >
+            Reset
+          </button>
         </div>
       </div>
     </div>
   </section>
 
-  <h3>
+  <!-- for debug -->
+  <h3 style="display: None">
     <span style="background-color: lightcoral"
       >Secret country: {{ secretCountry.name }}</span
     >
@@ -46,7 +54,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Country, CountryWithDistance } from './types'
+import { Country, CountryGuessed } from './types'
 import { MapUtil } from './util/geo'
 import { getCountries, loadData } from './util/load'
 
@@ -62,60 +70,66 @@ import SearchBar from './components/SearchBar.vue'
 const ALLOWED_GUESSES = 5
 const NUM_STATIONS = 5
 
-// guessed is type Country[]
-let guessed = ref<CountryWithDistance[]>(
-  Array(ALLOWED_GUESSES).fill({ name: '', two_code: '', three_code: '' })
-)
-let guessCount = 0
-
 const radioData = loadData()
 const countries = getCountries(radioData)
 const mapUtil = new MapUtil()
 
 // SETUP
-const secretCountry = getRandomCountry(countries)
-const radioStations = addStreamingUrl(
+let guessed = ref<CountryGuessed[]>(
+  Array(ALLOWED_GUESSES).fill({ name: '', two_code: '', three_code: '' })
+)
+let guessCount = 0
+const isGameOver = ref(false)
+let secretCountry = getRandomCountry(countries)
+let radioStations = addStreamingUrl(
   pickRadioStations(radioData, secretCountry, NUM_STATIONS)
 )
 
 const handleSearched = (country: Country) => {
-  // compute distance
+  // compute distance & direction
   const distance = mapUtil.computeDistance(country, secretCountry)
-  console.log('Distance:', distance)
-
-  // compute direction
   const direction = mapUtil.computeDirection(country, secretCountry)
-  console.log('Direction:', direction)
+  const isCorrect = country.three_code === secretCountry.three_code
 
   // add guess to list
-  guessed.value[guessCount] = { ...country, distance, direction }
+  guessed.value[guessCount] = {
+    ...country,
+    distance,
+    direction,
+    isCorrect,
+  }
   guessCount += 1
 
-  if (country.three_code === secretCountry.three_code) {
+  if (isCorrect === true) {
     gameWon()
   } else {
-    if (guessCount == ALLOWED_GUESSES) {
-      // wait a moment
-      setTimeout(() => {
-        gameOver()
-      }, 200)
+    if (guessCount === ALLOWED_GUESSES) {
+      gameOver()
     }
   }
 }
 
 const gameWon = () => {
+  isGameOver.value = true
   alert('Perfect! You won!')
-  resetGame()
 }
 
 const gameOver = () => {
-  alert('Game over!')
-  resetGame()
+  isGameOver.value = true
+  // wait a moment before showing alert
+  setTimeout(() => {
+    alert('Game over!')
+  }, 200)
 }
 
 const resetGame = () => {
-  guessed.value = Array(ALLOWED_GUESSES).fill('')
-  guessCount = 0
+  // guessed.value = Array(ALLOWED_GUESSES).fill('')
+  // guessCount = 0
+  // secretCountry = getRandomCountry(countries)
+  // radioStations = addStreamingUrl(
+  // pickRadioStations(radioData, secretCountry, NUM_STATIONS)
+  // )
+  location.reload()
 }
 </script>
 

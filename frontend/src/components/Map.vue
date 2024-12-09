@@ -57,7 +57,7 @@ onMounted(() => {
       const updateObject: { [key: string]: string } = {}
       const code = props.secretCountry.three_code
       updateObject[code] = 'black'
-      map.updateChoropleth(updateObject)
+      // map.updateChoropleth(updateObject)
     },
   })
 })
@@ -70,7 +70,7 @@ const updateMap = () => {
     if (!country.three_code) {
       return
     }
-    if (country.name === 'Peru') {
+    if (country.name === props.secretCountry.name) {
       map.updateChoropleth({
         [country.three_code]: 'green',
       })

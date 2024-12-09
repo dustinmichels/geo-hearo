@@ -51,9 +51,10 @@ export interface Country {
 
 export type Bearing = 'N' | 'NE' | 'E' | 'SE' | 'S' | 'SW' | 'W' | 'NW'
 
-export interface CountryWithDistance extends Country {
+export interface CountryGuessed extends Country {
   distance: number // km
   direction: Bearing
+  isCorrect: boolean
 }
 
 // A JSON.stringify-ed version of a country object
