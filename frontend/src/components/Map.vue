@@ -1,13 +1,22 @@
 <template>
   <div class="">
-    <div id="outer" class="max-w-screen-lg">
+    <div id="outer" class="">
       <div id="container" ref="container"></div>
+      <div class="overlay-text is-pulled-right">
+        Wrong
+        <div style="background-color: #ffffcc" class="square"></div>
+        <div style="background-color: #d9f0a3" class="square"></div>
+        <div style="background-color: #addd8e" class="square"></div>
+        <div style="background-color: #78c679" class="square"></div>
+        <div style="background-color: #31a354" class="square"></div>
+        <div style="background-color: #006837" class="square"></div>
+        Right
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import * as d3 from 'd3'
 import Datamap from 'datamaps'
 import { onMounted, watch } from 'vue'
 import { Country, CountryGuessed } from '../types'
@@ -16,14 +25,13 @@ const props = defineProps<{
   guessed: CountryGuessed[]
   secretCountry: Country
   isGameOver: boolean
+  colorFcn: Function
 }>()
 
 const mapBorder = '#ffffff'
 const mapFill = '#D4D4D8'
 
 let map: Datamap
-
-const getColor = d3.scaleLinear([19935, 0], ['#ffffcc', '#238b45'])
 
 // const proj = geoAitoff()
 
@@ -76,10 +84,10 @@ const updateMap = () => {
     if (!country.three_code) {
       return
     }
-    let fillColor = getColor(country.distance)
+    let fillColor = props.colorFcn(country.distance)
     if (country.name === props.secretCountry.name) {
       map.updateChoropleth({
-        [country.three_code]: 'green',
+        [country.three_code]: '#006837',
       })
     } else {
       console.log(country)
@@ -91,7 +99,7 @@ const updateMap = () => {
 
   if (props.isGameOver) {
     map.updateChoropleth({
-      [props.secretCountry.three_code]: 'green',
+      [props.secretCountry.three_code]: '#006837',
     })
   }
 }
@@ -117,4 +125,29 @@ watch(
 )
 </script>
 
-<style scoped></style>
+<style scoped>
+.svg-container {
+  position: relative;
+  display: inline-block;
+  width: 300px; /* Match your SVG width */
+  height: 200px; /* Match your SVG height */
+}
+
+.overlay-text {
+  /* position: absolute; */
+  bottom: 10px;
+  left: 10px;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  color: black;
+  background: rgba(255, 255, 255, 0.7); /* Optional: Background for contrast */
+  padding: 2px 5px; /* Optional: Padding for the text */
+  border-radius: 4px; /* Optional: Rounded corners */
+}
+
+.square {
+  width: 10px; /* Width of the square */
+  height: 10px; /* Height of the square */
+  display: inline-block; /* Ensures it behaves like a block element */
+}
+</style>

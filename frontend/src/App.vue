@@ -45,6 +45,7 @@
               :guessed="guessed"
               :secretCountry="secretCountry"
               :isGameOver="isGameOver"
+              :colorFcn="colorFcn"
             />
           </div>
         </div>
@@ -92,8 +93,7 @@ const NUM_STATIONS = 5
 const radioData = loadData()
 const countries = getCountries(radioData)
 const mapUtil = new MapUtil()
-
-console.log('Max distance: ', mapUtil.getMaxDistance())
+const colorFcn = mapUtil.getColorFunction()
 
 // SETUP
 let guessed = ref<CountryGuessed[]>(
