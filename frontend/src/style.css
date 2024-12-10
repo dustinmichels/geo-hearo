@@ -3,7 +3,4 @@
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  --primary: #ff5722; /* Custom primary color */
-  --link: #673ab7; /* Custom link color */
-  --success: #4caf50; /* Custom success color */
 }
