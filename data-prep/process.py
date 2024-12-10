@@ -7,6 +7,9 @@ def load_radio():
     df = pd.read_csv("crawl/out/output.csv")
     print(f"\nLoaded {len(df):,} rows from 'output.csv'")
 
+    # rename country "Türkiye" to "Turkey"
+    df["country"] = df["country"].replace("Türkiye", "Turkey")
+
     # Filter to only include countries with at least 3 stations
     s = df.groupby("country").size() >= N_STATIONS
     df = df[df["country"].isin(s[s].index)]
