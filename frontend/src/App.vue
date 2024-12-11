@@ -13,7 +13,7 @@
     <div class="container mt-2">
       <div class="box has-text-centered">
         <Radio
-          :radioStations="radioStations"
+          :allRadioStations="radioStations"
           :isGameOver="isGameOver"
           :secretCountry="secretCountry"
         />
@@ -88,7 +88,7 @@ import Radio from './components/Radio.vue'
 import SearchBar from './components/SearchBar.vue'
 
 const ALLOWED_GUESSES = 5
-const NUM_STATIONS = 5
+const NUM_STATIONS = 10
 
 const radioData = loadData()
 const countries = getCountries(radioData)

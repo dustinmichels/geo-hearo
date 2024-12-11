@@ -101,16 +101,29 @@ import IconPrev from '../assets/images/prev.png'
 import { RadioStationWithStreamingUrl } from '../types'
 
 const props = defineProps<{
-  radioStations: RadioStationWithStreamingUrl[]
+  allRadioStations: RadioStationWithStreamingUrl[]
   isGameOver: boolean
   secretCountry: { name: string }
 }>()
+
+const radioStations = ref<RadioStationWithStreamingUrl[]>([])
+// take five stations out of allRadioStations and put them in radioStations
+onMounted(() => {
+  const shuffledStations = props.allRadioStations.sort(
+    () => Math.random() - 0.5
+  )
+  radioStations.value = shuffledStations.slice(0, 5)
+  // remove stations from allRadioStations
+  props.allRadioStations = shuffledStations.slice(5)
+})
+
+const allRadioStationsCopy = allR
 
 const audioPlayer = useTemplateRef('audioPlayer')
 const isPlaying = ref(false)
 const isLoading = ref(false)
 const selectedStationIdx = ref(0)
-const audioSrc = ref(props.radioStations[0].streamingUrl)
+const audioSrc = ref(radioStations.value[0].streamingUrl)
 
 const togglePlay = () => {
   isPlaying.value = !isPlaying.value
@@ -130,7 +143,7 @@ const togglePlay = () => {
 
 // change streaming url when selected station changes
 watch(selectedStationIdx, async (newIdx, _oldIdx) => {
-  audioSrc.value = props.radioStations[newIdx].streamingUrl
+  audioSrc.value = radioStations.value[newIdx].streamingUrl
 
   if (audioPlayer === null || audioPlayer.value === null) return
   audioPlayer.value.load() //preload
@@ -146,19 +159,19 @@ watch(selectedStationIdx, async (newIdx, _oldIdx) => {
 
 const stationLink = computed(() => {
   return `https://radio.garden${
-    props.radioStations[selectedStationIdx.value].channel_url
+    radioStations.value[selectedStationIdx.value].channel_url
   }`
 })
 
 const increaseStationIdx = () => {
   selectedStationIdx.value =
-    (selectedStationIdx.value + 1) % props.radioStations.length
+    (selectedStationIdx.value + 1) % radioStations.value.length
 }
 
 const decreaseStationIdx = () => {
   selectedStationIdx.value =
-    (selectedStationIdx.value - 1 + props.radioStations.length) %
-    props.radioStations.length
+    (selectedStationIdx.value - 1 + radioStations.value.length) %
+    radioStations.value.length
 }
 
 // capture space bar events
