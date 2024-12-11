@@ -176,16 +176,16 @@ const handleKeydown = (event: KeyboardEvent) => {
 }
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
-  if (audioPlayer === null || audioPlayer.value === null) return
-  audioPlayer.value.load() //preload
-  isLoading.value = true
-  audioPlayer.value.addEventListener('loadeddata', () => {
-    isLoading.value = false
-    if (audioPlayer === null || audioPlayer.value === null) return
-    if (isPlaying.value) {
-      audioPlayer.value.play() //playing
-    }
-  })
+  // if (audioPlayer === null || audioPlayer.value === null) return
+  // audioPlayer.value.load() //preload
+  // isLoading.value = true
+  // audioPlayer.value.addEventListener('loadeddata', () => {
+  //   isLoading.value = false
+  //   if (audioPlayer === null || audioPlayer.value === null) return
+  //   if (isPlaying.value) {
+  //     audioPlayer.value.play() //playing
+  //   }
+  // })
 })
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)

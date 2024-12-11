@@ -117,6 +117,7 @@ export class MapUtil {
     }
   }
 
+  // not in use
   computeQuantilesWithColors() {
     const q = this.computeDistanceQuantiles()
     return {
