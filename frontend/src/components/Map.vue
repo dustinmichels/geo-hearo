@@ -20,6 +20,7 @@
 import Datamap from 'datamaps'
 import { onMounted, watch } from 'vue'
 import { Country, CountryGuessed } from '../types'
+import { isMobile } from '../util/general'
 
 const props = defineProps<{
   guessed: CountryGuessed[]
@@ -38,6 +39,11 @@ let map: Datamap
 // const projs = ['equirectangular', 'mercator', 'orthographic']
 
 onMounted(() => {
+  let borderWidth = 1
+  if (isMobile()) {
+    borderWidth = 0.5
+  }
+
   map = new window.Datamap({
     element: document.getElementById('container'),
     responsive: true,
@@ -45,7 +51,7 @@ onMounted(() => {
     geographyConfig: {
       hideAntarctica: true,
       hideHawaiiAndAlaska: false,
-      borderWidth: 1,
+      borderWidth: borderWidth,
       borderOpacity: 1,
       borderColor: mapBorder,
       popupOnHover: true,
