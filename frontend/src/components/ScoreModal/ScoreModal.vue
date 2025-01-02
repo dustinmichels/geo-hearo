@@ -21,13 +21,13 @@
         </header>
         <section class="modal-card-body">
           <!-- Original Content -->
-          <div class="box">
+          <div class="">
             <p
               class="has-text-right"
-              v-for="(number, index) in numbers"
+              v-for="(number, index) in formattedNumbers"
               :key="index"
             >
-              {{ index === numbers.length - 1 ? '+' + number : number }}
+              {{ index === numbers.length - 1 ? '+' + number : number }} km
             </p>
             <hr />
             <AnimatedScore :targetScore="totalScore" :duration="1000" />
@@ -51,7 +51,6 @@ const props = defineProps<{
 }>()
 
 const isModalActive = ref(false)
-// const numbers = [10, 20, 30, 40, 50] // Example numbers array
 
 const numbers = computed(() =>
   props.guessed
@@ -60,6 +59,19 @@ const numbers = computed(() =>
 )
 
 let totalScore = 0
+
+const formattedNumbers = computed(() =>
+  numbers.value.map((num) => formatNumber(num))
+)
+
+const formattedTotalScore = computed(() => formatNumber(totalScore))
+
+function formatNumber(num: number): string {
+  return num.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+}
 
 function openModal() {
   isModalActive.value = true

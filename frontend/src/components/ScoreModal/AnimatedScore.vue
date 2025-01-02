@@ -1,11 +1,9 @@
 <template>
-  <div class="animated-score">
-    {{ currentScore }}
-  </div>
+  <div class="animated-score">{{ formattedScore }} Mm</div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 const props = defineProps<{
   targetScore: number
@@ -28,6 +26,9 @@ const animate = (timestamp: number) => {
     startTime.value = null // Reset for potential future animations
   }
 }
+
+// Computed property to format the score as a decimal
+const formattedScore = computed(() => (currentScore.value / 1000).toFixed(3))
 
 watch(
   () => props.targetScore,
