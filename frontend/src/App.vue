@@ -9,6 +9,8 @@
   </section>
 
   <section>
+    <NumberGrid :numbers="[1, 2, 3, 4, 5]" />
+
     <!-- Search Bar -->
     <div class="container mt-2">
       <div class="box has-text-centered">
@@ -85,6 +87,7 @@ import { getRandomCountry, pickRadioStations } from './util/random'
 import GuessList from './components/GuessedList.vue'
 import Map from './components/Map.vue'
 import Radio from './components/Radio.vue'
+import NumberGrid from './components/ScoreModal/ScoreModal.vue'
 import SearchBar from './components/SearchBar.vue'
 
 const ALLOWED_GUESSES = 5
