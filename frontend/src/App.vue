@@ -9,8 +9,6 @@
   </section>
 
   <section>
-    <ScoreModal :guessed="guessed" />
-
     <!-- Search Bar -->
     <div class="container mt-2">
       <div class="box has-text-centered">
@@ -31,6 +29,9 @@
             @searched="handleSearched"
           />
           <GuessList :guessed="guessed" />
+
+          <ScoreModal :guessed="guessed" />
+
           <button
             class="button is-warning"
             v-show="isGameOver"
