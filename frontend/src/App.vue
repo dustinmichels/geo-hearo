@@ -9,6 +9,10 @@
   </section>
 
   <section>
+    <div>
+      <CountryMap />
+    </div>
+
     <ScoreModal :guessed="guessed" />
 
     <!-- Search Bar -->
@@ -84,6 +88,7 @@ import { addStreamingUrl } from './util/radio'
 import { getRandomCountry, pickRadioStations } from './util/random'
 
 // components
+import CountryMap from './components/CountryMap.vue'
 import GuessList from './components/GuessedList.vue'
 import Map from './components/Map.vue'
 import Radio from './components/Radio.vue'
