@@ -1,7 +1,8 @@
 import geopandas as gpd
 import pandas as pd
 
-N_STATIONS = 10
+N_STATIONS = 5
+
 
 def load_radio():
     df = pd.read_csv("crawl/out/output.csv")
@@ -10,7 +11,7 @@ def load_radio():
     # rename country "Türkiye" to "Turkey"
     df["country"] = df["country"].replace("Türkiye", "Turkey")
 
-    # Filter to only include countries with at least 3 stations
+    # Filter to only include countries with at least N stations
     s = df.groupby("country").size() >= N_STATIONS
     df = df[df["country"].isin(s[s].index)]
     print(f"> Filtered to countries with >= {N_STATIONS} stations - {len(df):,} rows")
