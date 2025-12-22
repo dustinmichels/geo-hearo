@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GeoHearo</title>
+
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Knewave&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Analytics -->
+    <script
+      defer
+      data-domain="geohearo.com"
+      src="https://plausible.io/js/script.js"
+    ></script>
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <!-- Datamaps -->
+    <head>
+      <!-- Use HTTPS for all external scripts to ensure secure loading -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/datamaps/0.5.9/datamaps.all.min.js"></script>
+    </head>
+
+    <!-- End Datamaps -->
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
