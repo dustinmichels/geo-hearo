@@ -133,6 +133,11 @@ const handleTuneIn = () => {
   border: 3px solid #334155;
 }
 
+.btn-pressable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 0 0 #334155;
+}
+
 .btn-pressable:active {
   transform: translateY(4px);
   box-shadow: 0 4px 0 0 #334155;
