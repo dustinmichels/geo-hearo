@@ -1,164 +1,215 @@
-<script setup lang="ts">
-import { BaseButton } from '@/components/base'
-</script>
-
 <template>
-  <div class="flex h-screen w-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[var(--color-cloud-white)] to-[#fff3e6]">
-    <div class="grid w-full max-w-[1400px] grid-cols-1 items-center gap-[var(--spacing-section)] px-[var(--spacing-container-padding)] md:grid-cols-2 md:gap-12 lg:gap-16">
-      <div class="text-center md:text-left">
-        <h1 class="title">GeoHearo</h1>
+  <div
+    class="min-h-screen w-screen no-scroll-container flex flex-col items-center justify-center p-6 md:p-12 overflow-x-hidden relative"
+  >
+    <!-- Decorative Background Shapes for "Pop" -->
+    <div
+      class="absolute top-10 right-[-5%] w-64 h-64 bg-bubblegum-pop/5 rounded-full blur-3xl -z-10"
+    ></div>
+    <div
+      class="absolute bottom-10 left-[-5%] w-80 h-80 bg-gumball-blue/5 rounded-full blur-3xl -z-10"
+    ></div>
 
-        <div class="mb-6 flex items-center justify-center gap-4 md:justify-start">
-          <p class="tagline">
-            The geo-guessing game where you win with your ears.
-          </p>
-          <div class="mobile-globe flex shrink-0 items-center justify-center md:hidden">
-            <img src="/globe.png" alt="Globe" class="globe" />
+    <!-- Main Content Container -->
+    <main
+      class="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center"
+    >
+      <!-- Globe Section: Top on Mobile, Right on Desktop -->
+      <div
+        class="order-1 lg:order-2 flex justify-center items-center py-4 lg:py-0"
+      >
+        <div class="relative scale-100 sm:scale-100">
+          <!-- Squishy Background Glow -->
+          <div
+            class="absolute inset-0 bg-mint-shake rounded-full blur-3xl opacity-25 scale-125"
+          ></div>
+
+          <!-- Globe Image -->
+          <img
+            :src="globeImage"
+            alt="GeoHearo Globe"
+            class="w-52 sm:w-64 md:w-80 lg:w-[480px] xl:w-[540px] object-contain float-animation relative z-10"
+            @error="handleImageError"
+          />
+
+          <!-- Floating Sticker Decorations (Visible on mobile now) -->
+          <div
+            class="absolute -top-3 -right-3 sm:-top-6 sm:-right-6 bg-paper-white border-3 border-pencil-lead p-3 sm:p-4 rounded-xl sm:rounded-3xl shadow-lg rotate-12 z-20"
+          >
+            <span class="text-2xl sm:text-4xl">🎵</span>
+          </div>
+          <div
+            class="absolute bottom-6 -left-6 sm:bottom-10 sm:-left-10 bg-paper-white border-3 border-pencil-lead p-3 sm:p-4 rounded-xl sm:rounded-3xl shadow-lg -rotate-12 z-20"
+          >
+            <span class="text-2xl sm:text-4xl">📢</span>
           </div>
         </div>
-
-        <ul class="features">
-          <li>Stream live radio from a mystery country</li>
-          <li>
-            Pay attention to languages, music, commercials, and commentary
-          </li>
-          <li>Figure out where in the world you are</li>
-        </ul>
-
-        <p class="challenge">
-          Do you have what it takes to be...<br />
-          The Geo Hearo?
-        </p>
-
-        <router-link to="/play" class="inline-block no-underline">
-          <BaseButton size="lg" class="cta-button">TUNE IN</BaseButton>
-        </router-link>
       </div>
 
-      <div class="desktop-globe hidden items-center justify-center md:flex">
-        <img src="/globe.png" alt="Globe" class="globe" />
+      <!-- Copy Section: Bottom on Mobile, Left on Desktop -->
+      <div
+        class="space-y-6 sm:space-y-10 order-2 lg:order-1 text-center lg:text-left"
+      >
+        <div class="space-y-6 lg:space-y-10">
+          <h1
+            class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-[1.1] tracking-tight text-pencil-lead"
+          >
+            GeoHearo is the geo-guessing game where you
+            <span class="text-gumball-blue">win with your ears.</span>
+          </h1>
+
+          <ul
+            class="space-y-4 md:space-y-6 text-lg sm:text-xl lg:text-2xl text-pencil-lead/90 font-body text-left inline-block lg:block mx-auto"
+          >
+            <li class="flex items-center gap-4 sm:gap-6">
+              <div class="step-badge bg-gumball-blue">1</div>
+              <span class="leading-snug"
+                >Stream live radio from a mystery country</span
+              >
+            </li>
+            <li class="flex items-center gap-4 sm:gap-6">
+              <div class="step-badge bg-bubblegum-pop">2</div>
+              <span class="leading-snug"
+                >Pay attention to languages and music</span
+              >
+            </li>
+            <li class="flex items-center gap-4 sm:gap-6">
+              <div class="step-badge bg-mint-shake">3</div>
+              <span class="leading-snug"
+                >Figure out where in the world you are</span
+              >
+            </li>
+          </ul>
+        </div>
+
+        <div class="space-y-6 sm:space-y-8">
+          <p
+            class="text-xl sm:text-2xl md:text-3xl font-heading text-bubblegum-pop uppercase tracking-tight leading-none"
+          >
+            Do you have what it takes to be... <br />
+            <span
+              class="text-3xl sm:text-4xl md:text-5xl text-pencil-lead block mt-2"
+              >The Geo Hearo?</span
+            >
+          </p>
+
+          <div class="flex justify-center lg:justify-start pt-2 pb-6 lg:pb-0">
+            <button
+              class="btn-pressable bg-yuzu-yellow px-10 sm:px-14 py-4 sm:py-6 rounded-[22px] sm:rounded-[26px] text-2xl sm:text-3xl btn-text uppercase tracking-widest text-pencil-lead transition-transform active:scale-95"
+              @click="handleTuneIn"
+            >
+              Tune In
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+    </main>
   </div>
 </template>
 
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const globeImage = ref('/globe.png')
+
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  img.src = 'https://via.placeholder.com/400?text=<'
+}
+
+const handleTuneIn = () => {
+  router.push({ name: 'Play' })
+}
+</script>
+
 <style scoped>
-.title {
-  color: var(--color-gumball-blue);
-  margin-bottom: 0.5rem;
-  font-size: var(--font-size-h1);
-  text-shadow: 2px 2px 0px var(--color-yuzu-yellow);
-}
-
-.tagline {
-  font-size: var(--font-size-h2);
-  font-weight: 700;
-  margin-bottom: 0;
-  color: var(--color-pencil-lead);
-  flex: 1;
-  max-width: none;
-}
-
-.features {
-  text-align: left;
-  list-style: none;
-  padding: 0;
-  margin: 1.5rem auto;
-  font-size: var(--font-size-body);
-  max-width: 600px;
-}
-
-.features li {
-  margin-bottom: 1rem;
-  padding-left: 2rem;
+/* The "Pressable" Button Effect */
+.btn-pressable {
   position: relative;
-  line-height: 1.5;
+  transition: all 0.1s ease;
+  box-shadow: 0 8px 0 0 #334155;
+  border: 3px solid #334155;
 }
 
-.features li::before {
-  content: '🎧';
-  font-size: 1.5rem;
-  position: absolute;
-  left: 0;
+.btn-pressable:active {
+  transform: translateY(4px);
+  box-shadow: 0 4px 0 0 #334155;
 }
 
-.challenge {
-  font-size: var(--font-size-h3);
-  font-weight: 700;
-  font-family: var(--font-family-heading);
-  margin: 1.5rem 0 1rem 0;
-  color: var(--color-bubblegum-pop);
-  line-height: 1.2;
-}
-
-.cta-button {
-  margin-top: 1rem;
-  background: linear-gradient(
-    135deg,
-    var(--color-gumball-blue) 0%,
-    #2563eb 100%
-  );
-  letter-spacing: 0.05em;
-}
-
-.cta-button:hover:not(:active) {
-  background: linear-gradient(
-    135deg,
-    #2563eb 0%,
-    var(--color-gumball-blue) 100%
-  );
-}
-
-.globe {
-  width: 100%;
-  max-width: 120px;
-  height: auto;
-  filter: drop-shadow(4px 4px 0px var(--color-pencil-lead));
-  animation: float 3s ease-in-out infinite;
-}
-
+/* Floating Animation for the Globe */
 @keyframes float {
-  0%,
-  100% {
+  0% {
     transform: translateY(0px) rotate(0deg);
   }
   50% {
-    transform: translateY(-15px) rotate(2deg);
+    transform: translateY(-15px) rotate(4deg);
   }
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+.float-animation {
+  animation: float 4.5s ease-in-out infinite;
+}
+
+/* Jiggle Animation for Badges */
+@keyframes jiggle {
+  0% {
+    transform: rotate(0deg) scale(1.1);
+  }
+  25% {
+    transform: rotate(-8deg) scale(1.1);
+  }
+  75% {
+    transform: rotate(8deg) scale(1.1);
+  }
+  100% {
+    transform: rotate(0deg) scale(1.1);
+  }
+}
+
+/* Badge Style */
+.step-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: 3px solid #334155;
+  border-radius: 10px;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: white;
+  box-shadow: 3px 3px 0px 0px #334155;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
 }
 
 @media (min-width: 768px) {
-  .features {
-    margin: 2rem 0;
-  }
-
-  .title {
-    text-shadow: 3px 3px 0px var(--color-yuzu-yellow);
-  }
-
-  .challenge {
-    margin: 2rem 0 1.5rem 0;
-  }
-
-  .globe {
-    max-width: 400px;
-    filter: drop-shadow(8px 8px 0px var(--color-pencil-lead));
-  }
-
-  @keyframes float {
-    0%,
-    100% {
-      transform: translateY(0px) rotate(0deg);
-    }
-    50% {
-      transform: translateY(-20px) rotate(2deg);
-    }
+  .step-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    font-size: 1.25rem;
+    box-shadow: 4px 4px 0px 0px #334155;
   }
 }
 
-@media (min-width: 1200px) {
-  .globe {
-    max-width: 500px;
+.step-badge:hover,
+.step-badge:active {
+  animation: jiggle 0.3s ease-in-out infinite;
+}
+
+/* Handle high-aspect ratio devices (tall phones) to keep centered */
+@media (min-height: 700px) {
+  .no-scroll-container {
+    overflow: hidden;
+    height: 100vh;
   }
 }
 </style>

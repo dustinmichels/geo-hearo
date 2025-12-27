@@ -1,0 +1,61 @@
+/*
+ * GeoHearo Style Guide Implementation
+ * Vibe: Fun, Light, Tactile, "Saturday Morning Cartoon"
+ * Keywords: Squishy, Pop, Rounded, Airy, Safe
+ */
+
+/* Import Google Fonts - Must come first */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@400;700&display=swap');
+
+/* Import Tailwind */
+@import 'tailwindcss';
+
+/* Tailwind v4 Theme Configuration */
+@theme {
+  /* Colors */
+  --color-gumball-blue: #3b82f6;
+  --color-yuzu-yellow: #fcd34d;
+  --color-bubblegum-pop: #f472b6;
+  --color-mint-shake: #34d399;
+  --color-berry-oops: #f87171;
+  --color-cloud-white: #fff9f5;
+  --color-paper-white: #ffffff;
+  --color-pencil-lead: #334155;
+  --color-eraser-grey: #94a3b8;
+
+  /* Fonts */
+  --font-heading: 'Fredoka', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Fredoka', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Fredoka', ui-sans-serif, system-ui, sans-serif;
+
+  /* Border widths */
+  --border-2: 2px;
+  --border-3: 3px;
+
+  /* Border radius */
+  --radius-btn: 16px;
+  --radius-card: 24px;
+  --radius-badge: 12px;
+}
+
+/* Apply fonts globally */
+body {
+  background-color: #fff9f5;
+  color: #334155;
+  font-family: 'Fredoka', sans-serif;
+}
+
+h1,
+h2,
+h3,
+.btn-text {
+  font-family: 'Fredoka', sans-serif;
+}
+
+.font-heading {
+  font-family: 'Fredoka', sans-serif;
+}
+
+.font-body {
+  font-family: 'Fredoka', sans-serif;
+}
