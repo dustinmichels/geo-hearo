@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Play, Pause, SkipBack, SkipForward } from 'lucide-vue-next'
-import Button from './ui/Button.vue'
+import { Button as VanButton } from 'vant'
 
 defineProps<{
   isPlaying: boolean
@@ -18,32 +18,31 @@ const emit = defineEmits<{
   <div class="bg-white rounded-xl shadow-md p-6 w-full">
     <!-- Controls -->
     <div class="flex items-center justify-center gap-4 mb-6">
-      <Button
-        variant="outline"
-        size="icon"
-        class="h-12 w-12"
+      <van-button
+        plain
+        class="!h-12 !w-12 !p-0 !rounded-lg !border-gray-200 shadow-sm"
         @click="emit('previous')"
       >
-        <SkipBack class="h-5 w-5" />
-      </Button>
+        <SkipBack class="h-5 w-5 text-gray-700" />
+      </van-button>
 
-      <Button
-        size="icon"
-        class="h-14 w-14 rounded-full"
+      <van-button
+        type="primary"
+        round
+        class="!h-14 !w-14 !p-0 shadow-md"
         @click="emit('playPause')"
       >
         <Pause v-if="isPlaying" class="h-6 w-6" />
         <Play v-else class="h-6 w-6 ml-0.5" />
-      </Button>
+      </van-button>
 
-      <Button
-        variant="outline"
-        size="icon"
-        class="h-12 w-12"
+      <van-button
+        plain
+        class="!h-12 !w-12 !p-0 !rounded-lg !border-gray-200 shadow-sm"
         @click="emit('next')"
       >
-        <SkipForward class="h-5 w-5" />
-      </Button>
+        <SkipForward class="h-5 w-5 text-gray-700" />
+      </van-button>
     </div>
 
     <!-- Station Indicators -->
