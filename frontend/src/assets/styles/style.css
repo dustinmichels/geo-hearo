@@ -25,7 +25,7 @@
 
   /* Fonts */
   --font-heading: 'Fredoka', ui-sans-serif, system-ui, sans-serif;
-  --font-body: 'Fredoka', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Nunito', ui-sans-serif, system-ui, sans-serif;
   --font-sans: 'Fredoka', ui-sans-serif, system-ui, sans-serif;
 
   /* Border widths */
@@ -42,7 +42,7 @@
 body {
   background-color: #fff9f5;
   color: #334155;
-  font-family: 'Fredoka', sans-serif;
+  font-family: 'Nunito', sans-serif;
 }
 
 h1,
@@ -57,5 +57,24 @@ h3,
 }
 
 .font-body {
-  font-family: 'Fredoka', sans-serif;
+  font-family: 'Nunito', sans-serif;
 }
+
+:root {
+  /* Vant Customization */
+  --van-primary-color: var(--color-gumball-blue);
+  --van-success-color: var(--color-mint-shake);
+  --van-danger-color: var(--color-berry-oops);
+  --van-warning-color: var(--color-yuzu-yellow);
+  --van-text-color: var(--color-pencil-lead);
+  --van-text-color-2: var(--color-eraser-grey);
+  --van-background: var(--color-cloud-white);
+  --van-background-2: var(--color-paper-white);
+  --van-base-font-family: var(--font-body);
+  --van-button-default-color: var(--color-pencil-lead);
+  --van-button-default-background: var(--color-paper-white);
+  --van-button-radius: var(--radius-btn);
+  --van-radius-lg: var(--radius-card);
+  --van-radius-md: var(--radius-btn);
+}
+
