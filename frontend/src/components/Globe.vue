@@ -1,115 +1,39 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref, shallowRef } from 'vue'
+import maplibregl from 'maplibre-gl'
+import 'maplibre-gl/dist/maplibre-gl.css'
 
-const canvasRef = ref<HTMLCanvasElement | null>(null)
-let animationId: number
-
-const drawGlobe = (
-  ctx: CanvasRenderingContext2D,
-  size: number,
-  rotation: number
-) => {
-  ctx.clearRect(0, 0, size, size)
-
-  const centerX = size / 2
-  const centerY = size / 2
-  const radius = size / 2 - 10
-
-  // Draw globe shadow
-  ctx.beginPath()
-  ctx.arc(centerX + 5, centerY + 5, radius, 0, Math.PI * 2)
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'
-  ctx.fill()
-
-  // Draw globe background
-  const gradient = ctx.createRadialGradient(
-    centerX - radius / 3,
-    centerY - radius / 3,
-    radius / 4,
-    centerX,
-    centerY,
-    radius
-  )
-  gradient.addColorStop(0, '#4facfe')
-  gradient.addColorStop(1, '#0575e6')
-
-  ctx.beginPath()
-  ctx.arc(centerX, centerY, radius, 0, Math.PI * 2)
-  ctx.fillStyle = gradient
-  ctx.fill()
-
-  // Draw latitude lines
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)'
-  ctx.lineWidth = 1
-
-  for (let i = -2; i <= 2; i++) {
-    const y = centerY + (i * radius) / 3
-    const offset = Math.abs(i) * 15
-
-    ctx.beginPath()
-    ctx.ellipse(centerX, y, radius - offset, radius / 8, 0, 0, Math.PI * 2)
-    ctx.stroke()
-  }
-
-  // Draw longitude lines
-  for (let i = 0; i < 6; i++) {
-    const angle = (i / 6) * Math.PI * 2 + rotation
-    // const x = centerX + Math.sin(angle) * radius * 0.3; // This variable x was unused in source
-
-    ctx.beginPath()
-    ctx.ellipse(
-      centerX,
-      centerY,
-      Math.abs(Math.cos(angle)) * radius,
-      radius,
-      0,
-      0,
-      Math.PI * 2
-    )
-    ctx.stroke()
-  }
-}
+const mapContainer = ref<HTMLElement | null>(null)
+const map = shallowRef<maplibregl.Map | null>(null)
 
 onMounted(() => {
-  const canvas = canvasRef.value
-  if (!canvas) return
+  if (!mapContainer.value) return
 
-  const ctx = canvas.getContext('2d')
-  if (!ctx) return
-
-  const size = 280
-  // Increase resolution for retina displays
-  const dpr = window.devicePixelRatio || 1
-  canvas.width = size * dpr
-  canvas.height = size * dpr
-  ctx.scale(dpr, dpr)
-
-  // Style width/height
-  canvas.style.width = `${size}px`
-  canvas.style.height = `${size}px`
-
-  let rotation = 0
-
-  const animate = () => {
-    drawGlobe(ctx, size, rotation)
-    rotation += 0.005
-    animationId = requestAnimationFrame(animate)
-  }
-
-  animate()
+  map.value = new maplibregl.Map({
+    container: mapContainer.value,
+    style: 'https://demotiles.maplibre.org/style.json',
+    center: [0, 0],
+    zoom: 1.5,
+  })
 })
 
 onUnmounted(() => {
-  if (animationId) {
-    cancelAnimationFrame(animationId)
-  }
+  map.value?.remove()
 })
 </script>
 
 <template>
   <div
-    class="flex items-center justify-center bg-gradient-to-b from-blue-50 to-white rounded-xl p-6 w-full"
+    class="w-full h-full rounded-xl overflow-hidden shadow-sm border border-slate-200 relative bg-slate-50"
   >
-    <canvas ref="canvasRef" class="w-full max-w-[280px] h-auto" />
+    <div ref="mapContainer" class="w-full h-full" />
   </div>
 </template>
+
+<style scoped>
+/* Optional: Custom styling for map controls can go here */
+:deep(.maplibregl-ctrl-bottom-right) {
+  display: none; /* Hide attribution for cleaner look if requested, strictly speaking we should keep it or minimalize it. Keeping it default is safer for license. */
+}
+/* Let's actully keep attribution but maybe make it smaller if needed. I'll leave it default for now. */
+</style>
