@@ -23,7 +23,7 @@
     {
       "name": "data-prep/crawl",
       "path": "data-prep/crawl"
-    }
+    },
   ],
   "settings": {
     "cSpell.words": [
