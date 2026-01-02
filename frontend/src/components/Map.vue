@@ -32,8 +32,8 @@ onMounted(() => {
     // Add source for countries
     map.value.addSource('countries', {
       type: 'geojson',
-      data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_countries.geojson',
-      promoteId: 'adm0_a3',
+      data: '/data/ne_110m_admin_0_countries.geojson',
+      promoteId: 'ADM0_A3',
     })
 
     // Add background layer (matches slate-50)
@@ -66,7 +66,7 @@ onMounted(() => {
         'fill-color': '#f472b6', // bubblegum-pop
         'fill-opacity': 1,
       },
-      filter: ['==', 'adm0_a3', ''], // Match nothing initially
+      filter: ['==', 'ADM0_A3', ''], // Match nothing initially
     })
 
     // Click handler
@@ -75,11 +75,11 @@ onMounted(() => {
 
       const feature = e.features[0]
       if (!feature) return
-      const id = feature.properties?.adm0_a3
+      const id = feature.properties?.ADM0_A3
 
       if (id && map.value) {
         // Update the filter to show the highlight for the clicked country
-        map.value.setFilter('countries-highlight', ['==', 'adm0_a3', id])
+        map.value.setFilter('countries-highlight', ['==', 'ADM0_A3', id])
       }
     })
 
