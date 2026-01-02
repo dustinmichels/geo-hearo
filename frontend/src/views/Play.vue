@@ -5,7 +5,7 @@ import {
   Field as VanField,
   Button as VanButton,
 } from 'vant'
-import Globe from '../components/Globe.vue'
+import Map from '../components/Map.vue'
 import RadioPlayer from '../components/RadioPlayer.vue'
 import GuessDisplay from '../components/GuessDisplay.vue'
 
@@ -67,7 +67,7 @@ const handleAddGuess = () => {
 
       <!-- Globe - takes remaining space -->
       <div class="flex-1 px-4 pb-2 min-h-0 relative">
-        <Globe />
+        <Map />
       </div>
     </div>
 

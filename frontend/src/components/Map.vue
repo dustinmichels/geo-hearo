@@ -14,7 +14,13 @@ onMounted(() => {
     style: 'https://demotiles.maplibre.org/style.json',
     center: [0, 0],
     zoom: 1.5,
+    dragRotate: false, // Disable right-click drag to rotate
+    pitchWithRotate: false, // Disable pitch when rotating (which is disabled anyway, but good practice)
+    touchZoomRotate: true, // Keep touch zoom enabled, but we will disable rotation specifically
   })
+
+  // Disable touch rotation but keep pinch-to-zoom
+  map.value.touchZoomRotate.disableRotation()
 })
 
 onUnmounted(() => {
