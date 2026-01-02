@@ -57,14 +57,14 @@ onMounted(() => {
       },
     })
 
-    // Add highlight layer (yellow border) - initially hidden via filter
+    // Add highlight layer (pink fill) - initially hidden via filter
     map.value.addLayer({
       id: 'countries-highlight',
-      type: 'line',
+      type: 'fill',
       source: 'countries',
       paint: {
-        'line-color': '#facc15', // yellow-400
-        'line-width': 2,
+        'fill-color': '#f472b6', // bubblegum-pop
+        'fill-opacity': 1,
       },
       filter: ['==', 'adm0_a3', ''], // Match nothing initially
     })
@@ -74,6 +74,7 @@ onMounted(() => {
       if (!e.features || e.features.length === 0) return
 
       const feature = e.features[0]
+      if (!feature) return
       const id = feature.properties?.adm0_a3
 
       if (id && map.value) {
