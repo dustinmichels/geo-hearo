@@ -86,7 +86,7 @@ const handleAddGuess = () => {
               placeholder="Enter your guess..."
               :disabled="guesses.length >= 5"
               @keypress.enter="handleAddGuess"
-              class="flex-1 border rounded-lg !py-2 !px-3"
+              class="flex-1 border rounded-lg !py-2 !px-3 !text-[16px]"
               :border="false"
             />
             <van-button

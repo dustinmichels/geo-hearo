@@ -11,16 +11,86 @@ onMounted(() => {
 
   map.value = new maplibregl.Map({
     container: mapContainer.value,
-    style: 'https://demotiles.maplibre.org/style.json',
-    center: [0, 0],
+    style: {
+      version: 8,
+      sources: {},
+      layers: [],
+    },
+    center: [0, 20],
     zoom: 1.5,
-    dragRotate: false, // Disable right-click drag to rotate
-    pitchWithRotate: false, // Disable pitch when rotating (which is disabled anyway, but good practice)
-    touchZoomRotate: true, // Keep touch zoom enabled, but we will disable rotation specifically
+    dragRotate: false,
+    pitchWithRotate: false,
+    touchZoomRotate: true,
   })
 
   // Disable touch rotation but keep pinch-to-zoom
   map.value.touchZoomRotate.disableRotation()
+
+  map.value.on('load', () => {
+    if (!map.value) return
+
+    // Add source for countries
+    map.value.addSource('countries', {
+      type: 'geojson',
+      data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_countries.geojson',
+      promoteId: 'adm0_a3',
+    })
+
+    // Add background layer (matches slate-50)
+    map.value.addLayer({
+      id: 'background',
+      type: 'background',
+      paint: {
+        'background-color': '#f8fafc',
+      },
+    })
+
+    // Add countries fill layer (grey)
+    map.value.addLayer({
+      id: 'countries-fill',
+      type: 'fill',
+      source: 'countries',
+      paint: {
+        'fill-color': '#cbd5e1', // slate-300
+        'fill-outline-color': '#ffffff', // white outline by default
+        'fill-opacity': 1,
+      },
+    })
+
+    // Add highlight layer (yellow border) - initially hidden via filter
+    map.value.addLayer({
+      id: 'countries-highlight',
+      type: 'line',
+      source: 'countries',
+      paint: {
+        'line-color': '#facc15', // yellow-400
+        'line-width': 2,
+      },
+      filter: ['==', 'adm0_a3', ''], // Match nothing initially
+    })
+
+    // Click handler
+    map.value.on('click', 'countries-fill', (e) => {
+      if (!e.features || e.features.length === 0) return
+
+      const feature = e.features[0]
+      const id = feature.properties?.adm0_a3
+
+      if (id && map.value) {
+        // Update the filter to show the highlight for the clicked country
+        map.value.setFilter('countries-highlight', ['==', 'adm0_a3', id])
+      }
+    })
+
+    // Hover effects calling attention to interactivity
+    map.value.on('mouseenter', 'countries-fill', () => {
+      if (map.value) map.value.getCanvas().style.cursor = 'pointer'
+    })
+
+    map.value.on('mouseleave', 'countries-fill', () => {
+      if (map.value) map.value.getCanvas().style.cursor = ''
+    })
+  })
 })
 
 onUnmounted(() => {
