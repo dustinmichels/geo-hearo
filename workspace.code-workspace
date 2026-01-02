@@ -21,7 +21,7 @@
       "path": "data-prep"
     },
     {
-      "name": "crawl",
+      "name": "data-prep/crawl",
       "path": "data-prep/crawl"
     }
   ],
