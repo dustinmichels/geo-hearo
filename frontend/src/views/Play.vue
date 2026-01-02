@@ -41,6 +41,10 @@ const handleAddGuess = () => {
     // Auto-expand slightly on add? Not strictly needed but UX choice
   }
 }
+
+const handleCountrySelect = (name: string) => {
+  guessInput.value = name
+}
 </script>
 
 <template>
@@ -67,7 +71,7 @@ const handleAddGuess = () => {
 
       <!-- Globe - takes remaining space -->
       <div class="flex-1 px-4 pb-2 min-h-0 relative">
-        <Map />
+        <Map @select-country="handleCountrySelect" />
       </div>
     </div>
 
@@ -77,7 +81,7 @@ const handleAddGuess = () => {
       :anchors="anchors"
       :content-class="'bg-white rounded-t-[20px] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex flex-col'"
     >
-      <div class="flex flex-col h-full w-full max-w-md mx-auto pt-8">
+      <div class="flex flex-col h-full w-full max-w-md mx-auto pt-3">
         <div class="px-4 pb-4 flex-1 overflow-y-auto flex flex-col gap-4">
           <!-- Input Area -->
           <div class="flex gap-2 items-center">
@@ -107,3 +111,19 @@ const handleAddGuess = () => {
     </van-floating-panel>
   </div>
 </template>
+
+<style scoped>
+:deep(.van-floating-panel__header) {
+  height: 48px !important; /* Larger hit area */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+:deep(.van-floating-panel__bar) {
+  width: 64px !important; /* Wider handle */
+  height: 6px !important; /* Thicker handle */
+  background-color: #d1d5db !important; /* Visible grey */
+  border-radius: 999px !important;
+}
+</style>

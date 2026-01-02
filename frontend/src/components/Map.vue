@@ -6,6 +6,10 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 const mapContainer = ref<HTMLElement | null>(null)
 const map = shallowRef<maplibregl.Map | null>(null)
 
+const emit = defineEmits<{
+  (e: 'select-country', name: string): void
+}>()
+
 onMounted(() => {
   if (!mapContainer.value) return
 
@@ -80,6 +84,12 @@ onMounted(() => {
       if (id && map.value) {
         // Update the filter to show the highlight for the clicked country
         map.value.setFilter('countries-highlight', ['==', 'ADM0_A3', id])
+
+        // Emit selection
+        const name = feature.properties?.NAME
+        if (name) {
+          emit('select-country', name)
+        }
       }
     })
 
