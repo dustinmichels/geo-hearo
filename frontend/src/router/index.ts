@@ -15,6 +15,10 @@ const routes: RouteRecordRaw[] = [
     name: 'Play',
     component: Play,
   },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/',
+  },
 ]
 
 const router = createRouter({
