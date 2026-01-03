@@ -35,31 +35,31 @@ onMounted(() => {
 
 <template>
   <div
-    class="absolute top-[8%] left-0 right-0 z-20 flex justify-center gap-48 pointer-events-none transition-opacity duration-300"
+    class="absolute top-2 left-0 right-0 z-20 flex justify-center gap-48 pointer-events-none transition-opacity duration-300"
   >
     <!-- Left Arrows -->
     <div class="flex flex-col items-center">
-      <div ref="arrowLeft1" class="text-yuzu-yellow/80">
-        <ChevronDown :size="28" />
+      <div ref="arrowLeft1" class="text-yuzu-yellow drop-shadow-sm">
+        <ChevronDown :size="42" :stroke-width="3" />
       </div>
-      <div ref="arrowLeft2" class="-mt-4 text-yuzu-yellow/60">
-        <ChevronDown :size="28" />
+      <div ref="arrowLeft2" class="-mt-6 text-yuzu-yellow/80 drop-shadow-sm">
+        <ChevronDown :size="42" :stroke-width="3" />
       </div>
-      <div ref="arrowLeft3" class="-mt-4 text-yuzu-yellow/40">
-        <ChevronDown :size="28" />
+      <div ref="arrowLeft3" class="-mt-6 text-yuzu-yellow/60 drop-shadow-sm">
+        <ChevronDown :size="42" :stroke-width="3" />
       </div>
     </div>
 
     <!-- Right Arrows -->
     <div class="flex flex-col items-center">
-      <div ref="arrowRight1" class="text-yuzu-yellow/80">
-        <ChevronDown :size="28" />
+      <div ref="arrowRight1" class="text-yuzu-yellow drop-shadow-sm">
+        <ChevronDown :size="42" :stroke-width="3" />
       </div>
-      <div ref="arrowRight2" class="-mt-4 text-yuzu-yellow/60">
-        <ChevronDown :size="28" />
+      <div ref="arrowRight2" class="-mt-6 text-yuzu-yellow/80 drop-shadow-sm">
+        <ChevronDown :size="42" :stroke-width="3" />
       </div>
-      <div ref="arrowRight3" class="-mt-4 text-yuzu-yellow/40">
-        <ChevronDown :size="28" />
+      <div ref="arrowRight3" class="-mt-6 text-yuzu-yellow/60 drop-shadow-sm">
+        <ChevronDown :size="42" :stroke-width="3" />
       </div>
     </div>
   </div>
