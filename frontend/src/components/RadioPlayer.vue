@@ -26,7 +26,7 @@ const emit = defineEmits<{
         class="w-2.5 h-2.5 rounded-full border border-pencil-lead transition-colors duration-300"
         :class="
           isPlaying
-            ? 'bg-red-500 shadow-[0_0_4px_rgba(239,68,68,0.5)]'
+            ? 'bg-red-500 shadow-[0_0_4px_rgba(239,68,68,0.5)] animate-blink'
             : 'bg-slate-300'
         "
       />
@@ -79,3 +79,18 @@ const emit = defineEmits<{
     </div>
   </div>
 </template>
+
+<style scoped>
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.animate-blink {
+  animation: blink 1.5s ease-in-out infinite;
+}
+</style>

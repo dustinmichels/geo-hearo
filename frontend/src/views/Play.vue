@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Field as VanField, FloatingPanel as VanFloatingPanel } from 'vant'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import gsap from 'gsap'
+import AnimatedArrows from '../components/AnimatedArrows.vue'
 import GuessDisplay from '../components/GuessDisplay.vue'
 import Map from '../components/Map.vue'
 import RadioPlayer from '../components/RadioPlayer.vue'
@@ -48,6 +49,16 @@ const handleCountrySelect = (name: string) => {
 const blob1 = ref(null)
 const blob2 = ref(null)
 
+const isPanelFullHeight = computed(() => {
+  const fullHeight = anchors[2]
+  if (
+    typeof fullHeight === 'undefined' ||
+    typeof panelHeight.value === 'undefined'
+  )
+    return false
+  return panelHeight.value >= fullHeight - 10
+})
+
 onMounted(() => {
   // Move blobs around
   gsap.to(blob1.value, {
@@ -85,6 +96,9 @@ onMounted(() => {
       ref="blob2"
       class="absolute bottom-10 left-[-5%] w-80 h-80 bg-gumball-blue/5 rounded-full blur-3xl pointer-events-none"
     ></div>
+
+    <!-- Animated Arrows Hint -->
+    <AnimatedArrows v-show="isPanelFullHeight" />
 
     <!-- Fixed content area -->
     <div
