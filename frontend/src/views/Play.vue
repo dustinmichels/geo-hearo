@@ -95,7 +95,7 @@ onMounted(() => {
         <h1
           class="text-center text-pencil-lead text-3xl font-heading tracking-tight"
         >
-          GeoHearo [under construction]
+          GeoHearo
         </h1>
       </div>
 
@@ -130,6 +130,7 @@ onMounted(() => {
               v-model="guessInput"
               placeholder="Select a country"
               :disabled="guesses.length >= 5"
+              readonly
               @keypress.enter="handleAddGuess"
               class="flex-1 !border-3 !border-pencil-lead !rounded-2xl !py-3 !px-4 !text-[18px] font-body text-pencil-lead placeholder:text-eraser-grey bg-white"
               :border="false"

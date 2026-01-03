@@ -16,8 +16,27 @@ const emit = defineEmits<{
 
 <template>
   <div
-    class="bg-paper-white rounded-2xl border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] p-6 w-full max-w-sm mx-auto"
+    class="bg-paper-white rounded-2xl border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] p-6 w-full max-w-sm mx-auto relative"
   >
+    <!-- Live Indicator -->
+    <div
+      class="absolute top-3 right-4 flex items-center gap-1.5 pointer-events-none"
+    >
+      <div
+        class="w-2.5 h-2.5 rounded-full border border-pencil-lead transition-colors duration-300"
+        :class="
+          isPlaying
+            ? 'bg-red-500 shadow-[0_0_4px_rgba(239,68,68,0.5)]'
+            : 'bg-slate-300'
+        "
+      />
+      <span
+        class="font-heading text-xs font-bold text-pencil-lead tracking-wider transition-opacity duration-300"
+        :class="isPlaying ? 'opacity-100' : 'opacity-50'"
+        >LIVE</span
+      >
+    </div>
+
     <!-- Controls -->
     <div class="flex items-center justify-center gap-6 mb-6">
       <van-button

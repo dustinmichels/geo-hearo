@@ -2,6 +2,14 @@
   <div
     class="min-h-screen w-screen no-scroll-container flex flex-col items-center justify-center p-6 md:p-12 overflow-x-hidden relative"
   >
+    <!-- Under Construction Banner -->
+    <div class="fixed top-4 right-4 z-50 pointer-events-none">
+      <div
+        class="bg-yuzu-yellow text-pencil-lead font-heading px-4 py-2 rounded-full border-3 border-pencil-lead text-sm font-bold shadow-[4px_4px_0px_0px_#334155] transform rotate-3"
+      >
+        🚧 UNDER CONSTRUCTION
+      </div>
+    </div>
     <!-- Decorative Background Shapes for "Pop" -->
     <div
       ref="blob1"
@@ -139,15 +147,15 @@ const ctaButton = ref(null)
 
 const steps = [
   {
-    text: 'Stream live radio from a mystery country',
+    text: 'Stream live radio from a mystery country. You get 5 stations.',
     colorClass: 'bg-gumball-blue',
   },
   {
-    text: 'Pay attention to languages and music',
+    text: 'Pay attention to what you hear',
     colorClass: 'bg-bubblegum-pop',
   },
   {
-    text: 'Figure out where in the world you are',
+    text: 'Guess the country.',
     colorClass: 'bg-mint-shake',
   },
 ]
