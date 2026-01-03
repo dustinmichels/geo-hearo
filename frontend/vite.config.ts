@@ -1,11 +1,18 @@
 import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
+import { execSync } from 'node:child_process'
 import { copyFileSync } from 'node:fs'
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 
+// Get git hash
+const gitHash = execSync('git rev-parse --short HEAD').toString().trim()
+
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    'import.meta.env.VITE_GIT_HASH': JSON.stringify(gitHash),
+  },
   plugins: [
     vue(),
     tailwindcss(),

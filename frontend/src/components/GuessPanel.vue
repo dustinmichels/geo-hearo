@@ -11,6 +11,8 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
   (e: 'add-guess'): void
 }>()
+
+const version = import.meta.env.VITE_GIT_HASH || 'dev'
 </script>
 
 <template>
@@ -48,6 +50,7 @@ const emit = defineEmits<{
         >
           <span>←</span> Back to Home
         </RouterLink>
+        <div class="text-[10px] text-eraser-grey mt-2">Hash #{{ version }}</div>
       </div>
     </div>
   </div>
