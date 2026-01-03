@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import {
-  FloatingPanel as VanFloatingPanel,
-  Field as VanField,
   Button as VanButton,
+  Field as VanField,
+  FloatingPanel as VanFloatingPanel,
 } from 'vant'
+import { ref } from 'vue'
+import GuessDisplay from '../components/GuessDisplay.vue'
 import Map from '../components/Map.vue'
 import RadioPlayer from '../components/RadioPlayer.vue'
-import GuessDisplay from '../components/GuessDisplay.vue'
 
 const isPlaying = ref(false)
 const currentStation = ref(1)
@@ -16,7 +16,7 @@ const guesses = ref<string[]>([])
 
 // Vant Floating Panel setup
 const anchors = [
-  100, // Collapsed height (px)
+  140, // Collapsed height (px)
   Math.round(window.innerHeight * 0.45), // Half-open
   Math.round(window.innerHeight * 0.9), // Fully open
 ]
@@ -38,7 +38,8 @@ const handleAddGuess = () => {
   if (guessInput.value.trim() && guesses.value.length < 5) {
     guesses.value.push(guessInput.value.trim())
     guessInput.value = ''
-    // Auto-expand slightly on add? Not strictly needed but UX choice
+    // Snap to fully open
+    panelHeight.value = anchors[2]
   }
 }
 
@@ -79,7 +80,7 @@ const handleCountrySelect = (name: string) => {
     <van-floating-panel
       v-model:height="panelHeight"
       :anchors="anchors"
-      :content-class="'bg-white rounded-t-[20px] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex flex-col'"
+      :content-class="'rounded-t-[20px] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex flex-col'"
     >
       <div class="flex flex-col h-full w-full max-w-md mx-auto pt-3">
         <div class="px-4 pb-4 flex-1 overflow-y-auto flex flex-col gap-4">
@@ -100,7 +101,7 @@ const handleCountrySelect = (name: string) => {
               :disabled="!guessInput.trim() || guesses.length >= 5"
               class="!h-[40px] !px-6"
             >
-              Add
+              Guess
             </van-button>
           </div>
 
@@ -113,17 +114,22 @@ const handleCountrySelect = (name: string) => {
 </template>
 
 <style scoped>
+:deep(.van-floating-panel) {
+  background-color: #042a2b !important;
+}
+
 :deep(.van-floating-panel__header) {
   height: 48px !important; /* Larger hit area */
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  background: transparent !important;
 }
 
 :deep(.van-floating-panel__bar) {
   width: 64px !important; /* Wider handle */
   height: 6px !important; /* Thicker handle */
-  background-color: #d1d5db !important; /* Visible grey */
+  background-color: #94a3b8 !important; /* Eraser Grey */
   border-radius: 999px !important;
 }
 </style>
