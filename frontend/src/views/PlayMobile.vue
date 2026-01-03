@@ -138,14 +138,15 @@ onMounted(() => {
             GeoHearo
           </h1>
           <span
-            class="absolute left-full bottom-1 text-5xl ml-4 leading-[0.8] z-20 whitespace-nowrap"
+            class="absolute left-full bottom-1 text-5xl ml-4 leading-[0.8] z-20 whitespace-nowrap transition-transform duration-700 ease-out"
+            :class="isPlaying ? 'translate-y-0' : 'translate-y-16'"
             >🦸</span
           >
         </div>
       </div>
 
       <!-- Radio Player -->
-      <div class="px-4 pb-2">
+      <div class="px-4 pb-2 relative z-30">
         <RadioPlayer
           :is-playing="isPlaying"
           :current-station="currentStation"
