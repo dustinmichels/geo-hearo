@@ -107,7 +107,7 @@ onMounted(() => {
       <!-- Title -->
       <div class="pt-6 pb-2 px-4 flex justify-center">
         <h1
-          class="text-center text-pencil-lead text-3xl font-heading tracking-tight"
+          class="text-center text-pencil-lead text-3xl font-heading tracking-wider"
         >
           GeoHearo
         </h1>
