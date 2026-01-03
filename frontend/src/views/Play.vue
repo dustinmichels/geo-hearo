@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { FloatingPanel as VanFloatingPanel } from 'vant'
-import { ref, onMounted, computed } from 'vue'
 import gsap from 'gsap'
+import { FloatingPanel as VanFloatingPanel } from 'vant'
+import { computed, onMounted, ref } from 'vue'
 import AnimatedArrows from '../components/AnimatedArrows.vue'
 import GuessPanel from '../components/GuessPanel.vue'
 import Map from '../components/Map.vue'
@@ -109,7 +109,7 @@ onMounted(() => {
         <h1
           class="text-center text-pencil-lead text-3xl font-heading tracking-wider"
         >
-          GeoHearo
+          GeoHearo 🦸
         </h1>
       </div>
 

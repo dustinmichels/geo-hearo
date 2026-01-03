@@ -126,9 +126,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import gsap from 'gsap'
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const globeImage = ref('/globe.png')
@@ -147,7 +147,7 @@ const ctaButton = ref(null)
 
 const steps = [
   {
-    text: 'Stream live radio from a mystery country. You get 5 stations.',
+    text: 'Stream 5 live radio stations from a mystery country',
     colorClass: 'bg-gumball-blue',
   },
   {
@@ -155,7 +155,7 @@ const steps = [
     colorClass: 'bg-bubblegum-pop',
   },
   {
-    text: 'Guess the country.',
+    text: 'Make guesses, get hints',
     colorClass: 'bg-mint-shake',
   },
 ]
