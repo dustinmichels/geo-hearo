@@ -126,7 +126,11 @@ onMounted(() => {
 
       <!-- Globe - takes remaining space -->
       <div class="flex-1 px-4 pb-2 min-h-0 relative">
-        <Map @select-country="handleCountrySelect" />
+        <Map
+          @select-country="handleCountrySelect"
+          :guessed-countries="guesses"
+          :selected-country="guessInput"
+        />
       </div>
     </div>
 

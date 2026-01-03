@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, shallowRef } from 'vue'
+import { onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+
+const props = defineProps<{
+  guessedCountries?: string[]
+  selectedCountry?: string
+}>()
 
 const mapContainer = ref<HTMLElement | null>(null)
 const map = shallowRef<maplibregl.Map | null>(null)
@@ -9,6 +14,35 @@ const map = shallowRef<maplibregl.Map | null>(null)
 const emit = defineEmits<{
   (e: 'select-country', name: string): void
 }>()
+
+// Update map filter when guesses change
+watch(
+  () => props.guessedCountries,
+  (newGuesses) => {
+    if (!map.value || !map.value.getLayer('countries-guessed')) return
+
+    if (newGuesses && newGuesses.length > 0) {
+      map.value.setFilter('countries-guessed', ['in', 'NAME', ...newGuesses])
+    } else {
+      map.value.setFilter('countries-guessed', ['in', 'NAME', '']) // Hide all
+    }
+  },
+  { deep: true }
+)
+
+// Update highlight when selected country passes from parent
+watch(
+  () => props.selectedCountry,
+  (newSelected) => {
+    if (!map.value || !map.value.getLayer('countries-highlight')) return
+
+    if (newSelected) {
+      map.value.setFilter('countries-highlight', ['==', 'NAME', newSelected])
+    } else {
+      map.value.setFilter('countries-highlight', ['==', 'NAME', ''])
+    }
+  }
+)
 
 onMounted(() => {
   if (!mapContainer.value) return
@@ -60,6 +94,18 @@ onMounted(() => {
       },
     })
 
+    // Add guessed countries layer (light green) - initially hidden
+    map.value.addLayer({
+      id: 'countries-guessed',
+      type: 'fill',
+      source: 'countries',
+      paint: {
+        'fill-color': '#86efac', // light green (green-300)
+        'fill-opacity': 1,
+      },
+      filter: ['in', 'NAME', ...(props.guessedCountries || [])],
+    })
+
     // Add highlight layer (pink fill) - initially hidden via filter
     map.value.addLayer({
       id: 'countries-highlight',
@@ -69,7 +115,7 @@ onMounted(() => {
         'fill-color': '#f472b6', // bubblegum-pop
         'fill-opacity': 1,
       },
-      filter: ['==', 'ADM0_A3', ''], // Match nothing initially
+      filter: ['==', 'NAME', props.selectedCountry || ''],
     })
 
     // Add countries border layer
@@ -89,17 +135,10 @@ onMounted(() => {
 
       const feature = e.features[0]
       if (!feature) return
-      const id = feature.properties?.ADM0_A3
 
-      if (id && map.value) {
-        // Update the filter to show the highlight for the clicked country
-        map.value.setFilter('countries-highlight', ['==', 'ADM0_A3', id])
-
-        // Emit selection
-        const name = feature.properties?.NAME
-        if (name) {
-          emit('select-country', name)
-        }
+      const name = feature.properties?.NAME
+      if (name) {
+        emit('select-country', name)
       }
     })
 
