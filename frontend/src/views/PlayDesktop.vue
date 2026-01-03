@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import gsap from 'gsap'
-import { FloatingPanel as VanFloatingPanel } from 'vant'
-import { computed, onMounted, ref } from 'vue'
-import AnimatedArrows from '../components/AnimatedArrows.vue'
+import { onMounted, ref } from 'vue'
 import GuessPanel from '../components/GuessPanel.vue'
 import Map from '../components/Map.vue'
 import RadioPlayer from '../components/RadioPlayer.vue'
@@ -11,14 +9,6 @@ const isPlaying = ref(false)
 const currentStation = ref(1)
 const guessInput = ref('')
 const guesses = ref<string[]>([])
-
-// Vant Floating Panel setup
-const anchors = [
-  140, // Collapsed height (px)
-  Math.round(window.innerHeight * 0.45), // Half-open
-  Math.round(window.innerHeight * 0.9), // Fully open
-]
-const panelHeight = ref(anchors[0])
 
 const handlePlayPause = () => {
   isPlaying.value = !isPlaying.value
@@ -36,8 +26,6 @@ const handleAddGuess = () => {
   if (guessInput.value.trim() && guesses.value.length < 5) {
     guesses.value.push(guessInput.value.trim())
     guessInput.value = ''
-    // Snap to fully open
-    panelHeight.value = anchors[2]
   }
 }
 
@@ -48,16 +36,6 @@ const handleCountrySelect = (name: string) => {
 // GSAP Animations and Refs
 const blob1 = ref(null)
 const blob2 = ref(null)
-
-const isPanelFullHeight = computed(() => {
-  const fullHeight = anchors[2]
-  if (
-    typeof fullHeight === 'undefined' ||
-    typeof panelHeight.value === 'undefined'
-  )
-    return false
-  return panelHeight.value >= fullHeight - 10
-})
 
 onMounted(() => {
   // Move blobs around
@@ -85,7 +63,7 @@ onMounted(() => {
 
 <template>
   <div
-    class="h-screen w-full overflow-hidden bg-cloud-white relative text-pencil-lead font-body"
+    class="h-screen w-full overflow-hidden bg-cloud-white relative text-pencil-lead font-body p-6 flex gap-6"
   >
     <!-- Decorative Background Shapes -->
     <div
@@ -97,24 +75,39 @@ onMounted(() => {
       class="absolute bottom-10 left-[-5%] w-80 h-80 bg-gumball-blue/5 rounded-full blur-3xl pointer-events-none"
     ></div>
 
-    <!-- Animated Arrows Hint -->
-    <AnimatedArrows v-show="isPanelFullHeight" />
-
-    <!-- Fixed content area -->
+    <!-- Left: Map Area -->
     <div
-      class="h-full w-full flex flex-col max-w-md mx-auto pb-[100px] relative z-10"
+      class="flex-1 bg-sea-blue/10 rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] overflow-hidden relative z-10"
     >
-      <!-- Title -->
-      <div class="pt-6 pb-2 px-4 flex justify-center">
-        <h1
-          class="text-center text-pencil-lead text-3xl font-heading tracking-wider"
-        >
-          GeoHearo (Desktop) 🦸
-        </h1>
-      </div>
+      <Map
+        @select-country="handleCountrySelect"
+        :guessed-countries="guesses"
+        :selected-country="guessInput"
+      />
+    </div>
 
-      <!-- Radio Player -->
-      <div class="px-4 pb-2">
+    <!-- Right: Sidebar -->
+    <div class="w-[400px] flex flex-col gap-6 relative z-10 shrink-0">
+      <!-- Header & Player Card -->
+      <div
+        class="bg-paper-white rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] p-6"
+      >
+        <!-- Title -->
+        <div class="flex justify-center mb-6">
+          <div class="relative">
+            <h1
+              class="text-center text-pencil-lead text-3xl font-heading tracking-wider"
+            >
+              GeoHearo
+            </h1>
+            <span
+              class="absolute left-full bottom-3 text-4xl ml-1 leading-[0.8] z-20 whitespace-nowrap rotate-[15deg]"
+              >🎧</span
+            >
+          </div>
+        </div>
+
+        <!-- Radio Player -->
         <RadioPlayer
           :is-playing="isPlaying"
           :current-station="currentStation"
@@ -124,50 +117,20 @@ onMounted(() => {
         />
       </div>
 
-      <!-- Globe - takes remaining space -->
-      <div class="flex-1 px-4 pb-2 min-h-0 relative">
-        <Map
-          @select-country="handleCountrySelect"
-          :guessed-countries="guesses"
-          :selected-country="guessInput"
+      <!-- Guess Panel Card -->
+      <div
+        class="flex-1 bg-paper-white rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] overflow-hidden flex flex-col relative"
+      >
+        <GuessPanel
+          v-model="guessInput"
+          :guesses="guesses"
+          @add-guess="handleAddGuess"
         />
       </div>
     </div>
-
-    <!-- Vant Floating Panel -->
-    <van-floating-panel
-      v-model:height="panelHeight"
-      :anchors="anchors"
-      :content-class="'bg-paper-white rounded-t-[24px] border-t-3 border-l-3 border-r-3 border-pencil-lead shadow-[0_-4px_0_0_#334155] flex flex-col'"
-    >
-      <GuessPanel
-        v-model="guessInput"
-        :guesses="guesses"
-        @add-guess="handleAddGuess"
-      />
-    </van-floating-panel>
   </div>
 </template>
 
 <style scoped>
-:deep(.van-floating-panel) {
-  /* Remove dark background override, let Tailwind class handle it */
-  background-color: transparent !important;
-}
-
-:deep(.van-floating-panel__header) {
-  height: 48px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  background: transparent !important;
-}
-
-:deep(.van-floating-panel__bar) {
-  width: 64px !important;
-  height: 6px !important;
-  background-color: #334155 !important; /* Pencil Lead */
-  border-radius: 999px !important;
-  opacity: 0.5; /* Slight transparency for softer look */
-}
+/* No specific styles needed as we're using Tailwind utilities */
 </style>
