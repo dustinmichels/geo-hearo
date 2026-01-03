@@ -95,7 +95,7 @@ onMounted(() => {
         <h1
           class="text-center text-pencil-lead text-3xl font-heading tracking-tight"
         >
-          GeoHearo
+          GeoHearo [under construction]
         </h1>
       </div>
 
@@ -128,7 +128,7 @@ onMounted(() => {
           <div class="flex gap-3 items-center">
             <van-field
               v-model="guessInput"
-              placeholder="Enter your guess..."
+              placeholder="Select a country"
               :disabled="guesses.length >= 5"
               @keypress.enter="handleAddGuess"
               class="flex-1 !border-3 !border-pencil-lead !rounded-2xl !py-3 !px-4 !text-[18px] font-body text-pencil-lead placeholder:text-eraser-grey bg-white"
@@ -137,9 +137,9 @@ onMounted(() => {
             <button
               @click="handleAddGuess"
               :disabled="!guessInput.trim() || guesses.length >= 5"
-              class="btn-pressable bg-yuzu-yellow h-[52px] px-6 rounded-xl font-heading text-lg text-pencil-lead uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
+              class="btn-pressable bg-yuzu-yellow h-[52px] px-6 rounded-xl font-heading text-lg text-pencil-lead uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
             >
-              Guess
+              Guess {{ Math.min(guesses.length + 1, 5) }}/5
             </button>
           </div>
 
