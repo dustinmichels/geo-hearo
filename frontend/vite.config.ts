@@ -14,4 +14,18 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('maplibre-gl')) return 'maplibre'
+            if (id.includes('vant')) return 'vant'
+            if (id.includes('vue')) return 'vue'
+            return 'vendor'
+          }
+        },
+      },
+    },
+  },
 })
