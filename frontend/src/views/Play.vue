@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { Field as VanField, FloatingPanel as VanFloatingPanel } from 'vant'
+import { FloatingPanel as VanFloatingPanel } from 'vant'
 import { ref, onMounted, computed } from 'vue'
 import gsap from 'gsap'
 import AnimatedArrows from '../components/AnimatedArrows.vue'
-import GuessDisplay from '../components/GuessDisplay.vue'
+import GuessPanel from '../components/GuessPanel.vue'
 import Map from '../components/Map.vue'
 import RadioPlayer from '../components/RadioPlayer.vue'
 
@@ -136,42 +136,11 @@ onMounted(() => {
       :anchors="anchors"
       :content-class="'bg-paper-white rounded-t-[24px] border-t-3 border-l-3 border-r-3 border-pencil-lead shadow-[0_-4px_0_0_#334155] flex flex-col'"
     >
-      <div class="flex flex-col h-full w-full max-w-md mx-auto pt-3">
-        <div class="px-4 pb-4 flex-1 overflow-y-auto flex flex-col gap-6">
-          <!-- Input Area -->
-          <div class="flex gap-3 items-center">
-            <van-field
-              v-model="guessInput"
-              placeholder="Select a country"
-              :disabled="guesses.length >= 5"
-              readonly
-              @keypress.enter="handleAddGuess"
-              class="flex-1 !border-3 !border-pencil-lead !rounded-2xl !py-3 !px-4 !text-[18px] font-body text-pencil-lead placeholder:text-eraser-grey bg-white"
-              :border="false"
-            />
-            <button
-              @click="handleAddGuess"
-              :disabled="!guessInput.trim() || guesses.length >= 5"
-              class="btn-pressable bg-yuzu-yellow h-[52px] px-6 rounded-xl font-heading text-lg text-pencil-lead uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-            >
-              Guess {{ Math.min(guesses.length + 1, 5) }}/5
-            </button>
-          </div>
-
-          <!-- Guesses Display -->
-          <GuessDisplay :guesses="guesses" />
-
-          <!-- Back to Home Link -->
-          <div class="mt-auto pt-6 pb-4 text-center">
-            <RouterLink
-              to="/"
-              class="text-lg font-heading text-eraser-grey hover:text-bubblegum-pop transition-colors flex items-center justify-center gap-2"
-            >
-              <span>←</span> Back to Home
-            </RouterLink>
-          </div>
-        </div>
-      </div>
+      <GuessPanel
+        v-model="guessInput"
+        :guesses="guesses"
+        @add-guess="handleAddGuess"
+      />
     </van-floating-panel>
   </div>
 </template>
