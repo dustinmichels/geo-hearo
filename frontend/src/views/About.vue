@@ -93,7 +93,7 @@ const sections = [
     emoji: '🌍',
     title: 'What is GeoHearo?',
     content:
-      'GeoHearo is a passion project of a solo developer, Dustin Michels. There is no business model.',
+      'GeoHearo is a passion project of a solo developer, <a href="https://dustinmichels.com" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Dustin Michels</a>. Its free and open-source. There is no business model.',
   },
   {
     emoji: '👏',
