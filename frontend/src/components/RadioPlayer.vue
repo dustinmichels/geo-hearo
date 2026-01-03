@@ -1,6 +1,24 @@
 <script setup lang="ts">
 import { Play, Pause, SkipBack, SkipForward } from 'lucide-vue-next'
 import { Button as VanButton } from 'vant'
+import clickSoundUrl from '@/assets/sounds/radio-click.mp3'
+import changeSoundUrl from '@/assets/sounds/radio-change.mp3'
+
+const clickSound = new Audio(clickSoundUrl)
+clickSound.preload = 'auto'
+
+const changeSound = new Audio(changeSoundUrl)
+changeSound.preload = 'auto'
+
+const playClickSound = () => {
+  clickSound.currentTime = 0
+  clickSound.play().catch((e) => console.error('Error playing sound:', e))
+}
+
+const playChangeSound = () => {
+  changeSound.currentTime = 0
+  changeSound.play().catch((e) => console.error('Error playing sound:', e))
+}
 
 defineProps<{
   isPlaying: boolean
@@ -12,6 +30,21 @@ const emit = defineEmits<{
   (e: 'previous'): void
   (e: 'next'): void
 }>()
+
+const handlePrevious = () => {
+  playChangeSound()
+  emit('previous')
+}
+
+const handlePlayPause = () => {
+  playClickSound()
+  emit('playPause')
+}
+
+const handleNext = () => {
+  playChangeSound()
+  emit('next')
+}
 </script>
 
 <template>
@@ -42,7 +75,7 @@ const emit = defineEmits<{
       <van-button
         plain
         class="!h-12 !w-12 !p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead"
-        @click="emit('previous')"
+        @click="handlePrevious"
       >
         <SkipBack class="h-6 w-6 text-pencil-lead" />
       </van-button>
@@ -51,7 +84,7 @@ const emit = defineEmits<{
         type="primary"
         round
         class="!h-16 !w-16 !p-0 !border-3 !border-pencil-lead shadow-[0_4px_0_0_#334155] active:translate-y-1 active:shadow-none transition-all duration-100 bg-gumball-blue"
-        @click="emit('playPause')"
+        @click="handlePlayPause"
       >
         <Pause v-if="isPlaying" class="h-8 w-8 text-white fill-current" />
         <Play v-else class="h-8 w-8 ml-1 text-white fill-current" />
@@ -60,7 +93,7 @@ const emit = defineEmits<{
       <van-button
         plain
         class="!h-12 !w-12 !p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead"
-        @click="emit('next')"
+        @click="handleNext"
       >
         <SkipForward class="h-6 w-6 text-pencil-lead" />
       </van-button>
@@ -82,7 +115,8 @@ const emit = defineEmits<{
 
 <style scoped>
 @keyframes blink {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

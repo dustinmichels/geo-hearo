@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Field as VanField } from 'vant'
 import GuessDisplay from './GuessDisplay.vue'
+import popSoundUrl from '@/assets/sounds/pop.mp3'
 
 defineProps<{
   modelValue: string
@@ -11,6 +12,19 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
   (e: 'add-guess'): void
 }>()
+
+const popSound = new Audio(popSoundUrl)
+popSound.preload = 'auto'
+
+const playPopSound = () => {
+  popSound.currentTime = 0
+  popSound.play().catch((e) => console.error('Error playing sound:', e))
+}
+
+const handleGuess = () => {
+  playPopSound()
+  emit('add-guess')
+}
 
 const version = import.meta.env.VITE_GIT_HASH || 'dev'
 </script>
@@ -31,7 +45,7 @@ const version = import.meta.env.VITE_GIT_HASH || 'dev'
           :border="false"
         />
         <button
-          @click="emit('add-guess')"
+          @click="handleGuess"
           :disabled="!modelValue.trim() || guesses.length >= 5"
           class="btn-pressable bg-yuzu-yellow h-[52px] px-6 rounded-xl font-heading text-lg text-pencil-lead uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
         >
