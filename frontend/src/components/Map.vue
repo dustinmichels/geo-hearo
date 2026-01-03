@@ -59,6 +59,7 @@ onMounted(() => {
     dragRotate: false,
     pitchWithRotate: false,
     touchZoomRotate: true,
+    keyboard: false,
   })
 
   // Disable touch rotation but keep pinch-to-zoom

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import gsap from 'gsap'
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import GuessPanel from '../components/GuessPanel.vue'
 import Map from '../components/Map.vue'
 import RadioPlayer from '../components/RadioPlayer.vue'
@@ -33,11 +33,38 @@ const handleCountrySelect = (name: string) => {
   guessInput.value = name
 }
 
+const handleKeydown = (e: KeyboardEvent) => {
+  // Ignore if user is typing in an input text field
+  const target = e.target as HTMLElement
+  if (['INPUT', 'TEXTAREA'].includes(target.tagName)) return
+
+  switch (e.code) {
+    case 'Space':
+      e.preventDefault()
+      handlePlayPause()
+      break
+    case 'ArrowLeft':
+      e.preventDefault() // Prevent map panning
+      handlePrevious()
+      break
+    case 'ArrowRight':
+      e.preventDefault() // Prevent map panning
+      handleNext()
+      break
+    case 'Enter':
+      e.preventDefault()
+      handleAddGuess()
+      break
+  }
+}
+
 // GSAP Animations and Refs
 const blob1 = ref(null)
 const blob2 = ref(null)
 
 onMounted(() => {
+  window.addEventListener('keydown', handleKeydown)
+
   // Move blobs around
   gsap.to(blob1.value, {
     x: 50,
@@ -58,6 +85,10 @@ onMounted(() => {
     repeat: -1,
     ease: 'sine.inOut',
   })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown)
 })
 </script>
 
