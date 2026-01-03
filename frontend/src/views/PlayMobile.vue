@@ -45,6 +45,10 @@ const handleCountrySelect = (name: string) => {
   guessInput.value = name
 }
 
+const handleArrowClick = () => {
+  panelHeight.value = anchors[0]
+}
+
 // GSAP Animations and Refs
 const blob1 = ref(null)
 const blob2 = ref(null)
@@ -57,6 +61,25 @@ const isPanelFullHeight = computed(() => {
   )
     return false
   return panelHeight.value >= fullHeight - 10
+})
+
+const overlayOpacity = computed(() => {
+  const min = anchors[0]
+  const max = anchors[2]
+  const current = panelHeight.value
+
+  if (
+    typeof min === 'undefined' ||
+    typeof max === 'undefined' ||
+    typeof current === 'undefined'
+  ) {
+    return 0
+  }
+
+  const progress = (current - min) / (max - min)
+  // Clamp between 0 and 1
+  const clamped = Math.min(Math.max(progress, 0), 1)
+  return clamped * 0.6 // Max opacity 0.6
 })
 
 onMounted(() => {
@@ -98,7 +121,9 @@ onMounted(() => {
     ></div>
 
     <!-- Animated Arrows Hint -->
-    <AnimatedArrows v-show="isPanelFullHeight" />
+    <div class="relative z-50" v-show="isPanelFullHeight">
+      <AnimatedArrows class="!top-9" @click="handleArrowClick" />
+    </div>
 
     <!-- Fixed content area -->
     <div
@@ -140,11 +165,18 @@ onMounted(() => {
       </div>
     </div>
 
+    <!-- Overlay for dimming effect -->
+    <div
+      class="fixed inset-0 bg-black pointer-events-none z-40"
+      :style="{ opacity: overlayOpacity }"
+    ></div>
+
     <!-- Vant Floating Panel -->
     <van-floating-panel
       v-model:height="panelHeight"
       :anchors="anchors"
       :content-class="'bg-paper-white rounded-t-[24px] border-t-3 border-l-3 border-r-3 border-pencil-lead shadow-[0_-4px_0_0_#334155] flex flex-col'"
+      style="z-index: 50"
     >
       <GuessPanel
         v-model="guessInput"

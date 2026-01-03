@@ -38,7 +38,7 @@ onMounted(() => {
     class="absolute top-2 left-0 right-0 z-20 flex justify-center gap-48 pointer-events-none transition-opacity duration-300"
   >
     <!-- Left Arrows -->
-    <div class="flex flex-col items-center">
+    <div class="flex flex-col items-center pointer-events-auto cursor-pointer">
       <div ref="arrowLeft1" class="text-yuzu-yellow drop-shadow-sm">
         <ChevronDown :size="42" :stroke-width="3" />
       </div>
@@ -51,7 +51,7 @@ onMounted(() => {
     </div>
 
     <!-- Right Arrows -->
-    <div class="flex flex-col items-center">
+    <div class="flex flex-col items-center pointer-events-auto cursor-pointer">
       <div ref="arrowRight1" class="text-yuzu-yellow drop-shadow-sm">
         <ChevronDown :size="42" :stroke-width="3" />
       </div>
