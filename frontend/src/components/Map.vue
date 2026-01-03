@@ -56,7 +56,6 @@ onMounted(() => {
       source: 'countries',
       paint: {
         'fill-color': '#cbd5e1', // slate-300
-        'fill-outline-color': '#ffffff', // white outline by default
         'fill-opacity': 1,
       },
     })
@@ -71,6 +70,17 @@ onMounted(() => {
         'fill-opacity': 1,
       },
       filter: ['==', 'ADM0_A3', ''], // Match nothing initially
+    })
+
+    // Add countries border layer
+    map.value.addLayer({
+      id: 'countries-border',
+      type: 'line',
+      source: 'countries',
+      paint: {
+        'line-color': '#475569', // slate-600
+        'line-width': 1,
+      },
     })
 
     // Click handler
