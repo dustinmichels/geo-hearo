@@ -107,6 +107,16 @@ const handleCountrySelect = (name: string) => {
 
           <!-- Guesses Display -->
           <GuessDisplay :guesses="guesses" />
+
+          <!-- Back to Home Link -->
+          <div class="mt-auto pt-6 pb-2 text-center">
+            <RouterLink
+              to="/"
+              class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+            >
+              ← Back to Home
+            </RouterLink>
+          </div>
         </div>
       </div>
     </van-floating-panel>
