@@ -105,12 +105,18 @@ onMounted(() => {
       class="h-full w-full flex flex-col max-w-md mx-auto pb-[100px] relative z-10"
     >
       <!-- Title -->
-      <div class="pt-6 pb-2 px-4 flex justify-center">
-        <h1
-          class="text-center text-pencil-lead text-3xl font-heading tracking-wider"
-        >
-          GeoHearo 🦸
-        </h1>
+      <div class="pt-6 px-4 flex justify-center">
+        <div class="relative">
+          <h1
+            class="text-center text-pencil-lead text-3xl font-heading tracking-wider pb-3"
+          >
+            GeoHearo
+          </h1>
+          <span
+            class="absolute left-full bottom-1 text-5xl ml-4 leading-[0.8] z-20 whitespace-nowrap"
+            >🦸</span
+          >
+        </div>
       </div>
 
       <!-- Radio Player -->
