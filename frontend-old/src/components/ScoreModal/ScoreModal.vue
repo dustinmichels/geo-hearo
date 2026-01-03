@@ -64,7 +64,7 @@ const formattedNumbers = computed(() =>
   numbers.value.map((num) => formatNumber(num))
 )
 
-const formattedTotalScore = computed(() => formatNumber(totalScore))
+// const formattedTotalScore = computed(() => formatNumber(totalScore))
 
 function formatNumber(num: number): string {
   return num.toLocaleString(undefined, {
