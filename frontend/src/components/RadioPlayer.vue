@@ -15,33 +15,35 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="bg-white rounded-xl shadow-md p-6 w-full">
+  <div
+    class="bg-paper-white rounded-2xl border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] p-6 w-full max-w-sm mx-auto"
+  >
     <!-- Controls -->
-    <div class="flex items-center justify-center gap-4 mb-6">
+    <div class="flex items-center justify-center gap-6 mb-6">
       <van-button
         plain
-        class="!h-12 !w-12 !p-0 !rounded-lg !border-gray-200 shadow-sm"
+        class="!h-12 !w-12 !p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead"
         @click="emit('previous')"
       >
-        <SkipBack class="h-5 w-5 text-gray-700" />
+        <SkipBack class="h-6 w-6 text-pencil-lead" />
       </van-button>
 
       <van-button
         type="primary"
         round
-        class="!h-14 !w-14 !p-0 shadow-md"
+        class="!h-16 !w-16 !p-0 !border-3 !border-pencil-lead shadow-[0_4px_0_0_#334155] active:translate-y-1 active:shadow-none transition-all duration-100 bg-gumball-blue"
         @click="emit('playPause')"
       >
-        <Pause v-if="isPlaying" class="h-6 w-6" />
-        <Play v-else class="h-6 w-6 ml-0.5" />
+        <Pause v-if="isPlaying" class="h-8 w-8 text-white fill-current" />
+        <Play v-else class="h-8 w-8 ml-1 text-white fill-current" />
       </van-button>
 
       <van-button
         plain
-        class="!h-12 !w-12 !p-0 !rounded-lg !border-gray-200 shadow-sm"
+        class="!h-12 !w-12 !p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead"
         @click="emit('next')"
       >
-        <SkipForward class="h-5 w-5 text-gray-700" />
+        <SkipForward class="h-6 w-6 text-pencil-lead" />
       </van-button>
     </div>
 
@@ -50,8 +52,10 @@ const emit = defineEmits<{
       <div
         v-for="station in 5"
         :key="station"
-        class="h-2 w-2 rounded-full transition-all"
-        :class="currentStation === station ? 'bg-blue-600 w-8' : 'bg-gray-300'"
+        class="h-3 rounded-full transition-all border-2 border-pencil-lead"
+        :class="
+          currentStation === station ? 'bg-bubblegum-pop w-8' : 'bg-white w-3'
+        "
       />
     </div>
   </div>

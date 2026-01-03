@@ -7,28 +7,33 @@ const maxGuesses = 5
 </script>
 
 <template>
-  <div class="bg-white rounded-xl shadow-md p-6 w-full">
+  <div class="w-full">
     <div class="space-y-3">
       <div
         v-for="num in maxGuesses"
         :key="num"
-        class="flex items-center gap-3 p-3 rounded-lg border-2"
+        class="flex items-center gap-4 p-3 rounded-xl border-3 transition-all"
         :class="
           guesses[num - 1]
-            ? 'border-blue-200 bg-blue-50'
-            : 'border-gray-200 bg-gray-50'
+            ? 'border-pencil-lead bg-white shadow-[0_2px_0_0_#334155]'
+            : 'border-eraser-grey border-dashed bg-transparent opacity-60'
         "
       >
         <div
-          class="flex items-center justify-center w-8 h-8 rounded-full bg-white border-2 border-gray-300 text-sm font-semibold text-gray-600"
+          class="flex items-center justify-center w-8 h-8 rounded-full border-2 text-sm font-heading font-bold"
+          :class="
+            guesses[num - 1]
+              ? 'bg-gumball-blue border-pencil-lead text-white'
+              : 'bg-transparent border-eraser-grey text-eraser-grey'
+          "
         >
           {{ num }}
         </div>
-        <div class="flex-1">
-          <span v-if="guesses[num - 1]" class="text-gray-800">{{
+        <div class="flex-1 font-heading text-lg">
+          <span v-if="guesses[num - 1]" class="text-pencil-lead">{{
             guesses[num - 1]
           }}</span>
-          <span v-else class="text-gray-400 italic">Empty</span>
+          <span v-else class="text-eraser-grey italic">Empty</span>
         </div>
       </div>
     </div>

@@ -77,3 +77,18 @@ h3,
   --van-radius-lg: var(--radius-card);
   --van-radius-md: var(--radius-btn);
 }
+
+/* Reusable Components */
+.btn-pressable {
+  position: relative;
+  box-shadow: 0 8px 0 0 var(--color-pencil-lead);
+  border: 3px solid var(--color-pencil-lead);
+  transform-origin: center center;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.btn-pressable:active {
+  transform: translateY(4px);
+  box-shadow: 0 4px 0 0 var(--color-pencil-lead);
+}
