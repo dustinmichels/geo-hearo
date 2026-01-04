@@ -1,12 +1,8 @@
 {
   "folders": [
     {
-      "name": "geo-hero (root)",
+      "name": "[root]",
       "path": "."
-    },
-    {
-      "name": "backend",
-      "path": "backend"
     },
     {
       "name": "frontend",
@@ -23,7 +19,7 @@
     {
       "name": "data-prep/crawl",
       "path": "data-prep/crawl"
-    },
+    }
   ],
   "settings": {
     "cSpell.words": [
