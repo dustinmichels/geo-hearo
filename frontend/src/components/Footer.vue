@@ -5,16 +5,16 @@ const version = import.meta.env.VITE_GIT_HASH || 'dev'
 <template>
   <div class="mt-auto py-4 flex items-center justify-center gap-4">
     <RouterLink
-      to="/about"
+      to="/"
       class="font-heading text-eraser-grey hover:text-bubblegum-pop transition-colors"
     >
-      About
+      Home
     </RouterLink>
     <RouterLink
-      to="/"
+      to="/about"
       class="font-heading text-eraser-grey hover:text-bubblegum-pop transition-colors flex items-center gap-2"
     >
-      Home
+      About
     </RouterLink>
     <div class="text-[10px] text-eraser-grey">Hash #{{ version }}</div>
   </div>
