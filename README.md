@@ -10,8 +10,7 @@
 
 Try online at [geohearo.com](http://geohearo.com/).
 
-Or open on mobile:
-![QR code](img/qr.png)
+<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://geohearo.com/" alt="QR code">
 
 ## Dev
 
