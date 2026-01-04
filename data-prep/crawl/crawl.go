@@ -11,30 +11,35 @@ import (
 )
 
 type OutputRow struct {
-	PlaceID     string  `json:"placeId" csv:"place_id"`
-	ChannelID   string  `json:"channelId" csv:"channel_id"`
-	ChannelURL  string  `json:"channelURL" csv:"channel_url"`
-	PlaceName   string  `json:"placeName" csv:"place_name"`
-	ChannelName string  `json:"channelName" csv:"channel_name"`
-	PlaceSize   int     `json:"placeSize" csv:"place_size"`
-	Boost       bool    `json:"boost" csv:"boost"`
-	Country     string  `json:"country" csv:"country"`
-	Latitude    float64 `json:"latitude" csv:"geo_lat"`
-	Longitude   float64 `json:"longitude"  csv:"geo_lon"`
+	PlaceID           string  `json:"placeId" csv:"place_id"`
+	ChannelID         string  `json:"channelId" csv:"channel_id"`
+	ChannelURL        string  `json:"channelURL" csv:"channel_url"`
+	PlaceName         string  `json:"placeName" csv:"place_name"`
+	ChannelName       string  `json:"channelName" csv:"channel_name"`
+	ChannelStream     string  `json:"channelStream" csv:"channel_stream"`
+	ChannelSecure     bool    `json:"channelSecure" csv:"channel_secure"`
+	PlaceSize         int     `json:"placeSize" csv:"place_size"`
+	Boost             bool    `json:"boost" csv:"boost"`
+	Country           string  `json:"country" csv:"country"`
+	Latitude          float64 `json:"latitude" csv:"geo_lat"`
+	Longitude         float64 `json:"longitude"  csv:"geo_lon"`
+	ResolvedStreamURL string  `json:"resolvedStreamURL" csv:"channel_resolved_url"`
 }
 
 func MakeOutputRow(p *radiogarden.Place, c *radiogarden.Channel) *OutputRow {
 	return &OutputRow{
-		PlaceID:     p.ID,
-		ChannelID:   strings.Split(c.Page.URL, "/")[3],
-		ChannelURL:  c.Page.URL,
-		PlaceName:   p.Title,
-		ChannelName: c.Page.Title,
-		PlaceSize:   p.Size,
-		Boost:       p.Boost,
-		Country:     p.Country,
-		Latitude:    p.Geo[1],
-		Longitude:   p.Geo[0],
+		PlaceID:       p.ID,
+		ChannelID:     strings.Split(c.Page.URL, "/")[3],
+		ChannelURL:    c.Page.URL,
+		PlaceName:     p.Title,
+		ChannelName:   c.Page.Title,
+		ChannelStream: c.Page.Stream,
+		ChannelSecure: c.Page.Secure,
+		PlaceSize:     p.Size,
+		Boost:         p.Boost,
+		Country:       p.Country,
+		Latitude:      p.Geo[1],
+		Longitude:     p.Geo[0],
 	}
 }
 
@@ -76,6 +81,15 @@ func Crawl(n_threads int) []*OutputRow {
 
 			for _, channel := range placeChannels {
 				out := MakeOutputRow(&place, &channel)
+
+				// Resolve streaming URL
+				resolved, err := radiogarden.GetStreamURL(out.ChannelID)
+				if err != nil {
+					log.Printf("WARN: could not resolve stream for %s: %s\n", out.ChannelID, err)
+				} else {
+					out.ResolvedStreamURL = resolved
+				}
+
 				output = append(output, out)
 			}
 

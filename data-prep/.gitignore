@@ -2,3 +2,6 @@ out/*.json
 crawl/out/*.csv
 
 crawl/crawl
+
+# Ignore all Jupyter Notebook checkpoints
+**/.ipynb_checkpoints

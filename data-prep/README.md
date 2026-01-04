@@ -21,9 +21,16 @@ The output is `crawl/out/output.csv`.
 
 Setup environment:
 
+Install pyproject.toml with uv:
+
 ```sh
-conda create --name geohearo -c conda-forge python=3.12 pandas geopandas
-conda activate geohearo
+curl -s "https://radio.garden/api/ara/content/page/lsg0ViHC" \
+  | jq -r '.data.content[]?.title'
+```
+
+```sh
+uv env create
+uv env install
 ```
 
 Run the code:
