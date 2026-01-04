@@ -2,6 +2,7 @@
 import gsap from 'gsap'
 import { onMounted, onUnmounted, ref } from 'vue'
 import GuessPanel from '../components/GuessPanel.vue'
+import Footer from '../components/Footer.vue'
 import Map from '../components/Map.vue'
 import RadioPlayer from '../components/RadioPlayer.vue'
 
@@ -94,7 +95,7 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="h-screen w-full overflow-hidden bg-cloud-white relative text-pencil-lead font-body p-6 flex gap-6"
+    class="h-screen w-full overflow-hidden bg-cloud-white relative text-pencil-lead font-body p-6 flex flex-col gap-4"
   >
     <!-- Decorative Background Shapes -->
     <div
@@ -106,61 +107,70 @@ onUnmounted(() => {
       class="absolute bottom-10 left-[-5%] w-80 h-80 bg-gumball-blue/5 rounded-full blur-3xl pointer-events-none"
     ></div>
 
-    <!-- Left: Map Area -->
-    <div
-      class="flex-1 bg-sea-blue/10 rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] overflow-hidden relative z-10"
-    >
-      <Map
-        @select-country="handleCountrySelect"
-        :guessed-countries="guesses"
-        :selected-country="guessInput"
-      />
-    </div>
-
-    <!-- Right: Sidebar -->
-    <div class="w-[400px] flex flex-col gap-6 relative z-10 shrink-0">
-      <!-- Header & Player Card -->
+    <!-- Main Content Area -->
+    <div class="flex-1 flex gap-6 min-h-0 relative z-10">
+      <!-- Left: Map Area -->
       <div
-        class="bg-paper-white rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] p-6"
+        class="flex-1 bg-sea-blue/10 rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] overflow-hidden relative z-10"
       >
-        <!-- Title -->
-        <div class="flex justify-center mb-6">
-          <div class="relative">
-            <h1
-              class="text-center text-pencil-lead text-3xl font-heading tracking-wider pb-3"
-            >
-              GeoHearo
-            </h1>
-            <span
-              class="absolute left-full bottom-[-1.5rem] text-5xl ml-4 leading-[0.8] z-20 whitespace-nowrap transition-transform duration-700 ease-out"
-              :class="isPlaying ? 'translate-y-0' : 'translate-y-16'"
-              >🦸</span
-            >
+        <Map
+          @select-country="handleCountrySelect"
+          :guessed-countries="guesses"
+          :selected-country="guessInput"
+        />
+      </div>
+
+      <!-- Right: Sidebar -->
+      <div class="w-[400px] flex flex-col gap-6 relative z-10 shrink-0">
+        <!-- Header & Player Card -->
+        <div
+          class="bg-paper-white rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] p-6"
+        >
+          <!-- Title -->
+          <div class="flex justify-center mb-6">
+            <div class="relative">
+              <h1
+                class="text-center text-pencil-lead text-3xl font-heading tracking-wider pb-3"
+              >
+                GeoHearo
+              </h1>
+              <span
+                class="absolute left-full bottom-[-1.5rem] text-5xl ml-4 leading-[0.8] z-20 whitespace-nowrap transition-transform duration-700 ease-out"
+                :class="isPlaying ? 'translate-y-0' : 'translate-y-16'"
+                >🦸</span
+              >
+            </div>
+          </div>
+
+          <!-- Radio Player -->
+          <div class="relative z-30">
+            <RadioPlayer
+              :is-playing="isPlaying"
+              :current-station="currentStation"
+              @play-pause="handlePlayPause"
+              @previous="handlePrevious"
+              @next="handleNext"
+            />
           </div>
         </div>
 
-        <!-- Radio Player -->
-        <div class="relative z-30">
-          <RadioPlayer
-            :is-playing="isPlaying"
-            :current-station="currentStation"
-            @play-pause="handlePlayPause"
-            @previous="handlePrevious"
-            @next="handleNext"
+        <!-- Guess Panel Card -->
+        <div
+          class="flex-1 bg-paper-white rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] overflow-hidden flex flex-col relative"
+        >
+          <GuessPanel
+            v-model="guessInput"
+            :guesses="guesses"
+            @add-guess="handleAddGuess"
+            :with-footer="false"
           />
         </div>
       </div>
+    </div>
 
-      <!-- Guess Panel Card -->
-      <div
-        class="flex-1 bg-paper-white rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] overflow-hidden flex flex-col relative"
-      >
-        <GuessPanel
-          v-model="guessInput"
-          :guesses="guesses"
-          @add-guess="handleAddGuess"
-        />
-      </div>
+    <!-- Footer -->
+    <div class="relative z-10">
+      <Footer />
     </div>
   </div>
 </template>
