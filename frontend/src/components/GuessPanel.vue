@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Field as VanField } from 'vant'
 import { ref } from 'vue'
-import GuessDisplay from './GuessDisplay.vue'
 import PanelFooter from './Footer.vue'
+import GuessDisplay from './GuessDisplay.vue'
 
 withDefaults(
   defineProps<{
