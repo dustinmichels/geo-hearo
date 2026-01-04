@@ -29,11 +29,16 @@ const maxGuesses = 5
         >
           {{ num }}
         </div>
-        <div class="flex-1 font-heading text-lg">
-          <span v-if="guesses[num - 1]" class="text-pencil-lead">{{
-            guesses[num - 1]
-          }}</span>
-          <span v-else class="text-eraser-grey italic">Empty</span>
+        <div
+          class="flex-1 font-heading min-w-0 flex items-center justify-between gap-1"
+        >
+          <template v-if="guesses[num - 1]">
+            <span class="text-pencil-lead text-base truncate">{{
+              guesses[num - 1]
+            }}</span>
+            <span class="text-xs tracking-tighter shrink-0">⬆️⬆️⬆️➡️➡️➡️</span>
+          </template>
+          <span v-else class="text-eraser-grey italic text-lg">Empty</span>
         </div>
       </div>
     </div>

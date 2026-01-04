@@ -147,7 +147,7 @@ const ctaButton = ref(null)
 
 const steps = [
   {
-    text: 'Stream 5 live radio stations from a mystery country',
+    text: 'Stream live radio station from a mystery country (you get 5 stations)',
     colorClass: 'bg-gumball-blue',
   },
   {
@@ -155,7 +155,7 @@ const steps = [
     colorClass: 'bg-bubblegum-pop',
   },
   {
-    text: 'Make guesses, get hints',
+    text: 'Make a guess, get a hint, repeat',
     colorClass: 'bg-mint-shake',
   },
 ]
