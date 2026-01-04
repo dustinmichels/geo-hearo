@@ -95,7 +95,7 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="h-screen w-full overflow-hidden bg-cloud-white relative text-pencil-lead font-body p-6 flex flex-col gap-4"
+    class="h-screen w-full overflow-hidden bg-cloud-white relative text-pencil-lead font-body px-6 pt-6 pb-2 flex flex-col gap-4"
   >
     <!-- Decorative Background Shapes -->
     <div
@@ -170,7 +170,7 @@ onUnmounted(() => {
 
     <!-- Footer -->
     <div class="relative z-10">
-      <Footer />
+      <Footer class="!py-0 text-xs" />
     </div>
   </div>
 </template>
