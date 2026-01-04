@@ -127,25 +127,28 @@ onUnmounted(() => {
         <div class="flex justify-center mb-6">
           <div class="relative">
             <h1
-              class="text-center text-pencil-lead text-3xl font-heading tracking-wider"
+              class="text-center text-pencil-lead text-3xl font-heading tracking-wider pb-3"
             >
               GeoHearo
             </h1>
             <span
-              class="absolute left-full bottom-3 text-4xl ml-1 leading-[0.8] z-20 whitespace-nowrap rotate-[15deg]"
-              >🎧</span
+              class="absolute left-full bottom-[-1.5rem] text-5xl ml-4 leading-[0.8] z-20 whitespace-nowrap transition-transform duration-700 ease-out"
+              :class="isPlaying ? 'translate-y-0' : 'translate-y-16'"
+              >🦸</span
             >
           </div>
         </div>
 
         <!-- Radio Player -->
-        <RadioPlayer
-          :is-playing="isPlaying"
-          :current-station="currentStation"
-          @play-pause="handlePlayPause"
-          @previous="handlePrevious"
-          @next="handleNext"
-        />
+        <div class="relative z-30">
+          <RadioPlayer
+            :is-playing="isPlaying"
+            :current-station="currentStation"
+            @play-pause="handlePlayPause"
+            @previous="handlePrevious"
+            @next="handleNext"
+          />
+        </div>
       </div>
 
       <!-- Guess Panel Card -->
