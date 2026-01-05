@@ -1,9 +1,24 @@
 <script setup lang="ts">
-defineProps<{
+import { useRadio } from '../composables/useRadio'
+import { getCountryLocation, getDirectionalArrows } from '../utils/geography'
+
+const props = defineProps<{
   guesses: string[]
 }>()
 
 const maxGuesses = 5
+const { allStations, secretCountry } = useRadio()
+
+const getArrowsForGuess = (guessName: string | undefined) => {
+  if (!guessName || !secretCountry.value) return null
+
+  const guessLoc = getCountryLocation(guessName, allStations.value)
+  const secretLoc = getCountryLocation(secretCountry.value, allStations.value)
+
+  if (!guessLoc || !secretLoc) return null
+
+  return getDirectionalArrows(guessLoc, secretLoc)
+}
 </script>
 
 <template>
@@ -36,7 +51,12 @@ const maxGuesses = 5
             <span class="text-pencil-lead text-base truncate">{{
               guesses[num - 1]
             }}</span>
-            <span class="text-xs tracking-tighter shrink-0">⬆️⬆️⬆️➡️➡️➡️</span>
+            <span
+              v-if="getArrowsForGuess(guesses[num - 1])"
+              class="text-xs tracking-tighter shrink-0"
+            >
+              {{ getArrowsForGuess(guesses[num - 1])?.arrows }}
+            </span>
           </template>
           <span v-else class="text-eraser-grey italic text-lg">Empty</span>
         </div>
