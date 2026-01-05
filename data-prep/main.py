@@ -216,6 +216,44 @@ if lost_iso_codes:
 
 
 # ==============================================================================
+# FILTERING: REMOVE SPECIAL ADMINISTRATIVE REGIONS
+# ==============================================================================
+
+# filter out NE 'level 4 = Lease or special administrative region'
+# Examples: Hong Kong, Macau, some military bases
+# Areas under special governance arrangements
+console.print(
+    "\n[bold yellow]Filtering: Removing level 4 special administrative regions[/bold yellow]"
+)
+before = len(radio_ne)
+before_countries = radio_ne["ISO_A2"].nunique()
+countries_before_data = radio_ne[["ISO_A2", "NAME"]].drop_duplicates()
+
+radio_ne = radio_ne[radio_ne["LEVEL"] != 4]
+
+after = len(radio_ne)
+after_countries = radio_ne["ISO_A2"].nunique()
+countries_after = set(radio_ne["ISO_A2"].unique())
+lost_iso_codes = sorted(set(countries_before_data["ISO_A2"].unique()) - countries_after)
+
+console.print(
+    f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
+)
+console.print(
+    f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green] ([dim]removed {len(lost_iso_codes)}[/dim])"
+)
+if lost_iso_codes:
+    lost_country_names = countries_before_data[
+        countries_before_data["ISO_A2"].isin(lost_iso_codes)
+    ]
+    lost_country_names = lost_country_names.sort_values("NAME")
+    lost_names_list = [
+        f"{row['NAME']} ({row['ISO_A2']})" for _, row in lost_country_names.iterrows()
+    ]
+    console.print(f"  Lost countries: [yellow]{', '.join(lost_names_list)}[/yellow]")
+
+
+# ==============================================================================
 # FINAL DATA PREPARATION
 # ==============================================================================
 
@@ -235,44 +273,6 @@ selected_ne_cols = [
 ]
 final_cols = radio.columns.tolist() + selected_ne_cols
 radio_final = radio_ne[final_cols]
-
-
-# ==============================================================================
-# FILTERING: REMOVE SPECIAL ADMINISTRATIVE REGIONS
-# ==============================================================================
-
-# filter out NE 'level 4 = Lease or special administrative region'
-# Examples: Hong Kong, Macau, some military bases
-# Areas under special governance arrangements
-console.print(
-    "\n[bold yellow]Filtering: Removing level 4 special administrative regions[/bold yellow]"
-)
-before = len(radio_final)
-before_countries = radio_final["ISO_A2"].nunique()
-countries_before_data = radio_final[["ISO_A2", "NAME"]].drop_duplicates()
-
-radio_final = radio_final[radio_final["LEVEL"] != 4]
-
-after = len(radio_final)
-after_countries = radio_final["ISO_A2"].nunique()
-countries_after = set(radio_final["ISO_A2"].unique())
-lost_iso_codes = sorted(set(countries_before_data["ISO_A2"].unique()) - countries_after)
-
-console.print(
-    f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
-)
-console.print(
-    f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green] ([dim]removed {len(lost_iso_codes)}[/dim])"
-)
-if lost_iso_codes:
-    lost_country_names = countries_before_data[
-        countries_before_data["ISO_A2"].isin(lost_iso_codes)
-    ]
-    lost_country_names = lost_country_names.sort_values("NAME")
-    lost_names_list = [
-        f"{row['NAME']} ({row['ISO_A2']})" for _, row in lost_country_names.iterrows()
-    ]
-    console.print(f"  Lost countries: [yellow]{', '.join(lost_names_list)}[/yellow]")
 
 console.print(
     f"\n[bold green]✓ Final record count: {len(radio_final):,} stations across {radio_final['ISO_A2'].nunique()} countries[/bold green]"
