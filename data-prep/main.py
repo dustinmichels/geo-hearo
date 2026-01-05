@@ -9,7 +9,10 @@ from rich.table import Table
 
 console = Console()
 
-# Load data
+# ==============================================================================
+# DATA LOADING
+# ==============================================================================
+
 console.print("\n[bold cyan]Loading data...[/bold cyan]")
 radio = pd.read_csv("crawl/out/output.csv")
 ne = gpd.read_file("data/ne_50m_admin_0_countries.geojson")
@@ -24,8 +27,16 @@ table.add_row("Countries (Natural Earth)", f"{len(ne):,}")
 table.add_row("Country Centers", f"{len(centers):,}")
 console.print(table)
 
+# ==============================================================================
+# DATA CLEANING & PREPARATION
+# ==============================================================================
+
 # Fill NA values
 radio["channel_stream"] = radio["channel_stream"].fillna("")
+
+# ==============================================================================
+# FILTERING: NULL CHANNEL URLS
+# ==============================================================================
 
 # Filter out null channel_resolved_url
 console.print(
@@ -33,30 +44,49 @@ console.print(
 )
 before = len(radio)
 before_countries = radio["country"].nunique()
+countries_before = set(radio["country"].unique())
 radio = radio[radio["channel_resolved_url"].notnull()]
 after = len(radio)
 after_countries = radio["country"].nunique()
-# number of records and countries
+countries_after = set(radio["country"].unique())
+lost_countries = sorted(countries_before - countries_after)
+
 console.print(
     f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
 )
 console.print(
-    f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green]"
+    f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green] ([dim]removed {len(lost_countries)}[/dim])"
 )
+if lost_countries:
+    console.print(f"  Lost countries: [yellow]{', '.join(lost_countries)}[/yellow]")
+
+# ==============================================================================
+# FILTERING: INSECURE CHANNELS
+# ==============================================================================
 
 # Filter out insecure channels
 console.print("\n[bold yellow]Filtering: Removing insecure channels[/bold yellow]")
 before = len(radio)
 before_countries = radio["country"].nunique()
+countries_before = set(radio["country"].unique())
 radio = radio[radio["channel_secure"] == True]
 after = len(radio)
 after_countries = radio["country"].nunique()
+countries_after = set(radio["country"].unique())
+lost_countries = sorted(countries_before - countries_after)
+
 console.print(
     f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
 )
 console.print(
-    f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green]"
+    f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green] ([dim]removed {len(lost_countries)}[/dim])"
 )
+if lost_countries:
+    console.print(f"  Lost countries: [yellow]{', '.join(lost_countries)}[/yellow]")
+
+# ==============================================================================
+# GEOSPATIAL PROCESSING
+# ==============================================================================
 
 # Create GeoDataFrame
 console.print("\n[bold cyan]Creating geo-spatial data...[/bold cyan]")
@@ -66,20 +96,36 @@ radio_gdf = gpd.GeoDataFrame(
     crs="EPSG:4326",
 )
 
+# ==============================================================================
+# SPATIAL JOIN WITH COUNTRY BOUNDARIES
+# ==============================================================================
+
 # Spatial join
 console.print(
     "\n[bold cyan]Performing spatial join with country boundaries...[/bold cyan]"
 )
+before = len(radio)
+before_countries = radio["country"].nunique()
+countries_before = set(radio["country"].unique())
+
 radio_ne = gpd.sjoin(radio_gdf, ne, how="inner", predicate="within")
 
-# Check lost countries
-lost_countries = radio[~radio["country"].isin(radio_ne["country"])]["country"].unique()
-if len(lost_countries) > 0:
+after = len(radio_ne)
+after_countries = radio_ne["country"].nunique()
+countries_after = set(radio_ne["country"].unique())
+lost_countries = sorted(countries_before - countries_after)
+
+console.print(
+    f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
+)
+console.print(
+    f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green] ([dim]removed {len(lost_countries)}[/dim])"
+)
+if lost_countries:
     console.print(
         Panel(
-            f"[yellow]{len(lost_countries)} countries lost during spatial join:[/yellow]\n"
-            + ", ".join(sorted(lost_countries)),
-            title="⚠️  Lost Countries",
+            ", ".join(lost_countries),
+            title=f"⚠️  {len(lost_countries)} Countries Lost in Spatial Join",
             border_style="yellow",
         )
     )
@@ -87,19 +133,46 @@ else:
     console.print("[green]✓ No countries lost during spatial join[/green]")
 
 
+# ==============================================================================
+# FILTERING: ALIGN WITH CENTERS DATASET
+# ==============================================================================
+
 # Filter based on centers ISO
 console.print(
     "\n[bold yellow]Filtering: Aligning with centers dataset based on ISO codes[/bold yellow]"
 )
 before = len(radio_ne)
+before_countries = radio_ne["ISO_A2"].nunique()
+countries_before = set(radio_ne["ISO_A2"].unique())
+
 radio_ne = radio_ne[radio_ne["ISO_A2"].isin(centers["ISO"])]
+
 after = len(radio_ne)
+after_countries = radio_ne["ISO_A2"].nunique()
+countries_after = set(radio_ne["ISO_A2"].unique())
+lost_iso_codes = sorted(countries_before - countries_after)
+
 console.print(
-    f"  Before: [red]{before:,}[/red] → After: [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
+    f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
 )
+console.print(
+    f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green] ([dim]removed {len(lost_iso_codes)}[/dim])"
+)
+if lost_iso_codes:
+    # Get full country names for lost ISO codes from the NE dataset
+    lost_country_names = ne[ne["ISO_A2"].isin(lost_iso_codes)][
+        ["ISO_A2", "NAME"]
+    ].drop_duplicates()
+    lost_country_names = lost_country_names.sort_values("NAME")
+    lost_names_list = [
+        f"{row['NAME']} ({row['ISO_A2']})" for _, row in lost_country_names.iterrows()
+    ]
+    console.print(f"  Lost countries: [yellow]{', '.join(lost_names_list)}[/yellow]")
 
 
-console.print(f"\n  Final record count: [bold green]{len(radio_ne):,}[/bold green]")
+# ==============================================================================
+# FINAL DATA PREPARATION
+# ==============================================================================
 
 # Prepare final data
 # LEVEL - Administrative level (2=country, 3=dependency, etc.)
@@ -119,16 +192,50 @@ final_cols = radio.columns.tolist() + selected_ne_cols
 radio_final = radio_ne[final_cols]
 
 
+# ==============================================================================
+# FILTERING: REMOVE SPECIAL ADMINISTRATIVE REGIONS
+# ==============================================================================
+
 # filter out NE 'level 4 = Lease or special administrative region'
 # Examples: Hong Kong, Macau, some military bases
 # Areas under special governance arrangements
-before = len(radio_final)
-radio_final = radio_final[radio_final["LEVEL"] != 4]
-after = len(radio_final)
 console.print(
-    f"\n[bold yellow]Filtering: Removing level 4 special administrative regions[/bold yellow]\n"
-    f"  Before: [red]{before:,}[/red] → After: [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
+    "\n[bold yellow]Filtering: Removing level 4 special administrative regions[/bold yellow]"
 )
+before = len(radio_final)
+before_countries = radio_final["ISO_A2"].nunique()
+countries_before_data = radio_final[["ISO_A2", "NAME"]].drop_duplicates()
+
+radio_final = radio_final[radio_final["LEVEL"] != 4]
+
+after = len(radio_final)
+after_countries = radio_final["ISO_A2"].nunique()
+countries_after = set(radio_final["ISO_A2"].unique())
+lost_iso_codes = sorted(set(countries_before_data["ISO_A2"].unique()) - countries_after)
+
+console.print(
+    f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
+)
+console.print(
+    f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green] ([dim]removed {len(lost_iso_codes)}[/dim])"
+)
+if lost_iso_codes:
+    lost_country_names = countries_before_data[
+        countries_before_data["ISO_A2"].isin(lost_iso_codes)
+    ]
+    lost_country_names = lost_country_names.sort_values("NAME")
+    lost_names_list = [
+        f"{row['NAME']} ({row['ISO_A2']})" for _, row in lost_country_names.iterrows()
+    ]
+    console.print(f"  Lost countries: [yellow]{', '.join(lost_names_list)}[/yellow]")
+
+console.print(
+    f"\n[bold green]✓ Final record count: {len(radio_final):,} stations across {radio_final['ISO_A2'].nunique()} countries[/bold green]"
+)
+
+# ==============================================================================
+# OUTPUT
+# ==============================================================================
 
 # Save as JSON
 output_path = "data/out/radio_with_countries.json"
