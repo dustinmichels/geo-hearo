@@ -134,6 +134,49 @@ else:
 
 
 # ==============================================================================
+# FIX ISO CODES
+# ==============================================================================
+
+# Fix ISO_A2 codes: use ISO_A2_EH as fallback when ISO_A2 is -99
+console.print(
+    "\n[bold cyan]Fixing ISO codes (using ISO_A2_EH fallback for -99 values)...[/bold cyan]"
+)
+before = len(radio_ne)
+before_countries = radio_ne["country"].nunique()
+
+iso_fixes_count = (radio_ne["ISO_A2"] == "-99").sum()
+if iso_fixes_count > 0:
+    console.print(f"  Found {iso_fixes_count:,} records with ISO_A2 = -99")
+    # Show which countries are affected
+    affected = (
+        radio_ne[radio_ne["ISO_A2"] == "-99"][["NAME", "ISO_A2_EH"]]
+        .drop_duplicates()
+        .sort_values("NAME")
+    )
+    for _, row in affected.iterrows():
+        console.print(f"    {row['NAME']}: -99 → {row['ISO_A2_EH']}")
+
+    # Apply the fix
+    radio_ne["ISO_A2"] = radio_ne.apply(
+        lambda row: row["ISO_A2_EH"] if row["ISO_A2"] == "-99" else row["ISO_A2"],
+        axis=1,
+    )
+    console.print(f"  [green]✓ Fixed {iso_fixes_count:,} ISO codes[/green]")
+else:
+    console.print("  [green]✓ No ISO codes need fixing[/green]")
+
+after = len(radio_ne)
+after_countries = radio_ne["country"].nunique()
+
+console.print(
+    f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]no records removed[/dim])"
+)
+console.print(
+    f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green]"
+)
+
+
+# ==============================================================================
 # FILTERING: ALIGN WITH CENTERS DATASET
 # ==============================================================================
 
@@ -144,6 +187,8 @@ console.print(
 before = len(radio_ne)
 before_countries = radio_ne["ISO_A2"].nunique()
 countries_before = set(radio_ne["ISO_A2"].unique())
+# Capture country names BEFORE filtering
+countries_before_data = radio_ne[["ISO_A2", "NAME"]].drop_duplicates()
 
 radio_ne = radio_ne[radio_ne["ISO_A2"].isin(centers["ISO"])]
 
@@ -159,10 +204,10 @@ console.print(
     f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green] ([dim]removed {len(lost_iso_codes)}[/dim])"
 )
 if lost_iso_codes:
-    # Get full country names for lost ISO codes from the NE dataset
-    lost_country_names = ne[ne["ISO_A2"].isin(lost_iso_codes)][
-        ["ISO_A2", "NAME"]
-    ].drop_duplicates()
+    # Get the country names from the data we captured before filtering
+    lost_country_names = countries_before_data[
+        countries_before_data["ISO_A2"].isin(lost_iso_codes)
+    ]
     lost_country_names = lost_country_names.sort_values("NAME")
     lost_names_list = [
         f"{row['NAME']} ({row['ISO_A2']})" for _, row in lost_country_names.iterrows()
