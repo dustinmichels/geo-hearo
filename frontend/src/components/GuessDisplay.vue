@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRadio } from '../composables/useRadio'
+import { getColorForArrowCount } from '../utils/colors'
 import { getCountryLocation, getDirectionalArrows } from '../utils/geography'
 
 const props = defineProps<{
@@ -19,6 +20,12 @@ const getArrowsForGuess = (guessName: string | undefined) => {
 
   return getDirectionalArrows(guessLoc, secretLoc)
 }
+
+const getGuessColor = (guessName: string | undefined) => {
+  const result = getArrowsForGuess(guessName)
+  if (!result) return '#FFFFFF'
+  return getColorForArrowCount(result.count)
+}
 </script>
 
 <template>
@@ -30,9 +37,14 @@ const getArrowsForGuess = (guessName: string | undefined) => {
         class="flex items-center gap-4 p-3 rounded-xl border-3 transition-all"
         :class="
           guesses[num - 1]
-            ? 'border-pencil-lead bg-white shadow-[0_2px_0_0_#334155]'
+            ? 'border-pencil-lead shadow-[0_2px_0_0_#334155]'
             : 'border-eraser-grey border-dashed bg-transparent opacity-60'
         "
+        :style="{
+          backgroundColor: guesses[num - 1]
+            ? getGuessColor(guesses[num - 1])
+            : undefined,
+        }"
       >
         <div
           class="flex items-center justify-center w-8 h-8 rounded-full border-2 text-sm font-heading font-bold"

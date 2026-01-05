@@ -5,6 +5,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 
 const props = defineProps<{
   guessedCountries?: string[]
+  guessColors?: Record<string, string>
   selectedCountry?: string
   secretCountry?: string
 }>()
@@ -27,6 +28,28 @@ watch(
     } else {
       map.value.setFilter('countries-guessed', ['in', 'NAME', '']) // Hide all
     }
+  },
+  { deep: true }
+)
+
+// Update guessed countries colors
+watch(
+  () => props.guessColors,
+  (newColors) => {
+    if (!map.value || !map.value.getLayer('countries-guessed') || !newColors)
+      return
+
+    let fillColor: any = '#86efac'
+    if (Object.keys(newColors).length > 0) {
+      const matchExpression: any[] = ['match', ['get', 'NAME']]
+      for (const [country, color] of Object.entries(newColors)) {
+        matchExpression.push(country, color)
+      }
+      matchExpression.push('#86efac') // Default fallback color
+      fillColor = matchExpression
+    }
+
+    map.value.setPaintProperty('countries-guessed', 'fill-color', fillColor)
   },
   { deep: true }
 )
@@ -110,13 +133,24 @@ onMounted(() => {
       },
     })
 
-    // Add guessed countries layer (light green) - initially hidden
+    // Prepare initial match expression if colors exist
+    let initialFillColor: any = '#86efac'
+    if (props.guessColors && Object.keys(props.guessColors).length > 0) {
+      const matchExpression: any[] = ['match', ['get', 'NAME']]
+      for (const [country, color] of Object.entries(props.guessColors)) {
+        matchExpression.push(country, color)
+      }
+      matchExpression.push('#86efac') // Default fallback
+      initialFillColor = matchExpression
+    }
+
+    // Add guessed countries layer (colored) - initially hidden via filter
     map.value.addLayer({
       id: 'countries-guessed',
       type: 'fill',
       source: 'countries',
       paint: {
-        'fill-color': '#86efac', // light green (green-300)
+        'fill-color': initialFillColor,
         'fill-opacity': 1,
       },
       filter: ['in', 'NAME', ...(props.guessedCountries || [])],

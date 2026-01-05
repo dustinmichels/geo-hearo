@@ -7,11 +7,14 @@ import GuessPanel from '../components/GuessPanel.vue'
 import Footer from '../components/Footer.vue'
 import Map from '../components/Map.vue'
 import RadioPlayer from '../components/RadioPlayer.vue'
+import { getCountryLocation, getDirectionalArrows } from '../utils/geography'
+import { getColorForArrowCount } from '../utils/colors'
 
 const isPlaying = ref(false)
 const currentStation = ref(1)
 const guessInput = ref('')
 const guesses = ref<string[]>([])
+const guessColors = ref<Record<string, string>>({})
 
 // Game State
 const showModal = ref(false)
@@ -22,8 +25,13 @@ const modalConfig = ref({
   isWin: false,
 })
 
-const { loadStations, selectRandomCountry, currentStations, secretCountry } =
-  useRadio()
+const {
+  loadStations,
+  selectRandomCountry,
+  currentStations,
+  secretCountry,
+  allStations,
+} = useRadio()
 
 const currentStationUrl = computed(() => {
   return currentStations.value[currentStation.value - 1]?.channel_resolved_url
@@ -61,6 +69,22 @@ const handleAddGuess = () => {
     }
     showModal.value = true
     return
+  }
+
+  // Calculate Color
+  const secretCoords = getCountryLocation(
+    secretCountry.value,
+    allStations.value
+  )
+  const guessCoords = getCountryLocation(guess, allStations.value)
+
+  if (secretCoords && guessCoords) {
+    const { count } = getDirectionalArrows(guessCoords, secretCoords)
+    const color = getColorForArrowCount(count)
+    guessColors.value[guess] = color
+  } else {
+    // Fallback if coords not found
+    guessColors.value[guess] = '#FCD34D'
   }
 
   // Add guess and check loss
@@ -174,6 +198,7 @@ onUnmounted(() => {
         <Map
           @select-country="handleCountrySelect"
           :guessed-countries="guesses"
+          :guess-colors="guessColors"
           :selected-country="guessInput"
           :secret-country="debugCountry"
         />

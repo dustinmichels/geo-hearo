@@ -7,6 +7,7 @@ interface Coordinates {
 
 interface DirectionResult {
   arrows: string
+  count: number
 }
 
 export function getCountryLocation(
@@ -84,5 +85,6 @@ export function getDirectionalArrows(
 
   return {
     arrows: totalArrows,
+    count: latCount + lngCount,
   }
 }
