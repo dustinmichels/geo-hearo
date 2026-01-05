@@ -192,42 +192,80 @@ console.print(
 
 
 # ==============================================================================
-# FILTERING: ALIGN WITH CENTERS DATASET
+# MERGE WITH CENTERS DATASET
 # ==============================================================================
 
-# Filter based on centers ISO
+# Merge with centers dataset and compute centroids for missing records
 console.print(
-    "\n[bold yellow]Filtering: Aligning with centers dataset based on ISO codes[/bold yellow]"
+    "\n[bold cyan]Merging with centers dataset and computing centroids...[/bold cyan]"
 )
+
+# Extract coordinates from centers geometry
+centers_with_coords = centers.copy()
+centers_with_coords["center"] = centers_with_coords.geometry.apply(
+    lambda geom: [geom.x, geom.y] if geom is not None else None
+)
+
+# Select only ISO and centers columns for merge
+centers_merge = centers_with_coords[["ISO", "center"]]
+
+# Merge with radio_ne, keeping all records from radio_ne
 before = len(radio_ne)
-before_countries = radio_ne["ISO_A2"].nunique()
-countries_before = set(radio_ne["ISO_A2"].unique())
-# Capture country names BEFORE filtering
-countries_before_data = radio_ne[["ISO_A2", "NAME"]].drop_duplicates()
-
-radio_ne = radio_ne[radio_ne["ISO_A2"].isin(centers["ISO"])]
-
+radio_ne = radio_ne.merge(centers_merge, left_on="ISO_A2", right_on="ISO", how="left")
 after = len(radio_ne)
-after_countries = radio_ne["ISO_A2"].nunique()
-countries_after = set(radio_ne["ISO_A2"].unique())
-lost_iso_codes = sorted(countries_before - countries_after)
 
+# Count records with and without centers
+records_with_centers = radio_ne["center"].notna().sum()
+records_without_centers = radio_ne["center"].isna().sum()
+
+console.print(f"  Records merged: {after:,}")
 console.print(
-    f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
+    f"  Records with centers from dataset: [green]{records_with_centers:,}[/green]"
 )
 console.print(
-    f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green] ([dim]removed {len(lost_iso_codes)}[/dim])"
+    f"  Records missing centers: [yellow]{records_without_centers:,}[/yellow]"
 )
-if lost_iso_codes:
-    # Get the country names from the data we captured before filtering
-    lost_country_names = countries_before_data[
-        countries_before_data["ISO_A2"].isin(lost_iso_codes)
-    ]
-    lost_country_names = lost_country_names.sort_values("NAME")
-    lost_names_list = [
-        f"{row['NAME']} ({row['ISO_A2']})" for _, row in lost_country_names.iterrows()
-    ]
-    console.print(f"  Lost countries: [yellow]{', '.join(lost_names_list)}[/yellow]")
+
+# Compute centroids for missing centers using country geometry
+if records_without_centers > 0:
+    console.print(
+        f"  [cyan]Computing centroids for {records_without_centers:,} records...[/cyan]"
+    )
+
+    # Get unique countries missing centers
+    countries_missing_centers = (
+        radio_ne[radio_ne["center"].isna()][["ISO_A2", "NAME"]]
+        .drop_duplicates()
+        .sort_values("NAME")
+    )
+
+    console.print(
+        f"  Countries requiring centroid computation: {len(countries_missing_centers)}"
+    )
+    for _, row in countries_missing_centers.iterrows():
+        console.print(f"    {row['NAME']} ({row['ISO_A2']})")
+
+    # Compute centroids for records missing centers
+    mask = radio_ne["center"].isna()
+    # Get the country polygon geometry from the original ne dataset
+    # Use the geometry column which contains the country boundaries
+    radio_ne.loc[mask, "center"] = radio_ne.loc[mask].apply(
+        lambda row: [row.geometry.centroid.x, row.geometry.centroid.y]
+        if hasattr(row, "geometry") and row.geometry is not None
+        else None,
+        axis=1,
+    )
+
+    # Verify all records now have centers
+    still_missing = radio_ne["center"].isna().sum()
+    if still_missing == 0:
+        console.print(
+            f"  [green]✓ All {records_without_centers:,} missing centroids computed successfully[/green]"
+        )
+    else:
+        console.print(
+            f"  [yellow]⚠ {still_missing} records still missing centroids[/yellow]"
+        )
 
 
 # ==============================================================================
@@ -332,6 +370,7 @@ selected_ne_cols = [
     "LEVEL",
     "POP_EST",
     "POP_RANK",
+    "center",  # Added centers column
 ]
 final_cols = radio.columns.tolist() + selected_ne_cols
 radio_final = radio_ne[final_cols]
