@@ -6,8 +6,8 @@ from rich import print
 
 radio = pd.read_csv("crawl/out/output.csv")
 
-# ne = gpd.read_file("data/ne_110m_admin_0_countries.geojson")
-ne = gpd.read_file("data/ne_50m_admin_0_countries.geojson")
+ne = gpd.read_file("data/ne_110m_admin_0_countries.geojson")
+# ne = gpd.read_file("data/ne_50m_admin_0_countries.geojson")
 
 
 print("Loaded data: ")
@@ -46,6 +46,9 @@ radio_ne = gpd.sjoin(radio_gdf, ne, how="inner", predicate="within")
 # check which countries were lost
 lost_countries = radio[~radio["country"].isin(radio_ne["country"])]["country"].unique()
 print("\nLost countries:", lost_countries)
+
+
+print(f"\nlen after spatial join: {len(radio_ne):,}")
 
 
 # save all radio columns, and select ne columns
