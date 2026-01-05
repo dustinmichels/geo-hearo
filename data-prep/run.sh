@@ -8,6 +8,8 @@ go build .
 cd ..
 
 # process data with python
-source ~/opt/anaconda3/etc/profile.d/conda.sh
-conda activate geohearo
-python process.py
+# Create virtual environment if it doesn't exist
+[ ! -d ".venv" ] && uv venv
+
+# Run using uv (no activation needed)
+uv run main.py
