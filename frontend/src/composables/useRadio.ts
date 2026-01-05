@@ -19,7 +19,7 @@ export interface RadioStation {
 
 const allStations = ref<RadioStation[]>([])
 const countries = ref<string[]>([])
-const selectedCountry = ref<string>('')
+const secretCountry = ref<string>('')
 const currentStations = ref<RadioStation[]>([])
 const isLoading = ref(false)
 
@@ -52,11 +52,11 @@ export function useRadio() {
     const randomIndex = Math.floor(Math.random() * countries.value.length)
     const country = countries.value[randomIndex]
     if (country) {
-      selectedCountry.value = country
+      secretCountry.value = country
 
       // Filter stations for this country
       const countryStations = allStations.value.filter(
-        (s) => s.country === selectedCountry.value,
+        (s) => s.country === secretCountry.value,
       )
 
       // We want 5 stations. If less, take all. If more, shuffle or take first 5.
@@ -68,7 +68,7 @@ export function useRadio() {
   return {
     allStations,
     countries,
-    selectedCountry,
+    secretCountry,
     currentStations,
     isLoading,
     loadStations,

@@ -23,11 +23,17 @@ const modalConfig = ref({
   isWin: false,
 })
 
-const { loadStations, selectRandomCountry, currentStations, selectedCountry } =
+const { loadStations, selectRandomCountry, currentStations, secretCountry } =
   useRadio()
 
 const currentStationUrl = computed(() => {
   return currentStations.value[currentStation.value - 1]?.channel_resolved_url
+})
+
+const debugCountry = computed(() => {
+  return import.meta.env.VITE_DEBUG_MODE === 'true'
+    ? secretCountry.value
+    : undefined
 })
 
 // Vant Floating Panel setup
@@ -55,10 +61,10 @@ const handleAddGuess = () => {
   if (!guess || guesses.value.length >= 5) return
 
   // Check if won
-  if (guess.toLowerCase() === selectedCountry.value.toLowerCase()) {
+  if (guess.toLowerCase() === secretCountry.value.toLowerCase()) {
     modalConfig.value = {
       title: 'You got it!',
-      message: `Correction! The country was ${selectedCountry.value}. Great job!`,
+      message: `Correction! The country was ${secretCountry.value}. Great job!`,
       buttonText: 'Play Again',
       isWin: true,
     }
@@ -77,7 +83,7 @@ const handleAddGuess = () => {
   if (guesses.value.length >= 5) {
     modalConfig.value = {
       title: 'Game Over',
-      message: `Better luck next time. The country was ${selectedCountry.value}. Play again?`,
+      message: `Better luck next time. The country was ${secretCountry.value}. Play again?`,
       buttonText: 'Try Again',
       isWin: false,
     }
@@ -132,7 +138,7 @@ const overlayOpacity = computed(() => {
 
 onMounted(() => {
   loadStations().then(() => {
-    if (!selectedCountry.value) {
+    if (!secretCountry.value) {
       selectRandomCountry()
     }
   })
@@ -217,6 +223,7 @@ onMounted(() => {
           @select-country="handleCountrySelect"
           :guessed-countries="guesses"
           :selected-country="guessInput"
+          :secret-country="debugCountry"
         />
       </div>
     </div>

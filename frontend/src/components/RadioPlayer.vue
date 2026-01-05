@@ -2,6 +2,7 @@
 import { Play, Pause, SkipBack, SkipForward } from 'lucide-vue-next'
 import { Button as VanButton } from 'vant'
 import { ref, watch } from 'vue'
+import { playRadioStatic } from '../utils/audio'
 
 const props = defineProps<{
   isPlaying: boolean
@@ -16,17 +17,52 @@ const emit = defineEmits<{
 }>()
 
 const audioPlayer = ref<HTMLAudioElement | null>(null)
+const currentStaticSource = ref<AudioBufferSourceNode | null>(null) // Store the source node
+
+const playStatic = () => {
+  // Stop any existing static first
+  if (currentStaticSource.value) {
+    try {
+      currentStaticSource.value.stop()
+    } catch (e) {
+      // ignore
+    }
+  }
+  const source = playRadioStatic()
+  if (source) {
+    currentStaticSource.value = source
+  }
+}
+
+const onAudioPlaying = () => {
+  if (currentStaticSource.value) {
+    try {
+      currentStaticSource.value.stop()
+    } catch (e) {
+      // ignore
+    }
+    currentStaticSource.value = null
+  }
+}
 
 watch(
   () => props.isPlaying,
   (playing) => {
     if (!audioPlayer.value) return
     if (playing) {
+      playStatic()
       audioPlayer.value.play().catch((e) => {
         console.error('Playback failed', e)
       })
     } else {
       audioPlayer.value.pause()
+      // Also stop static if pausing
+      if (currentStaticSource.value) {
+        try {
+          currentStaticSource.value.stop()
+        } catch (e) {}
+        currentStaticSource.value = null
+      }
     }
   }
 )
@@ -38,6 +74,7 @@ watch(
     if (newUrl) {
       audioPlayer.value.src = newUrl
       if (props.isPlaying) {
+        playStatic()
         audioPlayer.value.play().catch((e) => {
           console.error('Playback failed', e)
         })
@@ -112,7 +149,7 @@ watch(
     </div>
 
     <!-- Audio Element -->
-    <audio ref="audioPlayer" class="hidden" />
+    <audio ref="audioPlayer" class="hidden" @playing="onAudioPlaying" />
   </div>
 </template>
 

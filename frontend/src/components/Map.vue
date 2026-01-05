@@ -6,6 +6,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 const props = defineProps<{
   guessedCountries?: string[]
   selectedCountry?: string
+  secretCountry?: string
 }>()
 
 const mapContainer = ref<HTMLElement | null>(null)
@@ -40,6 +41,20 @@ watch(
       map.value.setFilter('countries-highlight', ['==', 'NAME', newSelected])
     } else {
       map.value.setFilter('countries-highlight', ['==', 'NAME', ''])
+    }
+  }
+)
+
+// Update secret highlight
+watch(
+  () => props.secretCountry,
+  (newSecret) => {
+    if (!map.value || !map.value.getLayer('countries-secret')) return
+
+    if (newSecret) {
+      map.value.setFilter('countries-secret', ['==', 'NAME', newSecret])
+    } else {
+      map.value.setFilter('countries-secret', ['==', 'NAME', ''])
     }
   }
 )
@@ -117,6 +132,18 @@ onMounted(() => {
         'fill-opacity': 1,
       },
       filter: ['==', 'NAME', props.selectedCountry || ''],
+    })
+
+    // Add secret debug layer (red fill) - initially hidden
+    map.value.addLayer({
+      id: 'countries-secret',
+      type: 'fill',
+      source: 'countries',
+      paint: {
+        'fill-color': '#ef4444', // red-500
+        'fill-opacity': 1,
+      },
+      filter: ['==', 'NAME', props.secretCountry || ''],
     })
 
     // Add countries border layer
