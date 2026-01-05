@@ -2,6 +2,7 @@
 import gsap from 'gsap'
 import { onMounted, onUnmounted, ref, computed } from 'vue'
 import { useRadio } from '../composables/useRadio'
+import GameResultModal from '../components/GameResultModal.vue'
 import GuessPanel from '../components/GuessPanel.vue'
 import Footer from '../components/Footer.vue'
 import Map from '../components/Map.vue'
@@ -11,6 +12,15 @@ const isPlaying = ref(false)
 const currentStation = ref(1)
 const guessInput = ref('')
 const guesses = ref<string[]>([])
+
+// Game State
+const showModal = ref(false)
+const modalConfig = ref({
+  title: '',
+  message: '',
+  buttonText: '',
+  isWin: false,
+})
 
 const { loadStations, selectRandomCountry, currentStations, selectedCountry } =
   useRadio()
@@ -32,10 +42,38 @@ const handleNext = () => {
 }
 
 const handleAddGuess = () => {
-  if (guessInput.value.trim() && guesses.value.length < 5) {
-    guesses.value.push(guessInput.value.trim())
-    guessInput.value = ''
+  const guess = guessInput.value.trim()
+  if (!guess || guesses.value.length >= 5) return
+
+  // Check if won
+  if (guess.toLowerCase() === selectedCountry.value.toLowerCase()) {
+    modalConfig.value = {
+      title: 'You got it!',
+      message: `Wooo! The country was ${selectedCountry.value}. Great job!`,
+      buttonText: 'Play Again',
+      isWin: true,
+    }
+    showModal.value = true
+    return
   }
+
+  // Add guess and check loss
+  guesses.value.push(guess)
+  guessInput.value = ''
+
+  if (guesses.value.length >= 5) {
+    modalConfig.value = {
+      title: 'Game Over',
+      message: `Better luck next time. The country was ${selectedCountry.value}. Play again?`,
+      buttonText: 'Try Again',
+      isWin: false,
+    }
+    showModal.value = true
+  }
+}
+
+const handleModalConfirm = () => {
+  window.location.reload()
 }
 
 const handleCountrySelect = (name: string) => {
@@ -187,6 +225,16 @@ onUnmounted(() => {
     <div class="relative z-10">
       <Footer class="!py-0 text-xs" />
     </div>
+
+    <!-- Game Result Modal -->
+    <GameResultModal
+      :show="showModal"
+      :title="modalConfig.title"
+      :message="modalConfig.message"
+      :button-text="modalConfig.buttonText"
+      :is-win="modalConfig.isWin"
+      @confirm="handleModalConfirm"
+    />
   </div>
 </template>
 
