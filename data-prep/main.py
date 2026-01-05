@@ -100,6 +100,45 @@ if lost_countries:
     console.print(f"  Lost countries: [yellow]{', '.join(lost_countries)}[/yellow]")
 
 # ==============================================================================
+# FILTERING: COUNTRIES WITH <5 RADIO STATIONS
+# ==============================================================================
+
+# Filter out countries with fewer than 5 radio stations
+console.print(
+    "\n[bold yellow]Filtering: Removing countries with <5 radio stations[/bold yellow]"
+)
+before = len(radio)
+before_countries = radio["country"].nunique()
+countries_before = set(radio["country"].unique())
+
+# Count stations per country
+stations_per_country = radio.groupby("country").size()
+countries_to_keep = stations_per_country[stations_per_country >= 5].index
+
+# Filter the dataframe
+radio = radio[radio["country"].isin(countries_to_keep)]
+
+after = len(radio)
+after_countries = radio["country"].nunique()
+countries_after = set(radio["country"].unique())
+lost_countries = sorted(countries_before - countries_after)
+
+console.print(
+    f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
+)
+console.print(
+    f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green] ([dim]removed {len(lost_countries)}[/dim])"
+)
+if lost_countries:
+    # Show countries that were removed with their station counts
+    removed_countries_info = stations_per_country[
+        stations_per_country.index.isin(lost_countries)
+    ].sort_values()
+    console.print(f"  Lost countries with their station counts:")
+    for country, count in removed_countries_info.items():
+        console.print(f"    {country}: {count} station(s)")
+
+# ==============================================================================
 # GEOSPATIAL PROCESSING
 # ==============================================================================
 
@@ -354,6 +393,49 @@ console.print(
 
 
 # ==============================================================================
+# FILTERING: COUNTRIES WITH <5 RADIO STATIONS (FINAL CHECK)
+# ==============================================================================
+
+# Filter out countries with fewer than 5 radio stations (final check after all other filters)
+console.print(
+    "\n[bold yellow]Filtering: Final check - removing countries with <5 radio stations[/bold yellow]"
+)
+before = len(radio_ne)
+before_countries = radio_ne["ISO_A2"].nunique()
+countries_before_data = radio_ne[["ISO_A2", "NAME"]].drop_duplicates()
+
+# Count stations per country
+stations_per_country_check = radio_ne.groupby("ISO_A2").size()
+countries_to_keep = stations_per_country_check[stations_per_country_check >= 5].index
+
+# Filter the dataframe
+radio_ne = radio_ne[radio_ne["ISO_A2"].isin(countries_to_keep)]
+
+after = len(radio_ne)
+after_countries = radio_ne["ISO_A2"].nunique()
+countries_after = set(radio_ne["ISO_A2"].unique())
+lost_iso_codes = sorted(set(countries_before_data["ISO_A2"].unique()) - countries_after)
+
+console.print(
+    f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
+)
+console.print(
+    f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green] ([dim]removed {len(lost_iso_codes)}[/dim])"
+)
+if lost_iso_codes:
+    # Show countries that were removed with their station counts
+    removed_countries_info = stations_per_country_check[
+        stations_per_country_check.index.isin(lost_iso_codes)
+    ].sort_values()
+    console.print(f"  Lost countries with their station counts:")
+    for iso_code, count in removed_countries_info.items():
+        country_name = countries_before_data[
+            countries_before_data["ISO_A2"] == iso_code
+        ]["NAME"].iloc[0]
+        console.print(f"    {country_name} ({iso_code}): {count} station(s)")
+
+
+# ==============================================================================
 # FINAL DATA PREPARATION
 # ==============================================================================
 
@@ -426,10 +508,10 @@ summary_table.add_column("% of Total", justify="right", style="magenta")
 
 total_stations = stations_per_country["station_count"].sum()
 
-for idx, row in stations_per_country.iterrows():
+for rank, (idx, row) in enumerate(stations_per_country.iterrows(), start=1):
     percentage = (row["station_count"] / total_stations) * 100
     summary_table.add_row(
-        str(idx + 1),
+        str(rank),
         row["NAME"],
         row["ISO_A2"],
         f"{row['POP_EST']:,.0f}",
