@@ -20,6 +20,14 @@ POPULATION_PERCENTILE_THRESHOLD = 0.10  # 10th percentile (bottom 10%)
 # DATA LOADING
 # ==============================================================================
 
+
+# print header bar
+console.print(
+    "[bold cyan]═════════════════════════════════════════════════════════════[/]",
+    "\n[bold cyan]START[/]",
+    "\n[bold cyan]═════════════════════════════════════════════════════════════[/]\n",
+)
+
 console.print("\n[bold cyan]Loading data...[/bold cyan]")
 radio = pd.read_csv("crawl/out/output.csv")
 ne = gpd.read_file("data/ne_50m_admin_0_countries.geojson")
@@ -344,4 +352,67 @@ with open(output_path, "w") as f:
 
 console.print(
     f"[bold green]✓ Successfully saved {len(radio_final):,} records to {output_path}[/bold green]\n"
+)
+
+# ==============================================================================
+# FINAL SUMMARY: STATIONS PER COUNTRY
+# ==============================================================================
+
+console.print(
+    "\n[bold cyan]═══════════════════════════════════════════════════════[/bold cyan]"
+)
+console.print("[bold cyan]FINAL SUMMARY: Radio Stations by Country[/bold cyan]")
+console.print(
+    "[bold cyan]═══════════════════════════════════════════════════════[/bold cyan]\n"
+)
+
+# Calculate stations per country with population
+stations_per_country = (
+    radio_final.groupby(["ISO_A2", "NAME", "POP_EST"])
+    .size()
+    .reset_index(name="station_count")
+    .sort_values("POP_EST", ascending=True)  # Sort by population, lowest to highest
+)
+
+# Create summary table
+summary_table = Table(
+    title=f"Radio Stations Distribution ({len(stations_per_country)} Countries) - Sorted by Population"
+)
+summary_table.add_column("Rank", justify="right", style="dim")
+summary_table.add_column("Country", style="cyan")
+summary_table.add_column("ISO", style="yellow")
+summary_table.add_column("Population", justify="right", style="blue")
+summary_table.add_column("Stations", justify="right", style="green")
+summary_table.add_column("% of Total", justify="right", style="magenta")
+
+total_stations = stations_per_country["station_count"].sum()
+
+for idx, row in stations_per_country.iterrows():
+    percentage = (row["station_count"] / total_stations) * 100
+    summary_table.add_row(
+        str(idx + 1),
+        row["NAME"],
+        row["ISO_A2"],
+        f"{row['POP_EST']:,.0f}",
+        f"{row['station_count']:,}",
+        f"{percentage:.1f}%",
+    )
+
+console.print(summary_table)
+
+# Print summary statistics
+console.print(f"\n[bold]Summary Statistics:[/bold]")
+console.print(f"  Total countries: [green]{len(stations_per_country)}[/green]")
+console.print(f"  Total stations: [green]{total_stations:,}[/green]")
+console.print(
+    f"  Average stations per country: [green]{stations_per_country['station_count'].mean():.1f}[/green]"
+)
+console.print(
+    f"  Median stations per country: [green]{stations_per_country['station_count'].median():.0f}[/green]"
+)
+console.print(
+    f"  Max stations (in {stations_per_country.iloc[0]['NAME']}): [green]{stations_per_country['station_count'].max():,}[/green]"
+)
+console.print(
+    f"  Min stations (in {stations_per_country.iloc[-1]['NAME']}): [green]{stations_per_country['station_count'].min():,}[/green]\n"
 )
