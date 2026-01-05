@@ -5,6 +5,7 @@ import pandas as pd
 from rich import print
 
 radio = pd.read_csv("crawl/out/output.csv")
+
 # ne = gpd.read_file("data/ne_110m_admin_0_countries.geojson")
 ne = gpd.read_file("data/ne_50m_admin_0_countries.geojson")
 
@@ -14,13 +15,22 @@ print("radio:", len(radio))
 print("ne:", len(ne))
 
 
+# for channel stream, fill na with empty string
+radio["channel_stream"] = radio["channel_stream"].fillna("")
+
+
 # filter out from radio if channel_resolved_url is null
 # print len before and after
 print("\nFiltering radio data: removing rows with null channel_resolved_url")
-print("len before:", len(radio))
+print(f"len before: {len(radio):,}")
 radio = radio[radio["channel_resolved_url"].notnull()]
-print("len after:", len(radio))
+print(f"len after: {len(radio):,}")
 
+# filter out channel_secure": false
+print("\nFiltering radio data: removing rows with channel_secure = false")
+print(f"len before: {len(radio):,}")
+radio = radio[radio["channel_secure"] == True]
+print(f"len after: {len(radio):,}")
 
 # make radio geo-spatial, using cols geo_lat, geo_lon
 radio_gdf = gpd.GeoDataFrame(
