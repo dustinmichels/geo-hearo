@@ -98,6 +98,10 @@ I have a dataset of the centerpoint of each country, `centers.json`, where count
 
 - The idea is to use the natural earth dataset as the underlying source of truth for matching countries. It has many two-letter and three-letter codes for each country.
 
+```sh
+curl -o data/ne_50m_admin_0_map_subunits.geojson https://naciscdn.org/naturalearth/50m/cultural/ne_50m_admin_0_map_subunits.geojson
+```
+
 ```json
 {
   "type": "Feature",

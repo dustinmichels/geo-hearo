@@ -8,4 +8,5 @@ dependencies = [
     "geopandas>=1.1.2",
     "jupyterlab>=4.5.1",
     "pandas>=2.3.3",
+    "rich>=14.2.0",
 ]

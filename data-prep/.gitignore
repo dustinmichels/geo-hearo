@@ -1,5 +1,7 @@
 out/*.json
+data/out/*.json
 crawl/out/*.csv
+
 
 crawl/crawl
 
