@@ -423,20 +423,6 @@ console.print(
 )
 
 # ==============================================================================
-# OUTPUT
-# ==============================================================================
-
-# Save as JSON
-output_path = "data/out/radio_with_countries.json"
-console.print(f"\n[bold cyan]Saving to {output_path}...[/bold cyan]")
-with open(output_path, "w") as f:
-    json.dump(radio_final.to_dict(orient="records"), f, indent=2)
-
-console.print(
-    f"[bold green]✓ Successfully saved {len(radio_final):,} records to {output_path}[/bold green]\n"
-)
-
-# ==============================================================================
 # FINAL SUMMARY: STATIONS PER COUNTRY
 # ==============================================================================
 
@@ -465,36 +451,28 @@ summary_table.add_column("Country", style="cyan")
 summary_table.add_column("ISO", style="yellow")
 summary_table.add_column("Population", justify="right", style="blue")
 summary_table.add_column("Stations", justify="right", style="green")
-summary_table.add_column("% of Total", justify="right", style="magenta")
-
-total_stations = stations_per_country["station_count"].sum()
 
 for rank, (idx, row) in enumerate(stations_per_country.iterrows(), start=1):
-    percentage = (row["station_count"] / total_stations) * 100
     summary_table.add_row(
         str(rank),
         row["NAME"],
         row["ISO_A2"],
         f"{row['POP_EST']:,.0f}",
         f"{row['station_count']:,}",
-        f"{percentage:.1f}%",
     )
 
 console.print(summary_table)
 
-# Print summary statistics
-console.print(f"\n[bold]Summary Statistics:[/bold]")
-console.print(f"  Total countries: [green]{len(stations_per_country)}[/green]")
-console.print(f"  Total stations: [green]{total_stations:,}[/green]")
+# ==============================================================================
+# OUTPUT
+# ==============================================================================
+
+# Save as JSON
+output_path = "data/out/radio_with_countries.json"
+console.print(f"\n[bold cyan]Saving to {output_path}...[/bold cyan]")
+with open(output_path, "w") as f:
+    json.dump(radio_final.to_dict(orient="records"), f, indent=2)
+
 console.print(
-    f"  Average stations per country: [green]{stations_per_country['station_count'].mean():.1f}[/green]"
-)
-console.print(
-    f"  Median stations per country: [green]{stations_per_country['station_count'].median():.0f}[/green]"
-)
-console.print(
-    f"  Max stations (in {stations_per_country.iloc[0]['NAME']}): [green]{stations_per_country['station_count'].max():,}[/green]"
-)
-console.print(
-    f"  Min stations (in {stations_per_country.iloc[-1]['NAME']}): [green]{stations_per_country['station_count'].min():,}[/green]\n"
+    f"[bold green]✓ Successfully saved {len(radio_final):,} records to {output_path}[/bold green]\n"
 )
