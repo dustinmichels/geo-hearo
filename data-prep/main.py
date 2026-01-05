@@ -468,7 +468,7 @@ console.print(summary_table)
 # ==============================================================================
 
 # Save as JSON
-output_path = "data/out/radio_with_countries.json"
+output_path = "data/out/all_radio_with_countries.json"
 console.print(f"\n[bold cyan]Saving to {output_path}...[/bold cyan]")
 with open(output_path, "w") as f:
     json.dump(radio_final.to_dict(orient="records"), f, indent=2)
@@ -476,3 +476,73 @@ with open(output_path, "w") as f:
 console.print(
     f"[bold green]✓ Successfully saved {len(radio_final):,} records to {output_path}[/bold green]\n"
 )
+
+# ==============================================================================
+# CREATE FILTERED VERSION: 5 STATIONS PER COUNTRY
+# ==============================================================================
+
+console.print(
+    "\n[bold cyan]Creating filtered version with 5 stations per country...[/bold cyan]"
+)
+
+# Verify country count before filtering
+unique_countries_before = radio_final["ISO_A2"].nunique()
+console.print(f"  Countries in final dataset: {unique_countries_before}")
+
+import random
+
+# Set seed for reproducibility (optional - remove if you want different results each time)
+random.seed(42)
+
+filtered_stations = []
+countries_processed = set()
+
+# Group by country
+for country_code in sorted(radio_final["ISO_A2"].unique()):
+    country_stations = radio_final[radio_final["ISO_A2"] == country_code].copy()
+    country_name = country_stations.iloc[0]["NAME"]
+
+    # Separate boosted and non-boosted stations
+    boosted = country_stations[country_stations["boost"] == True].to_dict("records")
+    unboosted = country_stations[country_stations["boost"] == False].to_dict("records")
+
+    all_stations = boosted + unboosted
+
+    # Step 1: Select up to 3 random boosted stations (if available)
+    num_boosted_to_select = min(3, len(boosted))
+    selected_boosted = random.sample(boosted, num_boosted_to_select)
+
+    # Step 2: Select remaining slots from all stations except the ones already selected
+    remaining_slots = 5 - len(selected_boosted)
+    available_for_remaining = [s for s in all_stations if s not in selected_boosted]
+    selected_remaining = random.sample(
+        available_for_remaining, min(remaining_slots, len(available_for_remaining))
+    )
+
+    # Step 3: Combine and shuffle
+    country_selection = selected_boosted + selected_remaining
+    random.shuffle(country_selection)
+
+    filtered_stations.extend(country_selection)
+    countries_processed.add(country_code)
+
+    console.print(
+        f"  {country_name} ({country_code}): selected {len(country_selection)} stations "
+        f"({len(selected_boosted)} boosted prioritized) "
+        f"[dim]from {len(country_stations)} total[/dim]"
+    )
+
+console.print(f"\n  Total countries processed: {len(countries_processed)}")
+
+# Save filtered version
+filtered_output_path = "data/out/filtered_radio_with_countries.json"
+console.print(
+    f"\n[bold cyan]Saving filtered version to {filtered_output_path}...[/bold cyan]"
+)
+with open(filtered_output_path, "w") as f:
+    json.dump(filtered_stations, f, indent=2)
+
+console.print(
+    f"[bold green]✓ Successfully saved {len(filtered_stations):,} records to {filtered_output_path}[/bold green]"
+)
+console.print(f"[bold green]  ({len(countries_processed)} countries)[/bold green]\n")
