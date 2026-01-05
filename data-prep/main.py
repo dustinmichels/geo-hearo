@@ -10,6 +10,13 @@ from rich.table import Table
 console = Console()
 
 # ==============================================================================
+# CONFIGURATION
+# ==============================================================================
+
+# Population percentile threshold - countries below this percentile will be filtered out
+POPULATION_PERCENTILE_THRESHOLD = 0.10  # 10th percentile (bottom 10%)
+
+# ==============================================================================
 # DATA LOADING
 # ==============================================================================
 
@@ -251,6 +258,53 @@ if lost_iso_codes:
         f"{row['NAME']} ({row['ISO_A2']})" for _, row in lost_country_names.iterrows()
     ]
     console.print(f"  Lost countries: [yellow]{', '.join(lost_names_list)}[/yellow]")
+
+
+# ==============================================================================
+# FILTERING: REMOVE BOTTOM 10% OF COUNTRIES BY POPULATION
+# ==============================================================================
+
+console.print(
+    f"\n[bold yellow]Filtering: Removing bottom {POPULATION_PERCENTILE_THRESHOLD * 100:.0f}% of countries by population (based on Natural Earth dataset)[/bold yellow]"
+)
+
+# Calculate the percentile threshold from the ORIGINAL Natural Earth dataset
+pop_threshold = ne["POP_EST"].quantile(POPULATION_PERCENTILE_THRESHOLD)
+console.print(
+    f"  Population threshold ({POPULATION_PERCENTILE_THRESHOLD * 100:.0f}th percentile of NE dataset): {pop_threshold:,.0f}"
+)
+
+# Get unique countries in current working dataset with their population
+country_populations = radio_ne[["ISO_A2", "NAME", "POP_EST"]].drop_duplicates()
+
+# Identify countries below threshold in our working dataset
+countries_below_threshold = country_populations[
+    country_populations["POP_EST"] < pop_threshold
+].sort_values("POP_EST")
+
+console.print(
+    f"  Countries in working dataset below threshold: {len(countries_below_threshold)}"
+)
+if len(countries_below_threshold) > 0:
+    console.print("  Countries to be removed:")
+    for _, row in countries_below_threshold.iterrows():
+        console.print(f"    {row['NAME']} ({row['ISO_A2']}): {row['POP_EST']:,.0f}")
+
+before = len(radio_ne)
+before_countries = radio_ne["ISO_A2"].nunique()
+
+# Filter out countries below threshold
+radio_ne = radio_ne[radio_ne["POP_EST"] >= pop_threshold]
+
+after = len(radio_ne)
+after_countries = radio_ne["ISO_A2"].nunique()
+
+console.print(
+    f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
+)
+console.print(
+    f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green] ([dim]removed {len(countries_below_threshold)}[/dim])"
+)
 
 
 # ==============================================================================
