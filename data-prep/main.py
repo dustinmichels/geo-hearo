@@ -43,6 +43,34 @@ table.add_row("Country Centers", f"{len(centers):,}")
 console.print(table)
 
 # ==============================================================================
+# PLACE_SIZE ANALYSIS
+# ==============================================================================
+
+console.print("\n[bold cyan]Analyzing place_size distribution...[/bold cyan]")
+
+place_size_stats = radio["place_size"].describe(
+    percentiles=[0.25, 0.5, 0.75, 0.90, 0.95, 0.99]
+)
+
+stats_table = Table(title="place_size Statistics")
+stats_table.add_column("Metric", style="cyan")
+stats_table.add_column("Value", justify="right", style="green")
+
+stats_table.add_row("Count", f"{place_size_stats['count']:,.0f}")
+stats_table.add_row("Mean", f"{place_size_stats['mean']:.2f}")
+stats_table.add_row("Std Dev", f"{place_size_stats['std']:.2f}")
+stats_table.add_row("Min", f"{place_size_stats['min']:.0f}")
+stats_table.add_row("25th percentile", f"{place_size_stats['25%']:.0f}")
+stats_table.add_row("50th percentile (Median)", f"{place_size_stats['50%']:.0f}")
+stats_table.add_row("75th percentile", f"{place_size_stats['75%']:.0f}")
+stats_table.add_row("90th percentile", f"{place_size_stats['90%']:.0f}")
+stats_table.add_row("95th percentile", f"{place_size_stats['95%']:.0f}")
+stats_table.add_row("99th percentile", f"{place_size_stats['99%']:.0f}")
+stats_table.add_row("Max", f"{place_size_stats['max']:.0f}")
+
+console.print(stats_table)
+
+# ==============================================================================
 # DATA CLEANING & PREPARATION
 # ==============================================================================
 
@@ -502,34 +530,58 @@ for country_code in sorted(radio_final["ISO_A2"].unique()):
     country_stations = radio_final[radio_final["ISO_A2"] == country_code].copy()
     country_name = country_stations.iloc[0]["NAME"]
 
-    # Separate boosted and non-boosted stations
-    boosted = country_stations[country_stations["boost"] == True].to_dict("records")
-    unboosted = country_stations[country_stations["boost"] == False].to_dict("records")
-
-    all_stations = boosted + unboosted
-
-    # Step 1: Select up to 3 random boosted stations (if available)
-    num_boosted_to_select = min(3, len(boosted))
-    selected_boosted = random.sample(boosted, num_boosted_to_select)
-
-    # Step 2: Select remaining slots from all stations except the ones already selected
-    remaining_slots = 5 - len(selected_boosted)
-    available_for_remaining = [s for s in all_stations if s not in selected_boosted]
-    selected_remaining = random.sample(
-        available_for_remaining, min(remaining_slots, len(available_for_remaining))
+    # Separate by place_size and boost status
+    large_place = country_stations[country_stations["place_size"] > 7].to_dict(
+        "records"
     )
+    boosted = country_stations[country_stations["boost"] == True].to_dict("records")
+    all_stations = country_stations.to_dict("records")
 
-    # Step 3: Combine and shuffle
-    country_selection = selected_boosted + selected_remaining
+    selected_stations = []
+
+    # Step 1: Try to select one station with place_size > 7
+    large_place_selected = False
+    if len(large_place) > 0:
+        selected_large = random.sample(large_place, 1)
+        selected_stations.extend(selected_large)
+        large_place_selected = True
+
+    # Step 2: Try to get 2 boosted stations (different from already selected)
+    available_boosted = [s for s in boosted if s not in selected_stations]
+    num_boosted_to_select = min(2, len(available_boosted))
+    if num_boosted_to_select > 0:
+        selected_boosted = random.sample(available_boosted, num_boosted_to_select)
+        selected_stations.extend(selected_boosted)
+
+    # Step 3: Fill remaining slots with random stations (different than ones already selected)
+    remaining_slots = 5 - len(selected_stations)
+    if remaining_slots > 0:
+        available_remaining = [s for s in all_stations if s not in selected_stations]
+        num_remaining_to_select = min(remaining_slots, len(available_remaining))
+        if num_remaining_to_select > 0:
+            selected_remaining = random.sample(
+                available_remaining, num_remaining_to_select
+            )
+            selected_stations.extend(selected_remaining)
+
+    # Shuffle the final selection
+    country_selection = selected_stations
     random.shuffle(country_selection)
 
     filtered_stations.extend(country_selection)
     countries_processed.add(country_code)
 
+    # Report selection details
+    large_place_text = (
+        "[green]place_size>7: Yes[/green]"
+        if large_place_selected
+        else "[red]place_size>7: No[/red]"
+    )
     console.print(
-        f"  {country_name} ({country_code}): selected {len(country_selection)} stations "
-        f"({len(selected_boosted)} boosted prioritized) "
-        f"[dim]from {len(country_stations)} total[/dim]"
+        f"  {country_name} ({country_code}): selected {len(country_selection)} stations | "
+        f"{large_place_text} | "
+        f"{num_boosted_to_select} boosted | "
+        f"[dim]{len(country_stations)} total available[/dim]"
     )
 
 console.print(f"\n  Total countries processed: {len(countries_processed)}")
