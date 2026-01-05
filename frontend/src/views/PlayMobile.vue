@@ -2,6 +2,7 @@
 import gsap from 'gsap'
 import { FloatingPanel as VanFloatingPanel } from 'vant'
 import { computed, onMounted, ref } from 'vue'
+import { useRadio } from '../composables/useRadio'
 import AnimatedArrows from '../components/AnimatedArrows.vue'
 import GuessPanel from '../components/GuessPanel.vue'
 import Map from '../components/Map.vue'
@@ -11,6 +12,13 @@ const isPlaying = ref(false)
 const currentStation = ref(1)
 const guessInput = ref('')
 const guesses = ref<string[]>([])
+
+const { loadStations, selectRandomCountry, currentStations, selectedCountry } =
+  useRadio()
+
+const currentStationUrl = computed(() => {
+  return currentStations.value[currentStation.value - 1]?.channel_resolved_url
+})
 
 // Vant Floating Panel setup
 const anchors = [
@@ -83,6 +91,12 @@ const overlayOpacity = computed(() => {
 })
 
 onMounted(() => {
+  loadStations().then(() => {
+    if (!selectedCountry.value) {
+      selectRandomCountry()
+    }
+  })
+
   // Move blobs around
   gsap.to(blob1.value, {
     x: 50,
@@ -150,6 +164,7 @@ onMounted(() => {
         <RadioPlayer
           :is-playing="isPlaying"
           :current-station="currentStation"
+          :station-url="currentStationUrl"
           @play-pause="handlePlayPause"
           @previous="handlePrevious"
           @next="handleNext"

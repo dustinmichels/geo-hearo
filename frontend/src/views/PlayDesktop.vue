@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import gsap from 'gsap'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, computed } from 'vue'
+import { useRadio } from '../composables/useRadio'
 import GuessPanel from '../components/GuessPanel.vue'
 import Footer from '../components/Footer.vue'
 import Map from '../components/Map.vue'
@@ -10,6 +11,13 @@ const isPlaying = ref(false)
 const currentStation = ref(1)
 const guessInput = ref('')
 const guesses = ref<string[]>([])
+
+const { loadStations, selectRandomCountry, currentStations, selectedCountry } =
+  useRadio()
+
+const currentStationUrl = computed(() => {
+  return currentStations.value[currentStation.value - 1]?.channel_resolved_url
+})
 
 const handlePlayPause = () => {
   isPlaying.value = !isPlaying.value
@@ -65,6 +73,12 @@ const blob2 = ref(null)
 
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
+
+  loadStations().then(() => {
+    if (!selectedCountry.value) {
+      selectRandomCountry()
+    }
+  })
 
   // Move blobs around
   gsap.to(blob1.value, {
@@ -147,6 +161,7 @@ onUnmounted(() => {
             <RadioPlayer
               :is-playing="isPlaying"
               :current-station="currentStation"
+              :station-url="currentStationUrl"
               @play-pause="handlePlayPause"
               @previous="handlePrevious"
               @next="handleNext"

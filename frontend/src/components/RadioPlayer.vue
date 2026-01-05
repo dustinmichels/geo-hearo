@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { Play, Pause, SkipBack, SkipForward } from 'lucide-vue-next'
 import { Button as VanButton } from 'vant'
+import { ref, watch } from 'vue'
 
-defineProps<{
+const props = defineProps<{
   isPlaying: boolean
   currentStation: number
+  stationUrl?: string
 }>()
 
 const emit = defineEmits<{
@@ -12,6 +14,37 @@ const emit = defineEmits<{
   (e: 'previous'): void
   (e: 'next'): void
 }>()
+
+const audioPlayer = ref<HTMLAudioElement | null>(null)
+
+watch(
+  () => props.isPlaying,
+  (playing) => {
+    if (!audioPlayer.value) return
+    if (playing) {
+      audioPlayer.value.play().catch((e) => {
+        console.error('Playback failed', e)
+      })
+    } else {
+      audioPlayer.value.pause()
+    }
+  }
+)
+
+watch(
+  () => props.stationUrl,
+  (newUrl) => {
+    if (!audioPlayer.value) return
+    if (newUrl) {
+      audioPlayer.value.src = newUrl
+      if (props.isPlaying) {
+        audioPlayer.value.play().catch((e) => {
+          console.error('Playback failed', e)
+        })
+      }
+    }
+  }
+)
 </script>
 
 <template>
@@ -77,6 +110,9 @@ const emit = defineEmits<{
         "
       />
     </div>
+
+    <!-- Audio Element -->
+    <audio ref="audioPlayer" class="hidden" />
   </div>
 </template>
 
