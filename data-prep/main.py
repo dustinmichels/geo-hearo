@@ -100,45 +100,6 @@ if lost_countries:
     console.print(f"  Lost countries: [yellow]{', '.join(lost_countries)}[/yellow]")
 
 # ==============================================================================
-# FILTERING: COUNTRIES WITH <5 RADIO STATIONS
-# ==============================================================================
-
-# Filter out countries with fewer than 5 radio stations
-console.print(
-    "\n[bold yellow]Filtering: Removing countries with <5 radio stations[/bold yellow]"
-)
-before = len(radio)
-before_countries = radio["country"].nunique()
-countries_before = set(radio["country"].unique())
-
-# Count stations per country
-stations_per_country = radio.groupby("country").size()
-countries_to_keep = stations_per_country[stations_per_country >= 5].index
-
-# Filter the dataframe
-radio = radio[radio["country"].isin(countries_to_keep)]
-
-after = len(radio)
-after_countries = radio["country"].nunique()
-countries_after = set(radio["country"].unique())
-lost_countries = sorted(countries_before - countries_after)
-
-console.print(
-    f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
-)
-console.print(
-    f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green] ([dim]removed {len(lost_countries)}[/dim])"
-)
-if lost_countries:
-    # Show countries that were removed with their station counts
-    removed_countries_info = stations_per_country[
-        stations_per_country.index.isin(lost_countries)
-    ].sort_values()
-    console.print(f"  Lost countries with their station counts:")
-    for country, count in removed_countries_info.items():
-        console.print(f"    {country}: {count} station(s)")
-
-# ==============================================================================
 # GEOSPATIAL PROCESSING
 # ==============================================================================
 
