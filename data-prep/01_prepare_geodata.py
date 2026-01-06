@@ -9,7 +9,7 @@ console = Console()
 # CONFIGURATION
 # ==============================================================================
 
-NE_INPUT = "data/ne_50m_admin_0_countries.geojson"
+NE_INPUT = "data/ne_10m_admin_0_countries.zip"
 CENTERS_INPUT = "./data/centers.geojson"
 NE_OUTPUT = "data/out/ne_countries.geojson"
 CENTERS_OUTPUT = "data/out/centers.geojson"
@@ -29,7 +29,7 @@ console.print(
 # ==============================================================================
 
 console.print("\n[bold cyan]Loading data...[/bold cyan]")
-ne = gpd.read_file(NE_INPUT)
+ne = gpd.read_file(f"zip://{NE_INPUT}")
 centers = gpd.read_file(CENTERS_INPUT)
 
 # Print summary table
@@ -70,6 +70,41 @@ else:
     console.print("  [green]✓ No ISO codes need fixing[/green]")
 
 # ==============================================================================
+# CHECK FOR MISSING CENTERS
+# ==============================================================================
+
+console.print("\n[bold cyan]Checking for countries without centers...[/bold cyan]")
+
+# Determine the ISO column name in centers dataset
+iso_col = "ISO" if "ISO" in centers.columns else None
+
+if iso_col is not None:
+    centers_isos = set(centers[iso_col].unique())
+    ne_isos = set(ne["ISO_A2"].unique())
+
+    missing_isos = ne_isos - centers_isos
+
+    if missing_isos:
+        console.print(
+            f"\n[yellow]Found {len(missing_isos)} countries without centers:[/yellow]\n"
+        )
+
+        missing_countries = ne[ne["ISO_A2"].isin(missing_isos)][
+            ["ISO_A2", "NAME"]
+        ].sort_values("NAME")
+
+        for _, row in missing_countries.iterrows():
+            console.print(f"  {row['ISO_A2']}: {row['NAME']}")
+
+        console.print(
+            f"\n[yellow]⚠ These countries will use computed centroids[/yellow]"
+        )
+    else:
+        console.print("[green]✓ All countries have centers[/green]")
+else:
+    console.print("[yellow]⚠ Cannot determine ISO column in centers dataset[/yellow]")
+
+# ==============================================================================
 # OUTPUT: NATURAL EARTH GEOJSON
 # ==============================================================================
 
@@ -79,6 +114,7 @@ console.print("\n[bold cyan]Creating Natural Earth GeoJSON output...[/bold cyan]
 ne_output_cols = [
     "ADMIN",
     "NAME",
+    "SUBUNIT",
     "ISO_A3",
     "ISO_A2",
     "POSTAL",
@@ -163,8 +199,42 @@ console.print(
     f"[bold green]✓ Successfully saved {len(centers_gdf):,} country centers to {CENTERS_OUTPUT}[/bold green]\n"
 )
 
+# ==============================================================================
+# FINAL SUMMARY
+# ==============================================================================
+
 console.print(
-    "[bold cyan]═════════════════════════════════════════════════════════════[/]",
+    "\n[bold cyan]═════════════════════════════════════════════════════════════[/]"
+)
+console.print("[bold cyan]FINAL SUMMARY[/]")
+console.print(
+    "[bold cyan]═════════════════════════════════════════════════════════════[/]\n"
+)
+
+summary_table = Table(title="Processing Results")
+summary_table.add_column("Metric", style="cyan")
+summary_table.add_column("Count", justify="right", style="green")
+
+summary_table.add_row("Countries in Natural Earth", f"{len(ne_output):,}")
+summary_table.add_row("Centers output", f"{len(centers_gdf):,}")
+summary_table.add_row("ISO codes fixed", f"{iso_fixes_count:,}")
+summary_table.add_row("Original centers used", f"{used_original:,}")
+summary_table.add_row("Centroids computed", f"{computed_centroid:,}")
+
+console.print(summary_table)
+
+# Verify all countries have centers
+if len(ne_output) == len(centers_gdf):
+    console.print(
+        "\n[bold green]✓ All countries have corresponding center entries[/bold green]"
+    )
+else:
+    console.print(
+        f"\n[bold red]✗ Mismatch: {len(ne_output)} countries but {len(centers_gdf)} centers[/bold red]"
+    )
+
+console.print(
+    "\n[bold cyan]═════════════════════════════════════════════════════════════[/]",
     "\n[bold green]SCRIPT 1 COMPLETE[/]",
     "\n[bold cyan]═════════════════════════════════════════════════════════════[/]\n",
 )

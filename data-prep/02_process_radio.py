@@ -15,7 +15,6 @@ console = Console()
 
 RADIO_INPUT = "crawl/out/output.csv"
 NE_INPUT = "data/out/ne_countries.geojson"
-CENTERS_INPUT = "data/out/centers.geojson"
 OUTPUT = "data/out/all_radio_with_countries.json"
 
 # Population percentile threshold - countries below this percentile will be filtered out
@@ -38,7 +37,6 @@ console.print(
 console.print("\n[bold cyan]Loading data...[/bold cyan]")
 radio = pd.read_csv(RADIO_INPUT)
 ne = gpd.read_file(NE_INPUT)
-centers = gpd.read_file(CENTERS_INPUT)
 
 # Print summary table
 table = Table(title="Dataset Summary")
@@ -46,36 +44,7 @@ table.add_column("Dataset", style="cyan")
 table.add_column("Records", justify="right", style="green")
 table.add_row("Radio stations", f"{len(radio):,}")
 table.add_row("Countries (Natural Earth)", f"{len(ne):,}")
-table.add_row("Country Centers", f"{len(centers):,}")
 console.print(table)
-
-# ==============================================================================
-# PLACE_SIZE ANALYSIS
-# ==============================================================================
-
-console.print("\n[bold cyan]Analyzing place_size distribution...[/bold cyan]")
-
-place_size_stats = radio["place_size"].describe(
-    percentiles=[0.25, 0.5, 0.75, 0.90, 0.95, 0.99]
-)
-
-stats_table = Table(title="place_size Statistics")
-stats_table.add_column("Metric", style="cyan")
-stats_table.add_column("Value", justify="right", style="green")
-
-stats_table.add_row("Count", f"{place_size_stats['count']:,.0f}")
-stats_table.add_row("Mean", f"{place_size_stats['mean']:.2f}")
-stats_table.add_row("Std Dev", f"{place_size_stats['std']:.2f}")
-stats_table.add_row("Min", f"{place_size_stats['min']:.0f}")
-stats_table.add_row("25th percentile", f"{place_size_stats['25%']:.0f}")
-stats_table.add_row("50th percentile (Median)", f"{place_size_stats['50%']:.0f}")
-stats_table.add_row("75th percentile", f"{place_size_stats['75%']:.0f}")
-stats_table.add_row("90th percentile", f"{place_size_stats['90%']:.0f}")
-stats_table.add_row("95th percentile", f"{place_size_stats['95%']:.0f}")
-stats_table.add_row("99th percentile", f"{place_size_stats['99%']:.0f}")
-stats_table.add_row("Max", f"{place_size_stats['max']:.0f}")
-
-console.print(stats_table)
 
 # ==============================================================================
 # DATA CLEANING & PREPARATION
@@ -178,114 +147,6 @@ if lost_countries:
 else:
     console.print("[green]✓ No countries lost during spatial join[/green]")
 
-# ==============================================================================
-# MERGE WITH CENTERS DATASET
-# ==============================================================================
-
-console.print(
-    "\n[bold cyan]Merging with centers dataset and computing centroids...[/bold cyan]"
-)
-
-# Extract coordinates from centers geometry
-centers_with_coords = centers.copy()
-centers_with_coords["center"] = centers_with_coords.geometry.apply(
-    lambda geom: [geom.x, geom.y] if geom is not None else None
-)
-
-# Select only ISO and centers columns for merge
-centers_merge = centers_with_coords[["iso_a2", "center"]]
-
-# Merge with radio_ne, keeping all records from radio_ne
-before = len(radio_ne)
-radio_ne = radio_ne.merge(
-    centers_merge, left_on="ISO_A2", right_on="iso_a2", how="left"
-)
-after = len(radio_ne)
-
-# Count records with and without centers
-records_with_centers = radio_ne["center"].notna().sum()
-records_without_centers = radio_ne["center"].isna().sum()
-
-console.print(f"  Records merged: {after:,}")
-console.print(
-    f"  Records with centers from dataset: [green]{records_with_centers:,}[/green]"
-)
-console.print(
-    f"  Records missing centers: [yellow]{records_without_centers:,}[/yellow]"
-)
-
-# Compute centroids for missing centers using country geometry
-if records_without_centers > 0:
-    console.print(
-        f"  [cyan]Computing centroids for {records_without_centers:,} records...[/cyan]"
-    )
-
-    # Get unique countries missing centers
-    countries_missing_centers = (
-        radio_ne[radio_ne["center"].isna()][["ISO_A2", "NAME"]]
-        .drop_duplicates()
-        .sort_values("NAME")
-    )
-
-    console.print(
-        f"  Countries requiring centroid computation: {len(countries_missing_centers)}"
-    )
-    for _, row in countries_missing_centers.iterrows():
-        console.print(f"    {row['NAME']} ({row['ISO_A2']})")
-
-    # Compute centroids for records missing centers
-    mask = radio_ne["center"].isna()
-    radio_ne.loc[mask, "center"] = radio_ne.loc[mask].apply(
-        lambda row: [row.geometry.centroid.x, row.geometry.centroid.y]
-        if hasattr(row, "geometry") and row.geometry is not None
-        else None,
-        axis=1,
-    )
-
-    # Verify all records now have centers
-    still_missing = radio_ne["center"].isna().sum()
-    if still_missing == 0:
-        console.print(
-            f"  [green]✓ All {records_without_centers:,} missing centroids computed successfully[/green]"
-        )
-    else:
-        console.print(
-            f"  [yellow]⚠ {still_missing} records still missing centroids[/yellow]"
-        )
-
-# ==============================================================================
-# FILTERING: REMOVE SPECIAL ADMINISTRATIVE REGIONS
-# ==============================================================================
-
-console.print(
-    "\n[bold yellow]Filtering: Removing level 4 special administrative regions[/bold yellow]"
-)
-before = len(radio_ne)
-before_countries = radio_ne["ISO_A2"].nunique()
-countries_before_data = radio_ne[["ISO_A2", "NAME"]].drop_duplicates()
-
-radio_ne = radio_ne[radio_ne["LEVEL"] != 4]
-
-after = len(radio_ne)
-after_countries = radio_ne["ISO_A2"].nunique()
-countries_after = set(radio_ne["ISO_A2"].unique())
-lost_iso_codes = sorted(set(countries_before_data["ISO_A2"].unique()) - countries_after)
-
-console.print(
-    f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
-)
-console.print(
-    f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green] ([dim]removed {len(lost_iso_codes)}[/dim])"
-)
-if lost_iso_codes:
-    lost_country_names = countries_before_data[
-        countries_before_data["ISO_A2"].isin(lost_iso_codes)
-    ]
-    lost_country_names = lost_country_names.sort_values("NAME")
-    lost_names_list = [
-        f"{row['NAME']} ({row['ISO_A2']})" for _, row in lost_country_names.iterrows()
-    ]
-    console.print(f"  Lost countries: [yellow]{', '.join(lost_names_list)}[/yellow]")
 
 # ==============================================================================
 # FILTERING: REMOVE BOTTOM 10% OF COUNTRIES BY POPULATION
@@ -395,7 +256,6 @@ selected_ne_cols = [
     "LEVEL",
     "POP_EST",
     "POP_RANK",
-    "center",
 ]
 
 # Prepare final columns list
