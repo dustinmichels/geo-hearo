@@ -13,25 +13,32 @@ console = Console()
 # CONFIGURATION
 # ==============================================================================
 
+RADIO_INPUT = "crawl/out/output.csv"
+NE_INPUT = "data/out/ne_countries.geojson"
+CENTERS_INPUT = "data/out/centers.geojson"
+OUTPUT = "data/out/all_radio_with_countries.json"
+
 # Population percentile threshold - countries below this percentile will be filtered out
 POPULATION_PERCENTILE_THRESHOLD = 0.10  # 10th percentile (bottom 10%)
+
+# ==============================================================================
+# MAIN
+# ==============================================================================
+
+console.print(
+    "[bold cyan]═════════════════════════════════════════════════════════════[/]",
+    "\n[bold cyan]SCRIPT 2: PROCESS RADIO STATIONS[/]",
+    "\n[bold cyan]═════════════════════════════════════════════════════════════[/]\n",
+)
 
 # ==============================================================================
 # DATA LOADING
 # ==============================================================================
 
-
-# print header bar
-console.print(
-    "[bold cyan]═════════════════════════════════════════════════════════════[/]",
-    "\n[bold cyan]START[/]",
-    "\n[bold cyan]═════════════════════════════════════════════════════════════[/]\n",
-)
-
 console.print("\n[bold cyan]Loading data...[/bold cyan]")
-radio = pd.read_csv("crawl/out/output.csv")
-ne = gpd.read_file("data/ne_50m_admin_0_countries.geojson")
-centers = gpd.read_file("./data/centers.geojson")
+radio = pd.read_csv(RADIO_INPUT)
+ne = gpd.read_file(NE_INPUT)
+centers = gpd.read_file(CENTERS_INPUT)
 
 # Print summary table
 table = Table(title="Dataset Summary")
@@ -81,7 +88,6 @@ radio["channel_stream"] = radio["channel_stream"].fillna("")
 # FILTERING: NULL CHANNEL URLS
 # ==============================================================================
 
-# Filter out null channel_resolved_url
 console.print(
     "\n[bold yellow]Filtering: Removing stations without 'resolved' URLs[/bold yellow]"
 )
@@ -107,7 +113,6 @@ if lost_countries:
 # FILTERING: INSECURE CHANNELS
 # ==============================================================================
 
-# Filter out insecure channels
 console.print("\n[bold yellow]Filtering: Removing insecure channels[/bold yellow]")
 before = len(radio)
 before_countries = radio["country"].nunique()
@@ -131,7 +136,6 @@ if lost_countries:
 # GEOSPATIAL PROCESSING
 # ==============================================================================
 
-# Create GeoDataFrame
 console.print("\n[bold cyan]Creating geo-spatial data...[/bold cyan]")
 radio_gdf = gpd.GeoDataFrame(
     radio,
@@ -143,7 +147,6 @@ radio_gdf = gpd.GeoDataFrame(
 # SPATIAL JOIN WITH COUNTRY BOUNDARIES
 # ==============================================================================
 
-# Spatial join
 console.print(
     "\n[bold cyan]Performing spatial join with country boundaries...[/bold cyan]"
 )
@@ -175,55 +178,10 @@ if lost_countries:
 else:
     console.print("[green]✓ No countries lost during spatial join[/green]")
 
-
-# ==============================================================================
-# FIX ISO CODES
-# ==============================================================================
-
-# Fix ISO_A2 codes: use ISO_A2_EH as fallback when ISO_A2 is -99
-console.print(
-    "\n[bold cyan]Fixing ISO codes (using ISO_A2_EH fallback for -99 values)...[/bold cyan]"
-)
-before = len(radio_ne)
-before_countries = radio_ne["country"].nunique()
-
-iso_fixes_count = (radio_ne["ISO_A2"] == "-99").sum()
-if iso_fixes_count > 0:
-    console.print(f"  Found {iso_fixes_count:,} records with ISO_A2 = -99")
-    # Show which countries are affected
-    affected = (
-        radio_ne[radio_ne["ISO_A2"] == "-99"][["NAME", "ISO_A2_EH"]]
-        .drop_duplicates()
-        .sort_values("NAME")
-    )
-    for _, row in affected.iterrows():
-        console.print(f"    {row['NAME']}: -99 → {row['ISO_A2_EH']}")
-
-    # Apply the fix
-    radio_ne["ISO_A2"] = radio_ne.apply(
-        lambda row: row["ISO_A2_EH"] if row["ISO_A2"] == "-99" else row["ISO_A2"],
-        axis=1,
-    )
-    console.print(f"  [green]✓ Fixed {iso_fixes_count:,} ISO codes[/green]")
-else:
-    console.print("  [green]✓ No ISO codes need fixing[/green]")
-
-after = len(radio_ne)
-after_countries = radio_ne["country"].nunique()
-
-console.print(
-    f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]no records removed[/dim])"
-)
-console.print(
-    f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green]"
-)
-
-
 # ==============================================================================
 # MERGE WITH CENTERS DATASET
 # ==============================================================================
 
-# Merge with centers dataset and compute centroids for missing records
 console.print(
     "\n[bold cyan]Merging with centers dataset and computing centroids...[/bold cyan]"
 )
@@ -235,11 +193,13 @@ centers_with_coords["center"] = centers_with_coords.geometry.apply(
 )
 
 # Select only ISO and centers columns for merge
-centers_merge = centers_with_coords[["ISO", "center"]]
+centers_merge = centers_with_coords[["iso_a2", "center"]]
 
 # Merge with radio_ne, keeping all records from radio_ne
 before = len(radio_ne)
-radio_ne = radio_ne.merge(centers_merge, left_on="ISO_A2", right_on="ISO", how="left")
+radio_ne = radio_ne.merge(
+    centers_merge, left_on="ISO_A2", right_on="iso_a2", how="left"
+)
 after = len(radio_ne)
 
 # Count records with and without centers
@@ -275,8 +235,6 @@ if records_without_centers > 0:
 
     # Compute centroids for records missing centers
     mask = radio_ne["center"].isna()
-    # Get the country polygon geometry from the original ne dataset
-    # Use the geometry column which contains the country boundaries
     radio_ne.loc[mask, "center"] = radio_ne.loc[mask].apply(
         lambda row: [row.geometry.centroid.x, row.geometry.centroid.y]
         if hasattr(row, "geometry") and row.geometry is not None
@@ -295,14 +253,10 @@ if records_without_centers > 0:
             f"  [yellow]⚠ {still_missing} records still missing centroids[/yellow]"
         )
 
-
 # ==============================================================================
 # FILTERING: REMOVE SPECIAL ADMINISTRATIVE REGIONS
 # ==============================================================================
 
-# filter out NE 'level 4 = Lease or special administrative region'
-# Examples: Hong Kong, Macau, some military bases
-# Areas under special governance arrangements
 console.print(
     "\n[bold yellow]Filtering: Removing level 4 special administrative regions[/bold yellow]"
 )
@@ -333,7 +287,6 @@ if lost_iso_codes:
     ]
     console.print(f"  Lost countries: [yellow]{', '.join(lost_names_list)}[/yellow]")
 
-
 # ==============================================================================
 # FILTERING: REMOVE BOTTOM 10% OF COUNTRIES BY POPULATION
 # ==============================================================================
@@ -342,8 +295,9 @@ console.print(
     f"\n[bold yellow]Filtering: Removing bottom {POPULATION_PERCENTILE_THRESHOLD * 100:.0f}% of countries by population (based on Natural Earth dataset)[/bold yellow]"
 )
 
-# Calculate the percentile threshold from the ORIGINAL Natural Earth dataset
-pop_threshold = ne["POP_EST"].quantile(POPULATION_PERCENTILE_THRESHOLD)
+# Load original Natural Earth to calculate threshold
+ne_original = gpd.read_file("data/ne_50m_admin_0_countries.geojson")
+pop_threshold = ne_original["POP_EST"].quantile(POPULATION_PERCENTILE_THRESHOLD)
 console.print(
     f"  Population threshold ({POPULATION_PERCENTILE_THRESHOLD * 100:.0f}th percentile of NE dataset): {pop_threshold:,.0f}"
 )
@@ -380,12 +334,10 @@ console.print(
     f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green] ([dim]removed {len(countries_below_threshold)}[/dim])"
 )
 
-
 # ==============================================================================
 # FILTERING: COUNTRIES WITH <5 RADIO STATIONS (FINAL CHECK)
 # ==============================================================================
 
-# Filter out countries with fewer than 5 radio stations (final check after all other filters)
 console.print(
     "\n[bold yellow]Filtering: Final check - removing countries with <5 radio stations[/bold yellow]"
 )
@@ -423,14 +375,16 @@ if lost_iso_codes:
         ]["NAME"].iloc[0]
         console.print(f"    {country_name} ({iso_code}): {count} station(s)")
 
-
 # ==============================================================================
 # FINAL DATA PREPARATION
 # ==============================================================================
 
-# Prepare final data
-# LEVEL - Administrative level (2=country, 3=dependency, etc.)
-# POP_EST
+console.print("\n[bold cyan]Preparing final dataset...[/bold cyan]")
+
+# Get original radio columns
+original_radio_cols = radio.columns.tolist()
+
+# Select NE columns to add
 selected_ne_cols = [
     "ADMIN",
     "NAME",
@@ -441,13 +395,15 @@ selected_ne_cols = [
     "LEVEL",
     "POP_EST",
     "POP_RANK",
-    "center",  # Added centers column
+    "center",
 ]
-final_cols = radio.columns.tolist() + selected_ne_cols
+
+# Prepare final columns list
+final_cols = original_radio_cols + selected_ne_cols
 radio_final = radio_ne[final_cols]
 
 console.print(
-    f"\n[bold green]✓ Final record count: {len(radio_final):,} stations across {radio_final['ISO_A2'].nunique()} countries[/bold green]"
+    f"[bold green]✓ Final record count: {len(radio_final):,} stations across {radio_final['ISO_A2'].nunique()} countries[/bold green]"
 )
 
 # ==============================================================================
@@ -467,7 +423,7 @@ stations_per_country = (
     radio_final.groupby(["ISO_A2", "NAME", "POP_EST"])
     .size()
     .reset_index(name="station_count")
-    .sort_values("POP_EST", ascending=True)  # Sort by population, lowest to highest
+    .sort_values("POP_EST", ascending=True)
 )
 
 # Create summary table
@@ -495,225 +451,16 @@ console.print(summary_table)
 # OUTPUT
 # ==============================================================================
 
-# Save as JSON
-output_path = "data/out/all_radio_with_countries.json"
-console.print(f"\n[bold cyan]Saving to {output_path}...[/bold cyan]")
-with open(output_path, "w") as f:
+console.print(f"\n[bold cyan]Saving to {OUTPUT}...[/bold cyan]")
+with open(OUTPUT, "w") as f:
     json.dump(radio_final.to_dict(orient="records"), f, indent=2)
 
 console.print(
-    f"[bold green]✓ Successfully saved {len(radio_final):,} records to {output_path}[/bold green]\n"
+    f"[bold green]✓ Successfully saved {len(radio_final):,} records to {OUTPUT}[/bold green]\n"
 )
-
-# ==============================================================================
-# CREATE FILTERED VERSION: 5 STATIONS PER COUNTRY
-# ==============================================================================
 
 console.print(
-    "\n[bold cyan]Creating filtered version with 5 stations per country...[/bold cyan]"
-)
-
-# Verify country count before filtering
-unique_countries_before = radio_final["ISO_A2"].nunique()
-console.print(f"  Countries in final dataset: {unique_countries_before}")
-
-import random
-
-# Set seed for reproducibility (optional - remove if you want different results each time)
-random.seed(42)
-
-filtered_stations = []
-countries_processed = set()
-
-# Group by country
-for country_code in sorted(radio_final["ISO_A2"].unique()):
-    country_stations = radio_final[radio_final["ISO_A2"] == country_code].copy()
-    country_name = country_stations.iloc[0]["NAME"]
-
-    # Separate by place_size and boost status
-    large_place = country_stations[country_stations["place_size"] > 7].to_dict(
-        "records"
-    )
-    boosted = country_stations[country_stations["boost"] == True].to_dict("records")
-    all_stations = country_stations.to_dict("records")
-
-    selected_stations = []
-
-    # Step 1: Try to select one station with place_size > 7
-    large_place_selected = False
-    if len(large_place) > 0:
-        selected_large = random.sample(large_place, 1)
-        selected_stations.extend(selected_large)
-        large_place_selected = True
-
-    # Step 2: Try to get 2 boosted stations (different from already selected)
-    available_boosted = [s for s in boosted if s not in selected_stations]
-    num_boosted_to_select = min(2, len(available_boosted))
-    if num_boosted_to_select > 0:
-        selected_boosted = random.sample(available_boosted, num_boosted_to_select)
-        selected_stations.extend(selected_boosted)
-
-    # Step 3: Fill remaining slots with random stations (different than ones already selected)
-    remaining_slots = 5 - len(selected_stations)
-    if remaining_slots > 0:
-        available_remaining = [s for s in all_stations if s not in selected_stations]
-        num_remaining_to_select = min(remaining_slots, len(available_remaining))
-        if num_remaining_to_select > 0:
-            selected_remaining = random.sample(
-                available_remaining, num_remaining_to_select
-            )
-            selected_stations.extend(selected_remaining)
-
-    # Shuffle the final selection
-    country_selection = selected_stations
-    random.shuffle(country_selection)
-
-    filtered_stations.extend(country_selection)
-    countries_processed.add(country_code)
-
-    # Report selection details
-    large_place_text = (
-        "[green]place_size>7: Yes[/green]"
-        if large_place_selected
-        else "[red]place_size>7: No[/red]"
-    )
-    console.print(
-        f"  {country_name} ({country_code}): selected {len(country_selection)} stations | "
-        f"{large_place_text} | "
-        f"{num_boosted_to_select} boosted | "
-        f"[dim]{len(country_stations)} total available[/dim]"
-    )
-
-console.print(f"\n  Total countries processed: {len(countries_processed)}")
-
-# Save filtered version
-filtered_output_path = "data/out/filtered_radio_with_countries.json"
-console.print(
-    f"\n[bold cyan]Saving filtered version to {filtered_output_path}...[/bold cyan]"
-)
-with open(filtered_output_path, "w") as f:
-    json.dump(filtered_stations, f, indent=2)
-
-console.print(
-    f"[bold green]✓ Successfully saved {len(filtered_stations):,} records to {filtered_output_path}[/bold green]"
-)
-console.print(f"[bold green]  ({len(countries_processed)} countries)[/bold green]\n")
-
-# ==============================================================================
-# OUTPUT: NATURAL EARTH GEOJSON
-# ==============================================================================
-
-console.print("\n[bold cyan]Creating Natural Earth GeoJSON output...[/bold cyan]")
-
-# Get unique countries from final dataset
-final_country_codes = radio_final["ISO_A2"].unique()
-
-# Filter Natural Earth data to only include countries that appear in final dataset
-ne_filtered = ne[ne["ISO_A2"].isin(final_country_codes)].copy()
-
-# Apply the same ISO fix that was done to radio_ne
-iso_fixes_ne = (ne_filtered["ISO_A2"] == "-99").sum()
-if iso_fixes_ne > 0:
-    console.print(f"  Fixing {iso_fixes_ne} ISO codes in Natural Earth data...")
-    ne_filtered["ISO_A2"] = ne_filtered.apply(
-        lambda row: row["ISO_A2_EH"] if row["ISO_A2"] == "-99" else row["ISO_A2"],
-        axis=1,
-    )
-
-# Select columns to keep
-ne_output_cols = [
-    "ADMIN",
-    "NAME",
-    "ISO_A3",
-    "ISO_A2",
-    "POSTAL",
-    "CONTINENT",
-    "LEVEL",
-    "POP_EST",
-    "POP_RANK",
-    "geometry",
-]
-
-ne_output = ne_filtered[ne_output_cols]
-
-# Save as GeoJSON
-ne_output_path = "data/out/ne_countries.geojson"
-console.print(f"  Saving to {ne_output_path}...")
-ne_output.to_file(ne_output_path, driver="GeoJSON")
-
-console.print(
-    f"[bold green]✓ Successfully saved {len(ne_output):,} countries to {ne_output_path}[/bold green]\n"
-)
-
-# ==============================================================================
-# OUTPUT: CENTERS GEOJSON
-# ==============================================================================
-
-console.print("\n[bold cyan]Creating Centers GeoJSON output...[/bold cyan]")
-
-# Check what columns are in the centers dataset
-console.print(f"  Centers dataset columns: {list(centers.columns)}")
-
-# Determine the ISO column name in centers dataset
-iso_col = None
-for col in centers.columns:
-    if "iso" in col.lower() and "a2" in col.lower():
-        iso_col = col
-        break
-
-if iso_col is None:
-    console.print(
-        "[yellow]  Warning: Could not find ISO_A2 column in centers dataset, will compute all centroids[/yellow]"
-    )
-
-# Create a dataset with centers - use original if exists, otherwise compute centroid
-centers_output_data = []
-used_original = 0
-computed_centroid = 0
-
-for idx, country in ne_output.iterrows():
-    iso = country["ISO_A2"]
-
-    # Get original center from centers dataset if available
-    if iso_col is not None:
-        original_center = centers[centers[iso_col] == iso]
-    else:
-        original_center = []
-
-    if len(original_center) > 0:
-        # Use original center
-        original_geom = original_center.iloc[0].geometry
-        lon = original_geom.x
-        lat = original_geom.y
-        used_original += 1
-    else:
-        # Compute centroid from country geometry
-        centroid = country["geometry"].centroid
-        lon = centroid.x
-        lat = centroid.y
-        computed_centroid += 1
-
-    centers_output_data.append(
-        {"iso_a2": iso, "name": country["NAME"], "lon": lon, "lat": lat}
-    )
-
-console.print(f"  Using original centers: {used_original}")
-console.print(f"  Computing centroids: {computed_centroid}")
-
-# Create GeoDataFrame
-centers_gdf = gpd.GeoDataFrame(
-    centers_output_data,
-    geometry=gpd.points_from_xy(
-        [d["lon"] for d in centers_output_data], [d["lat"] for d in centers_output_data]
-    ),
-    crs="EPSG:4326",
-)
-
-# Save as GeoJSON
-centers_output_path = "data/out/centers.geojson"
-console.print(f"  Saving to {centers_output_path}...")
-centers_gdf.to_file(centers_output_path, driver="GeoJSON")
-
-console.print(
-    f"[bold green]✓ Successfully saved {len(centers_gdf):,} country centers to {centers_output_path}[/bold green]\n"
+    "[bold cyan]═════════════════════════════════════════════════════════════[/]",
+    "\n[bold green]SCRIPT 2 COMPLETE[/]",
+    "\n[bold cyan]═════════════════════════════════════════════════════════════[/]\n",
 )
