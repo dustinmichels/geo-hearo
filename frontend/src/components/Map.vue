@@ -2,6 +2,7 @@
 import { onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import { Loader2 } from 'lucide-vue-next'
 
 const props = defineProps<{
   guessedCountries?: string[]
@@ -12,6 +13,7 @@ const props = defineProps<{
 
 const mapContainer = ref<HTMLElement | null>(null)
 const map = shallowRef<maplibregl.Map | null>(null)
+const loaded = ref(false)
 
 const emit = defineEmits<{
   (e: 'select-country', name: string): void
@@ -105,6 +107,7 @@ onMounted(() => {
 
   map.value.on('load', () => {
     if (!map.value) return
+    loaded.value = true
 
     // Add source for countries
     map.value.addSource('countries', {
@@ -224,6 +227,12 @@ onUnmounted(() => {
   <div
     class="w-full h-full rounded-xl overflow-hidden shadow-sm border border-slate-200 relative bg-slate-50"
   >
+    <div
+      v-show="!loaded"
+      class="absolute inset-0 flex items-center justify-center bg-slate-50 z-10 w-full h-full"
+    >
+      <Loader2 class="w-10 h-10 text-indigo-500 animate-spin" />
+    </div>
     <div ref="mapContainer" class="w-full h-full" />
   </div>
 </template>
