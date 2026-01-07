@@ -15,6 +15,7 @@ export interface RadioStation {
   geo_lon: number
   channel_resolved_url: string
   center: [number, number]
+  ISO_A2?: string
 }
 
 const allStations = ref<RadioStation[]>([])
@@ -23,24 +24,54 @@ const secretCountry = ref<string>('')
 const currentStations = ref<RadioStation[]>([])
 const isLoading = ref(false)
 
+// Centers data
+const nameToIso = ref<Map<string, string>>(new Map())
+const isoToCenter = ref<Map<string, [number, number]>>(new Map())
+
 export function useRadio() {
   const loadStations = async () => {
     if (allStations.value.length > 0) return // Already loaded
 
     isLoading.value = true
     try {
-      const response = await fetch('/data/radio.json')
-      const data = await response.json()
-      allStations.value = data
+      // Load radio stations
+      const radioResponse = await fetch('/data/radio.json')
+      const radioData = await radioResponse.json()
+      allStations.value = radioData
 
-      // Extract unique countries
+      // Load centers data
+      const centersResponse = await fetch('/data/centers.geojson')
+      const centersData = await centersResponse.json()
+      
+      // Process centers
+      const nToI = new Map<string, string>()
+      const iToC = new Map<string, [number, number]>()
+      
+      if (centersData.features) {
+        centersData.features.forEach((feature: any) => {
+          if (feature.properties?.iso_a2 && feature.geometry?.coordinates) {
+             const iso = feature.properties.iso_a2
+             const name = feature.properties.name
+             const coords = feature.geometry.coordinates as [number, number]
+             
+             iToC.set(iso, coords)
+             if (name) {
+               nToI.set(name, iso)
+             }
+          }
+        })
+      }
+      nameToIso.value = nToI
+      isoToCenter.value = iToC
+
+      // Extract unique countries based on radio data
       const uniqueCountries = new Set<string>()
-      data.forEach((station: RadioStation) => {
+      radioData.forEach((station: RadioStation) => {
         if (station.country) uniqueCountries.add(station.country)
       })
       countries.value = Array.from(uniqueCountries)
     } catch (error) {
-      console.error('Failed to load radio stations:', error)
+      console.error('Failed to load data:', error)
     } finally {
       isLoading.value = false
     }
@@ -60,9 +91,30 @@ export function useRadio() {
       )
 
       // We want 5 stations. If less, take all. If more, shuffle or take first 5.
-      // Since the user says "Radio stations as vue variables as well", let's store them.
       currentStations.value = countryStations.slice(0, 5)
     }
+  }
+  
+  const getCoordinates = (countryName: string): { lat: number, lng: number } | null => {
+    // 1. Try to find by name in our centers map
+    let iso = nameToIso.value.get(countryName)
+    
+    // 2. If not found, it might be the secret country from radio data, 
+    // try to find ISO from radio stations
+    if (!iso) {
+      const station = allStations.value.find(s => s.country === countryName)
+      if (station?.ISO_A2) {
+        iso = station.ISO_A2
+      }
+    }
+    
+    if (iso) {
+      const center = isoToCenter.value.get(iso)
+      if (center) {
+        return { lng: center[0], lat: center[1] }
+      }
+    }
+    return null
   }
 
   return {
@@ -73,5 +125,6 @@ export function useRadio() {
     isLoading,
     loadStations,
     selectRandomCountry,
+    getCoordinates,
   }
 }

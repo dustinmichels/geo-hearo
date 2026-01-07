@@ -8,7 +8,7 @@ import GameResultModal from '../components/GameResultModal.vue'
 import GuessPanel from '../components/GuessPanel.vue'
 import Map from '../components/Map.vue'
 import RadioPlayer from '../components/RadioPlayer.vue'
-import { getCountryLocation, getDirectionalArrows } from '../utils/geography'
+import { getDirectionalArrows } from '../utils/geography'
 import { getColorForArrowCount } from '../utils/colors'
 
 const isPlaying = ref(false)
@@ -31,7 +31,7 @@ const {
   selectRandomCountry,
   currentStations,
   secretCountry,
-  allStations,
+  getCoordinates,
 } = useRadio()
 
 const currentStationUrl = computed(() => {
@@ -81,11 +81,8 @@ const handleAddGuess = () => {
   }
 
   // Calculate Color
-  const secretCoords = getCountryLocation(
-    secretCountry.value,
-    allStations.value
-  )
-  const guessCoords = getCountryLocation(guess, allStations.value)
+  const secretCoords = getCoordinates(secretCountry.value)
+  const guessCoords = getCoordinates(guess)
 
   if (secretCoords && guessCoords) {
     const { count } = getDirectionalArrows(guessCoords, secretCoords)

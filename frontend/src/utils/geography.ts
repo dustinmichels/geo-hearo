@@ -1,5 +1,3 @@
-import type { RadioStation } from '../composables/useRadio'
-
 interface Coordinates {
   lat: number
   lng: number
@@ -8,20 +6,6 @@ interface Coordinates {
 interface DirectionResult {
   arrows: string
   count: number
-}
-
-export function getCountryLocation(
-  countryName: string,
-  stations: RadioStation[]
-): Coordinates | null {
-  const station = stations.find((s) => s.country === countryName)
-  if (!station || !station.center) return null
-  // radio.json "center" is [lng, lat] based on the file content I saw earlier:
-  // "center": [33.361435, 35.174778] (lng, lat) for Cyprus
-  return {
-    lng: station.center[0],
-    lat: station.center[1],
-  }
 }
 
 export function getDirectionalArrows(
