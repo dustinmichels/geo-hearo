@@ -3,7 +3,8 @@ import gsap from 'gsap'
 import { FloatingPanel as VanFloatingPanel } from 'vant'
 import { computed, onMounted, ref } from 'vue'
 import { useRadio } from '../composables/useRadio'
-import AnimatedArrows from '../components/AnimatedArrows.vue'
+// import AnimatedArrows from '../components/AnimatedArrows.vue'
+import AnimatedClose from '../components/AnimatedClose.vue'
 import GameResultModal from '../components/GameResultModal.vue'
 import GuessPanel from '../components/GuessPanel.vue'
 import Map from '../components/Map.vue'
@@ -202,7 +203,7 @@ onMounted(() => {
 
     <!-- Animated Arrows Hint -->
     <div class="relative z-50" v-show="isPanelFullHeight">
-      <AnimatedArrows class="!top-9" @click="handleArrowClick" />
+      <AnimatedClose class="!top-9" @click="handleArrowClick" />
     </div>
 
     <!-- Fixed content area -->
