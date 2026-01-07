@@ -251,6 +251,7 @@ selected_ne_cols = [
     "NAME",
     "ISO_A3",
     "ISO_A2",
+    "ISO_A2_EH",
     "POSTAL",
     "CONTINENT",
     "LEVEL",

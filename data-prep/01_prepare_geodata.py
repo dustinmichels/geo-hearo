@@ -160,6 +160,7 @@ ne_output_cols = [
     "SUBUNIT",
     "ISO_A3",
     "ISO_A2",
+    "ISO_A2_EH",
     "POSTAL",
     "CONTINENT",
     "LEVEL",
