@@ -214,17 +214,17 @@ onMounted(() => {
     >
       <!-- Title -->
       <div class="pt-6 px-4 flex justify-center">
-        <div class="relative">
+        <div class="relative z-10">
           <h1
             class="text-center text-pencil-lead text-3xl font-heading tracking-wider pb-3"
           >
             GeoHearo
           </h1>
-          <span
-            class="absolute left-full bottom-1 text-5xl ml-4 leading-[0.8] z-20 whitespace-nowrap transition-transform duration-700 ease-out"
+          <img
+            src="/emoji.png"
+            class="absolute left-full bottom-0 h-12 ml-4 z-0 transition-transform duration-700 ease-out"
             :class="isPlaying ? 'translate-y-0' : 'translate-y-16'"
-            >🦸</span
-          >
+          />
         </div>
       </div>
 

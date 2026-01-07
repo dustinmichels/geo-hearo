@@ -109,8 +109,8 @@ onMounted(() => {
     // Add source for countries
     map.value.addSource('countries', {
       type: 'geojson',
-      data: '/data/ne_110m_admin_0_countries.geojson',
-      promoteId: 'ADM0_A3',
+      data: '/data/ne_countries.geojson',
+      promoteId: 'ISO_A3',
     })
 
     // Add background layer (matches slate-50)

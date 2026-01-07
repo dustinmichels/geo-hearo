@@ -9,7 +9,7 @@ console = Console()
 # CONFIGURATION
 # ==============================================================================
 
-NE_INPUT = "data/ne_10m_admin_0_countries.zip"
+NE_INPUT = "data/ne_110m_admin_0_countries.geojson"
 CENTERS_INPUT = "./data/centers.geojson"
 NE_OUTPUT = "data/out/ne_countries.geojson"
 CENTERS_OUTPUT = "data/out/centers.geojson"
@@ -29,7 +29,7 @@ console.print(
 # ==============================================================================
 
 console.print("\n[bold cyan]Loading data...[/bold cyan]")
-ne = gpd.read_file(f"zip://{NE_INPUT}")
+ne = gpd.read_file(NE_INPUT)
 centers = gpd.read_file(CENTERS_INPUT)
 
 # Print summary table
@@ -41,33 +41,76 @@ table.add_row("Country Centers", f"{len(centers):,}")
 console.print(table)
 
 # ==============================================================================
-# FIX ISO CODES IN NATURAL EARTH
+# USE ISO_A2_EH AS ISO CODE
+# ==============================================================================
+
+console.print("\n[bold cyan]Using ISO_A2_EH as the ISO code column...[/bold cyan]")
+
+# Rename ISO_A2_EH to ISO_A2 for consistency
+ne["ISO_A2"] = ne["ISO_A2_EH"]
+
+console.print(
+    f"  [green]✓ Set ISO_A2 from ISO_A2_EH for all {len(ne):,} records[/green]"
+)
+
+# ==============================================================================
+# MERGE DISPUTED TERRITORIES
 # ==============================================================================
 
 console.print(
-    "\n[bold cyan]Fixing ISO codes (using ISO_A2_EH fallback for -99 values)...[/bold cyan]"
+    "\n[bold cyan]Merging disputed territories with parent countries...[/bold cyan]"
 )
 
-iso_fixes_count = (ne["ISO_A2"] == "-99").sum()
-if iso_fixes_count > 0:
-    console.print(f"  Found {iso_fixes_count:,} records with ISO_A2 = -99")
-    # Show which countries are affected
-    affected = (
-        ne[ne["ISO_A2"] == "-99"][["NAME", "ISO_A2_EH"]]
-        .drop_duplicates()
-        .sort_values("NAME")
-    )
-    for _, row in affected.iterrows():
-        console.print(f"    {row['NAME']}: -99 → {row['ISO_A2_EH']}")
+# Define territories to merge: disputed territory name -> parent country ISO code
+territories_to_merge = {
+    "N. Cyprus": "CY",  # Cyprus
+    "Somaliland": "SO",  # Somalia
+}
 
-    # Apply the fix
-    ne["ISO_A2"] = ne.apply(
-        lambda row: row["ISO_A2_EH"] if row["ISO_A2"] == "-99" else row["ISO_A2"],
-        axis=1,
+merged_count = 0
+
+for territory_name, parent_iso in territories_to_merge.items():
+    # Find the disputed territory
+    territory = ne[ne["NAME"] == territory_name]
+
+    if len(territory) == 0:
+        console.print(f"  [yellow]⚠ Territory '{territory_name}' not found[/yellow]")
+        continue
+
+    # Find the parent country
+    parent = ne[ne["ISO_A2"] == parent_iso]
+
+    if len(parent) == 0:
+        console.print(
+            f"  [yellow]⚠ Parent country with ISO '{parent_iso}' not found[/yellow]"
+        )
+        continue
+
+    territory_geom = territory.iloc[0].geometry
+    parent_idx = parent.index[0]
+    parent_geom = ne.loc[parent_idx, "geometry"]
+
+    # Merge geometries using unary_union
+    from shapely.ops import unary_union
+
+    merged_geom = unary_union([parent_geom, territory_geom])
+
+    # Update parent country geometry
+    ne.loc[parent_idx, "geometry"] = merged_geom
+
+    # Remove the disputed territory
+    ne = ne[ne["NAME"] != territory_name]
+
+    parent_name = ne.loc[parent_idx, "NAME"]
+    console.print(
+        f"  [green]✓ Merged {territory_name} into {parent_name} ({parent_iso})[/green]"
     )
-    console.print(f"  [green]✓ Fixed {iso_fixes_count:,} ISO codes[/green]")
-else:
-    console.print("  [green]✓ No ISO codes need fixing[/green]")
+    merged_count += 1
+
+console.print(
+    f"\n[bold green]✓ Merged {merged_count} disputed territories[/bold green]"
+)
+console.print(f"[bold green]✓ Dataset now has {len(ne):,} countries[/bold green]")
 
 # ==============================================================================
 # CHECK FOR MISSING CENTERS
@@ -217,7 +260,6 @@ summary_table.add_column("Count", justify="right", style="green")
 
 summary_table.add_row("Countries in Natural Earth", f"{len(ne_output):,}")
 summary_table.add_row("Centers output", f"{len(centers_gdf):,}")
-summary_table.add_row("ISO codes fixed", f"{iso_fixes_count:,}")
 summary_table.add_row("Original centers used", f"{used_original:,}")
 summary_table.add_row("Centroids computed", f"{computed_centroid:,}")
 
