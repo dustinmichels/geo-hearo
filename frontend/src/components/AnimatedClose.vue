@@ -25,7 +25,7 @@ onMounted(() => {
     <!-- Left X -->
     <div
       ref="xLeft"
-      class="text-white drop-shadow-md cursor-pointer pointer-events-auto opacity-80"
+      class="bg-paper-white text-berry-oops border-2 border-pencil-lead rounded-full p-1 drop-shadow-md cursor-pointer pointer-events-auto"
     >
       <X :size="32" :stroke-width="4" />
     </div>
@@ -33,7 +33,7 @@ onMounted(() => {
     <!-- Right X -->
     <div
       ref="xRight"
-      class="text-white drop-shadow-md cursor-pointer pointer-events-auto opacity-80"
+      class="bg-paper-white text-berry-oops border-2 border-pencil-lead rounded-full p-1 drop-shadow-md cursor-pointer pointer-events-auto"
     >
       <X :size="32" :stroke-width="4" />
     </div>
