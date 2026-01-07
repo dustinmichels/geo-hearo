@@ -46,6 +46,21 @@ export function getBearing(p1: Coordinates, p2: Coordinates): number {
   return (toDeg(theta) + 360) % 360
 }
 
+function getGridBearing(p1: Coordinates, p2: Coordinates): number {
+  const dLat = p2.lat - p1.lat
+  let dLon = p2.lng - p1.lng
+
+  // Normalize dLon to [-180, 180]
+  if (dLon > 180) dLon -= 360
+  if (dLon < -180) dLon += 360
+
+  // Calculate angle from North (0 deg)
+  // atan2(x, y) -> x is horizontal (dLon), y is vertical (dLat)
+  // This gives 0 for North (0, 1), 90 for East (1, 0)
+  const theta = Math.atan2(dLon, dLat)
+  return (toDeg(theta) + 360) % 360
+}
+
 function getArrowDistribution(bearing: number, totalSlots: number) {
   const bearingRad = toRad(bearing)
   
@@ -77,21 +92,16 @@ export function getDirectionalArrows(
     totalSlots = 1
   }
 
-  // 2. Calculate Bearing
-  const bearing = getBearing(guess, secret)
+  // 2. Calculate Bearing (Using Grid Bearing for flat-map logic)
+  const bearing = getGridBearing(guess, secret)
   
   // 3. Distribute Slots
   const { verticalSlots, horizontalSlots } = getArrowDistribution(bearing, totalSlots)
   
   // 4. Construct Arrow Strings
-  // Determine direction components based on bearing
-  // 0 is North, 90 East, 180 South, 270 West
   
   let latSymbol = ''
-  // North: 315-45 (approx check logic: if cos is positive, it's North-ish)
-  // Actually simpler: 
   // North-ish: bearing > 270 or < 90
-  // South-ish: bearing > 90 and < 270
   if (bearing > 270 || bearing < 90) {
       latSymbol = '⬆️'
   } else {
@@ -100,7 +110,6 @@ export function getDirectionalArrows(
   
   let lngSymbol = ''
   // East-ish: 0-180
-  // West-ish: 180-360
   if (bearing > 0 && bearing < 180) {
       lngSymbol = '➡️'
   } else {
