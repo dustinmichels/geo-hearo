@@ -21,7 +21,9 @@ export interface RadioStation {
 const allStations = ref<RadioStation[]>([])
 const countries = ref<string[]>([])
 const secretCountry = ref<string>('')
+const guesses = ref<string[]>([])
 const currentStations = ref<RadioStation[]>([])
+const STORAGE_KEY = 'geo_hearo_state'
 const isLoading = ref(false)
 
 // Centers data
@@ -70,11 +72,57 @@ export function useRadio() {
         if (station.country) uniqueCountries.add(station.country)
       })
       countries.value = Array.from(uniqueCountries)
+
+      // If we have a restored secretCountry but no stations yet, sync them now
+      if (secretCountry.value && currentStations.value.length === 0) {
+        const countryStations = allStations.value.filter(
+          (s) => s.country === secretCountry.value,
+        )
+        currentStations.value = countryStations.slice(0, 5)
+      }
     } catch (error) {
       console.error('Failed to load data:', error)
     } finally {
       isLoading.value = false
     }
+  }
+
+  const saveState = () => {
+    sessionStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        secretCountry: secretCountry.value,
+        guesses: guesses.value,
+      }),
+    )
+  }
+
+  const clearState = () => {
+    sessionStorage.removeItem(STORAGE_KEY)
+    guesses.value = []
+    secretCountry.value = ''
+    currentStations.value = []
+  }
+
+  const restoreState = () => {
+    const stored = sessionStorage.getItem(STORAGE_KEY)
+    if (stored) {
+      try {
+        const { secretCountry: s, guesses: g } = JSON.parse(stored)
+        if (s) secretCountry.value = s
+        if (g) guesses.value = g
+        return true
+      } catch (e) {
+        console.error('Failed to parse stored state', e)
+        return false
+      }
+    }
+    return false
+  }
+
+  const addGuess = (guess: string) => {
+    guesses.value.push(guess)
+    saveState()
   }
 
   const selectRandomCountry = () => {
@@ -83,6 +131,8 @@ export function useRadio() {
     const randomIndex = Math.floor(Math.random() * countries.value.length)
     const country = countries.value[randomIndex]
     if (country) {
+      // Clear previous game state
+      guesses.value = []
       secretCountry.value = country
 
       // Filter stations for this country
@@ -91,7 +141,9 @@ export function useRadio() {
       )
 
       // We want 5 stations. If less, take all. If more, shuffle or take first 5.
+      // We want 5 stations. If less, take all. If more, shuffle or take first 5.
       currentStations.value = countryStations.slice(0, 5)
+      saveState()
     }
   }
   
@@ -126,5 +178,10 @@ export function useRadio() {
     loadStations,
     selectRandomCountry,
     getCoordinates,
+    guesses,
+    addGuess,
+    saveState,
+    clearState,
+    restoreState,
   }
 }

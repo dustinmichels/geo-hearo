@@ -15,7 +15,7 @@ import { getColorForArrowCount } from '../utils/colors'
 const isPlaying = ref(false)
 const currentStation = ref(1)
 const guessInput = ref('')
-const guesses = ref<string[]>([])
+// guesses are now managed in useRadio
 const guessColors = ref<Record<string, string>>({})
 
 // Game State
@@ -33,6 +33,10 @@ const {
   currentStations,
   secretCountry,
   getCoordinates,
+  guesses,
+  addGuess,
+  clearState,
+  restoreState,
 } = useRadio()
 
 const currentStationUrl = computed(() => {
@@ -76,6 +80,7 @@ const handleAddGuess = () => {
       buttonText: 'Play Again',
       isWin: true,
     }
+    clearState()
     showModal.value = true
     return
   }
@@ -93,7 +98,7 @@ const handleAddGuess = () => {
   }
 
   // Add guess
-  guesses.value.push(guess)
+  addGuess(guess)
   guessInput.value = ''
 
   // Snap to fully open
@@ -107,8 +112,25 @@ const handleAddGuess = () => {
       buttonText: 'Try Again',
       isWin: false,
     }
+    clearState()
     showModal.value = true
   }
+}
+
+const populateGuessColors = () => {
+  guesses.value.forEach((guess) => {
+    if (guessColors.value[guess]) return
+    const secretCoords = getCoordinates(secretCountry.value)
+    const guessCoords = getCoordinates(guess)
+
+    if (secretCoords && guessCoords) {
+      const { count } = getDirectionalArrows(guessCoords, secretCoords)
+      const color = getColorForArrowCount(count)
+      guessColors.value[guess] = color
+    } else {
+      guessColors.value[guess] = '#FCD34D'
+    }
+  })
 }
 
 const handleModalConfirm = () => {
@@ -157,9 +179,13 @@ const overlayOpacity = computed(() => {
 })
 
 onMounted(() => {
+  restoreState()
+
   loadStations().then(() => {
     if (!secretCountry.value) {
       selectRandomCountry()
+    } else {
+      populateGuessColors()
     }
   })
 
@@ -201,8 +227,8 @@ onMounted(() => {
     ></div>
 
     <!-- Animated Arrows Hint -->
-    <div class="relative z-50" v-show="isPanelFullHeight">
-      <AnimatedClose class="!top-9" @click="handleArrowClick" />
+    <div class="relative z-[60]" v-show="isPanelFullHeight">
+      <AnimatedClose class="!top-16" @click="handleArrowClick" />
     </div>
 
     <!-- Fixed content area -->
@@ -211,22 +237,22 @@ onMounted(() => {
     >
       <!-- Title -->
       <div class="pt-6 px-4 flex justify-center">
-        <div class="relative z-10">
+        <div class="relative z-0">
           <h1
-            class="text-center text-pencil-lead text-3xl font-heading tracking-wider pb-3"
+            class="relative z-10 text-center text-pencil-lead text-3xl font-heading tracking-wider pb-3"
           >
             GeoHearo
           </h1>
           <img
             src="/emoji.png"
-            class="absolute left-full bottom-0 h-12 ml-4 z-0 transition-transform duration-700 ease-out"
+            class="absolute left-full bottom-0 h-12 ml-4 z-[-1] transition-transform duration-700 ease-out"
             :class="isPlaying ? 'translate-y-0' : 'translate-y-16'"
           />
         </div>
       </div>
 
       <!-- Radio Player -->
-      <div class="px-4 pb-2 relative z-30">
+      <div class="px-4 pb-2 relative z-40">
         <RadioPlayer
           :is-playing="isPlaying"
           :current-station="currentStation"

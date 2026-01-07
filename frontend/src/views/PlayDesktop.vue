@@ -13,7 +13,7 @@ import { getColorForArrowCount } from '../utils/colors'
 const isPlaying = ref(false)
 const currentStation = ref(1)
 const guessInput = ref('')
-const guesses = ref<string[]>([])
+// guesses are now managed in useRadio
 const guessColors = ref<Record<string, string>>({})
 
 // Game State
@@ -31,6 +31,10 @@ const {
   currentStations,
   secretCountry,
   getCoordinates,
+  guesses,
+  addGuess,
+  clearState,
+  restoreState,
 } = useRadio()
 
 const currentStationUrl = computed(() => {
@@ -67,6 +71,7 @@ const handleAddGuess = () => {
       buttonText: 'Play Again',
       isWin: true,
     }
+    clearState()
     showModal.value = true
     return
   }
@@ -85,7 +90,8 @@ const handleAddGuess = () => {
   }
 
   // Add guess and check loss
-  guesses.value.push(guess)
+  // Add guess and check loss
+  addGuess(guess)
   guessInput.value = ''
 
   if (guesses.value.length >= 5) {
@@ -95,8 +101,25 @@ const handleAddGuess = () => {
       buttonText: 'Try Again',
       isWin: false,
     }
+    clearState()
     showModal.value = true
   }
+}
+
+const populateGuessColors = () => {
+  guesses.value.forEach((guess) => {
+    if (guessColors.value[guess]) return
+    const secretCoords = getCoordinates(secretCountry.value)
+    const guessCoords = getCoordinates(guess)
+
+    if (secretCoords && guessCoords) {
+      const { count } = getDirectionalArrows(guessCoords, secretCoords)
+      const color = getColorForArrowCount(count)
+      guessColors.value[guess] = color
+    } else {
+      guessColors.value[guess] = '#FCD34D'
+    }
+  })
 }
 
 const handleModalConfirm = () => {
@@ -139,9 +162,13 @@ const blob2 = ref(null)
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
 
+  restoreState()
+
   loadStations().then(() => {
     if (!secretCountry.value) {
       selectRandomCountry()
+    } else {
+      populateGuessColors()
     }
   })
 

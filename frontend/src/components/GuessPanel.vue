@@ -48,17 +48,20 @@ const handleGuess = () => {
           :disabled="guesses.length >= 5"
           readonly
           @keypress.enter="handleGuess"
-          class="flex-1 !border-3 !border-pencil-lead !rounded-2xl !py-3 !px-4 !text-[18px] font-body placeholder:text-eraser-grey transition-colors bg-white hover:bg-white active:bg-white focus:bg-white"
-          :class="{ 'has-value': !!modelValue }"
+          class="flex-1 !border-3 !rounded-2xl !py-3 !px-4 !text-[18px] font-body text-pencil-lead placeholder:text-eraser-grey transition-colors bg-white"
+          :class="modelValue ? '!border-[#f472b6]' : '!border-pencil-lead'"
           :border="false"
         />
         <button
           @click="handleGuess"
           :disabled="!modelValue.trim() || guesses.length >= 5"
           :class="{ shake: isShaking }"
-          class="btn-pressable bg-yuzu-yellow h-[52px] px-6 rounded-xl font-heading text-lg text-pencil-lead uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+          class="btn-pressable bg-yuzu-yellow h-[52px] px-3 rounded-xl font-heading text-lg text-pencil-lead uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
         >
-          Guess {{ Math.min(guesses.length + 1, 5) }}/5
+          Guess
+          <span class="text-sm ml-1 lowercase"
+            >({{ 5 - guesses.length }} left)</span
+          >
         </button>
       </div>
 
@@ -97,18 +100,5 @@ const handleGuess = () => {
   60% {
     transform: translate3d(4px, 0, 0);
   }
-}
-
-/* Force pink text on inner input when value is present */
-.has-value :deep(.van-field__control) {
-  color: #f472b6 !important; /* bubblegum-pop */
-  font-weight: 700 !important;
-  -webkit-text-fill-color: #f472b6 !important; /* Safari override for readonly inputs */
-  opacity: 1 !important; /* Ensure opacity hasn't been lowered */
-}
-
-/* Default text color */
-:not(.has-value) :deep(.van-field__control) {
-  color: #334155 !important; /* pencil-lead */
 }
 </style>
