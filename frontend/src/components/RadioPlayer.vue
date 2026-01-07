@@ -4,11 +4,17 @@ import { Button as VanButton } from 'vant'
 import { ref, watch } from 'vue'
 import { playRadioStatic } from '../utils/audio'
 
-const props = defineProps<{
-  isPlaying: boolean
-  currentStation: number
-  stationUrl?: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    isPlaying: boolean
+    currentStation: number
+    stationUrl?: string
+    compact?: boolean
+  }>(),
+  {
+    compact: false,
+  }
+)
 
 const emit = defineEmits<{
   (e: 'playPause'): void
@@ -86,7 +92,8 @@ watch(
 
 <template>
   <div
-    class="bg-paper-white rounded-2xl border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] p-6 w-full max-w-sm mx-auto relative"
+    class="bg-paper-white rounded-2xl border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] w-full max-w-sm mx-auto relative"
+    :class="compact ? 'p-3' : 'p-6'"
   >
     <!-- Live Indicator -->
     <div
@@ -108,31 +115,51 @@ watch(
     </div>
 
     <!-- Controls -->
-    <div class="flex items-center justify-center gap-6 mb-6">
+    <div
+      class="flex items-center justify-center"
+      :class="compact ? 'gap-4 mb-3' : 'gap-6 mb-6'"
+    >
       <van-button
         plain
-        class="!h-12 !w-12 !p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead"
+        class="!p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead"
+        :class="compact ? '!h-10 !w-10' : '!h-12 !w-12'"
         @click="emit('previous')"
       >
-        <SkipBack class="h-6 w-6 text-pencil-lead" />
+        <SkipBack
+          class="text-pencil-lead"
+          :class="compact ? 'h-5 w-5' : 'h-6 w-6'"
+        />
       </van-button>
 
       <van-button
         type="primary"
         round
-        class="!h-16 !w-16 !p-0 !border-3 !border-pencil-lead shadow-[0_4px_0_0_#334155] active:translate-y-1 active:shadow-none transition-all duration-100 bg-gumball-blue"
+        class="!p-0 !border-3 !border-pencil-lead shadow-[0_4px_0_0_#334155] active:translate-y-1 active:shadow-none transition-all duration-100 bg-gumball-blue"
+        :class="compact ? '!h-14 !w-14' : '!h-16 !w-16'"
         @click="emit('playPause')"
       >
-        <Pause v-if="isPlaying" class="h-8 w-8 text-white fill-current" />
-        <Play v-else class="h-8 w-8 ml-1 text-white fill-current" />
+        <Pause
+          v-if="isPlaying"
+          class="text-white fill-current"
+          :class="compact ? 'h-6 w-6' : 'h-8 w-8'"
+        />
+        <Play
+          v-else
+          class="ml-1 text-white fill-current"
+          :class="compact ? 'h-6 w-6' : 'h-8 w-8'"
+        />
       </van-button>
 
       <van-button
         plain
-        class="!h-12 !w-12 !p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead"
+        class="!p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead"
+        :class="compact ? '!h-10 !w-10' : '!h-12 !w-12'"
         @click="emit('next')"
       >
-        <SkipForward class="h-6 w-6 text-pencil-lead" />
+        <SkipForward
+          class="text-pencil-lead"
+          :class="compact ? 'h-5 w-5' : 'h-6 w-6'"
+        />
       </van-button>
     </div>
 

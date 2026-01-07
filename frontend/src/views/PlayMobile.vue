@@ -48,7 +48,6 @@ const debugCountry = computed(() => {
 // Vant Floating Panel setup
 const anchors = [
   140, // Collapsed height (px)
-  Math.round(window.innerHeight * 0.45), // Half-open
   Math.round(window.innerHeight * 0.9), // Fully open
 ]
 const panelHeight = ref(anchors[0])
@@ -98,7 +97,7 @@ const handleAddGuess = () => {
   guessInput.value = ''
 
   // Snap to fully open
-  panelHeight.value = anchors[2]
+  panelHeight.value = anchors[1]
 
   // Check loss
   if (guesses.value.length >= 5) {
@@ -129,7 +128,7 @@ const blob1 = ref(null)
 const blob2 = ref(null)
 
 const isPanelFullHeight = computed(() => {
-  const fullHeight = anchors[2]
+  const fullHeight = anchors[1]
   if (
     typeof fullHeight === 'undefined' ||
     typeof panelHeight.value === 'undefined'
@@ -140,7 +139,7 @@ const isPanelFullHeight = computed(() => {
 
 const overlayOpacity = computed(() => {
   const min = anchors[0]
-  const max = anchors[2]
+  const max = anchors[1]
   const current = panelHeight.value
 
   if (
@@ -232,6 +231,7 @@ onMounted(() => {
           :is-playing="isPlaying"
           :current-station="currentStation"
           :station-url="currentStationUrl"
+          :compact="true"
           @play-pause="handlePlayPause"
           @previous="handlePrevious"
           @next="handleNext"
