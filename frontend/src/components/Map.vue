@@ -194,6 +194,26 @@ onMounted(() => {
       },
     })
 
+    // Add source for centroids (debug only)
+    if (import.meta.env.VITE_DEBUG_MODE === 'true') {
+      map.value.addSource('centroids', {
+        type: 'geojson',
+        data: '/data/centers.geojson',
+      })
+
+      // Add centroids layer (faint dots)
+      map.value.addLayer({
+        id: 'centroids-layer',
+        type: 'circle',
+        source: 'centroids',
+        paint: {
+          'circle-radius': 2.5,
+          'circle-color': '#0f172a', // slate-900
+          'circle-opacity': 0.3,
+        },
+      })
+    }
+
     // Click handler
     map.value.on('click', 'countries-fill', (e) => {
       if (!e.features || e.features.length === 0) return

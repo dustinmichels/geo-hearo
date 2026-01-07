@@ -88,6 +88,17 @@ watch(
     }
   }
 )
+const hasPlayed = ref(false)
+
+watch(
+  () => props.isPlaying,
+  (playing) => {
+    if (playing) {
+      hasPlayed.value = true
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
@@ -131,24 +142,30 @@ watch(
         />
       </van-button>
 
-      <van-button
-        type="primary"
-        round
-        class="!p-0 !border-3 !border-pencil-lead shadow-[0_4px_0_0_#334155] active:translate-y-1 active:shadow-none transition-all duration-100 bg-gumball-blue"
-        :class="compact ? '!h-14 !w-14' : '!h-16 !w-16'"
-        @click="emit('playPause')"
-      >
-        <Pause
-          v-if="isPlaying"
-          class="text-white fill-current"
-          :class="compact ? 'h-6 w-6' : 'h-8 w-8'"
-        />
-        <Play
-          v-else
-          class="ml-1 text-white fill-current"
-          :class="compact ? 'h-6 w-6' : 'h-8 w-8'"
-        />
-      </van-button>
+      <div class="relative group">
+        <div v-if="!hasPlayed && !isPlaying" class="magic-container">
+          <div class="magic-wave wave-1"></div>
+          <div class="magic-wave wave-2"></div>
+        </div>
+        <van-button
+          type="primary"
+          round
+          class="relative z-10 !p-0 !border-3 !border-pencil-lead shadow-[0_4px_0_0_#334155] active:translate-y-1 active:shadow-none transition-all duration-100 bg-gumball-blue"
+          :class="compact ? '!h-14 !w-14' : '!h-16 !w-16'"
+          @click="emit('playPause')"
+        >
+          <Pause
+            v-if="isPlaying"
+            class="text-white fill-current"
+            :class="compact ? 'h-6 w-6' : 'h-8 w-8'"
+          />
+          <Play
+            v-else
+            class="ml-1 text-white fill-current"
+            :class="compact ? 'h-6 w-6' : 'h-8 w-8'"
+          />
+        </van-button>
+      </div>
 
       <van-button
         plain
@@ -193,5 +210,45 @@ watch(
 
 .animate-blink {
   animation: blink 1.5s ease-in-out infinite;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.magic-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.magic-wave {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  opacity: 0;
+  animation: ripple 3s infinite cubic-bezier(0, 0, 0.2, 1);
+}
+
+.wave-1 {
+  background-color: rgba(244, 114, 182, 0.5); /* Bubblegum Pop */
+  animation-delay: 0s;
+}
+
+.wave-2 {
+  background-color: rgba(244, 114, 182, 0.5); /* Bubblegum Pop */
+  animation-delay: 1.5s;
 }
 </style>

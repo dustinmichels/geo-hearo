@@ -4,7 +4,7 @@ import { ref } from 'vue'
 import PanelFooter from './Footer.vue'
 import GuessDisplay from './GuessDisplay.vue'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     modelValue: string
     guesses: string[]
@@ -29,7 +29,6 @@ const handleGuess = () => {
     isShaking.value = false
   }, 500)
 
-  // Haptic feedback (longer duration might help detection)
   if (navigator.vibrate) {
     navigator.vibrate(200)
   }
@@ -49,7 +48,8 @@ const handleGuess = () => {
           :disabled="guesses.length >= 5"
           readonly
           @keypress.enter="handleGuess"
-          class="flex-1 !border-3 !border-pencil-lead !rounded-2xl !py-3 !px-4 !text-[18px] font-body text-pencil-lead placeholder:text-eraser-grey bg-white"
+          class="flex-1 !border-3 !border-pencil-lead !rounded-2xl !py-3 !px-4 !text-[18px] font-body placeholder:text-eraser-grey transition-colors bg-white hover:bg-white active:bg-white focus:bg-white"
+          :class="{ 'has-value': !!modelValue }"
           :border="false"
         />
         <button
@@ -97,5 +97,18 @@ const handleGuess = () => {
   60% {
     transform: translate3d(4px, 0, 0);
   }
+}
+
+/* Force pink text on inner input when value is present */
+.has-value :deep(.van-field__control) {
+  color: #f472b6 !important; /* bubblegum-pop */
+  font-weight: 700 !important;
+  -webkit-text-fill-color: #f472b6 !important; /* Safari override for readonly inputs */
+  opacity: 1 !important; /* Ensure opacity hasn't been lowered */
+}
+
+/* Default text color */
+:not(.has-value) :deep(.van-field__control) {
+  color: #334155 !important; /* pencil-lead */
 }
 </style>
