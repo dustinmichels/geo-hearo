@@ -23,6 +23,7 @@ const countries = ref<string[]>([])
 const secretCountry = ref<string>('')
 const guesses = ref<string[]>([])
 const currentStations = ref<RadioStation[]>([])
+const currentStationIndex = ref(3)
 const STORAGE_KEY = 'geo_hearo_state'
 const isLoading = ref(false)
 
@@ -93,6 +94,7 @@ export function useRadio() {
       JSON.stringify({
         secretCountry: secretCountry.value,
         guesses: guesses.value,
+        stationIndex: currentStationIndex.value,
       }),
     )
   }
@@ -102,15 +104,17 @@ export function useRadio() {
     guesses.value = []
     secretCountry.value = ''
     currentStations.value = []
+    currentStationIndex.value = 3
   }
 
   const restoreState = () => {
     const stored = sessionStorage.getItem(STORAGE_KEY)
     if (stored) {
       try {
-        const { secretCountry: s, guesses: g } = JSON.parse(stored)
+        const { secretCountry: s, guesses: g, stationIndex: si } = JSON.parse(stored)
         if (s) secretCountry.value = s
         if (g) guesses.value = g
+        if (typeof si === 'number') currentStationIndex.value = si
         return true
       } catch (e) {
         console.error('Failed to parse stored state', e)
@@ -134,13 +138,13 @@ export function useRadio() {
       // Clear previous game state
       guesses.value = []
       secretCountry.value = country
+      currentStationIndex.value = 3
 
       // Filter stations for this country
       const countryStations = allStations.value.filter(
         (s) => s.country === secretCountry.value,
       )
 
-      // We want 5 stations. If less, take all. If more, shuffle or take first 5.
       // We want 5 stations. If less, take all. If more, shuffle or take first 5.
       currentStations.value = countryStations.slice(0, 5)
       saveState()
@@ -174,6 +178,7 @@ export function useRadio() {
     countries,
     secretCountry,
     currentStations,
+    currentStationIndex,
     isLoading,
     loadStations,
     selectRandomCountry,

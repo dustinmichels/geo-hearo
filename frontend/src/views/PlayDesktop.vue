@@ -11,7 +11,6 @@ import { getDirectionalArrows } from '../utils/geography'
 import { getColorForArrowCount } from '../utils/colors'
 
 const isPlaying = ref(false)
-const currentStation = ref(1)
 const guessInput = ref('')
 // guesses are now managed in useRadio
 const guessColors = ref<Record<string, string>>({})
@@ -35,6 +34,8 @@ const {
   addGuess,
   clearState,
   restoreState,
+  currentStationIndex: currentStation,
+  saveState,
 } = useRadio()
 
 const currentStationUrl = computed(() => {
@@ -53,10 +54,12 @@ const handlePlayPause = () => {
 
 const handlePrevious = () => {
   currentStation.value = currentStation.value > 1 ? currentStation.value - 1 : 5
+  saveState()
 }
 
 const handleNext = () => {
   currentStation.value = currentStation.value < 5 ? currentStation.value + 1 : 1
+  saveState()
 }
 
 const handleAddGuess = () => {
