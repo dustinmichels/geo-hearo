@@ -18,10 +18,10 @@ NE_INPUT = "data/out/ne_countries.geojson"
 OUTPUT = "data/out/all_radio_with_countries.json"
 
 # Population percentile threshold - countries below this percentile will be filtered out
-POPULATION_PERCENTILE_THRESHOLD = 0.05  # 5th percentile (bottom 5%)
+POPULATION_PERCENTILE_THRESHOLD = 0.00  # 0th percentile (bottom 0%)
 
 # Area percentile threshold - countries below this percentile will be filtered out
-AREA_PERCENTILE_THRESHOLD = 0.05  # 5th percentile (bottom 5%)
+AREA_PERCENTILE_THRESHOLD = 0.00  # 0th percentile (bottom 0%)
 
 # ==============================================================================
 # MAIN
