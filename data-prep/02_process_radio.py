@@ -20,6 +20,9 @@ OUTPUT = "data/out/all_radio_with_countries.json"
 # Population percentile threshold - countries below this percentile will be filtered out
 POPULATION_PERCENTILE_THRESHOLD = 0.05  # 5th percentile (bottom 5%)
 
+# Area percentile threshold - countries below this percentile will be filtered out
+AREA_PERCENTILE_THRESHOLD = 0.10  # 10th percentile (bottom 10%)
+
 # ==============================================================================
 # MAIN
 # ==============================================================================
@@ -193,6 +196,63 @@ console.print(
 )
 console.print(
     f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green] ([dim]removed {len(countries_below_threshold)}[/dim])"
+)
+
+# ==============================================================================
+# FILTERING: REMOVE BOTTOM X% OF COUNTRIES BY AREA
+# ==============================================================================
+
+console.print(
+    f"\n[bold yellow]Filtering: Removing bottom {AREA_PERCENTILE_THRESHOLD * 100:.0f}% of countries by area (based on Natural Earth dataset)[/bold yellow]"
+)
+
+# Calculate area for Natural Earth dataset (in square kilometers)
+ne_with_area = ne.copy()
+ne_with_area["AREA_KM2"] = ne_with_area.to_crs("EPSG:6933").geometry.area / 1_000_000
+
+area_threshold = ne_with_area["AREA_KM2"].quantile(AREA_PERCENTILE_THRESHOLD)
+console.print(
+    f"  Area threshold ({AREA_PERCENTILE_THRESHOLD * 100:.0f}th percentile of NE dataset): {area_threshold:,.0f} km²"
+)
+
+# Merge area data into radio_ne based on ISO_A2
+country_areas = ne_with_area[["ISO_A2", "AREA_KM2"]].drop_duplicates()
+radio_ne = radio_ne.merge(country_areas, on="ISO_A2", how="left")
+
+# Get unique countries in current working dataset with their area
+country_info = radio_ne[["ISO_A2", "NAME", "AREA_KM2"]].drop_duplicates()
+
+# Identify countries below threshold in our working dataset
+countries_below_threshold_area = country_info[
+    country_info["AREA_KM2"] < area_threshold
+].sort_values("AREA_KM2")
+
+console.print(
+    f"  Countries in working dataset below threshold: {len(countries_below_threshold_area)}"
+)
+if len(countries_below_threshold_area) > 0:
+    console.print("  Countries to be removed:")
+    for _, row in countries_below_threshold_area.iterrows():
+        console.print(
+            f"    {row['NAME']} ({row['ISO_A2']}): {row['AREA_KM2']:,.0f} km²"
+        )
+
+before = len(radio_ne)
+before_countries = radio_ne["ISO_A2"].nunique()
+
+# Filter out countries below threshold
+radio_ne = radio_ne[radio_ne["AREA_KM2"] >= area_threshold].copy()
+# Drop the AREA_KM2 column as it was only for filtering
+radio_ne = radio_ne.drop(columns=["AREA_KM2"])
+
+after = len(radio_ne)
+after_countries = radio_ne["ISO_A2"].nunique()
+
+console.print(
+    f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
+)
+console.print(
+    f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green] ([dim]removed {len(countries_below_threshold_area)}[/dim])"
 )
 
 # ==============================================================================
