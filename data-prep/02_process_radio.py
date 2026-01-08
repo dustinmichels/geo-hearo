@@ -21,7 +21,7 @@ OUTPUT = "data/out/all_radio_with_countries.json"
 POPULATION_PERCENTILE_THRESHOLD = 0.05  # 5th percentile (bottom 5%)
 
 # Area percentile threshold - countries below this percentile will be filtered out
-AREA_PERCENTILE_THRESHOLD = 0.10  # 10th percentile (bottom 10%)
+AREA_PERCENTILE_THRESHOLD = 0.05  # 5th percentile (bottom 5%)
 
 # ==============================================================================
 # MAIN
