@@ -236,8 +236,8 @@ onMounted(() => {
       class="h-full w-full flex flex-col max-w-md mx-auto pb-[100px] relative z-10"
     >
       <!-- Title -->
-      <div class="pt-6 px-4 flex justify-center">
-        <div class="relative z-0">
+      <div class="pt-6 px-4 flex justify-center relative z-10">
+        <div class="relative">
           <h1
             class="relative z-10 text-center text-pencil-lead text-3xl font-heading tracking-wider pb-3"
           >
@@ -246,13 +246,17 @@ onMounted(() => {
           <img
             src="/emoji.png"
             class="absolute left-full bottom-0 h-12 ml-4 z-[-1] transition-transform duration-700 ease-out"
+            style="will-change: transform"
             :class="isPlaying ? 'translate-y-0' : 'translate-y-16'"
           />
         </div>
       </div>
 
       <!-- Radio Player -->
-      <div class="px-4 pb-2 relative z-40">
+      <div
+        class="px-4 pb-2 relative z-50"
+        style="transform: translate3d(0, 0, 0)"
+      >
         <RadioPlayer
           :is-playing="isPlaying"
           :current-station="currentStation"
