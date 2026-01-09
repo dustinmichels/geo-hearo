@@ -1,3 +1,8 @@
+// X,Y Grid Geography Implementation
+// Treats the world as a simple Equirectangular projection (lat=y, lng=x)
+// Distance is Euclidean distance in degrees.
+// Bearing is standard vector angle converted to compass.
+
 interface Coordinates {
   lat: number
   lng: number
@@ -11,64 +16,56 @@ interface DirectionResult {
   count: number
 }
 
-// Earth radius in km
-const R = 6371
-
-function toRad(degrees: number): number {
-  return (degrees * Math.PI) / 180
-}
-
 function toDeg(radians: number): number {
   return (radians * 180) / Math.PI
 }
 
-// 1. Haversine Distance
+// 1. Euclidean Distance on a Grid (with Longitude Wrap)
 export function getDistance(p1: Coordinates, p2: Coordinates): number {
-  const dLat = toRad(p2.lat - p1.lat)
-  const dLon = toRad(p2.lng - p1.lng)
-  const lat1 = toRad(p1.lat)
-  const lat2 = toRad(p2.lat)
+  const dy = Math.abs(p2.lat - p1.lat)
+  let dx = Math.abs(p2.lng - p1.lng)
 
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
+  // Handle wrapping across the antimeridian (180/-180)
+  // If the distance is greater than 180, going the other way is shorter.
+  if (dx > 180) {
+    dx = 360 - dx
+  }
 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  return R * c
+  // Simple Euclidean distance in "degrees"
+  return Math.sqrt(dx * dx + dy * dy)
 }
 
 // 2. Simplified Bearing (Map Direction)
 // - Wraps E/W (shortest longitudinal path)
 // - Does NOT wrap N/S (shortest latitudinal difference)
+// - Returns Compass Bearing (0=N, 90=E, 180=S, 270=W)
 export function getBearing(p1: Coordinates, p2: Coordinates): number {
   const lat1 = p1.lat
   const lat2 = p2.lat
   const lng1 = p1.lng
   const lng2 = p2.lng
 
-  // 1. dLat (North/South difference)
+  // 1. dLat (North/South difference) -- Y axis
   // Positive = North, Negative = South
-  const dLat = lat2 - lat1
+  const dy = lat2 - lat1
 
-  // 2. dLng (East/West difference + Wrap)
+  // 2. dLng (East/West difference + Wrap) -- X axis
   // We want the shortest path E/W
-  let dLng = lng2 - lng1
-  if (dLng > 180) {
-    dLng -= 360
-  } else if (dLng < -180) {
-    dLng += 360
+  let dx = lng2 - lng1
+  if (dx > 180) {
+    dx -= 360
+  } else if (dx < -180) {
+    dx += 360
   }
 
   // 3. Angle calculation
-  // We use simple rectangular logic (Equirectangular projection style)
-  // This avoids the "Great Circle" behavior where paths near poles directionally invert.
-  // We scale dLng by cos(avgLat) to correct for the narrowing of longitude lines at poles.
-  // This provides a "Physical Direction" approximation rather than a "Map Pixel Direction".
-  const avgLatRad = toRad((lat1 + lat2) / 2)
-  const angleRad = Math.atan2(dLat, dLng * Math.cos(avgLatRad))
+  // Basic vector angle in the plane. No spherical corrections.
+  // dy is Y component, dx is X component.
+  const angleRad = Math.atan2(dy, dx)
 
-  // 4. Convert to Compass Bearing (0 = N, 90 = E, 180 = S, 270 = W)
-  // Math: 0 = E, 90 = N
+  // 4. Convert to Compass Bearing
+  // Math angle: 0 = East, 90 = North
+  // Compass: 0 = North, 90 = East
   // Compass = 90 - Math
   const angleDeg = toDeg(angleRad)
   return (90 - angleDeg + 360) % 360
@@ -76,7 +73,7 @@ export function getBearing(p1: Coordinates, p2: Coordinates): number {
 
 // 3. Snap Bearing to 8 Cardinal Directions
 function getSnappingArrow(bearing: number): string {
-  // 337.5° – 22.5° -> N (Adjust logic to handle wrap-around easily)
+  // 337.5° – 22.5° -> N
   // Shift by 22.5 to aline sectors starting at 0
   const adjusted = (bearing + 22.5) % 360
   const sector = Math.floor(adjusted / 45)
@@ -103,11 +100,15 @@ function getSnappingArrow(bearing: number): string {
   }
 }
 
-// 4. Arrow Magnitude Logic (3 = Far, 2 = Closer, 1 = Close, 0 = Correct)
+// 4. Arrow Magnitude Logic
+// Distance is now in DEGREES.
+// 0.5 deg ~= 55km (Very Close)
+// 20 deg ~= 2220km (Close)
+// 60 deg ~= 6660km (Far)
 function getDotCount(distance: number): number {
-  if (distance <= 50) return 0 // Correct
-  if (distance <= 2000) return 1 // Close
-  if (distance <= 6000) return 2 // Closer
+  if (distance <= 0.5) return 0 // Correct / Very Close
+  if (distance <= 20) return 1 // Close
+  if (distance <= 60) return 2 // Closer
   return 3 // Far
 }
 
