@@ -37,19 +37,41 @@ export function getDistance(p1: Coordinates, p2: Coordinates): number {
   return R * c
 }
 
-// 2. Forward Azimuth Bearing
+// 2. Simplified Bearing (Map Direction)
+// - Wraps E/W (shortest longitudinal path)
+// - Does NOT wrap N/S (shortest latitudinal difference)
 export function getBearing(p1: Coordinates, p2: Coordinates): number {
-  const lat1 = toRad(p1.lat)
-  const lat2 = toRad(p2.lat)
-  const dLon = toRad(p2.lng - p1.lng)
+  const lat1 = p1.lat
+  const lat2 = p2.lat
+  const lng1 = p1.lng
+  const lng2 = p2.lng
 
-  const y = Math.sin(dLon) * Math.cos(lat2)
-  const x =
-    Math.cos(lat1) * Math.sin(lat2) -
-    Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon)
+  // 1. dLat (North/South difference)
+  // Positive = North, Negative = South
+  const dLat = lat2 - lat1
 
-  const theta = Math.atan2(y, x)
-  return (toDeg(theta) + 360) % 360
+  // 2. dLng (East/West difference + Wrap)
+  // We want the shortest path E/W
+  let dLng = lng2 - lng1
+  if (dLng > 180) {
+    dLng -= 360
+  } else if (dLng < -180) {
+    dLng += 360
+  }
+
+  // 3. Angle calculation
+  // We use simple rectangular logic (Equirectangular projection style)
+  // This avoids the "Great Circle" behavior where paths near poles directionally invert.
+  // We scale dLng by cos(avgLat) to correct for the narrowing of longitude lines at poles.
+  // This provides a "Physical Direction" approximation rather than a "Map Pixel Direction".
+  const avgLatRad = toRad((lat1 + lat2) / 2)
+  const angleRad = Math.atan2(dLat, dLng * Math.cos(avgLatRad))
+
+  // 4. Convert to Compass Bearing (0 = N, 90 = E, 180 = S, 270 = W)
+  // Math: 0 = E, 90 = N
+  // Compass = 90 - Math
+  const angleDeg = toDeg(angleRad)
+  return (90 - angleDeg + 360) % 360
 }
 
 // 3. Snap Bearing to 8 Cardinal Directions
@@ -81,12 +103,12 @@ function getSnappingArrow(bearing: number): string {
   }
 }
 
-// 4. Dot Magnitude Logic
+// 4. Arrow Magnitude Logic (3 = Far, 2 = Closer, 1 = Close, 0 = Correct)
 function getDotCount(distance: number): number {
-  if (distance <= 1000) return 1
-  if (distance <= 3500) return 2
-  if (distance <= 8000) return 3
-  return 4
+  if (distance <= 50) return 0 // Correct
+  if (distance <= 2000) return 1 // Close
+  if (distance <= 6000) return 2 // Closer
+  return 3 // Far
 }
 
 export function getDirectionalArrows(

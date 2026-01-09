@@ -1,12 +1,17 @@
 export const ARROW_COLORS = [
-  '#4ADE80', // 1 dot (Green-ish - Very Close)
-  '#A3E635', // 2 dots (Lime - Close)
-  '#FACC15', // 3 dots (Yellow - Far)
-  '#FB923C', // 4 dots (Orange-ish - Very Far)
+  '#22C55E', // 0: Right (Green)
+  '#84CC16', // 1: Close (Yellow-Green)
+  '#EAB308', // 2: Closer (Yellow)
+  '#F97316', // 3: Far (Reddish-Orange)
+  '#EF4444', // 4+: Wrong (Red)
 ]
 
 export function getColorForArrowCount(count: number): string {
-  // Clamp count between 1 and 4
-  const index = Math.max(1, Math.min(4, count)) - 1
-  return ARROW_COLORS[index] ?? '#FB923C'
+  // 0 = Correct
+  // 1 = Close
+  // 2 = Closer
+  // 3 = Far
+  // Anything else = Wrong (Red)
+  const index = Math.min(count, 4)
+  return ARROW_COLORS[index] ?? '#EF4444' // Fallback to Red
 }

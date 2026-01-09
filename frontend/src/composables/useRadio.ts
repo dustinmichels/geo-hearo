@@ -59,7 +59,7 @@ export function useRadio() {
              
              iToC.set(iso, coords)
              if (name) {
-               nToI.set(name, iso)
+               nToI.set(name.toLowerCase(), iso)
              }
           }
         })
@@ -152,17 +152,7 @@ export function useRadio() {
   }
   
   const getCoordinates = (countryName: string): { lat: number, lng: number } | null => {
-    // 1. Try to find by name in our centers map
-    let iso = nameToIso.value.get(countryName)
-    
-    // 2. If not found, it might be the secret country from radio data, 
-    // try to find ISO from radio stations
-    if (!iso) {
-      const station = allStations.value.find(s => s.country === countryName)
-      if (station?.ISO_A2) {
-        iso = station.ISO_A2
-      }
-    }
+    const iso = getCountryIso(countryName)
     
     if (iso) {
       const center = isoToCenter.value.get(iso)
@@ -171,6 +161,22 @@ export function useRadio() {
       }
     }
     return null
+  }
+
+  const getCountryIso = (countryName: string): string | null => {
+    // 1. Try to find by name in our centers map
+    let iso = nameToIso.value.get(countryName.toLowerCase())
+    
+    // 2. If not found, check radio stations
+    if (!iso) {
+      const station = allStations.value.find(
+        (s) => s.country.toLowerCase() === countryName.toLowerCase(),
+      )
+      if (station?.ISO_A2) {
+        iso = station.ISO_A2
+      }
+    }
+    return iso || null
   }
 
   return {
@@ -183,6 +189,7 @@ export function useRadio() {
     loadStations,
     selectRandomCountry,
     getCoordinates,
+    getCountryIso,
     guesses,
     addGuess,
     saveState,

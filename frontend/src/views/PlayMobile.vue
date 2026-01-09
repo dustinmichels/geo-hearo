@@ -32,6 +32,7 @@ const {
   currentStations,
   secretCountry,
   getCoordinates,
+  getCountryIso,
   guesses,
   addGuess,
   clearState,
@@ -76,7 +77,10 @@ const handleAddGuess = () => {
   if (!guess || guesses.value.length >= 5) return
 
   // Check if won
-  if (guess.toLowerCase() === secretCountry.value.toLowerCase()) {
+  const secretIso = getCountryIso(secretCountry.value)
+  const guessIso = getCountryIso(guess)
+
+  if (secretIso && guessIso && secretIso === guessIso) {
     modalConfig.value = {
       title: 'You got it!',
       message: `Correction! The country was ${secretCountry.value}. Great job!`,
