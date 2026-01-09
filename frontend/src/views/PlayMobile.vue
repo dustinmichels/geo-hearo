@@ -97,7 +97,7 @@ const handleAddGuess = () => {
     const color = getColorForArrowCount(count)
     guessColors.value[guess] = color
   } else {
-    guessColors.value[guess] = '#FCD34D'
+    guessColors.value[guess] = '#FB923C'
   }
 
   // Add guess
@@ -131,7 +131,7 @@ const populateGuessColors = () => {
       const color = getColorForArrowCount(count)
       guessColors.value[guess] = color
     } else {
-      guessColors.value[guess] = '#FCD34D'
+      guessColors.value[guess] = '#FB923C'
     }
   })
 }

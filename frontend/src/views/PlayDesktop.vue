@@ -89,7 +89,7 @@ const handleAddGuess = () => {
     guessColors.value[guess] = color
   } else {
     // Fallback if coords not found
-    guessColors.value[guess] = '#FCD34D'
+    guessColors.value[guess] = '#FB923C'
   }
 
   // Add guess and check loss
@@ -120,7 +120,7 @@ const populateGuessColors = () => {
       const color = getColorForArrowCount(count)
       guessColors.value[guess] = color
     } else {
-      guessColors.value[guess] = '#FCD34D'
+      guessColors.value[guess] = '#FB923C'
     }
   })
 }

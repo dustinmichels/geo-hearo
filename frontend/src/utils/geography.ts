@@ -3,6 +3,9 @@ interface Coordinates {
   lng: number
 }
 
+// Result can just be the string because count is implicit in the dots,
+// but we keep the structure compatible with what GuessDisplay might expect if it used 'count' for color.
+// We will return count as the number of dots (1-4).
 interface DirectionResult {
   arrows: string
   count: number
@@ -19,6 +22,7 @@ function toDeg(radians: number): number {
   return (radians * 180) / Math.PI
 }
 
+// 1. Haversine Distance
 export function getDistance(p1: Coordinates, p2: Coordinates): number {
   const dLat = toRad(p2.lat - p1.lat)
   const dLon = toRad(p2.lng - p1.lng)
@@ -27,11 +31,13 @@ export function getDistance(p1: Coordinates, p2: Coordinates): number {
 
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2)
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
+
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   return R * c
 }
 
+// 2. Forward Azimuth Bearing
 export function getBearing(p1: Coordinates, p2: Coordinates): number {
   const lat1 = toRad(p1.lat)
   const lat2 = toRad(p2.lat)
@@ -46,82 +52,55 @@ export function getBearing(p1: Coordinates, p2: Coordinates): number {
   return (toDeg(theta) + 360) % 360
 }
 
-function getGridBearing(p1: Coordinates, p2: Coordinates): number {
-  const dLat = p2.lat - p1.lat
-  let dLon = p2.lng - p1.lng
+// 3. Snap Bearing to 8 Cardinal Directions
+function getSnappingArrow(bearing: number): string {
+  // 337.5° – 22.5° -> N (Adjust logic to handle wrap-around easily)
+  // Shift by 22.5 to aline sectors starting at 0
+  const adjusted = (bearing + 22.5) % 360
+  const sector = Math.floor(adjusted / 45)
 
-  // Normalize dLon to [-180, 180]
-  if (dLon > 180) dLon -= 360
-  if (dLon < -180) dLon += 360
-
-  // Calculate angle from North (0 deg)
-  // atan2(x, y) -> x is horizontal (dLon), y is vertical (dLat)
-  // This gives 0 for North (0, 1), 90 for East (1, 0)
-  const theta = Math.atan2(dLon, dLat)
-  return (toDeg(theta) + 360) % 360
+  switch (sector) {
+    case 0:
+      return '⬆️' // North
+    case 1:
+      return '↗️' // NE
+    case 2:
+      return '➡️' // East
+    case 3:
+      return '↘️' // SE
+    case 4:
+      return '⬇️' // South
+    case 5:
+      return '↙️' // SW
+    case 6:
+      return '⬅️' // West
+    case 7:
+      return '↖️' // NW
+    default:
+      return '⬆️' // Should not happen
+  }
 }
 
-function getArrowDistribution(bearing: number, totalSlots: number) {
-  const bearingRad = toRad(bearing)
-  
-  // Calculate weights
-  const vertical = Math.abs(Math.cos(bearingRad))
-  const horizontal = Math.abs(Math.sin(bearingRad))
-  
-  // Distribute slots
-  const totalWeight = vertical + horizontal
-  const verticalSlots = Math.round((totalSlots * vertical) / totalWeight)
-  const horizontalSlots = totalSlots - verticalSlots
-
-  return { verticalSlots, horizontalSlots }
+// 4. Dot Magnitude Logic
+function getDotCount(distance: number): number {
+  if (distance <= 1000) return 1
+  if (distance <= 3500) return 2
+  if (distance <= 8000) return 3
+  return 4
 }
 
 export function getDirectionalArrows(
   guess: Coordinates,
   secret: Coordinates
 ): DirectionResult {
-  // 1. Calculate Distance & Total Slots
   const distance = getDistance(guess, secret)
-  
-  let totalSlots = 2
-  if (distance > 5000) {
-    totalSlots = 6
-  } else if (distance > 2000) {
-    totalSlots = 4
-  } else if (distance <= 500) {
-    totalSlots = 1
-  }
+  const bearing = getBearing(guess, secret)
 
-  // 2. Calculate Bearing (Using Grid Bearing for flat-map logic)
-  const bearing = getGridBearing(guess, secret)
-  
-  // 3. Distribute Slots
-  const { verticalSlots, horizontalSlots } = getArrowDistribution(bearing, totalSlots)
-  
-  // 4. Construct Arrow Strings
-  
-  let latSymbol = ''
-  // North-ish: bearing > 270 or < 90
-  if (bearing > 270 || bearing < 90) {
-      latSymbol = '⬆️'
-  } else {
-      latSymbol = '⬇️'
-  }
-  
-  let lngSymbol = ''
-  // East-ish: 0-180
-  if (bearing > 0 && bearing < 180) {
-      lngSymbol = '➡️'
-  } else {
-      lngSymbol = '⬅️'
-  }
-  
-  const latArrows = latSymbol.repeat(verticalSlots)
-  const lngArrows = lngSymbol.repeat(horizontalSlots)
-  
-  // Combine arrows - no separator
+  const arrow = getSnappingArrow(bearing)
+  const count = getDotCount(distance)
+
   return {
-    arrows: latArrows + lngArrows,
-    count: totalSlots,
+    arrows: arrow,
+    count: count,
   }
 }

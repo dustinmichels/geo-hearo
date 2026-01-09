@@ -2,6 +2,7 @@
 import { useRadio } from '../composables/useRadio'
 import { getColorForArrowCount } from '../utils/colors'
 import { getDirectionalArrows } from '../utils/geography'
+import { Circle } from 'lucide-vue-next'
 
 const props = defineProps<{
   guesses: string[]
@@ -63,12 +64,23 @@ const getGuessColor = (guessName: string | undefined) => {
             <span class="text-pencil-lead text-base truncate">{{
               guesses[num - 1]
             }}</span>
-            <span
-              v-if="getArrowsForGuess(guesses[num - 1])"
-              class="text-xs tracking-tighter shrink-0"
-            >
-              {{ getArrowsForGuess(guesses[num - 1])?.arrows }}
-            </span>
+            <div class="flex items-center gap-2 shrink-0">
+              <span
+                v-if="getArrowsForGuess(guesses[num - 1])"
+                class="text-xs tracking-tighter w-6 text-center inline-block"
+              >
+                {{ getArrowsForGuess(guesses[num - 1])?.arrows }}
+              </span>
+              <div class="flex gap-0.5 items-center w-16 shrink-0">
+                <Circle
+                  v-for="i in getArrowsForGuess(guesses[num - 1])?.count || 0"
+                  :key="i"
+                  :size="12"
+                  fill="currentColor"
+                  class="text-inherit"
+                />
+              </div>
+            </div>
           </template>
           <span v-else class="text-eraser-grey italic text-lg">Empty</span>
         </div>
