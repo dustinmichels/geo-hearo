@@ -339,13 +339,25 @@ console.print(
     "[bold cyan]═══════════════════════════════════════════════════════[/bold cyan]\n"
 )
 
-# Calculate stations per country with population
+# Calculate area for countries in final dataset (in square kilometers)
+ne_with_area_final = ne[ne["ISO_A2"].isin(radio_final["ISO_A2"].unique())].copy()
+ne_with_area_final["AREA_KM2"] = (
+    ne_with_area_final.to_crs("EPSG:6933").geometry.area / 1_000_000
+)
+country_areas_final = ne_with_area_final[["ISO_A2", "AREA_KM2"]].drop_duplicates()
+
+# Calculate stations per country with population and area
 stations_per_country = (
     radio_final.groupby(["ISO_A2", "NAME", "POP_EST"])
     .size()
     .reset_index(name="station_count")
-    .sort_values("POP_EST", ascending=True)
 )
+# Merge area data
+stations_per_country = stations_per_country.merge(
+    country_areas_final, on="ISO_A2", how="left"
+)
+# Sort by population
+stations_per_country = stations_per_country.sort_values("POP_EST", ascending=True)
 
 # Create summary table
 summary_table = Table(
@@ -355,6 +367,7 @@ summary_table.add_column("Rank", justify="right", style="dim")
 summary_table.add_column("Country", style="cyan")
 summary_table.add_column("ISO", style="yellow")
 summary_table.add_column("Population", justify="right", style="blue")
+summary_table.add_column("Area (km²)", justify="right", style="magenta")
 summary_table.add_column("Stations", justify="right", style="green")
 
 for rank, (idx, row) in enumerate(stations_per_country.iterrows(), start=1):
@@ -363,6 +376,7 @@ for rank, (idx, row) in enumerate(stations_per_country.iterrows(), start=1):
         row["NAME"],
         row["ISO_A2"],
         f"{row['POP_EST']:,.0f}",
+        f"{row['AREA_KM2']:,.0f}",
         f"{row['station_count']:,}",
     )
 
