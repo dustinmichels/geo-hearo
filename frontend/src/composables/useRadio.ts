@@ -179,6 +179,32 @@ export function useRadio() {
     return iso || null
   }
 
+  const checkGuess = (guessInput: string): boolean => {
+    if (!guessInput) return false
+    // Direct match check first
+    if (guessInput.toLowerCase() === secretCountry.value.toLowerCase()) return true
+    
+    const guessIso = getCountryIso(guessInput)
+    const secretIso = getCountryIso(secretCountry.value)
+    
+    if (guessIso && secretIso) {
+      return guessIso === secretIso
+    }
+    
+    return false
+  }
+
+  const resetData = () => {
+    allStations.value = []
+    countries.value = []
+    secretCountry.value = ''
+    guesses.value = []
+    currentStations.value = []
+    currentStationIndex.value = 3
+    nameToIso.value = new Map()
+    isoToCenter.value = new Map()
+  }
+
   return {
     allStations,
     countries,
@@ -195,5 +221,7 @@ export function useRadio() {
     saveState,
     clearState,
     restoreState,
+    checkGuess,
+    resetData,
   }
 }

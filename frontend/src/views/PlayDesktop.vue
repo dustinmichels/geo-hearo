@@ -36,6 +36,7 @@ const {
   restoreState,
   currentStationIndex: currentStation,
   saveState,
+  checkGuess,
 } = useRadio()
 
 const currentStationUrl = computed(() => {
@@ -67,7 +68,7 @@ const handleAddGuess = () => {
   if (!guess || guesses.value.length >= 5) return
 
   // Check if won
-  if (guess.toLowerCase() === secretCountry.value.toLowerCase()) {
+  if (checkGuess(guess)) {
     modalConfig.value = {
       title: 'You got it!',
       message: `Wooo! The country was ${secretCountry.value}. Great job!`,
