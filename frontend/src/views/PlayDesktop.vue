@@ -94,7 +94,6 @@ const handleAddGuess = () => {
   }
 
   // Add guess and check loss
-  // Add guess and check loss
   addGuess(guess)
   guessInput.value = ''
 

@@ -34,53 +34,54 @@ describe('useRadio Logic', () => {
   it('correctly identifies USA when guessed', async () => {
     // 1. Mock Data
     const mockRadioData = [
-      { 
-        country: 'United States', 
+      {
+        country: 'United States',
         ISO_A2: 'US',
         place_name: 'New York',
         channel_resolved_url: 'http://test.com',
-        channel_id: '1'
+        channel_id: '1',
       },
-      { 
-        country: 'Canada', 
+      {
+        country: 'Canada',
         ISO_A2: 'CA',
         place_name: 'Toronto',
         channel_resolved_url: 'http://test.com',
-        channel_id: '2'
-      }
+        channel_id: '2',
+      },
     ]
 
     const mockCentersData = {
       features: [
-        { 
-          properties: { name: 'United States', iso_a2: 'US' }, 
-          geometry: { coordinates: [-95, 37] } 
+        {
+          properties: { name: 'United States', iso_a2: 'US' },
+          geometry: { coordinates: [-95, 37] },
         },
-        { 
-          properties: { name: 'Canada', iso_a2: 'CA' }, 
-          geometry: { coordinates: [-106, 56] } 
-        }
-      ]
+        {
+          properties: { name: 'Canada', iso_a2: 'CA' },
+          geometry: { coordinates: [-106, 56] },
+        },
+      ],
     }
 
     // 2. Setup Fetch Mock
     fetchMock.mockImplementation((url: string) => {
       if (url.includes('radio.json')) {
         return Promise.resolve({
-          json: () => Promise.resolve(mockRadioData)
+          json: () => Promise.resolve(mockRadioData),
         })
       }
       if (url.includes('centers.geojson')) {
         return Promise.resolve({
-          json: () => Promise.resolve(mockCentersData)
+          json: () => Promise.resolve(mockCentersData),
         })
       }
       return Promise.reject(new Error(`Unknown URL: ${url}`))
     })
 
     // 3. Initialize Composable
-    const { loadStations, secretCountry, getCountryIso, addGuess, guesses } = useRadio()
-    
+    const { loadStations, secretCountry, getCountryIso, addGuess, guesses } =
+      useRadio()
+
     // 4. Load Data
     await loadStations()
 
@@ -91,7 +92,7 @@ describe('useRadio Logic', () => {
     // Simulating PlayDesktop logic: Get ISO for guess, then compare
     const guessName = 'United States'
     const guessIso = getCountryIso(guessName)
-    
+
     // Assert mapping works
     expect(guessIso).toBe('US')
 
@@ -109,42 +110,43 @@ describe('useRadio Logic', () => {
     // 1. Mock Data with Mismatch
     // Radio data has "Türkiye", Centers data has "Turkey"
     const mockRadioData = [
-      { 
-        country: 'Türkiye', 
+      {
+        country: 'Türkiye',
         ISO_A2: 'TR',
         place_name: 'Ankara',
         channel_resolved_url: 'http://test.com',
-        channel_id: '3'
-      }
+        channel_id: '3',
+      },
     ]
 
     const mockCentersData = {
       features: [
-        { 
-          properties: { name: 'Turkey', iso_a2: 'TR' }, 
-          geometry: { coordinates: [35, 39] } 
-        }
-      ]
+        {
+          properties: { name: 'Turkey', iso_a2: 'TR' },
+          geometry: { coordinates: [35, 39] },
+        },
+      ],
     }
 
     // 2. Setup Fetch Mock
     fetchMock.mockImplementation((url: string) => {
       if (url.includes('radio.json')) {
         return Promise.resolve({
-          json: () => Promise.resolve(mockRadioData)
+          json: () => Promise.resolve(mockRadioData),
         })
       }
       if (url.includes('centers.geojson')) {
         return Promise.resolve({
-          json: () => Promise.resolve(mockCentersData)
+          json: () => Promise.resolve(mockCentersData),
         })
       }
       return Promise.reject(new Error(`Unknown URL: ${url}`))
     })
 
     // 3. Initialize Composable
-    const { loadStations, secretCountry, selectRandomCountry, checkGuess } = useRadio()
-    
+    const { loadStations, secretCountry, selectRandomCountry, checkGuess } =
+      useRadio()
+
     await loadStations()
     selectRandomCountry() // Should select Türkiye
 
@@ -157,7 +159,7 @@ describe('useRadio Logic', () => {
 
     // Verify checkGuess returns true via ISO comparison
     expect(checkGuess(guessName)).toBe(true)
-    
+
     // Verify an incorrect guess returns false
     expect(checkGuess('Germany')).toBe(false)
   })

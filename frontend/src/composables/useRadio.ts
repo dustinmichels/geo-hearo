@@ -45,22 +45,22 @@ export function useRadio() {
       // Load centers data
       const centersResponse = await fetch('/data/centers.geojson')
       const centersData = await centersResponse.json()
-      
+
       // Process centers
       const nToI = new Map<string, string>()
       const iToC = new Map<string, [number, number]>()
-      
+
       if (centersData.features) {
         centersData.features.forEach((feature: any) => {
           if (feature.properties?.iso_a2 && feature.geometry?.coordinates) {
-             const iso = feature.properties.iso_a2
-             const name = feature.properties.name
-             const coords = feature.geometry.coordinates as [number, number]
-             
-             iToC.set(iso, coords)
-             if (name) {
-               nToI.set(name.toLowerCase(), iso)
-             }
+            const iso = feature.properties.iso_a2
+            const name = feature.properties.name
+            const coords = feature.geometry.coordinates as [number, number]
+
+            iToC.set(iso, coords)
+            if (name) {
+              nToI.set(name.toLowerCase(), iso)
+            }
           }
         })
       }
@@ -77,7 +77,7 @@ export function useRadio() {
       // If we have a restored secretCountry but no stations yet, sync them now
       if (secretCountry.value && currentStations.value.length === 0) {
         const countryStations = allStations.value.filter(
-          (s) => s.country === secretCountry.value,
+          (s) => s.country === secretCountry.value
         )
         currentStations.value = countryStations.slice(0, 5)
       }
@@ -95,7 +95,7 @@ export function useRadio() {
         secretCountry: secretCountry.value,
         guesses: guesses.value,
         stationIndex: currentStationIndex.value,
-      }),
+      })
     )
   }
 
@@ -111,7 +111,11 @@ export function useRadio() {
     const stored = sessionStorage.getItem(STORAGE_KEY)
     if (stored) {
       try {
-        const { secretCountry: s, guesses: g, stationIndex: si } = JSON.parse(stored)
+        const {
+          secretCountry: s,
+          guesses: g,
+          stationIndex: si,
+        } = JSON.parse(stored)
         if (s) secretCountry.value = s
         if (g) guesses.value = g
         if (typeof si === 'number') currentStationIndex.value = si
@@ -142,7 +146,7 @@ export function useRadio() {
 
       // Filter stations for this country
       const countryStations = allStations.value.filter(
-        (s) => s.country === secretCountry.value,
+        (s) => s.country === secretCountry.value
       )
 
       // We want 5 stations. If less, take all. If more, shuffle or take first 5.
@@ -150,10 +154,12 @@ export function useRadio() {
       saveState()
     }
   }
-  
-  const getCoordinates = (countryName: string): { lat: number, lng: number } | null => {
+
+  const getCoordinates = (
+    countryName: string
+  ): { lat: number; lng: number } | null => {
     const iso = getCountryIso(countryName)
-    
+
     if (iso) {
       const center = isoToCenter.value.get(iso)
       if (center) {
@@ -166,11 +172,11 @@ export function useRadio() {
   const getCountryIso = (countryName: string): string | null => {
     // 1. Try to find by name in our centers map
     let iso = nameToIso.value.get(countryName.toLowerCase())
-    
+
     // 2. If not found, check radio stations
     if (!iso) {
       const station = allStations.value.find(
-        (s) => s.country.toLowerCase() === countryName.toLowerCase(),
+        (s) => s.country.toLowerCase() === countryName.toLowerCase()
       )
       if (station?.ISO_A2) {
         iso = station.ISO_A2
@@ -182,15 +188,16 @@ export function useRadio() {
   const checkGuess = (guessInput: string): boolean => {
     if (!guessInput) return false
     // Direct match check first
-    if (guessInput.toLowerCase() === secretCountry.value.toLowerCase()) return true
-    
+    if (guessInput.toLowerCase() === secretCountry.value.toLowerCase())
+      return true
+
     const guessIso = getCountryIso(guessInput)
     const secretIso = getCountryIso(secretCountry.value)
-    
+
     if (guessIso && secretIso) {
       return guessIso === secretIso
     }
-    
+
     return false
   }
 

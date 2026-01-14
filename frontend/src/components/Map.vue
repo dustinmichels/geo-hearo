@@ -334,9 +334,5 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* Optional: Custom styling for map controls can go here */
-:deep(.maplibregl-ctrl-bottom-right) {
-  display: none; /* Hide attribution for cleaner look if requested, strictly speaking we should keep it or minimalize it. Keeping it default is safer for license. */
-}
-/* Let's actully keep attribution but maybe make it smaller if needed. I'll leave it default for now. */
+/* MapLibre attribution is kept visible for license compliance */
 </style>

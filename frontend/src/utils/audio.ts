@@ -3,7 +3,8 @@ let audioCtx: AudioContext | null = null
 export function playRadioStatic(duration = 2) {
   // Initialize AudioContext lazily to handle browser policies
   if (!audioCtx) {
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
+    const AudioContextClass =
+      window.AudioContext || (window as any).webkitAudioContext
     if (AudioContextClass) {
       audioCtx = new AudioContextClass()
     } else {
@@ -41,6 +42,6 @@ export function playRadioStatic(duration = 2) {
   gainNode.connect(audioCtx.destination)
 
   source.start()
-  
+
   return source
 }
