@@ -33,7 +33,7 @@ console = Console()
 # CONFIGURATION
 # ==============================================================================
 
-NE_INPUT = "data/ne_110m_admin_0_countries.geojson"
+NE_INPUT = "data/ne/ne_50m_admin_0_countries.geojson"
 OUTPUT_FILE = "data/out/country_centroids.geojson"
 
 # ==============================================================================

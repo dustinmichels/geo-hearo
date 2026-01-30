@@ -17,6 +17,7 @@ console = Console()
 RADIO_INPUT = "crawl/out/output.csv"
 NE_INPUT = "data/ne_110m_admin_0_countries.geojson"
 OUTPUT = "data/out/all_radio_with_countries.json"
+LOG_FILE = "data/out/process_radio.log"
 
 MIN_STATIONS = 5
 
@@ -161,6 +162,31 @@ console.print(
     f"  Stations: [red]{len(radio):,}[/red] → [green]{len(radio_ne):,}[/green] "
     f"([dim]removed {len(radio) - len(radio_ne):,}[/dim])"
 )
+
+# Log dropped stations
+dropped_indices = set(radio_gdf.index) - set(radio_ne.index)
+dropped_stations = radio_gdf.loc[list(dropped_indices)]
+
+if not dropped_stations.empty:
+    console.print(
+        f"  [yellow]Logging {len(dropped_stations):,} dropped stations to {LOG_FILE}[/yellow]"
+    )
+    with open(LOG_FILE, "w", encoding="utf-8") as f:
+        f.write("SPATIAL JOIN DROP REPORT\n")
+        f.write(f"Timestamp: {pd.Timestamp.now()}\n")
+        f.write(f"Total Dropped: {len(dropped_stations)}\n")
+        f.write("=" * 60 + "\n\n")
+
+        for idx, row in dropped_stations.iterrows():
+            f.write(f"Channel: {row.get('channel_name', 'N/A')}\n")
+            f.write(
+                f"Location: {row.get('place_name', 'N/A')}, {row.get('country', 'N/A')}\n"
+            )
+            f.write(
+                f"Coordinates: ({row.get('geo_lat', 'N/A')}, {row.get('geo_lon', 'N/A')})\n"
+            )
+            f.write(f"URL: {row.get('channel_resolved_url', 'N/A')}\n")
+            f.write("-" * 40 + "\n")
 
 console.print(f"  [dim]Re-applying min stations filter (< {MIN_STATIONS})...[/dim]")
 radio_ne = enforce_min_stations(radio_ne)

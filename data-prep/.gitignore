@@ -1,6 +1,6 @@
 out/*.json
-data/out/*.json
-data/out/*.geojson
+data/out
+data/ne
 crawl/out/*.csv
 
 
