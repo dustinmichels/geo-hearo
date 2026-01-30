@@ -3,12 +3,9 @@ USAGE:
     uv run 02_process_radio.py
 """
 
-import json
-
 import geopandas as gpd
 import pandas as pd
 from rich.console import Console
-from rich.panel import Panel
 from rich.table import Table
 
 console = Console()
@@ -22,37 +19,6 @@ NE_INPUT = "data/ne_110m_admin_0_countries.geojson"
 OUTPUT = "data/out/all_radio_with_countries.json"
 
 MIN_STATIONS = 5
-
-
-def filter_min_stations(df, min_stations, label=""):
-    console.print(
-        f"\n[bold yellow]Filtering: Removing countries with < {min_stations} stations{label}[/bold yellow]"
-    )
-    before = len(df)
-    before_countries = df["country"].nunique()
-    countries_before = set(df["country"].unique())
-
-    counts = df["country"].value_counts()
-    valid_countries = counts[counts >= min_stations].index
-    df = df[df["country"].isin(valid_countries)]
-
-    after = len(df)
-    after_countries = df["country"].nunique()
-    countries_after = set(df["country"].unique())
-    lost_countries = sorted(countries_before - countries_after)
-
-    console.print(
-        f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
-    )
-    console.print(
-        f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green] ([dim]removed {len(lost_countries)}[/dim])"
-    )
-    if lost_countries:
-        console.print(
-            f"  Lost countries: [yellow]{', '.join(str(x) for x in lost_countries)}[/yellow]"
-        )
-
-    return df
 
 
 # ==============================================================================
@@ -87,7 +53,32 @@ console.print(table)
 # FILTERING: MIN STATIONS (FIRST PASS)
 # ==============================================================================
 
-radio = filter_min_stations(radio, MIN_STATIONS)
+console.print(
+    f"\n[bold yellow]Filtering: Removing countries with < {MIN_STATIONS} stations[/bold yellow]"
+)
+before = len(radio)
+before_countries = radio["country"].nunique()
+countries_before = set(radio["country"].unique())
+
+counts = radio["country"].value_counts()
+valid_countries = counts[counts >= MIN_STATIONS].index
+radio = radio[radio["country"].isin(valid_countries)]
+
+after = len(radio)
+after_countries = radio["country"].nunique()
+countries_after = set(radio["country"].unique())
+lost_countries = sorted(countries_before - countries_after)
+
+console.print(
+    f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
+)
+console.print(
+    f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green] ([dim]removed {len(lost_countries)}[/dim])"
+)
+if lost_countries:
+    console.print(
+        f"  Lost countries: [yellow]{', '.join(str(x) for x in lost_countries)}[/yellow]"
+    )
 
 
 # ==============================================================================
