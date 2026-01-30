@@ -5,7 +5,9 @@ This script computes representative centroids for countries using Natural Earth 
 
 METHODOLOGY:
 - Extracts the largest polygon (mainland) for each country to avoid island influence
+- Reprojects geometries to EPSG:8857 (Equal Earth) for accurate centroid computation
 - Computes geometric centroids, with fallback to representative points for complex shapes
+- Reprojects centroids back to EPSG:4326 for output
 - Ensures resulting points are guaranteed to be within country boundaries
 - Outputs centroids as a GeoJSON file with country metadata
 
@@ -14,7 +16,7 @@ INPUT:
 
 OUTPUT:
 - GeoJSON file containing point geometries at centroid locations
-- Includes: country name, ISO code, continent, population, mainland area
+- Includes: country name, ISO code, continent, population
 
 USAGE:
     uv run 01_centroids.py
@@ -23,7 +25,6 @@ USAGE:
 import os
 import geopandas as gpd
 from rich.console import Console
-from rich.table import Table
 from shapely.geometry import MultiPolygon, Polygon
 
 console = Console()
@@ -113,21 +114,36 @@ def main():
     # Extract mainland (largest polygon) for each country
     gdf_processed["mainland"] = gdf_processed["geometry"].apply(get_largest_polygon)
 
-    # Compute representative centroids
-    gdf_processed["centroid"] = gdf_processed["mainland"].apply(
-        compute_interior_centroid
-    )
+    # Create a temporary GeoDataFrame for reprojection
+    mainland_gdf = gpd.GeoDataFrame(geometry=gdf_processed["mainland"], crs=gdf.crs)
+
+    # Reproject to EPSG:8857 (Equal Earth) for accurate centroid calculation
+    mainland_8857 = mainland_gdf.to_crs("EPSG:8857")
+
+    # Compute centroids in the projected CRS
+    console.print("Computing centroids in EPSG:8857...")
+    centroids_8857 = mainland_8857.geometry.apply(compute_interior_centroid)
+
+    # Reproject centroids back to EPSG:4326
+    centroids_gdf_8857 = gpd.GeoDataFrame(geometry=centroids_8857, crs="EPSG:8857")
+    centroids_4326 = centroids_gdf_8857.to_crs("EPSG:4326")
+
+    # Assign geometries back to the processed dataframe
+    gdf_processed["centroid"] = centroids_4326.geometry
 
     # Create output GeoDataFrame with centroids
     centroids_gdf = gpd.GeoDataFrame(
-        gdf_processed[["NAME", "ISO_A3", "CONTINENT", "POP_EST"]],
+        gdf_processed[
+            [
+                "NAME",
+                "ISO_A3",
+                "ISO_A2_EH",
+                "ISO_N3",
+                "CONTINENT",
+            ]
+        ],
         geometry=gdf_processed["centroid"],
         crs=gdf.crs,
-    )
-
-    # Add area information (mainland only)
-    centroids_gdf["mainland_area_km2"] = (
-        gdf_processed["mainland"].to_crs("EPSG:6933").area / 1e6
     )
 
     # ==============================================================================
@@ -145,50 +161,6 @@ def main():
     console.print(
         f"✓ Centroids within country boundaries: {within_boundary}/{len(gdf_processed)} ({100 * within_boundary / len(gdf_processed):.1f}%)"
     )
-
-    # Show examples
-    console.print("\n[bold cyan]Sample Results:[/bold cyan]")
-    table = Table(show_header=True, header_style="bold magenta")
-    table.add_column("Country", style="cyan", width=20)
-    table.add_column("ISO", justify="center", width=6)
-    table.add_column("Mainland Area (km²)", justify="right", width=18)
-    table.add_column("Centroid Lon", justify="right", width=12)
-    table.add_column("Centroid Lat", justify="right", width=12)
-    table.add_column("Within?", justify="center", width=8)
-
-    # Show a diverse sample of countries
-    sample_countries = [
-        "United States of America",
-        "China",
-        "Russia",
-        "Brazil",
-        "France",
-        "Indonesia",
-        "Norway",
-        "Chile",
-        "Japan",
-        "South Africa",
-    ]
-
-    for country in sample_countries:
-        row = centroids_gdf[centroids_gdf["NAME"] == country]
-        if not row.empty:
-            idx = row.index[0]
-            centroid = row.geometry.iloc[0]
-            within = (
-                "✓" if gdf_processed["mainland"].iloc[idx].contains(centroid) else "✗"
-            )
-
-            table.add_row(
-                country,
-                row["ISO_A3"].iloc[0],
-                f"{row['mainland_area_km2'].iloc[0]:,.0f}",
-                f"{centroid.x:.4f}",
-                f"{centroid.y:.4f}",
-                within,
-            )
-
-    console.print(table)
 
     # ==============================================================================
     # SAVE OUTPUT
