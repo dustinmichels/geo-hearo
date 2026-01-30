@@ -32,6 +32,55 @@ console.print(
 )
 
 # ==============================================================================
+# HELPER FUNCTIONS
+# ==============================================================================
+
+
+def filter_with_report(df, mask, description):
+    """Applies a boolean mask to the dataframe and reports station count changes."""
+    console.print(f"\n[bold yellow]Filtering: {description}[/bold yellow]")
+    before = len(df)
+    new_df = df[mask]
+    after = len(new_df)
+    console.print(
+        f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
+    )
+    return new_df
+
+
+def enforce_min_stations(df):
+    """Removes countries with fewer than MIN_STATIONS and reports changes."""
+    counts = df["country"].value_counts()
+    valid_countries = counts[counts >= MIN_STATIONS].index
+
+    before_n = len(df)
+    before_countries = set(df["country"].unique())
+
+    new_df = df[df["country"].isin(valid_countries)]
+
+    after_n = len(new_df)
+    after_countries = set(new_df["country"].unique())
+    lost_countries = sorted(before_countries - after_countries)
+
+    # Report station changes if any
+    if before_n != after_n:
+        console.print(
+            f"  Stations: [red]{before_n:,}[/red] → [green]{after_n:,}[/green] ([dim]removed {before_n - after_n:,}[/dim])"
+        )
+
+    # Report country changes
+    console.print(
+        f"  Countries: [red]{len(before_countries)}[/red] → [green]{len(after_countries)}[/green] "
+        f"([dim]removed {len(lost_countries)}[/dim])"
+    )
+    if lost_countries:
+        console.print(
+            f"  Lost countries: [yellow]{', '.join(str(x) for x in lost_countries)}[/yellow]"
+        )
+    return new_df
+
+
+# ==============================================================================
 # DATA LOADING
 # ==============================================================================
 
@@ -56,100 +105,26 @@ console.print(table)
 console.print(
     f"\n[bold yellow]Filtering: Removing countries with < {MIN_STATIONS} stations[/bold yellow]"
 )
-before = len(radio)
-before_countries = radio["country"].nunique()
-countries_before = set(radio["country"].unique())
-
-counts = radio["country"].value_counts()
-valid_countries = counts[counts >= MIN_STATIONS].index
-radio = radio[radio["country"].isin(valid_countries)]
-
-after = len(radio)
-after_countries = radio["country"].nunique()
-countries_after = set(radio["country"].unique())
-lost_countries = sorted(countries_before - countries_after)
-
-console.print(
-    f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
-)
-console.print(
-    f"  Countries: [red]{before_countries}[/red] → [green]{after_countries}[/green] ([dim]removed {len(lost_countries)}[/dim])"
-)
-if lost_countries:
-    console.print(
-        f"  Lost countries: [yellow]{', '.join(str(x) for x in lost_countries)}[/yellow]"
-    )
+radio = enforce_min_stations(radio)
 
 
 # ==============================================================================
 # FILTERING: NULL CHANNEL URLS
 # ==============================================================================
 
-console.print(
-    "\n[bold yellow]Filtering: Removing stations without 'resolved' URLs[/bold yellow]"
+radio = filter_with_report(
+    radio,
+    radio["channel_resolved_url"].notnull(),
+    "Removing stations without 'resolved' URLs",
 )
-before = len(radio)
-before_countries = radio["country"].nunique()
-countries_before = set(radio["country"].unique())
-
-radio = radio[radio["channel_resolved_url"].notnull()]
-
-after = len(radio)
-after_countries = radio["country"].nunique()
-countries_after = set(radio["country"].unique())
-
-console.print(
-    f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
-)
-
-# Re-check minimum stations and show country impact
-counts = radio["country"].value_counts()
-valid_countries = counts[counts >= MIN_STATIONS].index
-radio_final = radio[radio["country"].isin(valid_countries)]
-
-after_recheck_countries = radio_final["country"].nunique()
-lost_countries = sorted(countries_after - set(radio_final["country"].unique()))
-
-console.print(
-    f"  Countries: [red]{after_countries}[/red] → [green]{after_recheck_countries}[/green] ([dim]removed {after_countries - after_recheck_countries}[/dim])"
-)
-if lost_countries:
-    console.print(f"  Lost countries: [yellow]{', '.join(lost_countries)}[/yellow]")
-
-radio = radio_final
+radio = enforce_min_stations(radio)
 
 
 # ==============================================================================
 # FILTERING: INSECURE CHANNELS
 # ==============================================================================
 
-console.print(
-    "\n[bold yellow]Filtering: Removing stations with insecure channels[/bold yellow]"
+radio = filter_with_report(
+    radio, radio["channel_secure"], "Removing stations with insecure channels"
 )
-before = len(radio)
-
-radio = radio[radio["channel_secure"]]
-
-after = len(radio)
-after_countries = radio["country"].nunique()
-countries_after = set(radio["country"].unique())
-
-console.print(
-    f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
-)
-
-# Re-check minimum stations
-counts = radio["country"].value_counts()
-valid_countries = counts[counts >= MIN_STATIONS].index
-radio_final = radio[radio["country"].isin(valid_countries)]
-
-after_recheck_countries = radio_final["country"].nunique()
-lost_countries = sorted(countries_after - set(radio_final["country"].unique()))
-
-console.print(
-    f"  Countries: [red]{after_countries}[/red] → [green]{after_recheck_countries}[/green] ([dim]removed {after_countries - after_recheck_countries}[/dim])"
-)
-if lost_countries:
-    console.print(f"  Lost countries: [yellow]{', '.join(lost_countries)}[/yellow]")
-
-radio = radio_final
+radio = enforce_min_stations(radio)
