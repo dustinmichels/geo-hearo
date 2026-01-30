@@ -1,9 +1,30 @@
+"""
+Country Centroid Computation Script
+
+This script computes representative centroids for countries using Natural Earth data.
+
+METHODOLOGY:
+- Extracts the largest polygon (mainland) for each country to avoid island influence
+- Computes geometric centroids, with fallback to representative points for complex shapes
+- Ensures resulting points are guaranteed to be within country boundaries
+- Outputs centroids as a GeoJSON file with country metadata
+
+INPUT:
+- Natural Earth countries GeoJSON file
+
+OUTPUT:
+- GeoJSON file containing point geometries at centroid locations
+- Includes: country name, ISO code, continent, population, mainland area
+
+USAGE:
+    uv run 01_centroids.py
+"""
+
+import os
 import geopandas as gpd
-from rich import print
 from rich.console import Console
 from rich.table import Table
-from shapely.geometry import MultiPolygon, Point, Polygon
-from shapely.ops import unary_union
+from shapely.geometry import MultiPolygon, Polygon
 
 console = Console()
 
@@ -36,8 +57,8 @@ def get_largest_polygon(geometry):
 def compute_representative_point(polygon):
     """
     Compute a representative point that is guaranteed to be within the polygon.
-    Uses the polylabel algorithm (pole of inaccessibility) if available,
-    otherwise falls back to shapely's representative_point().
+    Uses shapely's representative_point() method, which implements an algorithm
+    to find a point inside the geometry.
     """
     try:
         # Shapely's representative_point is guaranteed to be within the geometry
@@ -50,11 +71,16 @@ def compute_representative_point(polygon):
         return polygon.centroid
 
 
-def compute_weighted_centroid(polygon):
+def compute_interior_centroid(polygon):
     """
-    Compute a centroid weighted by land mass.
-    For a single polygon, this is equivalent to the geometric centroid,
-    but this function ensures it's within the polygon boundaries.
+    Compute a geometric centroid that is guaranteed to be within the polygon.
+
+    This function first computes the geometric centroid. If that point falls
+    outside the polygon (which can happen with concave or complex shapes),
+    it falls back to using representative_point() which is guaranteed to be inside.
+
+    Note: This is a geometric centroid based on the polygon's shape, NOT weighted
+    by population, area, or any other factor.
     """
     # First try the geometric centroid
     centroid = polygon.centroid
@@ -89,7 +115,7 @@ def main():
 
     # Compute representative centroids
     gdf_processed["centroid"] = gdf_processed["mainland"].apply(
-        compute_weighted_centroid
+        compute_interior_centroid
     )
 
     # Create output GeoDataFrame with centroids
@@ -169,6 +195,10 @@ def main():
     # ==============================================================================
 
     console.print(f"\n[bold cyan]Saving centroids to {OUTPUT_FILE}...[/bold cyan]")
+
+    # Ensure output directory exists
+    os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
+
     centroids_gdf.to_file(OUTPUT_FILE, driver="GeoJSON")
     console.print("[bold green]✓ Complete![/bold green]")
 
