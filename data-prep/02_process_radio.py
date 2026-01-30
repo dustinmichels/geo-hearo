@@ -117,6 +117,7 @@ radio = filter_with_report(
     radio["channel_resolved_url"].notnull(),
     "Removing stations without 'resolved' URLs",
 )
+console.print(f"  [dim]Re-applying min stations filter (< {MIN_STATIONS})...[/dim]")
 radio = enforce_min_stations(radio)
 
 
@@ -127,4 +128,39 @@ radio = enforce_min_stations(radio)
 radio = filter_with_report(
     radio, radio["channel_secure"], "Removing stations with insecure channels"
 )
+console.print(f"  [dim]Re-applying min stations filter (< {MIN_STATIONS})...[/dim]")
 radio = enforce_min_stations(radio)
+
+
+# ==============================================================================
+# SPATIAL JOIN
+# ==============================================================================
+
+console.print(
+    "\n[bold yellow]Spatial Join: Matching stations to Natural Earth countries[/bold yellow]"
+)
+
+# Create GeoDataFrame
+radio_gdf = gpd.GeoDataFrame(
+    radio,
+    geometry=gpd.points_from_xy(radio["geo_lon"], radio["geo_lat"]),
+    crs="EPSG:4326",
+)
+
+# Ensure CRS match
+if ne.crs != radio_gdf.crs:
+    console.print(
+        f"  CRS mismatch: {ne.crs} != {radio_gdf.crs}. Reprojecting NE to match."
+    )
+    ne = ne.to_crs(radio_gdf.crs)
+
+# Perform spatial join
+radio_ne = gpd.sjoin(radio_gdf, ne, how="inner", predicate="within")
+
+console.print(
+    f"  Stations: [red]{len(radio):,}[/red] → [green]{len(radio_ne):,}[/green] "
+    f"([dim]removed {len(radio) - len(radio_ne):,}[/dim])"
+)
+
+console.print(f"  [dim]Re-applying min stations filter (< {MIN_STATIONS})...[/dim]")
+radio_ne = enforce_min_stations(radio_ne)
