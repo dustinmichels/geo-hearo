@@ -1,5 +1,13 @@
+"""
+USAGE:
+    uv run 01_load_data.py
+"""
+
 import geopandas as gpd
 import os
+from rich.console import Console
+
+import shutil
 
 # URLs for Natural Earth Data - Admin 0 - Map Subunits
 # Using map subunits instead of countries for better handling of territories
@@ -21,26 +29,34 @@ def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     output_dir = os.path.join(script_dir, OUTPUT_DIR)
 
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    console = Console()
+
+    console.print("\n[bold blue]🌍 Loading Natural Earth dataset...[/bold blue]")
+
+    # Remove output directory if it exists
+    console.print(f"[dim]🗑️  Cleaning output directory: {OUTPUT_DIR}[/dim]")
+    if os.path.exists(output_dir):
+        shutil.rmtree(output_dir)
+    os.makedirs(output_dir)
 
     for scale, url in URLS.items():
-        print(f"Loading {scale} data from {url}...")
+        console.print(f"\n[bold cyan]⬇️  Processing {scale} scale[/bold cyan]")
         try:
             # Load directly from URL using geopandas
             # This handles downloading and unzipping in memory/tmp
-            gdf = gpd.read_file(url)
+            with console.status(f"[dim]Downloading from {url}...[/dim]"):
+                gdf = gpd.read_file(url)
 
             # Construct output filename
             filename = f"ne_{scale}_admin_0_countries.geojson"
             output_path = os.path.join(output_dir, filename)
 
-            print(f"Saving to {output_path}...")
+            console.print(f"  [green]💾 Saving to {filename}...[/green]")
             gdf.to_file(output_path, driver="GeoJSON")
-            print("Done.")
+            console.print("  [bold green]✅ Done[/bold green]")
 
         except Exception as e:
-            print(f"Error processing {scale} ({url}): {e}")
+            console.print(f"  [bold red]❌ Error processing {scale}: {e}[/bold red]")
 
 
 if __name__ == "__main__":
