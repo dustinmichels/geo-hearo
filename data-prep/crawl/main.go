@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"log"
 	"os"
 
@@ -9,11 +10,41 @@ import (
 
 func main() {
 	createDirIfNotExist("./out")
+	backupOldOutput()
 
 	log.Println("**** Starting crawl ****")
 	output := Crawl(20)
 
 	saveToCsv(output)
+}
+
+func backupOldOutput() {
+	src := "out/output.csv"
+	dst := "out/output_previous.csv"
+
+	if _, err := os.Stat(src); os.IsNotExist(err) {
+		return
+	}
+
+	log.Println("**** Backing up output.csv to output_previous.csv ****")
+
+	sourceFile, err := os.Open(src)
+	if err != nil {
+		log.Printf("Error opening source file for backup: %v", err)
+		return
+	}
+	defer sourceFile.Close()
+
+	destFile, err := os.Create(dst)
+	if err != nil {
+		log.Printf("Error creating backup file: %v", err)
+		return
+	}
+	defer destFile.Close()
+
+	if _, err := io.Copy(destFile, sourceFile); err != nil {
+		log.Printf("Error copying backup file: %v", err)
+	}
 }
 
 func createDirIfNotExist(dir string) {
