@@ -1,6 +1,6 @@
 """
 USAGE:
-    uv run 04_match_radio.py
+    uv run 03_process_radio.py
 """
 
 import json
@@ -61,6 +61,9 @@ def main():
     try:
         radio = pd.read_json(RADIO_INPUT)
         ne = gpd.read_file(NE_INPUT)
+        # Drop geometry immediately to avoid index/reindexing overhead during processing
+        if "geometry" in ne.columns:
+            ne = ne.drop(columns=["geometry"])
     except Exception as e:
         console.print(f"[bold red]Error loading files: {e}[/bold red]")
         return
@@ -79,42 +82,42 @@ def main():
     # --------------------------------------------------------------------------
     console.print("\n[bold yellow]Building country name lookup map...[/bold yellow]")
 
-    # We want to match 'country' from radio to NE's ADMIN or NAME* columns.
-    # To do this efficiently, we create a "long" mapping table: Name -> NE Index
+    # Identify relevant columns for matching
     name_cols = ["ADMIN"] + [col for col in ne.columns if col.startswith("NAME")]
+
+    # Ensure selected metadata columns exist in the dataset
+    available_ne_cols = [c for c in SELECTED_NE_COLS if c in ne.columns]
 
     lookup_list = []
     for col in name_cols:
-        # Create a temp df with the name and the original index
-        temp_df = ne[[col]].copy()
-        temp_df.columns = ["match_key"]
-        temp_df["ne_index"] = ne.index
+        # We only want the unique mapping of this specific name column to the metadata
+        # We select the columns explicitly and rename the 'key' column
+        # Using .loc and ensuring we don't have duplicate names in the selection
+        cols_to_select = list(set([col] + available_ne_cols))
+        temp_df = ne[cols_to_select].copy()
+        temp_df = temp_df.rename(columns={col: "match_key"})
         lookup_list.append(temp_df)
 
-    # Combine all name variants, clean them, and drop duplicates (favoring first match)
-    lookup_map = pd.concat(lookup_list).dropna(subset=["match_key"])
+    # Combine all variants.
+    # ignore_index=True handles the row index.
+    # We ensure columns are unique across the list before concat.
+    lookup_map = pd.concat(lookup_list, ignore_index=True)
 
-    # Added .str before .lower() to correctly access pandas string methods
+    # Clean match keys
+    lookup_map = lookup_map.dropna(subset=["match_key"])
     lookup_map["match_key"] = (
         lookup_map["match_key"].astype(str).str.strip().str.lower()
     )
+
+    # Keep the first occurrence of each country name variant
     lookup_map = lookup_map.drop_duplicates(subset=["match_key"], keep="first")
 
     # Prepare radio data for merging
     radio["match_key"] = radio["country"].astype(str).str.strip().str.lower()
 
-    # Perform the merge
-    # 1. Match radio keys to NE indices
-    matched_indices = radio[["match_key"]].merge(lookup_map, on="match_key", how="left")
-
-    # 2. Join back to the actual NE data (excluding geometry for speed/JSON compatibility)
-    available_ne_cols = [c for c in SELECTED_NE_COLS if c in ne.columns]
-    ne_subset = ne[available_ne_cols].copy()
-
-    # Join the metadata using the ne_index we found
-    radio_enriched = radio.join(
-        matched_indices["ne_index"].map(ne_subset.to_dict("index")).apply(pd.Series)
-    )
+    # Perform a standard left merge.
+    # This avoids the Reindexing error by matching on a clean, deduplicated map.
+    radio_enriched = radio.merge(lookup_map, on="match_key", how="left")
 
     # Statistics
     unmatched_mask = radio_enriched["ADMIN"].isna()
@@ -135,17 +138,16 @@ def main():
         f"\n[bold yellow]Filtering countries with < {MIN_STATIONS} stations...[/bold yellow]"
     )
 
-    # Identify unique ID for countries (ISO_A2_EH is robust)
+    # Identify unique ID for countries
     country_id_col = "ISO_A2_EH"
 
     if country_id_col in radio_enriched.columns:
-        # Count stations per country
+        # Count stations per country (ignoring NaNs)
         counts = radio_enriched[country_id_col].value_counts()
         valid_countries = counts[counts >= MIN_STATIONS].index
 
         initial_count = len(radio_enriched)
-        # Filter: keep matched countries with enough stations OR keep unmatched rows (optional)
-        # Here we filter the whole dataset to ensure quality
+        # Filter: only keep countries with enough stations
         radio_final = radio_enriched[
             radio_enriched[country_id_col].isin(valid_countries)
         ].copy()
@@ -155,22 +157,21 @@ def main():
             f"[bold green]✓ Kept {len(radio_final):,} stations across {len(valid_countries)} countries[/bold green]"
         )
         console.print(
-            f"[dim]Dropped {removed_count:,} stations from small country datasets[/dim]"
+            f"[dim]Dropped {removed_count:,} stations (unmatched or small country sets)[/dim]"
         )
     else:
         console.print("[bold red]Cannot filter: ISO_A2_EH column missing.[/bold red]")
         radio_final = radio_enriched
 
     # --------------------------------------------------------------------------
-    # FINAL SUMMARY: STATIONS PER COUNTRY
+    # FINAL SUMMARY
     # --------------------------------------------------------------------------
     print_header("FINAL SUMMARY: Radio Stations by Country")
 
-    # Clean up temporary columns
+    # Clean up temporary column used for joining
     if "match_key" in radio_final.columns:
         radio_final = radio_final.drop(columns=["match_key"])
 
-    # Grouping logic
     required_cols = ["ISO_A2_EH", "NAME", "POP_EST"]
     if all(col in radio_final.columns for col in required_cols):
         summary_data = (
@@ -200,17 +201,13 @@ def main():
                 f"{row['station_count']:,}",
             )
         console.print(summary_table)
-    else:
-        console.print(
-            "[bold red]Missing columns for summary table. Check NE data columns.[/bold red]"
-        )
 
     # --------------------------------------------------------------------------
     # OUTPUT
     # --------------------------------------------------------------------------
     console.print(f"\n[bold yellow]Saving to {OUTPUT}...[/bold yellow]")
 
-    # Convert to dictionary for JSON output
+    # Ensure we don't have NaN in the final JSON output (converts to null)
     output_data = radio_final.to_dict(orient="records")
 
     with open(OUTPUT, "w", encoding="utf-8") as f:
