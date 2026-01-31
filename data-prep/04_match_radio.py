@@ -1,6 +1,6 @@
 """
 USAGE:
-    uv run 03_process_radio.py
+    uv run 04_match_radio.py
 """
 
 import json
@@ -52,7 +52,7 @@ def print_header(text: str):
 
 
 def main():
-    print_header("SCRIPT 2: PROCESS RADIO STATIONS")
+    print_header("SCRIPT 4: MATCH RADIO STATIONS TO COUNTRIES")
 
     # --------------------------------------------------------------------------
     # DATA LOADING
@@ -78,58 +78,48 @@ def main():
     console.print(table)
 
     # --------------------------------------------------------------------------
-    # COUNTRY MATCHING (VECTORIZED)
+    # COUNTRY MATCHING
     # --------------------------------------------------------------------------
     console.print("\n[bold yellow]Building country name lookup map...[/bold yellow]")
 
-    # Identify relevant columns for matching
-    name_cols = ["ADMIN"] + [col for col in ne.columns if col.startswith("NAME")]
+    # Identify all name-related columns in order
+    name_cols = [col for col in ne.columns if "NAME" in col.upper()]
 
-    # Ensure selected metadata columns exist in the dataset
-    available_ne_cols = [c for c in SELECTED_NE_COLS if c in ne.columns]
+    # We want a lookup map: { lowercase_name: ne_index }
+    # Priorities: 1. ADMIN, 2. name_cols (in order)
+    lookup = {}
 
-    lookup_list = []
+    def populate_lookup(column_name):
+        if column_name not in ne.columns:
+            return
+        for idx, val in ne[column_name].items():
+            if pd.isna(val):
+                continue
+            key = str(val).strip().lower()
+            if key not in lookup:
+                lookup[key] = idx
+
+    # Primary check: ADMIN
+    populate_lookup("ADMIN")
+
+    # Fallback checks: all NAME columns
     for col in name_cols:
-        # We only want the unique mapping of this specific name column to the metadata
-        # We select the columns explicitly and rename the 'key' column
-        # Using .loc and ensuring we don't have duplicate names in the selection
-        cols_to_select = list(set([col] + available_ne_cols))
-        temp_df = ne[cols_to_select].copy()
-        temp_df = temp_df.rename(columns={col: "match_key"})
-        lookup_list.append(temp_df)
+        populate_lookup(col)
 
-    # Combine all variants.
-    # ignore_index=True handles the row index.
-    # We ensure columns are unique across the list before concat.
-    lookup_map = pd.concat(lookup_list, ignore_index=True)
-
-    # Clean match keys
-    lookup_map = lookup_map.dropna(subset=["match_key"])
-    lookup_map["match_key"] = (
-        lookup_map["match_key"].astype(str).str.strip().str.lower()
+    console.print(
+        f"[dim]Lookup table built with {len(lookup):,} unique name variations[/dim]"
     )
 
-    # Keep the first occurrence of each country name variant
-    lookup_map = lookup_map.drop_duplicates(subset=["match_key"], keep="first")
+    # Map radio stations to NE indices
+    radio["ne_idx"] = radio["country"].str.strip().str.lower().map(lookup)
 
-    # Prepare radio data for merging
-    radio["match_key"] = radio["country"].astype(str).str.strip().str.lower()
+    # Merge with NE data
+    radio_enriched = radio.merge(
+        ne[SELECTED_NE_COLS], left_on="ne_idx", right_index=True, how="left"
+    )
 
-    # Perform a standard left merge.
-    # This avoids the Reindexing error by matching on a clean, deduplicated map.
-    radio_enriched = radio.merge(lookup_map, on="match_key", how="left")
-
-    # Statistics
-    unmatched_mask = radio_enriched["ADMIN"].isna()
-    unmatched_names = radio.loc[unmatched_mask, "country"].unique()
-    matched_count = len(radio_enriched) - unmatched_mask.sum()
-
+    matched_count = radio_enriched["ne_idx"].notna().sum()
     console.print(f"[bold green]✓ Matched {matched_count:,} stations[/bold green]")
-    if len(unmatched_names) > 0:
-        console.print(
-            f"[bold yellow]⚠ Unmatched country strings ({len(unmatched_names)}):[/bold yellow]"
-        )
-        console.print(f"  {', '.join(sorted([str(x) for x in unmatched_names]))}")
 
     # --------------------------------------------------------------------------
     # FILTERING BY MIN STATIONS
@@ -168,9 +158,11 @@ def main():
     # --------------------------------------------------------------------------
     print_header("FINAL SUMMARY: Radio Stations by Country")
 
-    # Clean up temporary column used for joining
-    if "match_key" in radio_final.columns:
-        radio_final = radio_final.drop(columns=["match_key"])
+    # Clean up temporary columns used for joining
+    cols_to_drop = ["match_key", "ne_idx"]
+    radio_final = radio_final.drop(
+        columns=[c for c in cols_to_drop if c in radio_final.columns]
+    )
 
     required_cols = ["ISO_A2_EH", "NAME", "POP_EST"]
     if all(col in radio_final.columns for col in required_cols):
@@ -208,7 +200,10 @@ def main():
     console.print(f"\n[bold yellow]Saving to {OUTPUT}...[/bold yellow]")
 
     # Ensure we don't have NaN in the final JSON output (converts to null)
-    output_data = radio_final.to_dict(orient="records")
+    # Use where(pd.notnull(df), None) or simply handle in dict conversion
+    output_data = radio_final.where(pd.notnull(radio_final), None).to_dict(
+        orient="records"
+    )
 
     with open(OUTPUT, "w", encoding="utf-8") as f:
         json.dump(output_data, f, indent=2, ensure_ascii=False)
