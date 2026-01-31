@@ -1,6 +1,6 @@
 """
 USAGE:
-    uv run 03_filter_radio.py
+    uv run scripts/03_filter_radio.py
 """
 
 import json

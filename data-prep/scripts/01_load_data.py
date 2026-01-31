@@ -1,6 +1,6 @@
 """
 USAGE:
-    uv run 01_load_data.py
+    uv run scripts/01_load_data.py
 """
 
 import os
@@ -28,8 +28,7 @@ OUTPUT_DIR = "data/ne"
 
 def main():
     # Setup paths
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    output_dir = os.path.join(script_dir, OUTPUT_DIR)
+    output_dir = OUTPUT_DIR
 
     console = Console()
 
