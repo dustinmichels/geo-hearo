@@ -24,8 +24,8 @@ MIN_STATIONS = 5
 
 SELECTED_NE_COLS = [
     "ADMIN",
-    "NAME",
-    "GEOUNIT",
+    # "NAME",
+    # "GEOUNIT",
     "ISO_A3",
     # "ISO_A2",
     "ISO_A2_EH",
@@ -36,6 +36,7 @@ SELECTED_NE_COLS = [
     # "POP_EST",
     # "POP_RANK",
 ]
+
 
 # ==============================================================================
 # UTILS

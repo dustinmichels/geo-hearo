@@ -18,6 +18,12 @@ console = Console()
 RADIO_INPUT = "crawl/out/output.csv"
 OUTPUT = "data/out/all_radio_filtered.json"
 
+DROP_COLS = [
+    "channel_stream",
+    "channel_secure",
+    "boost",
+]
+
 
 # ==============================================================================
 # MAIN
@@ -81,6 +87,12 @@ radio = filter_with_report(
     radio, radio["channel_secure"], "Removing stations with insecure channels"
 )
 
+
+# ==============================================================================
+# DROP UNWANTED COLUMNS
+# =============================================================================
+
+radio = radio.drop(columns=DROP_COLS)
 
 # ==============================================================================
 # OUTPUT
