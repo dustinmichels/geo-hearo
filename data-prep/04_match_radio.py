@@ -27,14 +27,14 @@ SELECTED_NE_COLS = [
     "NAME",
     "GEOUNIT",
     "ISO_A3",
-    "ISO_A2",
+    # "ISO_A2",
     "ISO_A2_EH",
-    "ISO_N3",
-    "POSTAL",
+    # "ISO_N3",
+    # "POSTAL",
     "CONTINENT",
-    "LEVEL",
-    "POP_EST",
-    "POP_RANK",
+    # "LEVEL",
+    # "POP_EST",
+    # "POP_RANK",
 ]
 
 # ==============================================================================
@@ -43,7 +43,11 @@ SELECTED_NE_COLS = [
 
 
 def print_header(text: str):
-    console.print(f"\n[bold cyan] {text} [/bold cyan]".center(80, "━"))
+    console.print(
+        "[bold cyan]═════════════════════════════════════════════════════════════[/]",
+        f"\n[bold cyan]{text}[/]",
+        "\n[bold cyan]═════════════════════════════════════════════════════════════[/]\n",
+    )
 
 
 # ==============================================================================
@@ -113,12 +117,36 @@ def main():
     # Map radio stations to NE indices
     radio["ne_idx"] = radio["country"].str.strip().str.lower().map(lookup)
 
-    # Merge with NE data
-    radio_enriched = radio.merge(
-        ne[SELECTED_NE_COLS], left_on="ne_idx", right_index=True, how="left"
-    )
+    # Identify unmatched countries BEFORE filtering
+    unmatched_mask = radio["ne_idx"].isna()
+    unmatched_countries = radio.loc[unmatched_mask, "country"].value_counts()
 
-    matched_count = radio_enriched["ne_idx"].notna().sum()
+    if len(unmatched_countries) > 0:
+        console.print(
+            f"\n[bold red]⚠ Found {len(unmatched_countries)} unmatched countries:[/bold red]"
+        )
+        unmatch_table = Table(
+            title="Unmatched Countries (will be dropped)", header_style="bold red"
+        )
+        unmatch_table.add_column("Country", style="yellow")
+        unmatch_table.add_column("Stations", justify="right", style="red")
+
+        for country, count in unmatched_countries.items():
+            unmatch_table.add_row(str(country), f"{count:,}")
+        console.print(unmatch_table)
+
+        total_dropped = unmatched_mask.sum()
+        console.print(
+            f"[bold red]Dropping {total_dropped:,} stations from unmatched countries[/bold red]\n"
+        )
+
+    # Drop unmatched stations
+    radio = radio[~unmatched_mask].copy()
+
+    # Merge with ALL NE columns (we'll filter later)
+    radio_enriched = radio.merge(ne, left_on="ne_idx", right_index=True, how="left")
+
+    matched_count = len(radio_enriched)
     console.print(f"[bold green]✓ Matched {matched_count:,} stations[/bold green]")
 
     # --------------------------------------------------------------------------
@@ -136,6 +164,27 @@ def main():
         counts = radio_enriched[country_id_col].value_counts()
         valid_countries = counts[counts >= MIN_STATIONS].index
 
+        # Identify countries being filtered out
+        small_countries = counts[counts < MIN_STATIONS]
+        if len(small_countries) > 0:
+            console.print(
+                f"\n[bold yellow]⚠ Found {len(small_countries)} countries with < {MIN_STATIONS} stations:[/bold yellow]"
+            )
+            small_table = Table(
+                title=f"Countries with < {MIN_STATIONS} stations (will be dropped)",
+                header_style="bold yellow",
+            )
+            small_table.add_column("Country Code", style="cyan")
+            small_table.add_column("Stations", justify="right", style="yellow")
+
+            for iso_code, count in small_countries.items():
+                # Try to get the country name
+                country_name = radio_enriched[
+                    radio_enriched[country_id_col] == iso_code
+                ]["NAME"].iloc[0]
+                small_table.add_row(f"{country_name} ({iso_code})", f"{count:,}")
+            console.print(small_table)
+
         initial_count = len(radio_enriched)
         # Filter: only keep countries with enough stations
         radio_final = radio_enriched[
@@ -147,7 +196,7 @@ def main():
             f"[bold green]✓ Kept {len(radio_final):,} stations across {len(valid_countries)} countries[/bold green]"
         )
         console.print(
-            f"[dim]Dropped {removed_count:,} stations (unmatched or small country sets)[/dim]"
+            f"[dim]Dropped {removed_count:,} stations (small country sets)[/dim]"
         )
     else:
         console.print("[bold red]Cannot filter: ISO_A2_EH column missing.[/bold red]")
@@ -156,7 +205,9 @@ def main():
     # --------------------------------------------------------------------------
     # FINAL SUMMARY
     # --------------------------------------------------------------------------
-    print_header("FINAL SUMMARY: Radio Stations by Country")
+    console.print(
+        "[bold yellow]FINAL SUMMARY: Radio Stations by Country[/bold yellow]\n"
+    )
 
     # Clean up temporary columns used for joining
     cols_to_drop = ["match_key", "ne_idx"]
@@ -195,12 +246,26 @@ def main():
         console.print(summary_table)
 
     # --------------------------------------------------------------------------
+    # FILTER COLUMNS (Final step before output)
+    # --------------------------------------------------------------------------
+    console.print(f"\n[bold yellow]Filtering columns for output...[/bold yellow]")
+
+    # Keep original radio columns + selected NE columns
+    original_radio_cols = [col for col in radio.columns if col != "ne_idx"]
+    final_columns = original_radio_cols + SELECTED_NE_COLS
+
+    # Only keep columns that exist in radio_final
+    final_columns = [col for col in final_columns if col in radio_final.columns]
+    radio_final = radio_final[final_columns]
+
+    console.print(f"[dim]Kept {len(final_columns)} columns in final output[/dim]")
+
+    # --------------------------------------------------------------------------
     # OUTPUT
     # --------------------------------------------------------------------------
     console.print(f"\n[bold yellow]Saving to {OUTPUT}...[/bold yellow]")
 
     # Ensure we don't have NaN in the final JSON output (converts to null)
-    # Use where(pd.notnull(df), None) or simply handle in dict conversion
     output_data = radio_final.where(pd.notnull(radio_final), None).to_dict(
         orient="records"
     )
