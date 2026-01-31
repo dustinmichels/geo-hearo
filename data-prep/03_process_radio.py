@@ -17,8 +17,7 @@ console = Console()
 # ==============================================================================
 
 RADIO_INPUT = "crawl/out/output.csv"
-NE_10M_INPUT = "data/ne/ne_10m_admin_0_countries.geojson"
-NE_110M_INPUT = "data/ne/ne_110m_admin_0_countries.geojson"
+NE_INPUT = "data/ne/ne_110m_admin_0_countries.geojson"
 OUTPUT = "data/out/all_radio_with_countries.json"
 SPATIAL_JOIN_LOG_FILE = "data/out/spatial_join.log"
 DROP_SUBUNITS_LOG_FILE = "data/out/drop_subunits.log"
