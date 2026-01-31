@@ -17,9 +17,11 @@ console = Console()
 # ==============================================================================
 
 RADIO_INPUT = "crawl/out/output.csv"
-NE_INPUT = "data/ne/ne_10m_map_subunits_admin_0_countries.geojson"
+NE_10M_INPUT = "data/ne/ne_10m_admin_0_countries.geojson"
+NE_110M_INPUT = "data/ne/ne_110m_admin_0_countries.geojson"
 OUTPUT = "data/out/all_radio_with_countries.json"
-LOG_FILE = "data/out/process_radio.log"
+SPATIAL_JOIN_LOG_FILE = "data/out/spatial_join.log"
+DROP_SUBUNITS_LOG_FILE = "data/out/drop_subunits.log"
 
 MIN_STATIONS = 5
 
@@ -49,6 +51,34 @@ def filter_with_report(df, mask, description):
         f"  Stations: [red]{before:,}[/red] → [green]{after:,}[/green] ([dim]removed {before - after:,}[/dim])"
     )
     return new_df
+
+
+def log_dropped_stations(dropped_df, log_file, title):
+    """Logs details of dropped stations to a specified log file."""
+    if dropped_df.empty:
+        return
+
+    console.print(
+        f"  [yellow]Logging {len(dropped_df):,} dropped stations to {log_file}[/yellow]"
+    )
+    with open(log_file, "w", encoding="utf-8") as f:
+        f.write(f"{title}\n")
+        f.write(f"Timestamp: {pd.Timestamp.now()}\n")
+        f.write(f"Total Dropped: {len(dropped_df)}\n")
+        f.write("=" * 60 + "\n\n")
+
+        for idx, row in dropped_df.iterrows():
+            f.write(f"Channel: {row.get('channel_name', 'N/A')}\n")
+            f.write(
+                f"Location: {row.get('place_name', 'N/A')}, {row.get('country', 'N/A')}\n"
+            )
+            f.write(
+                f"Coordinates: ({row.get('geo_lat', 'N/A')}, {row.get('geo_lon', 'N/A')})\n"
+            )
+            if "GEOUNIT" in row and "ADMIN" in row:
+                f.write(f"Subunit: {row['GEOUNIT']}, Admin: {row['ADMIN']}\n")
+            f.write(f"URL: {row.get('channel_resolved_url', 'N/A')}\n")
+            f.write("-" * 40 + "\n")
 
 
 def enforce_min_stations(df):
@@ -89,7 +119,7 @@ def enforce_min_stations(df):
 
 console.print("[bold cyan]Loading data...[/bold cyan]\n")
 radio = pd.read_csv(RADIO_INPUT)
-ne = gpd.read_file(NE_INPUT)
+ne = gpd.read_file(NE_10M_INPUT)
 
 # Print summary table
 table = Table(title="Dataset Summary")
@@ -170,28 +200,50 @@ dropped_indices = set(radio_gdf.index) - set(radio_ne.index)
 dropped_stations = radio_gdf.loc[list(dropped_indices)]
 
 if not dropped_stations.empty:
-    console.print(
-        f"  [yellow]Logging {len(dropped_stations):,} dropped stations to {LOG_FILE}[/yellow]"
+    log_dropped_stations(
+        dropped_stations, SPATIAL_JOIN_LOG_FILE, "SPATIAL JOIN DROP REPORT"
     )
-    with open(LOG_FILE, "w", encoding="utf-8") as f:
-        f.write("SPATIAL JOIN DROP REPORT\n")
-        f.write(f"Timestamp: {pd.Timestamp.now()}\n")
-        f.write(f"Total Dropped: {len(dropped_stations)}\n")
-        f.write("=" * 60 + "\n\n")
-
-        for idx, row in dropped_stations.iterrows():
-            f.write(f"Channel: {row.get('channel_name', 'N/A')}\n")
-            f.write(
-                f"Location: {row.get('place_name', 'N/A')}, {row.get('country', 'N/A')}\n"
-            )
-            f.write(
-                f"Coordinates: ({row.get('geo_lat', 'N/A')}, {row.get('geo_lon', 'N/A')})\n"
-            )
-            f.write(f"URL: {row.get('channel_resolved_url', 'N/A')}\n")
-            f.write("-" * 40 + "\n")
 
 console.print(f"  [dim]Re-applying min stations filter (< {MIN_STATIONS})...[/dim]")
 radio_ne = enforce_min_stations(radio_ne)
+
+
+# ==============================================================================
+# FILTER TO MATCH LOWER RESOLUTION
+# ==============================================================================
+
+console.print(
+    "\n[bold yellow]Filtering: Matching to lower resolution (110m) country set[/bold yellow]"
+)
+
+# Load lower resolution dataset
+ne_110m = gpd.read_file(NE_110M_INPUT)
+
+# Get country names from lower resolution dataset
+valid_country_names = set(ne_110m["NAME"].unique())
+
+console.print(f"  Countries in 10m dataset: [cyan]{radio_ne['NAME'].nunique()}[/cyan]")
+console.print(f"  Countries in 110m dataset: [cyan]{len(valid_country_names)}[/cyan]")
+
+# Identify countries that will be dropped
+current_country_names = set(radio_ne["NAME"].unique())
+countries_to_drop = sorted(current_country_names - valid_country_names)
+
+# Filter to only countries present in 110m dataset
+radio_ne = filter_with_report(
+    radio_ne,
+    radio_ne["NAME"].isin(valid_country_names),
+    "Removing countries not in 110m dataset",
+)
+
+if countries_to_drop:
+    console.print(
+        f"  Dropped countries: [yellow]{', '.join(countries_to_drop)}[/yellow]"
+    )
+
+console.print(f"  [dim]Re-applying min stations filter (< {MIN_STATIONS})...[/dim]")
+radio_ne = enforce_min_stations(radio_ne)
+
 
 # ==============================================================================
 # FINAL DATA PREPARATION
@@ -240,7 +292,7 @@ console.print(
 
 # Calculate stations per country with population and area
 stations_per_country = (
-    radio_final.groupby(["ISO_A2", "NAME", "POP_EST"])
+    radio_final.groupby(["ISO_A2_EH", "NAME", "POP_EST"])
     .size()
     .reset_index(name="station_count")
 )
@@ -262,7 +314,7 @@ for rank, (idx, row) in enumerate(stations_per_country.iterrows(), start=1):
     summary_table.add_row(
         str(rank),
         row["NAME"],
-        row["ISO_A2"],
+        row["ISO_A2_EH"],
         f"{row['POP_EST']:,.0f}",
         f"{row['station_count']:,}",
     )
