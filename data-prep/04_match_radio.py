@@ -1,6 +1,6 @@
 """
 USAGE:
-    uv run 03_process_radio.py
+    uv run 04_match_radio.py
 """
 
 import json
@@ -8,7 +8,6 @@ import json
 import geopandas as gpd
 import pandas as pd
 from rich.console import Console
-from rich.progress import track
 from rich.table import Table
 
 console = Console()
@@ -23,123 +22,7 @@ OUTPUT = "data/out/all_radio_with_countries.json"
 
 MIN_STATIONS = 5
 
-
-# ==============================================================================
-# MAIN
-# ==============================================================================
-
-console.print(
-    "[bold cyan]═════════════════════════════════════════════════════════════[/]",
-    "\n[bold cyan]SCRIPT 2: PROCESS RADIO STATIONS[/]",
-    "\n[bold cyan]═════════════════════════════════════════════════════════════[/]\n",
-)
-
-
-# ==============================================================================
-# DATA LOADING
-# ==============================================================================
-
-console.print("[bold cyan]Loading data...[/bold cyan]\n")
-radio = pd.read_json(RADIO_INPUT)
-ne = gpd.read_file(NE_INPUT)
-
-# Print summary table
-table = Table(title="Dataset Summary")
-table.add_column("Dataset", style="cyan")
-table.add_column("Records", justify="right", style="green")
-table.add_row("Radio stations", f"{len(radio):,}")
-table.add_row("Countries (Radio)", f"{radio['country'].nunique():,}")
-table.add_row("Countries (Natural Earth)", f"{len(ne):,}")
-console.print(table)
-
-
-# ==============================================================================
-# COUNTRY MATCHING
-# ==============================================================================
-
-console.print(
-    "\n[bold cyan]Matching radio stations to Natural Earth countries...[/bold cyan]\n"
-)
-
-
-# Create a mapping function
-def match_country(country_name, ne_df):
-    """Match a country name to Natural Earth data"""
-    if pd.isna(country_name):
-        return None
-
-    country_name = str(country_name).strip().lower()
-
-    # First try ADMIN column
-    match = ne_df[ne_df["ADMIN"].astype(str).str.lower() == country_name]
-    if len(match) > 0:
-        return match.iloc[0]
-
-    # Then try all NAME* columns
-    name_cols = [col for col in ne_df.columns if col.startswith("NAME")]
-    for col in name_cols:
-        try:
-            match = ne_df[ne_df[col].astype(str).str.lower() == country_name]
-            if len(match) > 0:
-                return match.iloc[0]
-        except (AttributeError, TypeError):
-            # Skip columns that can't be converted to string
-            continue
-
-    return None
-
-
-# Match each radio station to NE data
-matched_data = []
-unmatched_countries = set()
-
-for row in track(radio.itertuples(), total=len(radio), description="Matching stations"):
-    row_dict = row._asdict()
-    # Remove the Index field added by itertuples
-    row_dict.pop("Index", None)
-
-    country_match = match_country(row_dict["country"], ne)
-
-    if country_match is not None:
-        # Merge radio data with NE data
-        merged_row = row_dict.copy()
-        # Add NE columns
-        for col in country_match.index:
-            if col != "geometry":  # Skip geometry column
-                merged_row[col] = country_match[col]
-        matched_data.append(merged_row)
-    else:
-        unmatched_countries.add(row_dict["country"])
-        # Still include the row but without NE data
-        matched_data.append(row_dict)
-
-# Create matched dataframe
-radio_ne = pd.DataFrame(matched_data)
-
-console.print(
-    f"\n[bold green]✓ Matched {len(radio_ne[radio_ne['ADMIN'].notna()]) if 'ADMIN' in radio_ne.columns else 0:,} stations[/bold green]"
-)
-console.print(
-    f"[bold yellow]⚠ Unmatched stations: {len(radio_ne[radio_ne['ADMIN'].isna()]) if 'ADMIN' in radio_ne.columns else len(radio_ne):,}[/bold yellow]"
-)
-console.print(
-    f"[bold yellow]⚠ Lost countries: {len(unmatched_countries)}[/bold yellow]"
-)
-if unmatched_countries:
-    console.print(f"  {', '.join(sorted(unmatched_countries))}")
-
-
-# ==============================================================================
-# FINAL DATA PREPARATION
-# ==============================================================================
-
-console.print("\n[bold cyan]Preparing final dataset...[/bold cyan]")
-
-# Get original radio columns
-original_radio_cols = radio.columns.tolist()
-
-# Select NE columns to add
-selected_ne_cols = [
+SELECTED_NE_COLS = [
     "ADMIN",
     "NAME",
     "GEOUNIT",
@@ -154,85 +37,190 @@ selected_ne_cols = [
     "POP_RANK",
 ]
 
-# Only include columns that exist in the dataframe
-available_ne_cols = [col for col in selected_ne_cols if col in radio_ne.columns]
-final_cols = original_radio_cols + available_ne_cols
-
-# Reorder columns
-radio_final = radio_ne[final_cols]
-
-matched_count = (
-    radio_final["ISO_A2"].notna().sum() if "ISO_A2" in radio_final.columns else 0
-)
-unique_countries = (
-    radio_final["ISO_A2"].nunique() if "ISO_A2" in radio_final.columns else 0
-)
-
-console.print(
-    f"[bold green]✓ Final record count: {len(radio_final):,} stations across {unique_countries} countries[/bold green]"
-)
-
 # ==============================================================================
-# FINAL SUMMARY: STATIONS PER COUNTRY
+# UTILS
 # ==============================================================================
 
-console.print(
-    "\n[bold cyan]═══════════════════════════════════════════════════════[/bold cyan]"
-)
-console.print("[bold cyan]FINAL SUMMARY: Radio Stations by Country[/bold cyan]")
-console.print(
-    "[bold cyan]═══════════════════════════════════════════════════════[/bold cyan]\n"
-)
 
-# Calculate stations per country with population
-if all(col in radio_final.columns for col in ["ISO_A2_EH", "NAME", "POP_EST"]):
-    stations_per_country = (
-        radio_final[radio_final["ISO_A2_EH"].notna()]
-        .groupby(["ISO_A2_EH", "NAME", "POP_EST"])
-        .size()
-        .reset_index(name="station_count")
+def print_header(text: str):
+    console.print(f"\n[bold cyan] {text} [/bold cyan]".center(80, "━"))
+
+
+# ==============================================================================
+# MAIN
+# ==============================================================================
+
+
+def main():
+    print_header("SCRIPT 2: PROCESS RADIO STATIONS")
+
+    # --------------------------------------------------------------------------
+    # DATA LOADING
+    # --------------------------------------------------------------------------
+    console.print("[bold yellow]Loading datasets...[/bold yellow]")
+    try:
+        radio = pd.read_json(RADIO_INPUT)
+        ne = gpd.read_file(NE_INPUT)
+    except Exception as e:
+        console.print(f"[bold red]Error loading files: {e}[/bold red]")
+        return
+
+    # Print summary table
+    table = Table(title="Dataset Summary", title_style="bold magenta")
+    table.add_column("Dataset", style="cyan")
+    table.add_column("Records", justify="right", style="green")
+    table.add_row("Radio stations", f"{len(radio):,}")
+    table.add_row("Countries (Radio Source)", f"{radio['country'].nunique():,}")
+    table.add_row("Natural Earth Shapes", f"{len(ne):,}")
+    console.print(table)
+
+    # --------------------------------------------------------------------------
+    # COUNTRY MATCHING (VECTORIZED)
+    # --------------------------------------------------------------------------
+    console.print("\n[bold yellow]Building country name lookup map...[/bold yellow]")
+
+    # We want to match 'country' from radio to NE's ADMIN or NAME* columns.
+    # To do this efficiently, we create a "long" mapping table: Name -> NE Index
+    name_cols = ["ADMIN"] + [col for col in ne.columns if col.startswith("NAME")]
+
+    lookup_list = []
+    for col in name_cols:
+        # Create a temp df with the name and the original index
+        temp_df = ne[[col]].copy()
+        temp_df.columns = ["match_key"]
+        temp_df["ne_index"] = ne.index
+        lookup_list.append(temp_df)
+
+    # Combine all name variants, clean them, and drop duplicates (favoring first match)
+    lookup_map = pd.concat(lookup_list).dropna(subset=["match_key"])
+
+    # Added .str before .lower() to correctly access pandas string methods
+    lookup_map["match_key"] = (
+        lookup_map["match_key"].astype(str).str.strip().str.lower()
+    )
+    lookup_map = lookup_map.drop_duplicates(subset=["match_key"], keep="first")
+
+    # Prepare radio data for merging
+    radio["match_key"] = radio["country"].astype(str).str.strip().str.lower()
+
+    # Perform the merge
+    # 1. Match radio keys to NE indices
+    matched_indices = radio[["match_key"]].merge(lookup_map, on="match_key", how="left")
+
+    # 2. Join back to the actual NE data (excluding geometry for speed/JSON compatibility)
+    available_ne_cols = [c for c in SELECTED_NE_COLS if c in ne.columns]
+    ne_subset = ne[available_ne_cols].copy()
+
+    # Join the metadata using the ne_index we found
+    radio_enriched = radio.join(
+        matched_indices["ne_index"].map(ne_subset.to_dict("index")).apply(pd.Series)
     )
 
-    # Sort by population
-    stations_per_country = stations_per_country.sort_values("POP_EST", ascending=False)
+    # Statistics
+    unmatched_mask = radio_enriched["ADMIN"].isna()
+    unmatched_names = radio.loc[unmatched_mask, "country"].unique()
+    matched_count = len(radio_enriched) - unmatched_mask.sum()
 
-    # Create summary table
-    summary_table = Table(
-        title=f"Radio Stations Distribution ({len(stations_per_country)} Countries) - Sorted by Population"
+    console.print(f"[bold green]✓ Matched {matched_count:,} stations[/bold green]")
+    if len(unmatched_names) > 0:
+        console.print(
+            f"[bold yellow]⚠ Unmatched country strings ({len(unmatched_names)}):[/bold yellow]"
+        )
+        console.print(f"  {', '.join(sorted([str(x) for x in unmatched_names]))}")
+
+    # --------------------------------------------------------------------------
+    # FILTERING BY MIN STATIONS
+    # --------------------------------------------------------------------------
+    console.print(
+        f"\n[bold yellow]Filtering countries with < {MIN_STATIONS} stations...[/bold yellow]"
     )
-    summary_table.add_column("Rank", justify="right", style="dim")
-    summary_table.add_column("Country", style="cyan")
-    summary_table.add_column("ISO", style="yellow")
-    summary_table.add_column("Population", justify="right", style="blue")
-    summary_table.add_column("Stations", justify="right", style="green")
 
-    for rank, (idx, row) in enumerate(stations_per_country.iterrows(), start=1):
-        summary_table.add_row(
-            str(rank),
-            row["NAME"],
-            row["ISO_A2_EH"],
-            f"{row['POP_EST']:,.0f}",
-            f"{row['station_count']:,}",
+    # Identify unique ID for countries (ISO_A2_EH is robust)
+    country_id_col = "ISO_A2_EH"
+
+    if country_id_col in radio_enriched.columns:
+        # Count stations per country
+        counts = radio_enriched[country_id_col].value_counts()
+        valid_countries = counts[counts >= MIN_STATIONS].index
+
+        initial_count = len(radio_enriched)
+        # Filter: keep matched countries with enough stations OR keep unmatched rows (optional)
+        # Here we filter the whole dataset to ensure quality
+        radio_final = radio_enriched[
+            radio_enriched[country_id_col].isin(valid_countries)
+        ].copy()
+
+        removed_count = initial_count - len(radio_final)
+        console.print(
+            f"[bold green]✓ Kept {len(radio_final):,} stations across {len(valid_countries)} countries[/bold green]"
+        )
+        console.print(
+            f"[dim]Dropped {removed_count:,} stations from small country datasets[/dim]"
+        )
+    else:
+        console.print("[bold red]Cannot filter: ISO_A2_EH column missing.[/bold red]")
+        radio_final = radio_enriched
+
+    # --------------------------------------------------------------------------
+    # FINAL SUMMARY: STATIONS PER COUNTRY
+    # --------------------------------------------------------------------------
+    print_header("FINAL SUMMARY: Radio Stations by Country")
+
+    # Clean up temporary columns
+    if "match_key" in radio_final.columns:
+        radio_final = radio_final.drop(columns=["match_key"])
+
+    # Grouping logic
+    required_cols = ["ISO_A2_EH", "NAME", "POP_EST"]
+    if all(col in radio_final.columns for col in required_cols):
+        summary_data = (
+            radio_final.dropna(subset=["ISO_A2_EH"])
+            .groupby(required_cols)
+            .size()
+            .reset_index(name="station_count")
+            .sort_values("POP_EST", ascending=False)
         )
 
-    console.print(summary_table)
-else:
-    console.print("[bold yellow]⚠ Insufficient data for country summary[/bold yellow]")
+        summary_table = Table(
+            title=f"Radio Stations by Population ({len(summary_data)} Countries)",
+            header_style="bold white on blue",
+        )
+        summary_table.add_column("Rank", justify="right", style="dim")
+        summary_table.add_column("Country", style="cyan")
+        summary_table.add_column("ISO", style="yellow")
+        summary_table.add_column("Population", justify="right", style="blue")
+        summary_table.add_column("Stations", justify="right", style="green")
 
-# ==============================================================================
-# OUTPUT
-# ==============================================================================
+        for rank, (_, row) in enumerate(summary_data.iterrows(), start=1):
+            summary_table.add_row(
+                str(rank),
+                str(row["NAME"]),
+                str(row["ISO_A2_EH"]),
+                f"{row['POP_EST']:,.0f}",
+                f"{row['station_count']:,}",
+            )
+        console.print(summary_table)
+    else:
+        console.print(
+            "[bold red]Missing columns for summary table. Check NE data columns.[/bold red]"
+        )
 
-console.print(f"\n[bold cyan]Saving to {OUTPUT}...[/bold cyan]")
-with open(OUTPUT, "w") as f:
-    json.dump(radio_final.to_dict(orient="records"), f, indent=2)
+    # --------------------------------------------------------------------------
+    # OUTPUT
+    # --------------------------------------------------------------------------
+    console.print(f"\n[bold yellow]Saving to {OUTPUT}...[/bold yellow]")
 
-console.print(
-    f"[bold green]✓ Successfully saved {len(radio_final):,} records to {OUTPUT}[/bold green]\n"
-)
+    # Convert to dictionary for JSON output
+    output_data = radio_final.to_dict(orient="records")
 
-console.print(
-    "[bold cyan]═════════════════════════════════════════════════════════════[/]",
-    "\n[bold green]SCRIPT 2 COMPLETE[/]",
-    "\n[bold cyan]═════════════════════════════════════════════════════════════[/]\n",
-)
+    with open(OUTPUT, "w", encoding="utf-8") as f:
+        json.dump(output_data, f, indent=2, ensure_ascii=False)
+
+    console.print(
+        f"[bold green]✓ Successfully saved {len(radio_final):,} records.[/bold green]"
+    )
+    print_header("SCRIPT COMPLETE")
+
+
+if __name__ == "__main__":
+    main()
