@@ -8,6 +8,7 @@ import json
 import geopandas as gpd
 import pandas as pd
 from rich.console import Console
+from rich.progress import track
 from rich.table import Table
 
 console = Console()
@@ -92,30 +93,37 @@ def match_country(country_name, ne_df):
 matched_data = []
 unmatched_countries = set()
 
-for idx, row in radio.iterrows():
-    country_match = match_country(row["country"], ne)
+for row in track(radio.itertuples(), total=len(radio), description="Matching stations"):
+    row_dict = row._asdict()
+    # Remove the Index field added by itertuples
+    row_dict.pop("Index", None)
+
+    country_match = match_country(row_dict["country"], ne)
 
     if country_match is not None:
         # Merge radio data with NE data
-        merged_row = row.to_dict()
+        merged_row = row_dict.copy()
         # Add NE columns
         for col in country_match.index:
             if col != "geometry":  # Skip geometry column
                 merged_row[col] = country_match[col]
         matched_data.append(merged_row)
     else:
-        unmatched_countries.add(row["country"])
+        unmatched_countries.add(row_dict["country"])
         # Still include the row but without NE data
-        matched_data.append(row.to_dict())
+        matched_data.append(row_dict)
 
 # Create matched dataframe
 radio_ne = pd.DataFrame(matched_data)
 
 console.print(
-    f"[bold green]✓ Matched {len(radio_ne[radio_ne['ADMIN'].notna()]) if 'ADMIN' in radio_ne.columns else 0:,} stations[/bold green]"
+    f"\n[bold green]✓ Matched {len(radio_ne[radio_ne['ADMIN'].notna()]) if 'ADMIN' in radio_ne.columns else 0:,} stations[/bold green]"
 )
 console.print(
-    f"[bold yellow]⚠ Unmatched countries: {len(unmatched_countries)}[/bold yellow]"
+    f"[bold yellow]⚠ Unmatched stations: {len(radio_ne[radio_ne['ADMIN'].isna()]) if 'ADMIN' in radio_ne.columns else len(radio_ne):,}[/bold yellow]"
+)
+console.print(
+    f"[bold yellow]⚠ Lost countries: {len(unmatched_countries)}[/bold yellow]"
 )
 if unmatched_countries:
     console.print(f"  {', '.join(sorted(unmatched_countries))}")
