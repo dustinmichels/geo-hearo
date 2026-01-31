@@ -1,4 +1,23 @@
 """
+Radio Station Country Matching Script
+
+This script matches filtered radio stations to Natural Earth country records
+using a name-based lookup, then filters out countries with too few stations.
+
+METHODOLOGY:
+- Builds a lowercase lookup map from Natural Earth ADMIN and NAME columns
+- Matches radio station country names to Natural Earth indices
+- Reports and drops unmatched stations
+- Filters out countries with fewer than MIN_STATIONS stations
+- Enriches radio data with selected Natural Earth metadata columns
+
+INPUT:
+- Filtered radio station JSON (data/out/all_radio_filtered.json)
+- Natural Earth 110m countries GeoJSON (data/ne/ne_110m_admin_0_countries.geojson)
+
+OUTPUT:
+- JSON file with radio stations enriched with country metadata
+
 USAGE:
     uv run scripts/04_match_radio.py
 """
@@ -24,45 +43,22 @@ MIN_STATIONS = 5
 
 SELECTED_NE_COLS = [
     "ADMIN",
-    # "NAME",
-    # "GEOUNIT",
     "ISO_A3",
-    # "ISO_A2",
     "ISO_A2_EH",
-    # "ISO_N3",
-    # "POSTAL",
     "CONTINENT",
-    # "LEVEL",
-    # "POP_EST",
-    # "POP_RANK",
 ]
 
 
 # ==============================================================================
-# UTILS
-# ==============================================================================
-
-
-def print_header(text: str):
-    console.print(
-        "[bold cyan]═════════════════════════════════════════════════════════════[/]",
-        f"\n[bold cyan]{text}[/]",
-        "\n[bold cyan]═════════════════════════════════════════════════════════════[/]\n",
-    )
-
-
-# ==============================================================================
-# MAIN
+# MAIN PROCESSING
 # ==============================================================================
 
 
 def main():
-    print_header("SCRIPT 4: MATCH RADIO STATIONS TO COUNTRIES")
-
     # --------------------------------------------------------------------------
     # DATA LOADING
     # --------------------------------------------------------------------------
-    console.print("[bold yellow]Loading datasets...[/bold yellow]")
+    console.print("\n[bold cyan]Loading datasets...[/bold cyan]")
     try:
         radio = pd.read_json(RADIO_INPUT)
         ne = gpd.read_file(NE_INPUT)
@@ -74,7 +70,7 @@ def main():
         return
 
     # Print summary table
-    table = Table(title="Dataset Summary", title_style="bold magenta")
+    table = Table(title="Dataset Summary")
     table.add_column("Dataset", style="cyan")
     table.add_column("Records", justify="right", style="green")
     table.add_row("Radio stations", f"{len(radio):,}")
@@ -85,7 +81,7 @@ def main():
     # --------------------------------------------------------------------------
     # COUNTRY MATCHING
     # --------------------------------------------------------------------------
-    console.print("\n[bold yellow]Building country name lookup map...[/bold yellow]")
+    console.print("\n[bold cyan]Building country name lookup map...[/bold cyan]")
 
     # Identify all name-related columns in order
     name_cols = [col for col in ne.columns if "NAME" in col.upper()]
@@ -111,9 +107,7 @@ def main():
     for col in name_cols:
         populate_lookup(col)
 
-    console.print(
-        f"[dim]Lookup table built with {len(lookup):,} unique name variations[/dim]"
-    )
+    console.print(f"Lookup table built with {len(lookup):,} unique name variations")
 
     # Map radio stations to NE indices
     radio["ne_idx"] = radio["country"].str.strip().str.lower().map(lookup)
@@ -124,11 +118,9 @@ def main():
 
     if len(unmatched_countries) > 0:
         console.print(
-            f"\n[bold red]⚠ Found {len(unmatched_countries)} unmatched countries:[/bold red]"
+            f"\n[yellow]Warning: Found {len(unmatched_countries)} unmatched countries[/yellow]"
         )
-        unmatch_table = Table(
-            title="Unmatched Countries (will be dropped)", header_style="bold red"
-        )
+        unmatch_table = Table(title="Unmatched Countries (will be dropped)")
         unmatch_table.add_column("Country", style="yellow")
         unmatch_table.add_column("Stations", justify="right", style="red")
 
@@ -137,9 +129,7 @@ def main():
         console.print(unmatch_table)
 
         total_dropped = unmatched_mask.sum()
-        console.print(
-            f"[bold red]Dropping {total_dropped:,} stations from unmatched countries[/bold red]\n"
-        )
+        console.print(f"Dropping {total_dropped:,} stations from unmatched countries")
 
     # Drop unmatched stations
     radio = radio[~unmatched_mask].copy()
@@ -148,13 +138,13 @@ def main():
     radio_enriched = radio.merge(ne, left_on="ne_idx", right_index=True, how="left")
 
     matched_count = len(radio_enriched)
-    console.print(f"[bold green]✓ Matched {matched_count:,} stations[/bold green]")
+    console.print(f"Matched {matched_count:,} stations")
 
     # --------------------------------------------------------------------------
     # FILTERING BY MIN STATIONS
     # --------------------------------------------------------------------------
     console.print(
-        f"\n[bold yellow]Filtering countries with < {MIN_STATIONS} stations...[/bold yellow]"
+        f"\n[bold cyan]Filtering countries with < {MIN_STATIONS} stations...[/bold cyan]"
     )
 
     # Identify unique ID for countries
@@ -169,11 +159,10 @@ def main():
         small_countries = counts[counts < MIN_STATIONS]
         if len(small_countries) > 0:
             console.print(
-                f"\n[bold yellow]⚠ Found {len(small_countries)} countries with < {MIN_STATIONS} stations:[/bold yellow]"
+                f"\n[yellow]Warning: Found {len(small_countries)} countries with < {MIN_STATIONS} stations[/yellow]"
             )
             small_table = Table(
                 title=f"Countries with < {MIN_STATIONS} stations (will be dropped)",
-                header_style="bold yellow",
             )
             small_table.add_column("Country Code", style="cyan")
             small_table.add_column("Stations", justify="right", style="yellow")
@@ -194,21 +183,19 @@ def main():
 
         removed_count = initial_count - len(radio_final)
         console.print(
-            f"[bold green]✓ Kept {len(radio_final):,} stations across {len(valid_countries)} countries[/bold green]"
+            f"Kept {len(radio_final):,} stations across {len(valid_countries)} countries"
         )
-        console.print(
-            f"[dim]Dropped {removed_count:,} stations (small country sets)[/dim]"
-        )
+        console.print(f"Dropped {removed_count:,} stations (small country sets)")
     else:
-        console.print("[bold red]Cannot filter: ISO_A2_EH column missing.[/bold red]")
+        console.print(
+            f"[bold red]Cannot filter: {country_id_col} column missing.[/bold red]"
+        )
         radio_final = radio_enriched
 
     # --------------------------------------------------------------------------
     # FINAL SUMMARY
     # --------------------------------------------------------------------------
-    console.print(
-        "[bold yellow]FINAL SUMMARY: Radio Stations by Country[/bold yellow]\n"
-    )
+    console.print("\n[bold cyan]Final Summary: Radio Stations by Country[/bold cyan]")
 
     # Clean up temporary columns used for joining
     cols_to_drop = ["match_key", "ne_idx"]
@@ -228,7 +215,6 @@ def main():
 
         summary_table = Table(
             title=f"Radio Stations by Population ({len(summary_data)} Countries)",
-            header_style="bold white on blue",
         )
         summary_table.add_column("Rank", justify="right", style="dim")
         summary_table.add_column("Country", style="cyan")
@@ -249,7 +235,7 @@ def main():
     # --------------------------------------------------------------------------
     # FILTER COLUMNS (Final step before output)
     # --------------------------------------------------------------------------
-    console.print(f"\n[bold yellow]Filtering columns for output...[/bold yellow]")
+    console.print(f"\n[bold cyan]Filtering columns for output...[/bold cyan]")
 
     # Keep original radio columns + selected NE columns
     original_radio_cols = [col for col in radio.columns if col != "ne_idx"]
@@ -259,12 +245,12 @@ def main():
     final_columns = [col for col in final_columns if col in radio_final.columns]
     radio_final = radio_final[final_columns]
 
-    console.print(f"[dim]Kept {len(final_columns)} columns in final output[/dim]")
+    console.print(f"Kept {len(final_columns)} columns in final output")
 
     # --------------------------------------------------------------------------
     # OUTPUT
     # --------------------------------------------------------------------------
-    console.print(f"\n[bold yellow]Saving to {OUTPUT}...[/bold yellow]")
+    console.print(f"\n[bold cyan]Saving to {OUTPUT}...[/bold cyan]")
 
     # Ensure we don't have NaN in the final JSON output (converts to null)
     output_data = radio_final.where(pd.notnull(radio_final), None).to_dict(
@@ -275,9 +261,8 @@ def main():
         json.dump(output_data, f, indent=2, ensure_ascii=False)
 
     console.print(
-        f"[bold green]✓ Successfully saved {len(radio_final):,} records.[/bold green]"
+        f"[bold green]Successfully saved {len(radio_final):,} records to {OUTPUT}[/bold green]"
     )
-    print_header("SCRIPT COMPLETE")
 
 
 if __name__ == "__main__":
