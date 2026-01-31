@@ -11,34 +11,26 @@ class SeededRandom {
   }
 }
 
-async function runLocalSelection() {
-  const INDEX_PATH = "data/out/public/data/index.json";
-  const DATA_PATH = "data/out/public/data/stations.jsonl";
-
-  const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+async function runSelectionForDate(
+  dateStr: string,
+  indexMap: Record<string, { start: number; end: number }>,
+  dataPath: string,
+) {
   const rng = new SeededRandom(parseInt(dateStr, 10));
-
-  // 2. Load the index
-  const indexFile = Bun.file(INDEX_PATH);
-  const indexMap = await indexFile.json();
   const countries = Object.keys(indexMap);
 
-  // 3. Pick the country
   const countryCode = countries[rng.nextInt(countries.length)];
   const { start, end } = indexMap[countryCode];
 
-  // 4. Slice the data file
-  const stationSlice = Bun.file(DATA_PATH).slice(start, end + 1);
+  const stationSlice = Bun.file(dataPath).slice(start, end + 1);
   const rawText = await stationSlice.text();
 
-  // Filter out any empty lines from the split
   const allStations = rawText
     .trim()
     .split("\n")
     .filter((line) => line.trim().length > 0)
     .map((line) => JSON.parse(line));
 
-  // 5. Pick up to 5 unique stations
   const selected = [];
   const pool = [...allStations];
   const targetCount = Math.min(5, pool.length);
@@ -48,13 +40,10 @@ async function runLocalSelection() {
     selected.push(pool.splice(idx, 1)[0]);
   }
 
-  // 6. Visual Output with the correct columns
   console.log(`\n📅 Date Seed: ${dateStr}`);
   console.log(
     `🌍 Country: ${countryCode} (${allStations.length} total stations)`,
   );
-
-  // Using the specific keys from your JSON
   console.table(selected, [
     "channel_name",
     "place_name",
@@ -63,7 +52,20 @@ async function runLocalSelection() {
   ]);
 }
 
-runLocalSelection().catch((e) => {
+async function main() {
+  const INDEX_PATH = "data/out/public/data/index.json";
+  const DATA_PATH = "data/out/public/data/stations.jsonl";
+
+  const indexMap = await Bun.file(INDEX_PATH).json();
+
+  // Test 12 consecutive days in December 2025
+  for (let day = 1; day <= 12; day++) {
+    const dateStr = `202512${String(day).padStart(2, "0")}`;
+    await runSelectionForDate(dateStr, indexMap, DATA_PATH);
+  }
+}
+
+main().catch((e) => {
   console.error(
     "Selection failed. Check if your index offsets match the JSONL file.",
   );

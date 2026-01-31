@@ -3,11 +3,11 @@ USAGE:
     uv run 01_load_data.py
 """
 
-import geopandas as gpd
 import os
-from rich.console import Console
-
 import shutil
+
+import geopandas as gpd
+from rich.console import Console
 
 # URLs for Natural Earth Data - Admin 0 - Map Subunits
 # Using map subunits instead of countries for better handling of territories
