@@ -1,6 +1,8 @@
-// 1. LCG Randomizer
-// A simple seeded random number generator (Linear Congruential Generator)
-// Ensures that for a specific date (seed), we always get the same "random" results.
+/**
+ * LCG Randomizer
+ * A simple seeded random number generator (Linear Congruential Generator)
+ * Ensures that for a specific date (seed), we always get the same "random" results.
+ */
 class SeededRandom {
   private state: number;
   constructor(seed: number) {
@@ -11,61 +13,77 @@ class SeededRandom {
     // Use BigInt to avoid precision loss with large numbers
     const nextState = (1103515245n * BigInt(this.state) + 12345n) % 2147483648n;
     this.state = Number(nextState);
-    return this.state % max;
+    return Math.abs(this.state % max);
   }
+}
+
+interface IndexStructure {
+  config: {
+    line_length: number;
+  };
+  countries: Record<string, { start: number; count: number }>;
+}
+
+/**
+ * Fetches a single record from the JSONL file using a byte range
+ */
+async function fetchStationAt(
+  url: string,
+  startByte: number,
+  lineLength: number,
+): Promise<any> {
+  const endByte = startByte + lineLength - 1;
+
+  const response = await fetch(url, {
+    headers: { Range: `bytes=${startByte}-${endByte}` },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch byte range ${startByte}-${endByte}`);
+  }
+
+  const text = await response.text();
+  // .trim() removes the padding spaces added for fixed-width alignment
+  return JSON.parse(text.trim());
 }
 
 async function runSelectionForDate(
   dateStr: string,
-  indexMap: Record<string, { start: number; end: number }>,
+  index: IndexStructure,
   dataUrl: string,
 ) {
-  // Initialize RNG with the date string (e.g. "20231027") as the seed.
   const rng = new SeededRandom(parseInt(dateStr, 10));
-  const countries = Object.keys(indexMap).sort();
+  const { config, countries } = index;
+  const lineLength = config.line_length;
+  const countryNames = Object.keys(countries).sort();
 
   // 1. Pick a Random Country
-  const countryCode = countries[rng.nextInt(countries.length)];
-  const { start, end } = indexMap[countryCode];
-
-  // 2. Read ONLY that country's data from the JSONL file
-  // Using HTTP Range header allows us to read just the bytes we need without downloading the whole file.
-  const response = await fetch(dataUrl, {
-    headers: { Range: `bytes=${start}-${end}` },
-  });
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch stations for ${countryCode}: ${response.statusText}`,
-    );
-  }
-
-  const rawText = await response.text();
-
-  const allStations = rawText
-    .trim()
-    .split("\n")
-    .filter((line) => line.trim().length > 0)
-    .map((line) => JSON.parse(line))
-    .filter((s) => s.country === countryCode);
-
-  const selected = [];
-  const pool = [...allStations];
-  const targetCount = Math.min(5, pool.length); // Pick up to 5 stations
-
-  // 3. Select 5 unique random stations
-  // We randomly pick an index, remove it from the pool (to avoid duplicates), and add to selected.
-
-  for (let i = 0; i < targetCount; i++) {
-    const idx = rng.nextInt(pool.length);
-    selected.push(pool.splice(idx, 1)[0]);
-  }
+  const countryName = countryNames[rng.nextInt(countryNames.length)];
+  const { start, count } = countries[countryName];
 
   console.log(`\n📅 Date Seed: ${dateStr}`);
-  console.log(
-    `🌍 Country: ${countryCode} (${allStations.length} total stations)`,
+  console.log(`🌍 Country: ${countryName} (${count} available stations)`);
+
+  // 2. Determine which unique indices to fetch (up to 5)
+  const targetCount = Math.min(5, count);
+  const selectedIndices: number[] = [];
+  const pool = Array.from({ length: count }, (_, i) => i);
+
+  // We pick unique indices from the pool using the seed
+  for (let i = 0; i < targetCount; i++) {
+    const poolIdx = rng.nextInt(pool.length);
+    selectedIndices.push(pool.splice(poolIdx, 1)[0]);
+  }
+
+  // 3. Fetch specific byte ranges for the selected indices
+  const selectedStations = await Promise.all(
+    selectedIndices.map((idx) => {
+      const stationOffset = start + idx * lineLength;
+      return fetchStationAt(dataUrl, stationOffset, lineLength);
+    }),
   );
-  console.table(selected, [
+
+  console.table(selectedStations, [
     "channel_name",
     "place_name",
     "country",
@@ -77,23 +95,27 @@ async function main() {
   const INDEX_URL = "http://localhost:3000/data/index.json";
   const DATA_URL = "http://localhost:3000/data/stations.jsonl";
 
+  // Load the new index structure
   const indexRes = await fetch(INDEX_URL);
   if (!indexRes.ok) {
     throw new Error(`Failed to fetch index: ${indexRes.statusText}`);
   }
-  const indexMap = await indexRes.json();
+  const index: IndexStructure = await indexRes.json();
 
   // For testing: Run the selection logic for every day in December 2025.
-  // This verifies that the seeding and data slicing work correctly across multiple days.
   for (let day = 1; day <= 31; day++) {
     const dateStr = `202512${String(day).padStart(2, "0")}`;
-    await runSelectionForDate(dateStr, indexMap, DATA_URL);
+    try {
+      await runSelectionForDate(dateStr, index, DATA_URL);
+    } catch (err) {
+      console.error(`Error processing ${dateStr}:`, err);
+    }
   }
 }
 
 main().catch((e) => {
   console.error(
-    "Selection failed. Check if your index offsets match the JSONL file.",
+    "Selection failed. Check if your index offsets and line_length match the JSONL file.",
   );
   console.error(e);
 });

@@ -1,24 +1,15 @@
 """
-Data Organization Script for HTTP Range Requests
+Data Organization Script for HTTP Range Requests (Fixed-Width Line Indexing)
 
-This script converts the enriched radio station JSON into a JSONL format
-optimized for HTTP range requests, along with a byte-offset index.
+This script converts the radio station JSON into a fixed-width JSONL format.
+Every line is padded with spaces to a consistent length, allowing for
+O(1) byte-offset calculations without storing individual line offsets.
 
 METHODOLOGY:
-- Sorts stations by ADMIN (country) so all records for a region are contiguous
-- Writes each station as a single JSON line in a JSONL file
-- Builds an index mapping each country to its byte range and station count
-- The index enables efficient partial fetches via HTTP Range headers
-
-INPUT:
-- Enriched radio station JSON (data/out/all_radio_with_countries.json)
-
-OUTPUT:
-- JSONL data file (data/out/public/data/stations.jsonl)
-- Byte-offset index file (data/out/public/data/index.json)
-
-USAGE:
-    uv run scripts/05_organize.py
+- Finds the maximum length of a JSON-serialized station record.
+- Pads every record with spaces to match this 'LINE_LENGTH'.
+- The index only needs to store: { country: { start_byte, count } }.
+- Client calculates offset: start_byte + (station_index * LINE_LENGTH).
 """
 
 import json
@@ -35,9 +26,12 @@ console = Console()
 # ==============================================================================
 
 RADIO_INPUT = "data/out/all_radio_with_countries.json"
-DATA_OUTPUT = "data/out/public/data/stations.jsonl"  # The big file
-INDEX_OUTPUT = "data/out/public/data/index.json"  # The byte-map
+DATA_OUTPUT = "data/out/public/data/stations.jsonl"
+INDEX_OUTPUT = "data/out/public/data/index.json"
 
+# We define a fixed length that is guaranteed to fit any station record.
+# 1024 is usually safe for radio metadata, but we will calculate the real max.
+LINE_LENGTH = 0
 
 # ==============================================================================
 # MAIN PROCESSING
@@ -45,38 +39,71 @@ INDEX_OUTPUT = "data/out/public/data/index.json"  # The byte-map
 
 
 def main():
-    console.print("\n[bold cyan]Organizing for HTTP Range Requests...[/bold cyan]")
+    global LINE_LENGTH
+    console.print(
+        "\n[bold cyan]Organizing for Fixed-Width HTTP Range Requests...[/bold cyan]"
+    )
 
     # Load data
-    radio = pd.read_json(RADIO_INPUT)
+    if not os.path.exists(RADIO_INPUT):
+        console.print(
+            f"[bold red]Error: Input file {RADIO_INPUT} not found.[/bold red]"
+        )
+        return
 
-    # Sort by ADMIN to ensure all records for a region are contiguous
+    radio = pd.read_json(RADIO_INPUT)
     radio = radio.sort_values("ADMIN")
 
-    index_map = {}
+    # Step 1: Calculate the maximum line length needed
+    console.print("Calculating maximum record length...")
+    max_len = 0
+    for _, row in radio.iterrows():
+        # +1 for the newline character
+        current_len = len(json.dumps(row.to_dict()).encode("utf-8")) + 1
+        if current_len > max_len:
+            max_len = current_len
+
+    # Add a small buffer and round up to a nice power of 2 or a clean number
+    # This makes manual inspection easier and provides room for minor data changes.
+    LINE_LENGTH = max_len + 16
+    console.print(
+        f"Set fixed LINE_LENGTH to: [bold yellow]{LINE_LENGTH} bytes[/bold yellow]"
+    )
+
+    index_map = {"config": {"line_length": LINE_LENGTH}, "countries": {}}
+
     current_offset = 0
 
     # Ensure output directory exists
     os.makedirs(os.path.dirname(DATA_OUTPUT), exist_ok=True)
 
-    console.print("Writing JSONL and building index...")
+    console.print("Writing fixed-width JSONL and building compact index...")
 
     with open(DATA_OUTPUT, "wb") as f_out:
-        # Group by ADMIN
         for admin, group in radio.groupby("ADMIN"):
             start_byte = current_offset
 
-            # Write each station in the ADMIN group as a JSON line
             for _, row in group.iterrows():
-                # Convert row to dict, then to JSON string + newline
-                line = json.dumps(row.to_dict()).encode("utf-8") + b"\n"
+                # Convert to JSON
+                json_data = json.dumps(row.to_dict()).encode("utf-8")
+
+                # Calculate padding needed: (LINE_LENGTH - 1) because the last byte is \n
+                padding_size = (LINE_LENGTH - 1) - len(json_data)
+
+                if padding_size < 0:
+                    raise ValueError(f"Record too long for LINE_LENGTH {LINE_LENGTH}!")
+
+                # Write: JSON + Spaces + Newline
+                line = json_data + (b" " * padding_size) + b"\n"
                 f_out.write(line)
+
                 current_offset += len(line)
 
-            end_byte = current_offset - 1  # End of the last line for this region
-
-            # Store offsets and the number of stations (to help the LCG)
-            index_map[admin] = {"start": start_byte, "end": end_byte, "count": len(group)}
+            # Compact index entry
+            index_map["countries"][str(admin)] = {
+                "start": start_byte,
+                "count": len(group),
+            }
 
     # Save the index
     with open(INDEX_OUTPUT, "w") as f_index:
@@ -88,15 +115,21 @@ def main():
 
     console.print("\n[bold cyan]Build Results:[/bold cyan]")
 
+    data_size_mb = os.path.getsize(DATA_OUTPUT) / (1024 * 1024)
+    index_size_kb = os.path.getsize(INDEX_OUTPUT) / 1024
+
     table = Table(title="Build Results")
     table.add_column("File", style="cyan")
     table.add_column("Size", justify="right", style="green")
-    table.add_row("Data (JSONL)", f"{os.path.getsize(DATA_OUTPUT) / 1024 / 1024:.2f} MB")
-    table.add_row("Index (JSON)", f"{os.path.getsize(INDEX_OUTPUT) / 1024:.2f} KB")
+    table.add_row("Data (Fixed JSONL)", f"{data_size_mb:.2f} MB")
+    table.add_row("Index (JSON)", f"{index_size_kb:.2f} KB")
     console.print(table)
 
     console.print(
-        f"[bold green]Successfully created index for {len(index_map)} regions.[/bold green]"
+        f"[bold green]Successfully created fixed-width index for {len(index_map['countries'])} regions.[/bold green]"
+    )
+    console.print(
+        f"[italic gray]App logic: start + (randomIndex * {LINE_LENGTH})[/italic gray]"
     )
 
 
