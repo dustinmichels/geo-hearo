@@ -1,7 +1,9 @@
 """
 USAGE:
-    uv run 02_process_radio.py
+    uv run 03_process_radio.py
 """
+
+import json
 
 import geopandas as gpd
 import pandas as pd
@@ -15,7 +17,7 @@ console = Console()
 # ==============================================================================
 
 RADIO_INPUT = "crawl/out/output.csv"
-NE_INPUT = "data/ne_110m_admin_0_countries.geojson"
+NE_INPUT = "data/ne/ne_10m_map_subunits_admin_0_countries.geojson"
 OUTPUT = "data/out/all_radio_with_countries.json"
 LOG_FILE = "data/out/process_radio.log"
 
@@ -85,7 +87,7 @@ def enforce_min_stations(df):
 # DATA LOADING
 # ==============================================================================
 
-console.print("\n[bold cyan]Loading data...[/bold cyan]\n")
+console.print("[bold cyan]Loading data...[/bold cyan]\n")
 radio = pd.read_csv(RADIO_INPUT)
 ne = gpd.read_file(NE_INPUT)
 
@@ -190,3 +192,97 @@ if not dropped_stations.empty:
 
 console.print(f"  [dim]Re-applying min stations filter (< {MIN_STATIONS})...[/dim]")
 radio_ne = enforce_min_stations(radio_ne)
+
+# ==============================================================================
+# FINAL DATA PREPARATION
+# ==============================================================================
+
+console.print("\n[bold cyan]Preparing final dataset...[/bold cyan]")
+
+# Get original radio columns
+original_radio_cols = radio.columns.tolist()
+
+# Select NE columns to add
+selected_ne_cols = [
+    "ADMIN",
+    "NAME",
+    "GEOUNIT",
+    "ISO_A3",
+    "ISO_A2",
+    "ISO_A2_EH",
+    "ISO_N3",
+    "POSTAL",
+    "CONTINENT",
+    "LEVEL",
+    "POP_EST",
+    "POP_RANK",
+]
+
+# Prepare final columns list
+final_cols = original_radio_cols + selected_ne_cols
+radio_final = radio_ne[final_cols]
+
+console.print(
+    f"[bold green]✓ Final record count: {len(radio_final):,} stations across {radio_final['ISO_A2'].nunique()} countries[/bold green]"
+)
+
+# ==============================================================================
+# FINAL SUMMARY: STATIONS PER COUNTRY
+# ==============================================================================
+
+console.print(
+    "\n[bold cyan]═══════════════════════════════════════════════════════[/bold cyan]"
+)
+console.print("[bold cyan]FINAL SUMMARY: Radio Stations by Country[/bold cyan]")
+console.print(
+    "[bold cyan]═══════════════════════════════════════════════════════[/bold cyan]\n"
+)
+
+# Calculate stations per country with population and area
+stations_per_country = (
+    radio_final.groupby(["ISO_A2", "NAME", "POP_EST"])
+    .size()
+    .reset_index(name="station_count")
+)
+
+# Sort by population
+stations_per_country = stations_per_country.sort_values("POP_EST", ascending=True)
+
+# Create summary table
+summary_table = Table(
+    title=f"Radio Stations Distribution ({len(stations_per_country)} Countries) - Sorted by Population"
+)
+summary_table.add_column("Rank", justify="right", style="dim")
+summary_table.add_column("Country", style="cyan")
+summary_table.add_column("ISO", style="yellow")
+summary_table.add_column("Population", justify="right", style="blue")
+summary_table.add_column("Stations", justify="right", style="green")
+
+for rank, (idx, row) in enumerate(stations_per_country.iterrows(), start=1):
+    summary_table.add_row(
+        str(rank),
+        row["NAME"],
+        row["ISO_A2"],
+        f"{row['POP_EST']:,.0f}",
+        f"{row['station_count']:,}",
+    )
+
+console.print(summary_table)
+
+# ==============================================================================
+# OUTPUT
+# ==============================================================================
+
+console.print(f"\n[bold cyan]Saving to {OUTPUT}...[/bold cyan]")
+with open(OUTPUT, "w") as f:
+    json.dump(radio_final.to_dict(orient="records"), f, indent=2)
+
+console.print(
+    f"[bold green]✓ Successfully saved {len(radio_final):,} records to {OUTPUT}[/bold green]\n"
+)
+
+console.print(
+    "[bold cyan]═════════════════════════════════════════════════════════════[/]",
+    "\n[bold green]SCRIPT 2 COMPLETE[/]",
+    "\n[bold cyan]═════════════════════════════════════════════════════════════[/]\n",
+)

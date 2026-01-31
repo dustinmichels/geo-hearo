@@ -19,7 +19,7 @@ OUTPUT:
 - Includes: country name, ISO code, continent, population
 
 USAGE:
-    uv run 01_centroids.py
+    uv run 02_centroids.py
 """
 
 import os
@@ -33,7 +33,7 @@ console = Console()
 # CONFIGURATION
 # ==============================================================================
 
-NE_INPUT = "data/ne/ne_50m_admin_0_countries.geojson"
+NE_INPUT = "data/ne/ne_10m_admin_0_countries.geojson"
 OUTPUT_FILE = "data/out/country_centroids.geojson"
 
 # ==============================================================================

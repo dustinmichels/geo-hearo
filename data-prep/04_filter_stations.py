@@ -2,7 +2,6 @@ import json
 import random
 
 import pandas as pd
-from rich import print
 from rich.console import Console
 from rich.table import Table
 
@@ -68,7 +67,7 @@ for country_code in sorted(radio_final["ISO_A2"].unique()):
     large_place = country_stations[country_stations["place_size"] > 7].to_dict(
         "records"
     )
-    boosted = country_stations[country_stations["boost"] == True].to_dict("records")
+    boosted = country_stations[country_stations["boost"]].to_dict("records")
     all_stations = country_stations.to_dict("records")
 
     selected_stations = []
