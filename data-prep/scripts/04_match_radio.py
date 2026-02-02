@@ -235,7 +235,7 @@ def main():
     # --------------------------------------------------------------------------
     # FILTER COLUMNS (Final step before output)
     # --------------------------------------------------------------------------
-    console.print(f"\n[bold cyan]Filtering columns for output...[/bold cyan]")
+    console.print("\n[bold cyan]Filtering columns for output...[/bold cyan]")
 
     # Keep original radio columns + selected NE columns
     original_radio_cols = [col for col in radio.columns if col != "ne_idx"]

@@ -70,6 +70,15 @@ def main():
             gdf.to_file(output_path, driver="GeoJSON")
             console.print(f"[bold green]Done[/bold green]")
 
+            # For 110m, also save a minimal version with only the ADMIN field
+            if scale == "110m":
+                minimal = gdf[["ADMIN", "geometry"]]
+                minimal_filename = "ne_110m_admin_only.geojson"
+                minimal_path = os.path.join(OUTPUT_DIR, minimal_filename)
+                console.print(f"Saving to {minimal_filename}...")
+                minimal.to_file(minimal_path, driver="GeoJSON")
+                console.print(f"[bold green]Done[/bold green]")
+
         except Exception as e:
             console.print(f"[bold red]Error processing {scale}: {e}[/bold red]")
 

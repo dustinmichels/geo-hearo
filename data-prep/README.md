@@ -1,135 +1,37 @@
 # Data Prep
 
-- The go code in `crawl` scrapes the radio garden API to get radio stations from different places.
-- The python code in `process.py` cleans up the data for use in the frontend.
+- The Go code in `crawl/` scrapes the Radio Garden API to get radio stations from different places.
+- The Python scripts in `scripts/` prepare the data for the frontend.
 
-## Usage
+Run all scripts in sequence with `./run_py.sh`.
 
-### Step 1 - Crawl
+## Scripts
 
-To run the go code,
+### 01_load_data.py
 
-```sh
-cd crawl
-go build
-./crawl
-```
+Downloads Natural Earth GeoJSON datasets (country boundaries) from GitHub at 10m, 50m, and 110m scales and saves them to `data/ne/`.
 
-The output is `crawl/out/output.csv`.
+### 02_centroids.py
 
-### Step 2 - Process
+Computes a representative centroid point for each country. Extracts the largest polygon (mainland) per country, reprojects to Equal Earth (EPSG:8857) for accurate centroid calculation, then converts back to WGS84. Outputs `data/out/centers.geojson` with country name and centroid geometry.
 
-Setup environment:
+### 03_filter_radio.py
 
-Install pyproject.toml with uv:
+Loads the crawled radio station CSV (`crawl/out/output.csv`) and filters out stations that have no resolved stream URL or use insecure (non-HTTPS) streams. Outputs `data/out/all_radio_filtered.json`.
 
-```sh
-curl -s "https://radio.garden/api/ara/content/page/lsg0ViHC" \
-  | jq -r '.data.content[]?.title'
-```
+### 04_match_radio.py
 
-```sh
-uv env create
-uv env install
-```
+Matches filtered radio stations to Natural Earth country records by name. Drops unmatched stations and countries with fewer than 5 stations. Enriches each station with country metadata (ADMIN, ISO codes, continent). Outputs `data/out/all_radio_with_countries.json`.
 
-Run the code:
+### 05_organize.py
 
-```sh
-python process.py
-```
+Converts the enriched radio JSON into a fixed-width JSONL file (`data/out/public/data/stations.jsonl`) where every line is padded to the same byte length. Builds a compact index (`data/out/public/data/index.json`) mapping each country to a byte offset and station count, enabling O(1) HTTP range-request lookups by the frontend.
 
-## Data Notes
+## Output
 
-### Radio Garden
+The final output in `data/out/public/data/` consists of two files:
 
-- I use the API to get streaming URLs for the radio stations of different places.
-- I generally have a place name (eg, "Pontal do Paraná PR") and a country name (eg, "Brazil").
-- I also have the coordinates of the place.
+- **`stations.jsonl`** -- All radio stations as fixed-width JSONL (one station per line, all lines the same byte length).
+- **`index.json`** -- An index mapping each country to `{ start, count }` byte offsets into `stations.jsonl`, plus a `line_length` config value. The frontend uses this to fetch a random station for a given country with a single HTTP range request: `start + (randomIndex * line_length)`.
 
-```json
-{
-  "size": 1,
-  "id": "S7H8SqEe",
-  "geo": [-102.987625, 22.646875],
-  "url": "/visit/jerez-de-garcia-salinas/S7H8SqEe",
-  "boost": false,
-  "title": "Jerez de García Salinas",
-  "country": "Mexico"
-}
-```
-
-### `datamaps.json`
-
-- On the frontend, I have a datamaps map, where countries can be selected by their name or a three-letter code.
-
-```json
-{
-  "type": "MultiPolygon",
-  "properties": {
-    "name": "Canada"
-  },
-  "id": "CAN",
-  "arcs": [[[128]], [[160]]]
-}
-```
-
-### `centers.json`
-
-I have a dataset of the centerpoint of each country, `centers.json`, where countries have a name and two-letter "ISO".
-
-```json
-{
-  "type": "Feature",
-  "geometry": {
-    "type": "Point",
-    "coordinates": [-98.41680517868062, 57.550480044655636]
-  },
-  "properties": {
-    "COUNTRY": "Canada",
-    "ISO": "CA",
-    "COUNTRYAFF": "Canada",
-    "AFF_ISO": "CA"
-  }
-}
-```
-
-### `ne_50`
-
-- The idea is to use the natural earth dataset as the underlying source of truth for matching countries. It has many two-letter and three-letter codes for each country.
-
-```sh
-curl -o data/ne_50m_admin_0_map_subunits.geojson https://naciscdn.org/naturalearth/50m/cultural/ne_50m_admin_0_map_subunits.geojson
-```
-
-```json
-{
-  "type": "Feature",
-  "properties": {
-    "SOVEREIGNT": "Canada",
-    "SOV_A3": "CAN",
-    "ADMIN": "Canada",
-    "ADM0_A3": "CAN",
-    "ISO_A2": "CA",
-    "ADM0_ISO": "CAN",
-    "ADM0_TLC": "CAN"
-  }
-}
-```
-
-## Dev Notes
-
-### Git Config
-
-So as to not include notebook out in git, and based on this [SO post](https://stackoverflow.com/a/58004619/7576819), I modified the `.git/config`.
-
-```properties
-[filter "strip-notebook-output"]
-    clean = "jq '.cells[].outputs = [] | .cells[].execution_count = null | .'"
-```
-
-And created a `.gitattributes` files with the following content:
-
-```properties
-*.ipynb filter=strip-notebook-output
-```
+Additionally, `data/out/centers.geojson` provides country centroid points used by the frontend to place markers on the map.

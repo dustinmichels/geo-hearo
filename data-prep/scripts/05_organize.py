@@ -26,8 +26,8 @@ console = Console()
 # ==============================================================================
 
 RADIO_INPUT = "data/out/all_radio_with_countries.json"
-DATA_OUTPUT = "data/out/public/data/stations.jsonl"
-INDEX_OUTPUT = "data/out/public/data/index.json"
+DATA_OUTPUT = "data/out/stations.jsonl"
+INDEX_OUTPUT = "data/out/index.json"
 
 # We define a fixed length that is guaranteed to fit any station record.
 # 1024 is usually safe for radio metadata, but we will calculate the real max.

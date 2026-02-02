@@ -136,11 +136,12 @@ def main():
     centroids_gdf = gpd.GeoDataFrame(
         gdf_processed[
             [
-                "NAME",
-                "ISO_A3",
-                "ISO_A2_EH",
-                "ISO_N3",
-                "CONTINENT",
+                "ADMIN",
+                # "NAME",
+                # "ISO_A3",
+                # "ISO_A2_EH",
+                # "ISO_N3",
+                # "CONTINENT",
             ]
         ],
         geometry=gdf_processed["centroid"],
