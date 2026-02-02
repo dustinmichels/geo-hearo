@@ -6,10 +6,13 @@ import GameResultModal from '../components/GameResultModal.vue'
 import GuessPanel from '../components/GuessPanel.vue'
 import Map from '../components/Map.vue'
 import RadioPlayer from '../components/RadioPlayer.vue'
+import { useRadio } from '../composables/useRadio'
 import { useGamePlay } from '../composables/useGamePlay'
 
 const blob1 = ref<HTMLElement | null>(null)
 const blob2 = ref<HTMLElement | null>(null)
+
+const { isDailyChallengeMode, dailyChallengeNumber } = useRadio()
 
 // Vant Floating Panel setup
 const anchors = [
@@ -104,6 +107,12 @@ const overlayOpacity = computed(() => {
           <h1
             class="relative z-10 text-center text-pencil-lead text-3xl font-heading tracking-wider pb-3"
           >
+            <div
+              v-if="isDailyChallengeMode"
+              class="text-sm uppercase tracking-widest text-[#B45309] font-bold mb-1"
+            >
+              Daily Challenge #{{ dailyChallengeNumber }}
+            </div>
             GeoHearo
           </h1>
           <img

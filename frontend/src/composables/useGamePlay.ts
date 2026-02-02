@@ -38,6 +38,11 @@ export function useGamePlay(options: GamePlayOptions) {
     currentStationIndex: currentStation,
     saveState,
     checkGuess,
+    // Daily Challenge
+    initDailyChallenge,
+    isDailyChallengeMode,
+    completeDailyChallenge,
+    getDailyChallengeSeed,
   } = useRadio()
 
   // Hooking up country coordinates
@@ -90,11 +95,21 @@ export function useGamePlay(options: GamePlayOptions) {
     if (!guess || guesses.value.length >= 5) return
 
     if (checkGuess(guess)) {
-      modalConfig.value = {
-        title: 'You got it!',
-        message: `Wooo! The country was ${secretCountry.value}. Great job!`,
-        buttonText: 'Play Again',
-        isWin: true,
+      if (isDailyChallengeMode.value) {
+        completeDailyChallenge() // Mark as done for today
+        modalConfig.value = {
+          title: 'Daily Challenge Complete!',
+          message: `You found ${secretCountry.value}! Logic +1. Come back tomorrow for a new challenge.`,
+          buttonText: 'Play Free Mode',
+          isWin: true,
+        }
+      } else {
+        modalConfig.value = {
+          title: 'You got it!',
+          message: `Wooo! The country was ${secretCountry.value}. Great job!`,
+          buttonText: 'Play Again',
+          isWin: true,
+        }
       }
       clearState()
       showModal.value = true
@@ -168,9 +183,17 @@ export function useGamePlay(options: GamePlayOptions) {
 
     // Load both stations (for audio) and centers (for map/distance)
     Promise.all([loadStations(), loadCenters()]).then(() => {
-      if (!secretCountry.value) {
+      // Initialize Daily Challenge Logic
+      initDailyChallenge()
+
+      if (isDailyChallengeMode.value) {
+        // Force selection with daily seed
+        selectRandomCountry(getDailyChallengeSeed())
+      } else if (!secretCountry.value) {
+        // Normal free play random start (if not restoring state)
         selectRandomCountry()
       } else {
+        // Restored state (secretCountry already set)
         populateGuessColors()
       }
     })

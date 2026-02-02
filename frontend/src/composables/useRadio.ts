@@ -31,6 +31,11 @@ const currentSeed = ref<number | null>(null)
 const STORAGE_KEY = 'geo_hearo_state'
 const isLoading = ref(false)
 
+// Daily Challenge State
+const isDailyChallengeMode = ref(false)
+const dailyChallengeNumber = ref(0)
+const STORAGE_KEY_DAILY_DATE = 'dailyChallengeDate'
+
 export function useRadio() {
   /**
    * Fetches a single record from the JSONL file using a byte range
@@ -244,6 +249,52 @@ export function useRadio() {
     countryList.value = []
   }
 
+  // --- Daily Challenge Logic ---
+
+  // Refactor note: we use local '2026-02-02' construction in getDailyChallengeNumber directly.
+
+  /**
+   * Calculates the Day # based on user's LOCAL time relative to Feb 2, 2026.
+   * Day 1 is Feb 2, 2026.
+   */
+  const getDailyChallengeNumber = (): number => {
+    const now = new Date()
+    // Reset hours to compare dates only
+    const current = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const start = new Date(2026, 1, 2) // Month is 0-indexed: 1 = Feb
+
+    const diffTime = current.getTime() - start.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+    // Day 1 is the start date itself, so +1
+    return diffDays + 1
+  }
+
+  const getDailyChallengeSeed = (): number => {
+    const now = new Date()
+    // Create a unique integer from YYYYMMDD
+    return (
+      now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate()
+    )
+  }
+
+  const initDailyChallenge = () => {
+    const todayStr = new Date().toDateString()
+    const lastCompleted = localStorage.getItem(STORAGE_KEY_DAILY_DATE)
+
+    if (lastCompleted === todayStr) {
+      isDailyChallengeMode.value = false
+    } else {
+      isDailyChallengeMode.value = true
+      dailyChallengeNumber.value = getDailyChallengeNumber()
+    }
+  }
+
+  const completeDailyChallenge = () => {
+    localStorage.setItem(STORAGE_KEY_DAILY_DATE, new Date().toDateString())
+    isDailyChallengeMode.value = false
+  }
+
   return {
     currentStations,
     countryList, // Exposed if needed for autocomplete
@@ -259,5 +310,11 @@ export function useRadio() {
     restoreState,
     checkGuess,
     resetData,
+    // Daily Challenge
+    isDailyChallengeMode,
+    dailyChallengeNumber,
+    initDailyChallenge,
+    completeDailyChallenge,
+    getDailyChallengeSeed,
   }
 }

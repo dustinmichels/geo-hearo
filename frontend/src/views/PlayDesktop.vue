@@ -6,9 +6,12 @@ import GuessPanel from '../components/GuessPanel.vue'
 import Map from '../components/Map.vue'
 import RadioPlayer from '../components/RadioPlayer.vue'
 import { useGamePlay } from '../composables/useGamePlay'
+import { useRadio } from '../composables/useRadio'
 
 const blob1 = ref<HTMLElement | null>(null)
 const blob2 = ref<HTMLElement | null>(null)
+
+const { isDailyChallengeMode, dailyChallengeNumber } = useRadio()
 
 const {
   isPlaying,
@@ -70,6 +73,12 @@ const {
               <h1
                 class="text-center text-pencil-lead text-3xl font-heading tracking-wider pb-3"
               >
+                <div
+                  v-if="isDailyChallengeMode"
+                  class="text-sm uppercase tracking-widest text-[#B45309] font-bold mb-1"
+                >
+                  Daily Challenge #{{ dailyChallengeNumber }}
+                </div>
                 GeoHearo
               </h1>
               <img
