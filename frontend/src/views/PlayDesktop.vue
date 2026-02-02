@@ -1,205 +1,32 @@
 <script setup lang="ts">
-import gsap from 'gsap'
-import { onMounted, onUnmounted, ref, computed } from 'vue'
-import { useRadio } from '../composables/useRadio'
+import { ref } from 'vue'
+import Footer from '../components/Footer.vue'
 import GameResultModal from '../components/GameResultModal.vue'
 import GuessPanel from '../components/GuessPanel.vue'
-import Footer from '../components/Footer.vue'
 import Map from '../components/Map.vue'
 import RadioPlayer from '../components/RadioPlayer.vue'
-import { getDirectionalArrows } from '../utils/geography'
-import { getColorForArrowCount } from '../utils/colors'
+import { useGamePlay } from '../composables/useGamePlay'
 
-const isPlaying = ref(false)
-const guessInput = ref('')
-// guesses are now managed in useRadio
-const guessColors = ref<Record<string, string>>({})
-
-// Game State
-const showModal = ref(false)
-const modalConfig = ref({
-  title: '',
-  message: '',
-  buttonText: '',
-  isWin: false,
-})
+const blob1 = ref<HTMLElement | null>(null)
+const blob2 = ref<HTMLElement | null>(null)
 
 const {
-  loadStations,
-  selectRandomCountry,
-  currentStations,
-  secretCountry,
-  getCoordinates,
+  isPlaying,
+  guessInput,
+  guessColors,
+  showModal,
+  modalConfig,
   guesses,
-  addGuess,
-  clearState,
-  restoreState,
-  currentStationIndex: currentStation,
-  saveState,
-  checkGuess,
-} = useRadio()
-
-const currentStationUrl = computed(() => {
-  return currentStations.value[currentStation.value - 1]?.channel_resolved_url
-})
-
-const debugCountry = computed(() => {
-  return import.meta.env.VITE_DEBUG_MODE === 'true'
-    ? secretCountry.value
-    : undefined
-})
-
-const handlePlayPause = () => {
-  isPlaying.value = !isPlaying.value
-}
-
-const handlePrevious = () => {
-  currentStation.value = currentStation.value > 1 ? currentStation.value - 1 : 5
-  saveState()
-}
-
-const handleNext = () => {
-  currentStation.value = currentStation.value < 5 ? currentStation.value + 1 : 1
-  saveState()
-}
-
-const handleAddGuess = () => {
-  const guess = guessInput.value.trim()
-  if (!guess || guesses.value.length >= 5) return
-
-  // Check if won
-  if (checkGuess(guess)) {
-    modalConfig.value = {
-      title: 'You got it!',
-      message: `Wooo! The country was ${secretCountry.value}. Great job!`,
-      buttonText: 'Play Again',
-      isWin: true,
-    }
-    clearState()
-    showModal.value = true
-    return
-  }
-
-  // Calculate Color
-  const secretCoords = getCoordinates(secretCountry.value)
-  const guessCoords = getCoordinates(guess)
-
-  if (secretCoords && guessCoords) {
-    const { count } = getDirectionalArrows(guessCoords, secretCoords)
-    const color = getColorForArrowCount(count)
-    guessColors.value[guess] = color
-  } else {
-    // Fallback if coords not found
-    guessColors.value[guess] = '#FB923C'
-  }
-
-  // Add guess and check loss
-  addGuess(guess)
-  guessInput.value = ''
-
-  if (guesses.value.length >= 5) {
-    modalConfig.value = {
-      title: 'Game Over',
-      message: `Better luck next time. The country was ${secretCountry.value}. Play again?`,
-      buttonText: 'Try Again',
-      isWin: false,
-    }
-    clearState()
-    showModal.value = true
-  }
-}
-
-const populateGuessColors = () => {
-  guesses.value.forEach((guess) => {
-    if (guessColors.value[guess]) return
-    const secretCoords = getCoordinates(secretCountry.value)
-    const guessCoords = getCoordinates(guess)
-
-    if (secretCoords && guessCoords) {
-      const { count } = getDirectionalArrows(guessCoords, secretCoords)
-      const color = getColorForArrowCount(count)
-      guessColors.value[guess] = color
-    } else {
-      guessColors.value[guess] = '#FB923C'
-    }
-  })
-}
-
-const handleModalConfirm = () => {
-  window.location.reload()
-}
-
-const handleCountrySelect = (name: string) => {
-  guessInput.value = name
-}
-
-const handleKeydown = (e: KeyboardEvent) => {
-  // Ignore if user is typing in an input text field
-  const target = e.target as HTMLElement
-  if (['INPUT', 'TEXTAREA'].includes(target.tagName)) return
-
-  switch (e.code) {
-    case 'Space':
-      e.preventDefault()
-      handlePlayPause()
-      break
-    case 'ArrowLeft':
-      e.preventDefault() // Prevent map panning
-      handlePrevious()
-      break
-    case 'ArrowRight':
-      e.preventDefault() // Prevent map panning
-      handleNext()
-      break
-    case 'Enter':
-      e.preventDefault()
-      handleAddGuess()
-      break
-  }
-}
-
-// GSAP Animations and Refs
-const blob1 = ref(null)
-const blob2 = ref(null)
-
-onMounted(() => {
-  window.addEventListener('keydown', handleKeydown)
-
-  restoreState()
-
-  loadStations().then(() => {
-    if (!secretCountry.value) {
-      selectRandomCountry()
-    } else {
-      populateGuessColors()
-    }
-  })
-
-  // Move blobs around
-  gsap.to(blob1.value, {
-    x: 50,
-    y: 30,
-    scale: 1.1,
-    duration: 8,
-    yoyo: true,
-    repeat: -1,
-    ease: 'sine.inOut',
-  })
-
-  gsap.to(blob2.value, {
-    x: -30,
-    y: -40,
-    scale: 1.2,
-    duration: 10,
-    yoyo: true,
-    repeat: -1,
-    ease: 'sine.inOut',
-  })
-})
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown)
-})
+  currentStation,
+  currentStationUrl,
+  debugCountry,
+  handlePlayPause,
+  handlePrevious,
+  handleNext,
+  handleAddGuess,
+  handleModalConfirm,
+  handleCountrySelect,
+} = useGamePlay({ blob1, blob2, setupKeyboardShortcuts: true })
 </script>
 
 <template>

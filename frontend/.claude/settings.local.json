@@ -4,7 +4,10 @@
       "Bash(npm run dev:*)",
       "Bash(cat:*)",
       "Bash(npm run format:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npx vue-tsc:*)",
+      "Bash(npm test:*)",
+      "Bash(du:*)"
     ]
   }
 }

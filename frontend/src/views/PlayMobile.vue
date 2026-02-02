@@ -1,55 +1,15 @@
 <script setup lang="ts">
-import gsap from 'gsap'
 import { FloatingPanel as VanFloatingPanel } from 'vant'
-import { computed, onMounted, ref } from 'vue'
-import { useRadio } from '../composables/useRadio'
-// import AnimatedArrows from '../components/AnimatedArrows.vue'
+import { computed, ref } from 'vue'
 import AnimatedClose from '../components/AnimatedClose.vue'
 import GameResultModal from '../components/GameResultModal.vue'
 import GuessPanel from '../components/GuessPanel.vue'
 import Map from '../components/Map.vue'
 import RadioPlayer from '../components/RadioPlayer.vue'
-import { getDirectionalArrows } from '../utils/geography'
-import { getColorForArrowCount } from '../utils/colors'
+import { useGamePlay } from '../composables/useGamePlay'
 
-const isPlaying = ref(false)
-const guessInput = ref('')
-// guesses are now managed in useRadio
-const guessColors = ref<Record<string, string>>({})
-
-// Game State
-const showModal = ref(false)
-const modalConfig = ref({
-  title: '',
-  message: '',
-  buttonText: '',
-  isWin: false,
-})
-
-const {
-  loadStations,
-  selectRandomCountry,
-  currentStations,
-  secretCountry,
-  getCoordinates,
-  guesses,
-  addGuess,
-  clearState,
-  restoreState,
-  currentStationIndex: currentStation,
-  saveState,
-  checkGuess,
-} = useRadio()
-
-const currentStationUrl = computed(() => {
-  return currentStations.value[currentStation.value - 1]?.channel_resolved_url
-})
-
-const debugCountry = computed(() => {
-  return import.meta.env.VITE_DEBUG_MODE === 'true'
-    ? secretCountry.value
-    : undefined
-})
+const blob1 = ref<HTMLElement | null>(null)
+const blob2 = ref<HTMLElement | null>(null)
 
 // Vant Floating Panel setup
 const anchors = [
@@ -58,100 +18,33 @@ const anchors = [
 ]
 const panelHeight = ref(anchors[0])
 
-const handlePlayPause = () => {
-  isPlaying.value = !isPlaying.value
-}
-
-const handlePrevious = () => {
-  currentStation.value = currentStation.value > 1 ? currentStation.value - 1 : 5
-  saveState()
-}
-
-const handleNext = () => {
-  currentStation.value = currentStation.value < 5 ? currentStation.value + 1 : 1
-  saveState()
-}
-
-const handleAddGuess = () => {
-  const guess = guessInput.value.trim()
-  if (!guess || guesses.value.length >= 5) return
-
-  // Check if won
-  if (checkGuess(guess)) {
-    modalConfig.value = {
-      title: 'You got it!',
-      message: `Correction! The country was ${secretCountry.value}. Great job!`,
-      buttonText: 'Play Again',
-      isWin: true,
-    }
-    clearState()
-    showModal.value = true
-    return
-  }
-
-  // Calculate Color
-  const secretCoords = getCoordinates(secretCountry.value)
-  const guessCoords = getCoordinates(guess)
-
-  if (secretCoords && guessCoords) {
-    const { count } = getDirectionalArrows(guessCoords, secretCoords)
-    const color = getColorForArrowCount(count)
-    guessColors.value[guess] = color
-  } else {
-    guessColors.value[guess] = '#FB923C'
-  }
-
-  // Add guess
-  addGuess(guess)
-  guessInput.value = ''
-
-  // Snap to fully open
-  panelHeight.value = anchors[1]
-
-  // Check loss
-  if (guesses.value.length >= 5) {
-    modalConfig.value = {
-      title: 'Game Over',
-      message: `Better luck next time. The country was ${secretCountry.value}. Play again?`,
-      buttonText: 'Try Again',
-      isWin: false,
-    }
-    clearState()
-    showModal.value = true
-  }
-}
-
-const populateGuessColors = () => {
-  guesses.value.forEach((guess) => {
-    if (guessColors.value[guess]) return
-    const secretCoords = getCoordinates(secretCountry.value)
-    const guessCoords = getCoordinates(guess)
-
-    if (secretCoords && guessCoords) {
-      const { count } = getDirectionalArrows(guessCoords, secretCoords)
-      const color = getColorForArrowCount(count)
-      guessColors.value[guess] = color
-    } else {
-      guessColors.value[guess] = '#FB923C'
-    }
-  })
-}
-
-const handleModalConfirm = () => {
-  window.location.reload()
-}
-
-const handleCountrySelect = (name: string) => {
-  guessInput.value = name
-}
+const {
+  isPlaying,
+  guessInput,
+  guessColors,
+  showModal,
+  modalConfig,
+  guesses,
+  currentStation,
+  currentStationUrl,
+  debugCountry,
+  handlePlayPause,
+  handlePrevious,
+  handleNext,
+  handleAddGuess,
+  handleModalConfirm,
+  handleCountrySelect,
+} = useGamePlay({
+  blob1,
+  blob2,
+  onGuessAdded: () => {
+    panelHeight.value = anchors[1]
+  },
+})
 
 const handleArrowClick = () => {
   panelHeight.value = anchors[0]
 }
-
-// GSAP Animations and Refs
-const blob1 = ref(null)
-const blob2 = ref(null)
 
 const isPanelFullHeight = computed(() => {
   const fullHeight = anchors[1]
@@ -177,42 +70,8 @@ const overlayOpacity = computed(() => {
   }
 
   const progress = (current - min) / (max - min)
-  // Clamp between 0 and 1
   const clamped = Math.min(Math.max(progress, 0), 1)
-  return clamped * 0.6 // Max opacity 0.6
-})
-
-onMounted(() => {
-  restoreState()
-
-  loadStations().then(() => {
-    if (!secretCountry.value) {
-      selectRandomCountry()
-    } else {
-      populateGuessColors()
-    }
-  })
-
-  // Move blobs around
-  gsap.to(blob1.value, {
-    x: 50,
-    y: 30,
-    scale: 1.1,
-    duration: 8,
-    yoyo: true,
-    repeat: -1,
-    ease: 'sine.inOut',
-  })
-
-  gsap.to(blob2.value, {
-    x: -30,
-    y: -40,
-    scale: 1.2,
-    duration: 10,
-    yoyo: true,
-    repeat: -1,
-    ease: 'sine.inOut',
-  })
+  return clamped * 0.6
 })
 </script>
 
@@ -318,7 +177,6 @@ onMounted(() => {
 
 <style scoped>
 :deep(.van-floating-panel) {
-  /* Remove dark background override, let Tailwind class handle it */
   background-color: transparent !important;
 }
 
@@ -333,8 +191,8 @@ onMounted(() => {
 :deep(.van-floating-panel__bar) {
   width: 64px !important;
   height: 6px !important;
-  background-color: #334155 !important; /* Pencil Lead */
+  background-color: #334155 !important;
   border-radius: 999px !important;
-  opacity: 0.5; /* Slight transparency for softer look */
+  opacity: 0.5;
 }
 </style>

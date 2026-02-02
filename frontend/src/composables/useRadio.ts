@@ -1,8 +1,8 @@
 import { ref } from 'vue'
 import type {
-  RadioStation,
-  IndexStructure,
   CenterProperties,
+  IndexStructure,
+  RadioStation,
 } from '../types/geo'
 
 /**
@@ -100,7 +100,7 @@ export function useRadio() {
       adminToCenter.value = adminToC
 
       // 3. Restore state if available
-      restoreState()
+      await restoreState()
     } catch (error) {
       console.error('Failed to load data:', error)
     } finally {
@@ -201,7 +201,7 @@ export function useRadio() {
     }
   }
 
-  const restoreState = () => {
+  const restoreState = async (): Promise<boolean> => {
     const stored = sessionStorage.getItem(STORAGE_KEY)
     if (stored) {
       try {
@@ -218,7 +218,7 @@ export function useRadio() {
 
         // If we have a seed, re-run selection to fetch data (idempotent)
         if (typeof seed === 'number') {
-          selectRandomCountry(seed)
+          await selectRandomCountry(seed)
         }
         return true
       } catch (e) {

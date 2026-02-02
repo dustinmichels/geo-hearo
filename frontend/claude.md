@@ -139,21 +139,55 @@ src/
 
 ## Data Schema
 
-All geographic data is linked using ISO country codes:
+All geographic data is linked using the `ADMIN` country name (e.g., `"United States of America"`):
 
-| File                               | ISO Field              | Example |
-| ---------------------------------- | ---------------------- | ------- |
-| `public/data/centers.geojson`      | `properties.iso_a2`    | `"US"`  |
-| `public/data/ne_countries.geojson` | `properties.ISO_A2_EH` | `"US"`  |
-| `public/data/radio.json`           | `ISO_A2`               | `"US"`  |
+| File                               | Linking Field      | Description                                        |
+| ---------------------------------- | ------------------ | -------------------------------------------------- |
+| `public/data/index.json`           | Object keys        | Maps ADMIN names to byte offsets in stations.jsonl |
+| `public/data/stations.jsonl`       | `ADMIN`            | Fixed-width JSONL records (1053 bytes each)        |
+| `public/data/centers.geojson`      | `properties.ADMIN` | Country center points (lon/lat)                    |
+| `public/data/ne_countries.geojson` | `properties.ADMIN` | Country boundary polygons                          |
 
-**Note:** Different files use different field names for historical reasons. The `useRadio` composable handles mapping between country names and ISO codes.
+**index.json structure:**
+
+```json
+{
+  "config": { "line_length": 1053 },
+  "countries": {
+    "Afghanistan": { "start": 0, "count": 5 },
+    "Albania": { "start": 5265, "count": 20 }
+  }
+}
+```
+
+**stations.jsonl record fields:**
+
+```json
+{
+  "place_id": "bJHG3R4J",
+  "channel_id": "ndNglOCM",
+  "channel_url": "/listen/...",
+  "place_name": "Kabul",
+  "channel_name": "RTA Taranum Radio 91.3 FM",
+  "place_size": 5,
+  "country": "Afghanistan",
+  "geo_lat": 34.55535,
+  "geo_lon": 69.20749,
+  "channel_resolved_url": "https://...",
+  "ADMIN": "Afghanistan",
+  "ISO_A3": "AFG",
+  "ISO_A2_EH": "AF",
+  "CONTINENT": "Asia"
+}
+```
+
+**Loading strategy:** `useRadio` fetches `index.json` to get byte offsets, then uses HTTP Range requests to lazily load only the stations needed for the current game round from `stations.jsonl`.
 
 ## Game Architecture
 
 ### State Flow
 
-1. `useRadio.loadStations()` loads radio.json and centers.geojson
+1. `useRadio.loadStations()` loads index.json and centers.geojson
 2. `useRadio.selectRandomCountry()` picks a secret country and 5 stations
 3. User interacts with `Map.vue` (clicks country) → emits `select-country`
 4. Parent view updates `guessInput` → passes to `GuessPanel.vue`

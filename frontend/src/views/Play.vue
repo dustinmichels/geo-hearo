@@ -4,7 +4,7 @@ import PlayDesktop from './PlayDesktop.vue'
 import PlayMobile from './PlayMobile.vue'
 import { useRadio } from '../composables/useRadio'
 
-const isMobile = ref(false)
+const isMobile = ref(window.innerWidth < 1024)
 const { secretCountry } = useRadio()
 const isDebug = import.meta.env.VITE_DEBUG_MODE === 'true'
 
