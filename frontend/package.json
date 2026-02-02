@@ -8,7 +8,8 @@
     "test": "vitest",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "minify": "find public/data -type f \\( -name '*.json' -o -name '*.geojson' \\) -exec sh -c 'mkdir -p \"$(dirname \"dist/{}\")\" && jq -c . \"{}\" > \"dist/{}\"' \\;"
   },
   "dependencies": {
     "@plausible-analytics/tracker": "^0.4.4",

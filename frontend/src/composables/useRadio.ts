@@ -1,4 +1,9 @@
 import { ref } from 'vue'
+import type {
+  RadioStation,
+  IndexStructure,
+  CenterProperties,
+} from '../types/geo'
 
 /**
  * LCG Randomizer
@@ -19,46 +24,19 @@ class SeededRandom {
   }
 }
 
-export interface RadioStation {
-  place_name: string
-  place_id: string
-  channel_id: string
-  channel_url: string
-  channel_name: string
-  channel_stream?: string
-  channel_secure?: boolean
-  place_size: number
-  boost?: boolean
-  country: string
-  geo_lat: number
-  geo_lon: number
-  channel_resolved_url: string
-  ADMIN: string
-  ISO_A3: string
-  ISO_A2_EH: string
-  CONTINENT: string
-}
-
-interface IndexStructure {
-  config: {
-    line_length: number
-  }
-  countries: Record<string, { start: number; count: number }>
-}
-
 // State
 const countriesIndex = ref<IndexStructure | null>(null)
 const countryList = ref<string[]>([])
-const secretCountry = ref<string>('')
-const guesses = ref<string[]>([])
+const secretCountry = ref<string>('') // This is the ADMIN name
+const guesses = ref<string[]>([]) // Array of ADMIN names
 const currentStations = ref<RadioStation[]>([])
 const currentStationIndex = ref(3)
 const currentSeed = ref<number | null>(null)
 const STORAGE_KEY = 'geo_hearo_state'
 const isLoading = ref(false)
 
-// Centers data
-const adminToCenter = ref<Map<string, [number, number]>>(new Map()) // Maps ADMIN -> coords
+// Centers data: Maps ADMIN name -> [lon, lat]
+const adminToCenter = ref<Map<string, [number, number]>>(new Map())
 
 export function useRadio() {
   /**
@@ -81,7 +59,7 @@ export function useRadio() {
 
     const text = await response.text()
     // .trim() removes the padding spaces added for fixed-width alignment
-    return JSON.parse(text.trim())
+    return JSON.parse(text.trim()) as RadioStation
   }
 
   const loadStations = async () => {
@@ -93,6 +71,7 @@ export function useRadio() {
       const indexResponse = await fetch('/data/index.json')
       const indexData: IndexStructure = await indexResponse.json()
       countriesIndex.value = indexData
+      // The keys in index.json are ADMIN names
       countryList.value = Object.keys(indexData.countries).sort()
 
       // 2. Load Centers Data
@@ -104,13 +83,15 @@ export function useRadio() {
 
       if (centersData.features) {
         centersData.features.forEach((feature: any) => {
-          const props = feature.properties
+          const props = feature.properties as CenterProperties
           const geom = feature.geometry
           if (props && geom?.coordinates) {
             const coords = geom.coordinates as [number, number]
 
-            // Store by ADMIN (primary link for new data)
+            // Store strictly by ADMIN
             if (props.ADMIN) {
+              // Ensure we normalize or just use strictly. Data prep should have ensured consistency.
+              // We will direct map.
               adminToC.set(props.ADMIN, coords)
             }
           }
@@ -168,7 +149,7 @@ export function useRadio() {
     const rng = new SeededRandom(seed)
     currentSeed.value = seed
 
-    // 1. Pick a Random Country
+    // 1. Pick a Random Country (key is ADMIN)
     const idx = countriesIndex.value
     const countries = idx.countries
     const names = countryList.value
@@ -248,60 +229,36 @@ export function useRadio() {
     return false
   }
 
-  const addGuess = (guess: string) => {
-    guesses.value.push(guess)
-    saveState()
+  const addGuess = (guessAdmin: string) => {
+    if (!guessAdmin) return
+    // Avoid duplicates
+    if (!guesses.value.includes(guessAdmin)) {
+      guesses.value.push(guessAdmin)
+      saveState()
+    }
   }
 
   const getCoordinates = (
-    countryName: string
+    countryAdmin: string
   ): { lat: number; lng: number } | null => {
-    // 1. Try ADMIN map first (best for new data)
-    let coords = adminToCenter.value.get(countryName)
+    // Strictly use ADMIN map
+    const coords = adminToCenter.value.get(countryAdmin)
     if (coords) return { lng: coords[0], lat: coords[1] }
-
-    // 2. Fallback: Check currently loaded stations (last resort for obscure name match)
-    // NOTE: This only works if the station is currently loaded!
-    const station = currentStations.value.find(
-      (s) => s.country === countryName || s.ADMIN === countryName
-    )
-    if (station) {
-      // We might not have geometric center in station, but we have lat/lon of station
-      // The station interface has geo_lat/geo_lon.
-      // But maybe we want the country center.
-      // If we can't find the country center, returning station loc is better than nothing?
-      // Let's stick to returning null if we can't find the country center to avoid confusion.
-      // Actually, let's try to match via ADMIN if station has it
-      if (station.ADMIN) {
-        coords = adminToCenter.value.get(station.ADMIN)
-        if (coords) return { lng: coords[0], lat: coords[1] }
-      }
-    }
-
     return null
   }
 
-  const checkGuess = (guessInput: string): boolean => {
-    if (!guessInput) return false
-    // Direct match check
-    if (guessInput.toLowerCase() === secretCountry.value.toLowerCase())
-      return true
+  const checkGuess = (guessAdmin: string): boolean => {
+    if (!guessAdmin) return false
 
-    // ADMIN match check
-    // Simplest strategy:
-    // 1. Resolve guess to coordinates
-    const guessCoords = getCoordinates(guessInput)
-    // 2. Resolve secret to coordinates
-    const secretCoords = getCoordinates(secretCountry.value)
+    // Direct match check (ADMIN === ADMIN)
+    if (guessAdmin === secretCountry.value) return true
 
-    if (guessCoords && secretCoords) {
-      // Compare coords (approximate match to handle precision diffs?)
-      // Or just strict equality if they come from the same map entry
-      return (
-        guessCoords.lat === secretCoords.lat &&
-        guessCoords.lng === secretCoords.lng
-      )
-    }
+    // Fallback: Check strictly by coordinates if names differ but represent same place?
+    // In our new clean data regime, ADMIN should be unique and sufficient.
+    // If ADMIN strings match, we are good.
+    // We can also double check via coordinates just in case of slight string variations if data isn't perfectly normalized?
+    // But data prep should handle that. Let's rely on strict string equality first.
+    // And for logic "linked by ADMIN", string equality is the way.
 
     return false
   }

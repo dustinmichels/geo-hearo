@@ -3,12 +3,13 @@ import { onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { Loader2, RefreshCw } from 'lucide-vue-next'
+import type { NeCountryProperties } from '../types/geo'
 
 const props = defineProps<{
-  guessedCountries?: string[]
-  guessColors?: Record<string, string>
-  selectedCountry?: string
-  secretCountry?: string
+  guessedCountries?: string[] // List of ADMIN names
+  guessColors?: Record<string, string> // ADMIN -> Color
+  selectedCountry?: string // ADMIN name
+  secretCountry?: string // ADMIN name
 }>()
 
 const mapContainer = ref<HTMLElement | null>(null)
@@ -19,7 +20,7 @@ const showReloadInfo = ref(false)
 let loadingTimeout: ReturnType<typeof setTimeout> | null = null
 
 const emit = defineEmits<{
-  (e: 'select-country', name: string): void
+  (e: 'select-country', admin: string): void
 }>()
 
 // Update map filter when guesses change
@@ -29,9 +30,9 @@ watch(
     if (!map.value || !map.value.getLayer('countries-guessed')) return
 
     if (newGuesses && newGuesses.length > 0) {
-      map.value.setFilter('countries-guessed', ['in', 'NAME', ...newGuesses])
+      map.value.setFilter('countries-guessed', ['in', 'ADMIN', ...newGuesses])
     } else {
-      map.value.setFilter('countries-guessed', ['in', 'NAME', '']) // Hide all
+      map.value.setFilter('countries-guessed', ['in', 'ADMIN', '']) // Hide all
     }
   },
   { deep: true }
@@ -46,9 +47,9 @@ watch(
 
     let fillColor: any = '#86efac'
     if (Object.keys(newColors).length > 0) {
-      const matchExpression: any[] = ['match', ['get', 'NAME']]
-      for (const [country, color] of Object.entries(newColors)) {
-        matchExpression.push(country, color)
+      const matchExpression: any[] = ['match', ['get', 'ADMIN']]
+      for (const [countryAdmin, color] of Object.entries(newColors)) {
+        matchExpression.push(countryAdmin, color)
       }
       matchExpression.push('#86efac') // Default fallback color
       fillColor = matchExpression
@@ -66,9 +67,9 @@ watch(
     if (!map.value || !map.value.getLayer('countries-highlight')) return
 
     if (newSelected) {
-      map.value.setFilter('countries-highlight', ['==', 'NAME', newSelected])
+      map.value.setFilter('countries-highlight', ['==', 'ADMIN', newSelected])
     } else {
-      map.value.setFilter('countries-highlight', ['==', 'NAME', ''])
+      map.value.setFilter('countries-highlight', ['==', 'ADMIN', ''])
     }
   }
 )
@@ -80,9 +81,9 @@ watch(
     if (!map.value || !map.value.getLayer('countries-secret')) return
 
     if (newSecret) {
-      map.value.setFilter('countries-secret', ['==', 'NAME', newSecret])
+      map.value.setFilter('countries-secret', ['==', 'ADMIN', newSecret])
     } else {
-      map.value.setFilter('countries-secret', ['==', 'NAME', ''])
+      map.value.setFilter('countries-secret', ['==', 'ADMIN', ''])
     }
   }
 )
@@ -149,7 +150,7 @@ const initMap = () => {
       map.value.addSource('countries', {
         type: 'geojson',
         data: '/data/ne_countries.geojson',
-        promoteId: 'ISO_A3',
+        promoteId: 'ADMIN', // Use ADMIN as ID
       })
 
       setupLayers()
@@ -192,9 +193,9 @@ const setupLayers = () => {
   // Prepare initial match expression if colors exist
   let initialFillColor: any = '#86efac'
   if (props.guessColors && Object.keys(props.guessColors).length > 0) {
-    const matchExpression: any[] = ['match', ['get', 'NAME']]
-    for (const [country, color] of Object.entries(props.guessColors)) {
-      matchExpression.push(country, color)
+    const matchExpression: any[] = ['match', ['get', 'ADMIN']]
+    for (const [countryAdmin, color] of Object.entries(props.guessColors)) {
+      matchExpression.push(countryAdmin, color)
     }
     matchExpression.push('#86efac') // Default fallback
     initialFillColor = matchExpression
@@ -209,7 +210,7 @@ const setupLayers = () => {
       'fill-color': initialFillColor,
       'fill-opacity': 1,
     },
-    filter: ['in', 'NAME', ...(props.guessedCountries || [])],
+    filter: ['in', 'ADMIN', ...(props.guessedCountries || [])],
   })
 
   // Add highlight layer (pink fill) - initially hidden via filter
@@ -221,7 +222,7 @@ const setupLayers = () => {
       'fill-color': '#f472b6', // bubblegum-pop
       'fill-opacity': 1,
     },
-    filter: ['==', 'NAME', props.selectedCountry || ''],
+    filter: ['==', 'ADMIN', props.selectedCountry || ''],
   })
 
   // Add secret debug layer (red fill) - initially hidden
@@ -233,7 +234,7 @@ const setupLayers = () => {
       'fill-color': '#ef4444', // red-500
       'fill-opacity': 1,
     },
-    filter: ['==', 'NAME', props.secretCountry || ''],
+    filter: ['==', 'ADMIN', props.secretCountry || ''],
   })
 
   // Add countries border layer
@@ -278,9 +279,11 @@ const setupInteractions = () => {
     const feature = e.features[0]
     if (!feature) return
 
-    const name = feature.properties?.NAME
-    if (name) {
-      emit('select-country', name)
+    const props = feature.properties as NeCountryProperties | undefined
+    if (props && props.ADMIN) {
+      emit('select-country', props.ADMIN)
+    } else {
+      console.warn('Click on country with no ADMIN property:', feature)
     }
   })
 
