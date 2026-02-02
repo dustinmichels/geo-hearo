@@ -1,9 +1,5 @@
 import { ref } from 'vue'
-import type {
-  CenterProperties,
-  IndexStructure,
-  RadioStation,
-} from '../types/geo'
+import type { IndexStructure, RadioStation } from '../types/geo'
 
 /**
  * LCG Randomizer
@@ -34,9 +30,6 @@ const currentStationIndex = ref(3)
 const currentSeed = ref<number | null>(null)
 const STORAGE_KEY = 'geo_hearo_state'
 const isLoading = ref(false)
-
-// Centers data: Maps ADMIN name -> [lon, lat]
-const adminToCenter = ref<Map<string, [number, number]>>(new Map())
 
 export function useRadio() {
   /**
@@ -73,31 +66,6 @@ export function useRadio() {
       countriesIndex.value = indexData
       // The keys in index.json are ADMIN names
       countryList.value = Object.keys(indexData.countries).sort()
-
-      // 2. Load Centers Data
-      const centersResponse = await fetch('/data/centers.geojson')
-      const centersData = await centersResponse.json()
-
-      // Process centers
-      const adminToC = new Map<string, [number, number]>()
-
-      if (centersData.features) {
-        centersData.features.forEach((feature: any) => {
-          const props = feature.properties as CenterProperties
-          const geom = feature.geometry
-          if (props && geom?.coordinates) {
-            const coords = geom.coordinates as [number, number]
-
-            // Store strictly by ADMIN
-            if (props.ADMIN) {
-              // Ensure we normalize or just use strictly. Data prep should have ensured consistency.
-              // We will direct map.
-              adminToC.set(props.ADMIN, coords)
-            }
-          }
-        })
-      }
-      adminToCenter.value = adminToC
 
       // 3. Restore state if available
       await restoreState()
@@ -153,7 +121,19 @@ export function useRadio() {
     const idx = countriesIndex.value
     const countries = idx.countries
     const names = countryList.value
+    if (names.length === 0) {
+      console.warn('No countries found in index')
+      isLoading.value = false
+      return
+    }
+
     const countryName = names[rng.nextInt(names.length)]
+
+    if (!countryName) {
+      console.error('Failed to select country')
+      isLoading.value = false
+      return
+    }
 
     // Clear previous game state (except seed which we just set)
     guesses.value = []
@@ -176,7 +156,10 @@ export function useRadio() {
 
     for (let i = 0; i < targetCount; i++) {
       const poolIdx = rng.nextInt(pool.length)
-      selectedIndices.push(pool.splice(poolIdx, 1)[0])
+      const selectedIndex = pool.splice(poolIdx, 1)[0]
+      if (selectedIndex !== undefined) {
+        selectedIndices.push(selectedIndex)
+      }
     }
 
     // 3. Fetch specific stations
@@ -238,15 +221,6 @@ export function useRadio() {
     }
   }
 
-  const getCoordinates = (
-    countryAdmin: string
-  ): { lat: number; lng: number } | null => {
-    // Strictly use ADMIN map
-    const coords = adminToCenter.value.get(countryAdmin)
-    if (coords) return { lng: coords[0], lat: coords[1] }
-    return null
-  }
-
   const checkGuess = (guessAdmin: string): boolean => {
     if (!guessAdmin) return false
 
@@ -268,7 +242,6 @@ export function useRadio() {
     clearState()
     countriesIndex.value = null
     countryList.value = []
-    adminToCenter.value = new Map()
   }
 
   return {
@@ -279,7 +252,6 @@ export function useRadio() {
     isLoading,
     loadStations,
     selectRandomCountry,
-    getCoordinates,
     guesses,
     addGuess,
     saveState,

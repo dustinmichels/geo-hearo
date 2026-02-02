@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useCountryData } from '../composables/useCountryData'
 import { useRadio } from '../composables/useRadio'
 import { getColorForArrowCount } from '../utils/colors'
 import { getDirectionalArrows } from '../utils/geography'
@@ -8,7 +9,8 @@ const props = defineProps<{
 }>()
 
 const maxGuesses = 5
-const { secretCountry, getCoordinates } = useRadio()
+const { secretCountry } = useRadio()
+const { getCoordinates } = useCountryData()
 
 const getArrowsForGuess = (guessName: string | undefined) => {
   if (!guessName || !secretCountry.value) return null

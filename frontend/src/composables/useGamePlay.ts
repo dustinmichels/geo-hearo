@@ -3,6 +3,7 @@ import type { Ref } from 'vue'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { getColorForArrowCount } from '../utils/colors'
 import { getDirectionalArrows } from '../utils/geography'
+import { useCountryData } from './useCountryData'
 import { useRadio } from './useRadio'
 
 interface GamePlayOptions {
@@ -25,12 +26,12 @@ export function useGamePlay(options: GamePlayOptions) {
     isWin: false,
   })
 
+  // Hooking up radio logic
   const {
     loadStations,
     selectRandomCountry,
     currentStations,
     secretCountry,
-    getCoordinates,
     guesses,
     addGuess,
     clearState,
@@ -38,6 +39,9 @@ export function useGamePlay(options: GamePlayOptions) {
     saveState,
     checkGuess,
   } = useRadio()
+
+  // Hooking up country coordinates
+  const { loadCenters, getCoordinates } = useCountryData()
 
   const currentStationUrl = computed(() => {
     return currentStations.value[currentStation.value - 1]?.channel_resolved_url
@@ -162,7 +166,8 @@ export function useGamePlay(options: GamePlayOptions) {
       window.addEventListener('keydown', handleKeydown)
     }
 
-    loadStations().then(() => {
+    // Load both stations (for audio) and centers (for map/distance)
+    Promise.all([loadStations(), loadCenters()]).then(() => {
       if (!secretCountry.value) {
         selectRandomCountry()
       } else {
