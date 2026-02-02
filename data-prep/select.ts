@@ -92,8 +92,8 @@ async function runSelectionForDate(
 }
 
 async function main() {
-  const INDEX_URL = "http://localhost:3000/data/index.json";
-  const DATA_URL = "http://localhost:3000/data/stations.jsonl";
+  const INDEX_URL = "http://localhost:3000/index.json";
+  const DATA_URL = "http://localhost:3000/stations.jsonl";
 
   // Load the new index structure
   const indexRes = await fetch(INDEX_URL);

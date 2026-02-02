@@ -1,7 +1,7 @@
 import { join } from "path";
 
 const PORT = 3000;
-const PUBLIC_DIR = join(import.meta.dir, "data/out/public");
+const PUBLIC_DIR = join(import.meta.dir, "data/out");
 
 console.log(`Serving files from ${PUBLIC_DIR}`);
 
@@ -24,7 +24,7 @@ const server = Bun.serve({
     // Default to index.json or handle root if necessary, but request was specifically for json files
     let path = url.pathname;
     if (path === "/") {
-      return new Response("Use /{filename} to access files in data/out/public");
+      return new Response("Use /{filename} to access files in data/out");
     }
 
     const filePath = join(PUBLIC_DIR, path);
