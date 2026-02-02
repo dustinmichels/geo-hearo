@@ -37,7 +37,7 @@ npm run format
 
 ## Project Structure
 
-```
+```txt
 frontend/
 ├── src/
 │   ├── components/       # Reusable UI components
@@ -67,9 +67,10 @@ frontend/
 │   └── main.ts           # Application entry point
 ├── public/
 │   ├── data/             # Static game data
-│   │   ├── radio.json    # Radio stations with ISO_A2 codes
-│   │   ├── centers.geojson  # Country centroids (iso_a2)
-│   │   └── ne_countries.geojson  # Country boundaries (ISO_A2_EH)
+│   │   ├── stations.jsonl # Radio stations (line-delimited JSON)
+│   │   ├── index.json     # Index for sparse fetching
+│   │   ├── centers.geojson  # Country centroids (ADMIN)
+│   │   └── ne_countries.geojson  # Country boundaries (ADMIN)
 │   └── ...               # Favicon and PWA assets
 └── ...config files
 ```
@@ -78,15 +79,16 @@ frontend/
 
 ### How It Works
 
-1. **Initialization**: On game start, the app loads radio stations from `public/data/radio.json` and randomly selects a country
-2. **Radio Streaming**: `RadioPlayer.vue` handles audio playback with 5 stations per country, playing static during loading/switching
-3. **Map Interaction**: Users explore the interactive map (`Map.vue`) using MapLibre GL JS to pan, zoom, and click countries
-4. **Guessing Logic**:
-   - Users submit guesses via `GuessPanel.vue`
+1. **Initialization**: On game start, the app loads the country index from `public/data/index.json` and country centroids from `public/data/centers.geojson`.
+2. **Station Selection**: It randomly selects a country (using the `ADMIN` name) and performs a sparse fetch of ~5 radio stations from `public/data/stations.jsonl` using HTTP Range headers (no massive JSON download).
+3. **Radio Streaming**: `RadioPlayer.vue` handles audio playback with the fetched stations.
+4. **Map Interaction**: Users explore the interactive map (`Map.vue`) using MapLibre GL JS to pan, zoom, and click countries.
+5. **Guessing Logic**:
+   - Users submit guesses via `GuessPanel.vue` (matched against `ADMIN` name)
    - Correct guess → Win modal
    - Incorrect guess → Visual arrows on map showing distance/direction + color-coded "hot/cold" feedback
    - 5 incorrect guesses → Game Over
-5. **State Management**: Shared game state managed via `useRadio.ts` composable with sessionStorage persistence
+6. **State Management**: Shared game state managed via `useRadio.ts` composable with sessionStorage persistence.
 
 ### Key Features
 
@@ -97,14 +99,15 @@ frontend/
   - `Arrow Left/Right`: Previous/Next station
   - `Enter`: Submit guess
 - **Session Persistence**: Game state saved in sessionStorage (survives page refresh)
+- **Sparse Data Loading**: Efficiently fetches only the data needed for the current round.
 
 ## Data Schema
 
-All geographic data is linked using ISO country codes:
+All geographic data is linked using the `ADMIN` (Administrative Name) field:
 
-- `public/data/centers.geojson` → `properties.iso_a2`
-- `public/data/ne_countries.geojson` → `properties.ISO_A2_EH`
-- `public/data/radio.json` → `ISO_A2` field
+- `public/data/centers.geojson` → `properties.ADMIN`
+- `public/data/ne_countries.geojson` → `properties.ADMIN`
+- `public/data/stations.jsonl` → `ADMIN` field (indexed via `public/data/index.json`)
 
 See [CLAUDE.md](./CLAUDE.md) for technical notes about data structure.
 
@@ -156,7 +159,3 @@ See implementation in `src/assets/styles/style.css`:
 - **Colors**: Candy-inspired palette (Gumball Blue, Yuzu Yellow, Bubblegum Pop, etc.)
 - **Typography**: Fredoka (headings/buttons), Nunito (body)
 - **Components**: Pressable buttons with hard shadows, rounded corners everywhere
-
-## License
-
-MIT

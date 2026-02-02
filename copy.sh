@@ -1,5 +1,9 @@
 #!/bin/zsh
 
+# delete then recreate public/data
+rm -rf frontend/public/data
+mkdir -p frontend/public/data
+
 # centers
 cp data-prep/data/out/centers.geojson frontend/public/data/centers.geojson
 
