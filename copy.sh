@@ -1,5 +1,11 @@
 #!/bin/zsh
 
+# centers
 cp data-prep/data/out/centers.geojson frontend/public/data/centers.geojson
-cp data-prep/data/out/ne_countries.geojson frontend/public/data/ne_countries.geojson
-cp data-prep/data/out/filtered_radio_with_countries.json frontend/public/data/radio.json
+
+# countries
+cp data-prep/data/ne/ne_110m_admin_0_countries.geojson frontend/public/data/ne_countries.geojson
+
+# radio
+cp data-prep/data/out/stations.jsonl frontend/public/data/stations.jsonl
+cp data-prep/data/out/index.json frontend/public/data/index.json
