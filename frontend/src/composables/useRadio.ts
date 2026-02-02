@@ -1,86 +1,125 @@
 import { ref } from 'vue'
 
+/**
+ * LCG Randomizer
+ * A simple seeded random number generator (Linear Congruential Generator)
+ * Ensures that for a specific date (seed), we always get the same "random" results.
+ */
+class SeededRandom {
+  private state: number
+  constructor(seed: number) {
+    this.state = seed
+  }
+
+  nextInt(max: number): number {
+    // Use BigInt to avoid precision loss with large numbers
+    const nextState = (1103515245n * BigInt(this.state) + 12345n) % 2147483648n
+    this.state = Number(nextState)
+    return Math.abs(this.state % max)
+  }
+}
+
 export interface RadioStation {
   place_name: string
   place_id: string
   channel_id: string
   channel_url: string
   channel_name: string
-  channel_stream: string
-  channel_secure: boolean
+  channel_stream?: string
+  channel_secure?: boolean
   place_size: number
-  boost: boolean
+  boost?: boolean
   country: string
   geo_lat: number
   geo_lon: number
   channel_resolved_url: string
-  center: [number, number]
-  ISO_A2?: string
+  ADMIN: string
+  ISO_A3: string
+  ISO_A2_EH: string
+  CONTINENT: string
 }
 
-const allStations = ref<RadioStation[]>([])
-const countries = ref<string[]>([])
+interface IndexStructure {
+  config: {
+    line_length: number
+  }
+  countries: Record<string, { start: number; count: number }>
+}
+
+// State
+const countriesIndex = ref<IndexStructure | null>(null)
+const countryList = ref<string[]>([])
 const secretCountry = ref<string>('')
 const guesses = ref<string[]>([])
 const currentStations = ref<RadioStation[]>([])
 const currentStationIndex = ref(3)
+const currentSeed = ref<number | null>(null)
 const STORAGE_KEY = 'geo_hearo_state'
 const isLoading = ref(false)
 
 // Centers data
-const nameToIso = ref<Map<string, string>>(new Map())
-const isoToCenter = ref<Map<string, [number, number]>>(new Map())
+const adminToCenter = ref<Map<string, [number, number]>>(new Map()) // Maps ADMIN -> coords
 
 export function useRadio() {
+  /**
+   * Fetches a single record from the JSONL file using a byte range
+   */
+  const fetchStationAt = async (
+    url: string,
+    startByte: number,
+    lineLength: number
+  ): Promise<RadioStation> => {
+    const endByte = startByte + lineLength - 1
+
+    const response = await fetch(url, {
+      headers: { Range: `bytes=${startByte}-${endByte}` },
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch byte range ${startByte}-${endByte}`)
+    }
+
+    const text = await response.text()
+    // .trim() removes the padding spaces added for fixed-width alignment
+    return JSON.parse(text.trim())
+  }
+
   const loadStations = async () => {
-    if (allStations.value.length > 0) return // Already loaded
+    if (countriesIndex.value) return // Already loaded index
 
     isLoading.value = true
     try {
-      // Load radio stations
-      const radioResponse = await fetch('/data/radio.json')
-      const radioData = await radioResponse.json()
-      allStations.value = radioData
+      // 1. Load Index
+      const indexResponse = await fetch('/data/index.json')
+      const indexData: IndexStructure = await indexResponse.json()
+      countriesIndex.value = indexData
+      countryList.value = Object.keys(indexData.countries).sort()
 
-      // Load centers data
+      // 2. Load Centers Data
       const centersResponse = await fetch('/data/centers.geojson')
       const centersData = await centersResponse.json()
 
       // Process centers
-      const nToI = new Map<string, string>()
-      const iToC = new Map<string, [number, number]>()
+      const adminToC = new Map<string, [number, number]>()
 
       if (centersData.features) {
         centersData.features.forEach((feature: any) => {
-          if (feature.properties?.iso_a2 && feature.geometry?.coordinates) {
-            const iso = feature.properties.iso_a2
-            const name = feature.properties.name
-            const coords = feature.geometry.coordinates as [number, number]
+          const props = feature.properties
+          const geom = feature.geometry
+          if (props && geom?.coordinates) {
+            const coords = geom.coordinates as [number, number]
 
-            iToC.set(iso, coords)
-            if (name) {
-              nToI.set(name.toLowerCase(), iso)
+            // Store by ADMIN (primary link for new data)
+            if (props.ADMIN) {
+              adminToC.set(props.ADMIN, coords)
             }
           }
         })
       }
-      nameToIso.value = nToI
-      isoToCenter.value = iToC
+      adminToCenter.value = adminToC
 
-      // Extract unique countries based on radio data
-      const uniqueCountries = new Set<string>()
-      radioData.forEach((station: RadioStation) => {
-        if (station.country) uniqueCountries.add(station.country)
-      })
-      countries.value = Array.from(uniqueCountries)
-
-      // If we have a restored secretCountry but no stations yet, sync them now
-      if (secretCountry.value && currentStations.value.length === 0) {
-        const countryStations = allStations.value.filter(
-          (s) => s.country === secretCountry.value
-        )
-        currentStations.value = countryStations.slice(0, 5)
-      }
+      // 3. Restore state if available
+      restoreState()
     } catch (error) {
       console.error('Failed to load data:', error)
     } finally {
@@ -89,9 +128,12 @@ export function useRadio() {
   }
 
   const saveState = () => {
+    if (currentSeed.value === null) return
+
     sessionStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({
+        seed: currentSeed.value,
         secretCountry: secretCountry.value,
         guesses: guesses.value,
         stationIndex: currentStationIndex.value,
@@ -105,6 +147,77 @@ export function useRadio() {
     secretCountry.value = ''
     currentStations.value = []
     currentStationIndex.value = 3
+    currentSeed.value = null
+  }
+
+  const selectRandomCountry = async (seedInput?: number | string) => {
+    if (!countriesIndex.value) return
+
+    // Determine seed
+    let seed: number
+    if (typeof seedInput === 'number') {
+      seed = seedInput
+    } else if (typeof seedInput === 'string') {
+      seed = parseInt(seedInput, 10)
+    } else {
+      // Random seed if none provided
+      seed = Math.floor(Math.random() * 10000000)
+    }
+
+    // Initialize RNG
+    const rng = new SeededRandom(seed)
+    currentSeed.value = seed
+
+    // 1. Pick a Random Country
+    const idx = countriesIndex.value
+    const countries = idx.countries
+    const names = countryList.value
+    const countryName = names[rng.nextInt(names.length)]
+
+    // Clear previous game state (except seed which we just set)
+    guesses.value = []
+    secretCountry.value = countryName
+    currentStationIndex.value = 3
+
+    // 2. Determine which unique indices to fetch (up to 5)
+    // Validate country data availability to satisfy TypeScript
+    const countryData = countries[countryName]
+    if (!countryData) {
+      console.error(`Missing data for country: ${countryName}`)
+      isLoading.value = false
+      return
+    }
+
+    const { start, count } = countryData
+    const targetCount = Math.min(5, count)
+    const selectedIndices: number[] = []
+    const pool = Array.from({ length: count }, (_, i) => i)
+
+    for (let i = 0; i < targetCount; i++) {
+      const poolIdx = rng.nextInt(pool.length)
+      selectedIndices.push(pool.splice(poolIdx, 1)[0])
+    }
+
+    // 3. Fetch specific stations
+    isLoading.value = true
+    try {
+      const lineLength = idx.config.line_length
+      const DATA_URL = '/data/stations.jsonl'
+
+      const stations = await Promise.all(
+        selectedIndices.map((offsetIdx) => {
+          const stationOffset = start + offsetIdx * lineLength
+          return fetchStationAt(DATA_URL, stationOffset, lineLength)
+        })
+      )
+
+      currentStations.value = stations
+      saveState()
+    } catch (err) {
+      console.error('Error fetching stations:', err)
+    } finally {
+      isLoading.value = false
+    }
   }
 
   const restoreState = () => {
@@ -112,13 +225,20 @@ export function useRadio() {
     if (stored) {
       try {
         const {
+          seed,
           secretCountry: s,
           guesses: g,
           stationIndex: si,
         } = JSON.parse(stored)
-        if (s) secretCountry.value = s
+
         if (g) guesses.value = g
         if (typeof si === 'number') currentStationIndex.value = si
+        if (s) secretCountry.value = s
+
+        // If we have a seed, re-run selection to fetch data (idempotent)
+        if (typeof seed === 'number') {
+          selectRandomCountry(seed)
+        }
         return true
       } catch (e) {
         console.error('Failed to parse stored state', e)
@@ -133,96 +253,76 @@ export function useRadio() {
     saveState()
   }
 
-  const selectRandomCountry = () => {
-    if (countries.value.length === 0) return
-
-    const randomIndex = Math.floor(Math.random() * countries.value.length)
-    const country = countries.value[randomIndex]
-    if (country) {
-      // Clear previous game state
-      guesses.value = []
-      secretCountry.value = country
-      currentStationIndex.value = 3
-
-      // Filter stations for this country
-      const countryStations = allStations.value.filter(
-        (s) => s.country === secretCountry.value
-      )
-
-      // We want 5 stations. If less, take all. If more, shuffle or take first 5.
-      currentStations.value = countryStations.slice(0, 5)
-      saveState()
-    }
-  }
-
   const getCoordinates = (
     countryName: string
   ): { lat: number; lng: number } | null => {
-    const iso = getCountryIso(countryName)
+    // 1. Try ADMIN map first (best for new data)
+    let coords = adminToCenter.value.get(countryName)
+    if (coords) return { lng: coords[0], lat: coords[1] }
 
-    if (iso) {
-      const center = isoToCenter.value.get(iso)
-      if (center) {
-        return { lng: center[0], lat: center[1] }
+    // 2. Fallback: Check currently loaded stations (last resort for obscure name match)
+    // NOTE: This only works if the station is currently loaded!
+    const station = currentStations.value.find(
+      (s) => s.country === countryName || s.ADMIN === countryName
+    )
+    if (station) {
+      // We might not have geometric center in station, but we have lat/lon of station
+      // The station interface has geo_lat/geo_lon.
+      // But maybe we want the country center.
+      // If we can't find the country center, returning station loc is better than nothing?
+      // Let's stick to returning null if we can't find the country center to avoid confusion.
+      // Actually, let's try to match via ADMIN if station has it
+      if (station.ADMIN) {
+        coords = adminToCenter.value.get(station.ADMIN)
+        if (coords) return { lng: coords[0], lat: coords[1] }
       }
     }
+
     return null
-  }
-
-  const getCountryIso = (countryName: string): string | null => {
-    // 1. Try to find by name in our centers map
-    let iso = nameToIso.value.get(countryName.toLowerCase())
-
-    // 2. If not found, check radio stations
-    if (!iso) {
-      const station = allStations.value.find(
-        (s) => s.country.toLowerCase() === countryName.toLowerCase()
-      )
-      if (station?.ISO_A2) {
-        iso = station.ISO_A2
-      }
-    }
-    return iso || null
   }
 
   const checkGuess = (guessInput: string): boolean => {
     if (!guessInput) return false
-    // Direct match check first
+    // Direct match check
     if (guessInput.toLowerCase() === secretCountry.value.toLowerCase())
       return true
 
-    const guessIso = getCountryIso(guessInput)
-    const secretIso = getCountryIso(secretCountry.value)
+    // ADMIN match check
+    // Simplest strategy:
+    // 1. Resolve guess to coordinates
+    const guessCoords = getCoordinates(guessInput)
+    // 2. Resolve secret to coordinates
+    const secretCoords = getCoordinates(secretCountry.value)
 
-    if (guessIso && secretIso) {
-      return guessIso === secretIso
+    if (guessCoords && secretCoords) {
+      // Compare coords (approximate match to handle precision diffs?)
+      // Or just strict equality if they come from the same map entry
+      return (
+        guessCoords.lat === secretCoords.lat &&
+        guessCoords.lng === secretCoords.lng
+      )
     }
 
     return false
   }
 
   const resetData = () => {
-    allStations.value = []
-    countries.value = []
-    secretCountry.value = ''
-    guesses.value = []
-    currentStations.value = []
-    currentStationIndex.value = 3
-    nameToIso.value = new Map()
-    isoToCenter.value = new Map()
+    // Resetting mostly for testing or hard restart
+    clearState()
+    countriesIndex.value = null
+    countryList.value = []
+    adminToCenter.value = new Map()
   }
 
   return {
-    allStations,
-    countries,
-    secretCountry,
     currentStations,
+    countryList, // Exposed if needed for autocomplete
+    secretCountry,
     currentStationIndex,
     isLoading,
     loadStations,
     selectRandomCountry,
     getCoordinates,
-    getCountryIso,
     guesses,
     addGuess,
     saveState,
