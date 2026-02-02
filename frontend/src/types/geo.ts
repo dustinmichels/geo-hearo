@@ -14,10 +14,7 @@ export interface RadioStation {
   channel_id: string
   channel_url: string
   channel_name: string
-  channel_stream?: string
-  channel_secure?: boolean
   place_size: number
-  boost?: boolean
   country: string // This is the country name from the radio table (might differ from ADMIN)
   geo_lat: number
   geo_lon: number
