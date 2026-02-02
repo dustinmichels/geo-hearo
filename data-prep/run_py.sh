@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 # clear files in data/out except .gitkeep
-rm -f data
+rm -rf data
 
 # Create virtual environment if it doesn't exist
 [ ! -d ".venv" ] && uv venv
