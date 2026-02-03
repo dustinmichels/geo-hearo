@@ -6,7 +6,7 @@ import type { IndexStructure, RadioStation } from '../types/geo'
  * A simple seeded random number generator (Linear Congruential Generator)
  * Ensures that for a specific date (seed), we always get the same "random" results.
  */
-class SeededRandom {
+export class SeededRandom {
   private state: number
   constructor(seed: number) {
     this.state = seed
