@@ -131,6 +131,7 @@ const initMap = () => {
         projection: { type: 'globe' },
         sources: {},
         layers: [],
+        glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
       },
       center: [0, 20],
       zoom: 1.5,
@@ -253,8 +254,27 @@ const setupLayers = () => {
     type: 'line',
     source: 'countries',
     paint: {
-      'line-color': '#475569', // slate-600
-      'line-width': 1,
+      'line-color': '#e2e8f0', // slate-200
+      'line-width': 1.5,
+    },
+  })
+
+  // Add country labels
+  map.value.addLayer({
+    id: 'countries-label',
+    type: 'symbol',
+    source: 'countries',
+    minzoom: 3,
+    layout: {
+      'text-field': ['get', 'ADMIN'],
+      'text-font': ['Open Sans Semibold'],
+      'text-size': 12,
+      'text-variable-anchor': ['center'],
+    },
+    paint: {
+      'text-color': '#f1f5f9', // slate-100
+      'text-halo-color': '#0f172a', // slate-900 (dark halo for contrast)
+      'text-halo-width': 1.5,
     },
   })
 
