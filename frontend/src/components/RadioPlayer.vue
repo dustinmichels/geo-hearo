@@ -89,6 +89,7 @@ watch(
   }
 )
 const hasPlayed = ref(false)
+const hasSkipped = ref(false)
 
 watch(
   () => props.isPlaying,
@@ -99,6 +100,16 @@ watch(
   },
   { immediate: true }
 )
+
+const onPrevious = () => {
+  hasSkipped.value = true
+  emit('previous')
+}
+
+const onNext = () => {
+  hasSkipped.value = true
+  emit('next')
+}
 </script>
 
 <template>
@@ -130,17 +141,23 @@ watch(
       class="flex items-center justify-center"
       :class="compact ? 'gap-4 mb-3' : 'gap-6 mb-6'"
     >
-      <van-button
-        plain
-        class="!p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead"
-        :class="compact ? '!h-10 !w-10' : '!h-12 !w-12'"
-        @click="emit('previous')"
-      >
-        <SkipBack
-          class="text-pencil-lead"
-          :class="compact ? 'h-5 w-5' : 'h-6 w-6'"
-        />
-      </van-button>
+      <div class="relative">
+        <div v-if="hasPlayed && !hasSkipped" class="magic-container">
+          <div class="magic-wave wave-1"></div>
+          <div class="magic-wave wave-2"></div>
+        </div>
+        <van-button
+          plain
+          class="relative z-10 !p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead"
+          :class="compact ? '!h-10 !w-10' : '!h-12 !w-12'"
+          @click="onPrevious"
+        >
+          <SkipBack
+            class="text-pencil-lead"
+            :class="compact ? 'h-5 w-5' : 'h-6 w-6'"
+          />
+        </van-button>
+      </div>
 
       <div class="relative group">
         <div v-if="!hasPlayed && !isPlaying" class="magic-container">
@@ -167,17 +184,23 @@ watch(
         </van-button>
       </div>
 
-      <van-button
-        plain
-        class="!p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead"
-        :class="compact ? '!h-10 !w-10' : '!h-12 !w-12'"
-        @click="emit('next')"
-      >
-        <SkipForward
-          class="text-pencil-lead"
-          :class="compact ? 'h-5 w-5' : 'h-6 w-6'"
-        />
-      </van-button>
+      <div class="relative">
+        <div v-if="hasPlayed && !hasSkipped" class="magic-container">
+          <div class="magic-wave wave-1"></div>
+          <div class="magic-wave wave-2"></div>
+        </div>
+        <van-button
+          plain
+          class="relative z-10 !p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead"
+          :class="compact ? '!h-10 !w-10' : '!h-12 !w-12'"
+          @click="onNext"
+        >
+          <SkipForward
+            class="text-pencil-lead"
+            :class="compact ? 'h-5 w-5' : 'h-6 w-6'"
+          />
+        </van-button>
+      </div>
     </div>
 
     <!-- Station Indicators -->

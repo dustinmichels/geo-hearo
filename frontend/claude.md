@@ -185,23 +185,59 @@ All geographic data is linked using the `ADMIN` country name (e.g., `"United Sta
 
 ## Game Architecture
 
+### Game Modes
+
+The game has two modes, both served from the same `/play` route:
+
+**Free Play**: Random country each round, unlimited replays.
+
+**Daily Challenge**: Deterministic country selection using a seeded RNG based on the current date (YYYYMMDD format). All players get the same country on a given day. Enforced one attempt per day via localStorage.
+
+### Daily Challenge Implementation
+
+Key functions in `useRadio.ts`:
+
+- **`SeededRandom`**: Linear Congruential Generator class used for deterministic country selection
+- **`getDailyChallengeNumber()`**: Calculates day number relative to the launch date (Feb 2, 2026)
+- **`getDailyChallengeSeed()`**: Returns YYYYMMDD integer seed from today's date
+- **`initDailyChallenge()`**: Checks localStorage for today's date; sets `isDailyChallengeMode` accordingly
+- **`completeDailyChallenge()`**: Writes today's date to localStorage, preventing replay
+
+Key state variables:
+
+- `isDailyChallengeMode` (`ref<boolean>`): Whether the current session is a daily challenge
+- `dailyChallengeNumber` (`ref<number>`): Current day number displayed in the UI badge
+
+Game flow integration in `useGamePlay.ts`:
+
+1. After data loads, `initDailyChallenge()` checks if today's challenge was already completed
+2. If available: `selectRandomCountry(getDailyChallengeSeed())` ensures deterministic selection
+3. If already completed: falls through to free play mode with `selectRandomCountry()`
+4. On win/loss in daily mode: `completeDailyChallenge()` marks the day as done; modal shows daily-specific messaging
+
+**Storage**: Daily challenge completion stored in localStorage (`dailyChallengeDate` key) with today's date string. Game session state still uses sessionStorage.
+
 ### State Flow
 
 1. `useRadio.loadStations()` loads index.json and centers.geojson
-2. `useRadio.selectRandomCountry()` picks a secret country and 5 stations
-3. User interacts with `Map.vue` (clicks country) → emits `select-country`
-4. Parent view updates `guessInput` → passes to `GuessPanel.vue`
-5. User submits → parent calls `useRadio.checkGuess()`
-6. State persists to sessionStorage via `useRadio.saveState()`
+2. `useGamePlay` calls `initDailyChallenge()` to determine mode
+3. `useRadio.selectRandomCountry()` picks a secret country and 5 stations (with optional seed for daily challenge)
+4. User interacts with `Map.vue` (clicks country) → emits `select-country`
+5. Parent view updates `guessInput` → passes to `GuessPanel.vue`
+6. User submits → parent calls `useRadio.checkGuess()`
+7. State persists to sessionStorage via `useRadio.saveState()`; daily completion to localStorage
 
 ### Key Files
 
-- **src/composables/useRadio.ts**: Game state, station loading, guess validation
+- **src/composables/useRadio.ts**: Game state, station loading, guess validation, daily challenge logic
+- **src/composables/useGamePlay.ts**: Game flow orchestration, daily challenge initialization, win/loss handling
 - **src/components/Map.vue**: MapLibre GL JS integration, country selection
 - **src/components/RadioPlayer.vue**: Audio streaming with HLS/Icecast support
 - **src/utils/geography.ts**: Distance/direction calculations (haversine, bearings)
 - **src/utils/colors.ts**: Color mapping for hot/cold feedback
 - **src/views/Play.vue**: Responsive wrapper (desktop vs mobile)
+- **src/views/PlayDesktop.vue**: Desktop layout, displays daily challenge badge
+- **src/views/PlayMobile.vue**: Mobile layout, displays daily challenge badge
 
 ### MapLibre Integration
 
@@ -259,10 +295,10 @@ watch(
 
 ### Modifying Game State
 
-1. Edit `src/composables/useRadio.ts`
+1. Edit `src/composables/useRadio.ts` for state/data logic, or `src/composables/useGamePlay.ts` for game flow
 2. Add new reactive variables at module level if shared
 3. Expose via return object
-4. Update `saveState()`/`restoreState()` if persistent
+4. Update `saveState()`/`restoreState()` if persistent (sessionStorage for game session, localStorage for daily challenge)
 
 ## Testing
 

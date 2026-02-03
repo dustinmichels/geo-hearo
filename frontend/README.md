@@ -53,7 +53,8 @@ frontend/
 │   │   ├── PlayMobile.vue   # Mobile game layout
 │   │   └── About.vue     # About page
 │   ├── composables/      # Composition API composables
-│   │   └── useRadio.ts   # Game state and radio station logic
+│   │   ├── useRadio.ts   # Game state and radio station logic
+│   │   └── useGamePlay.ts # Game flow, daily challenge integration
 │   ├── utils/            # Helper functions
 │   │   ├── audio.ts      # Static audio generation
 │   │   ├── colors.ts     # Color mapping for feedback
@@ -77,10 +78,16 @@ frontend/
 
 ## Game Architecture
 
+### Game Modes
+
+**Free Play**: Unlimited rounds with randomly selected countries. Play as many times as you want.
+
+**Daily Challenge**: One puzzle per day, shared across all players. A seeded random number generator ensures everyone gets the same mystery country on a given date. Progress is tracked in localStorage to prevent replaying the same day's challenge. A "Daily Challenge #X" badge displays the current day number (counting from the launch date).
+
 ### How It Works
 
-1. **Initialization**: On game start, the app loads the country index from `public/data/index.json` and country centroids from `public/data/centers.geojson`.
-2. **Station Selection**: It randomly selects a country (using the `ADMIN` name) and performs a sparse fetch of ~5 radio stations from `public/data/stations.jsonl` using HTTP Range headers (no massive JSON download).
+1. **Initialization**: On game start, the app loads the country index from `public/data/index.json` and country centroids from `public/data/centers.geojson`. If a daily challenge is available (not yet completed today), the game enters daily challenge mode; otherwise it starts in free play.
+2. **Station Selection**: A country is selected (deterministically for daily challenge, randomly for free play) using the `ADMIN` name, and ~5 radio stations are sparse-fetched from `public/data/stations.jsonl` using HTTP Range headers.
 3. **Radio Streaming**: `RadioPlayer.vue` handles audio playback with the fetched stations.
 4. **Map Interaction**: Users explore the interactive map (`Map.vue`) using MapLibre GL JS to pan, zoom, and click countries.
 5. **Guessing Logic**:
@@ -88,10 +95,11 @@ frontend/
    - Correct guess → Win modal
    - Incorrect guess → Visual arrows on map showing distance/direction + color-coded "hot/cold" feedback
    - 5 incorrect guesses → Game Over
-6. **State Management**: Shared game state managed via `useRadio.ts` composable with sessionStorage persistence.
+6. **State Management**: Shared game state managed via `useRadio.ts` and `useGamePlay.ts` composables with sessionStorage persistence. Daily challenge completion is tracked in localStorage.
 
 ### Key Features
 
+- **Daily Challenge**: One shared puzzle per day for all players, with completion tracking
 - **Responsive Design**: Separate desktop and mobile layouts
 - **Debug Mode**: Set `VITE_DEBUG_MODE=true` to highlight the secret country
 - **Keyboard Shortcuts** (Desktop):
