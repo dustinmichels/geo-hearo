@@ -11,29 +11,34 @@ interface DistanceHintResult {
   level: number
 }
 
-// 1. Euclidean Distance on a Grid (with Longitude Wrap)
+// 1. Haversine Formula (Great Circle Distance)
+// Returns distance in kilometers
 export function getDistance(p1: Coordinates, p2: Coordinates): number {
-  const dy = Math.abs(p2.lat - p1.lat)
-  let dx = Math.abs(p2.lng - p1.lng)
+  const R = 6371 // Radius of the earth in km
+  const dLat = deg2rad(p2.lat - p1.lat)
+  const dLng = deg2rad(p2.lng - p1.lng)
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(p1.lat)) *
+      Math.cos(deg2rad(p2.lat)) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return R * c
+}
 
-  // Handle wrapping across the antimeridian (180/-180)
-  // If the distance is greater than 180, going the other way is shorter.
-  if (dx > 180) {
-    dx = 360 - dx
-  }
-
-  // Simple Euclidean distance in "degrees"
-  return Math.sqrt(dx * dx + dy * dy)
+function deg2rad(deg: number): number {
+  return deg * (Math.PI / 180)
 }
 
 // 2. Distance Magnitude Logic
-// Distance is in DEGREES.
-// Level 1: <= 20  (Close / Correct)    -> 🟡
-// Level 2: <= 60  (Medium)             -> 🟠🟠
-// Level 3: > 60   (Far)                -> 🔴🔴🔴
+// Distance is in KILOMETERS.
+// Level 1: <= 2000 km  (Close)              -> 🟡
+// Level 2: <= 6000 km  (Medium)             -> 🟠🟠
+// Level 3: > 6000 km   (Far)                -> 🔴🔴🔴
 function getDistanceLevel(distance: number): number {
-  if (distance <= 20) return 1
-  if (distance <= 60) return 2
+  if (distance <= 2000) return 1
+  if (distance <= 6000) return 2
   return 3
 }
 

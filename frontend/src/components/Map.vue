@@ -182,6 +182,7 @@ const setupLayers = () => {
     type: 'background',
     paint: {
       'background-color': isGlobe.value ? '#0f172a' : '#ffffff', // Navy for globe, White for flat
+      'background-color-transition': { duration: 200 },
     },
   })
 
@@ -251,6 +252,7 @@ const setupLayers = () => {
     paint: {
       'line-color': isGlobe.value ? '#e2e8f0' : '#000000', // Light for globe, Black for flat
       'line-width': 1.5,
+      'line-color-transition': { duration: 500 },
     },
   })
 

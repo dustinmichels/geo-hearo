@@ -44,18 +44,20 @@ describe('geography utils', () => {
   })
 
   describe('getDistance', () => {
-    it('calculates simple euclidean distance', () => {
+    it('calculates great circle distance (approx)', () => {
       const p1 = { lat: 0, lng: 0 }
       const p2 = { lat: 3, lng: 4 }
-      expect(getDistance(p1, p2)).toBe(5)
+      // 3 lat ~ 333km, 4 lng ~ 444km ... but on sphere it's different.
+      // Actual result ~ 555.8 km
+      expect(getDistance(p1, p2)).toBeCloseTo(555.8, 1)
     })
 
     it('handles antimeridian wrapping', () => {
       const p1 = { lat: 0, lng: -170 }
       const p2 = { lat: 0, lng: 170 }
-      // Direct distance would be 340
-      // Wrapped distance should be 20
-      expect(getDistance(p1, p2)).toBe(20)
+      // Wrapped longitudinal distance is 20 degrees.
+      // 20 degrees * ~111.19 km/deg = ~2223.9 km
+      expect(getDistance(p1, p2)).toBeCloseTo(2223.9, 1)
     })
   })
 })
