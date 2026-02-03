@@ -272,15 +272,15 @@ export function useGamePlay(options: GamePlayOptions) {
       // Initialize Daily Challenge Logic
       initDailyChallenge()
 
-      if (isDailyChallengeMode.value) {
-        // Force selection with daily seed
-        selectRandomCountry(getDailyChallengeSeed())
-      } else if (!secretCountry.value) {
-        // Normal free play random start (if not restoring state)
-        selectRandomCountry()
-      } else {
-        // Restored state (secretCountry already set)
+      if (secretCountry.value) {
+        // State was restored from session storage — just repopulate colors
         populateGuessColors()
+      } else if (isDailyChallengeMode.value) {
+        // Fresh daily challenge
+        selectRandomCountry(getDailyChallengeSeed())
+      } else {
+        // Normal free play random start
+        selectRandomCountry()
       }
     })
 
@@ -319,6 +319,7 @@ export function useGamePlay(options: GamePlayOptions) {
     modalConfig,
     guesses,
     currentStation,
+    currentStations,
     currentStationUrl,
     debugCountry,
     handlePlayPause,

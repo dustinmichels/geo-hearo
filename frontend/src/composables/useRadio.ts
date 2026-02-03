@@ -200,14 +200,15 @@ export function useRadio() {
           stationIndex: si,
         } = JSON.parse(stored)
 
-        if (g) guesses.value = g
-        if (typeof si === 'number') currentStationIndex.value = si
-        if (s) secretCountry.value = s
-
-        // If we have a seed, re-run selection to fetch data (idempotent)
+        // Re-run selection to fetch stations (this resets guesses and stationIndex)
         if (typeof seed === 'number') {
           await selectRandomCountry(seed)
         }
+
+        // Restore guesses and stationIndex AFTER selectRandomCountry, which clears them
+        if (g) guesses.value = g
+        if (typeof si === 'number') currentStationIndex.value = si
+
         return true
       } catch (e) {
         console.error('Failed to parse stored state', e)

@@ -29,6 +29,7 @@ const {
   modalConfig,
   guesses,
   currentStation,
+  currentStations,
   currentStationUrl,
   debugCountry,
   handlePlayPause,
