@@ -1,3 +1,8 @@
+/**
+ * USAGE:
+ * npm test -- dailyChallenge
+ */
+
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
@@ -19,11 +24,6 @@ interface IndexStructure {
   countries: Record<string, { start: number; count: number }>
 }
 
-/** Reproduce the seed computation: YYYYMMDD as an integer */
-function makeSeed(year: number, month: number, day: number): number {
-  return year * 10000 + month * 100 + day
-}
-
 /**
  * Reproduce the country + station selection algorithm from useRadio.ts.
  * Returns the selected country name and the station indices.
@@ -36,8 +36,11 @@ function selectCountryAndStations(
   const rng = new SeededRandom(seed)
   const countryIdx = rng.nextInt(sortedCountryNames.length)
   const country = sortedCountryNames[countryIdx]
+  if (!country) throw new Error('Selected country is undefined')
 
-  const { count } = countries[country]
+  const countryData = countries[country]
+  if (!countryData) throw new Error(`Country data not found for ${country}`)
+  const { count } = countryData
   const targetCount = Math.min(5, count)
   const pool = Array.from({ length: count }, (_, i) => i)
   const stationIndices: number[] = []

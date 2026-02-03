@@ -133,9 +133,10 @@ export function useRadio() {
     }
 
     const envCountry = import.meta.env.VITE_SECRET_COUNTRY
-    const countryName = envCountry && names.includes(envCountry)
-      ? envCountry
-      : names[rng.nextInt(names.length)]
+    const countryName =
+      envCountry && names.includes(envCountry)
+        ? envCountry
+        : names[rng.nextInt(names.length)]
 
     if (!countryName) {
       console.error('Failed to select country')
@@ -196,12 +197,7 @@ export function useRadio() {
     const stored = sessionStorage.getItem(STORAGE_KEY)
     if (stored) {
       try {
-        const {
-          seed,
-          secretCountry: s,
-          guesses: g,
-          stationIndex: si,
-        } = JSON.parse(stored)
+        const { seed, guesses: g, stationIndex: si } = JSON.parse(stored)
 
         // Re-run selection to fetch stations (this resets guesses and stationIndex)
         if (typeof seed === 'number') {
