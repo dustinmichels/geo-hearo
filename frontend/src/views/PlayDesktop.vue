@@ -82,7 +82,7 @@ const {
                 "
               >
                 <template v-if="isDailyChallengeMode">
-                  Daily Challenge #{{ dailyChallengeNumber }}
+                  Daily Challenge! 📣
                 </template>
                 <template v-else> Free play mode </template>
               </div>

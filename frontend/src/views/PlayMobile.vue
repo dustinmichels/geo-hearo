@@ -102,15 +102,15 @@ const overlayOpacity = computed(() => {
       class="h-full w-full flex flex-col max-w-md mx-auto pb-[100px] relative z-10"
     >
       <!-- Title -->
-      <div class="pt-6 px-4 flex justify-center relative z-10">
+      <div class="pt-2 px-4 flex justify-center relative z-10">
         <div class="relative">
           <h1
-            class="relative z-10 text-center text-pencil-lead text-3xl font-heading tracking-wider"
+            class="relative z-10 text-center text-pencil-lead text-2xl font-heading tracking-wider"
           >
             GeoHearo
           </h1>
           <div
-            class="relative z-10 text-center text-sm uppercase tracking-widest font-bold mb-1"
+            class="relative z-10 text-center text-xs uppercase tracking-widest font-bold mb-1"
             :class="
               isDailyChallengeMode ? 'text-[#B45309]' : 'text-eraser-grey'
             "
