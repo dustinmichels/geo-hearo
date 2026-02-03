@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useCountryData } from '../composables/useCountryData'
+import { useDistanceUnit } from '../composables/useDistanceUnit'
 import { useRadio } from '../composables/useRadio'
 import { getColorForDistanceLevel } from '../utils/colors'
 import { getDistanceHint } from '../utils/geography'
@@ -11,6 +12,7 @@ const props = defineProps<{
 const maxGuesses = 5
 const { secretCountry } = useRadio()
 const { getFeature } = useCountryData()
+const { toggleUnit, formatDistance } = useDistanceUnit()
 
 const getHintForGuess = (guessName: string | undefined) => {
   if (!guessName || !secretCountry.value) return null
@@ -28,12 +30,6 @@ const getGuessColor = (guessName: string | undefined) => {
   if (!result) return '#FFFFFF'
   return getColorForDistanceLevel(result.level)
 }
-
-const formatDistance = (km: number | undefined) => {
-  if (km === undefined) return ''
-  const miles = Math.round(km * 0.621371)
-  return `${miles.toLocaleString()} mi`
-}
 </script>
 
 <template>
@@ -45,7 +41,7 @@ const formatDistance = (km: number | undefined) => {
         class="flex items-center gap-4 p-3 rounded-xl border-3 transition-all"
         :class="
           guesses[num - 1]
-            ? 'border-pencil-lead shadow-[0_2px_0_0_#334155]'
+            ? 'border-pencil-lead shadow-[0_2px_0_0_#334155] cursor-pointer select-none'
             : 'border-eraser-grey border-dashed bg-transparent opacity-60'
         "
         :style="{
@@ -53,6 +49,7 @@ const formatDistance = (km: number | undefined) => {
             ? getGuessColor(guesses[num - 1])
             : undefined,
         }"
+        @click="guesses[num - 1] && toggleUnit()"
       >
         <div
           class="flex items-center justify-center w-8 h-8 rounded-full border-2 text-sm font-heading font-bold"

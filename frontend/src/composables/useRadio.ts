@@ -132,7 +132,10 @@ export function useRadio() {
       return
     }
 
-    const countryName = names[rng.nextInt(names.length)]
+    const envCountry = import.meta.env.VITE_SECRET_COUNTRY
+    const countryName = envCountry && names.includes(envCountry)
+      ? envCountry
+      : names[rng.nextInt(names.length)]
 
     if (!countryName) {
       console.error('Failed to select country')

@@ -114,24 +114,8 @@ export function useGamePlay(options: GamePlayOptions) {
       const guessFeature = getFeature(guess)
 
       if (secretFeature && guessFeature) {
-        const { level } = getDistanceHint(guessFeature, secretFeature)
-        // Map level to single emoji
-        // Level 1 (Close): 🟡
-        // Level 2 (Medium): 🟠
-        // Level 3 (Far): 🔴
-        switch (level) {
-          case 1:
-            emojiLine += '🟡'
-            break
-          case 2:
-            emojiLine += '🟠'
-            break
-          case 3:
-            emojiLine += '🔴'
-            break
-          default:
-            emojiLine += '🔴'
-        }
+        const { emoji } = getDistanceHint(guessFeature, secretFeature)
+        emojiLine += emoji
       } else {
         emojiLine += '⬜' // Fallback
       }

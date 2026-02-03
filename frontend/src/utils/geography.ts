@@ -51,22 +51,32 @@ interface DistanceHintResult {
 
 // 2. Distance Magnitude Logic
 // Distance is in KILOMETERS.
-// Level 1: <= 2000 km  (Close)              -> 🟡
-// Level 2: <= 6000 km  (Medium)             -> 🟠
-// Level 3: > 6000 km   (Far)                -> 🔴
+// Level 1: 0-50 km     (Yellow 2) -> 🤏
+// Level 2: 50-250 km   (Yellow 1) -> 🟡
+// Level 3: 250-750 km  (Orange 2) -> 🟠
+// Level 4: 750-1500 km (Orange 1) -> 🟠
+// Level 5: 1500-3000 km(Red 2)    -> 🔴
+// Level 6: 3000+ km    (Red 1)    -> 🔴
 function getDistanceLevel(distance: number): number {
-  if (distance <= 2000) return 1
-  if (distance <= 6000) return 2
-  return 3
+  if (distance <= 50) return 1
+  if (distance <= 250) return 2
+  if (distance <= 750) return 3
+  if (distance <= 1500) return 4
+  if (distance <= 3000) return 5
+  return 6
 }
 
 function getEmojiForLevel(level: number): string {
   switch (level) {
     case 1:
-      return '🟡'
+      return '🤏'
     case 2:
-      return '🟠'
+      return '🟡'
     case 3:
+    case 4:
+      return '🟠'
+    case 5:
+    case 6:
       return '🔴'
     default:
       return '🔴'
@@ -111,16 +121,15 @@ export function getDistanceHint(
 ): DistanceHintResult {
   let dist: number
 
+  const guessPoly = getLargestPolygon(guessFeature)
+  const secretPoly = getLargestPolygon(secretFeature)
+
   // Check for intersection first
-  if (
-    guessFeature &&
-    secretFeature &&
-    booleanIntersects(guessFeature, secretFeature)
-  ) {
+  if (guessPoly && secretPoly && booleanIntersects(guessPoly, secretPoly)) {
     dist = 0
-  } else if (guessFeature && secretFeature) {
+  } else if (guessPoly && secretPoly) {
     // Calculate distance between nearest border points
-    dist = nearestBorderDistance(guessFeature, secretFeature)
+    dist = nearestBorderDistance(guessPoly, secretPoly)
   } else {
     // Fallback if features are missing (should not happen in normal flow)
     dist = Infinity

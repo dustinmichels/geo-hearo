@@ -25,7 +25,7 @@ onUnmounted(() => {
 <template>
   <div
     v-if="isDebug"
-    class="fixed top-0 left-0 bg-red-500 text-white px-2 py-1 z-[9999] pointer-events-none font-bold text-sm"
+    class="fixed top-0 left-0 bg-[#00ffff] text-black px-2 py-1 z-[9999] pointer-events-none font-bold text-sm"
   >
     DEBUG: {{ secretCountry }}
   </div>

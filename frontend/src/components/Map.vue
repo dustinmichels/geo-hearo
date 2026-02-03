@@ -237,13 +237,13 @@ const setupLayers = () => {
     filter: ['==', 'ADMIN', props.selectedCountry || ''],
   })
 
-  // Add secret debug layer (red fill) - initially hidden
+  // Add secret debug layer - initially hidden
   map.value.addLayer({
     id: 'countries-secret',
     type: 'fill',
     source: 'countries',
     paint: {
-      'fill-color': '#ef4444', // red-500
+      'fill-color': '#00ffff',
       'fill-opacity': 1,
     },
     filter: ['==', 'ADMIN', props.secretCountry || ''],

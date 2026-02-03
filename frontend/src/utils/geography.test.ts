@@ -23,34 +23,34 @@ describe('geography utils', () => {
     it('returns Level 1 (Yellow) for overlapping location', () => {
       // Same location
       expect(getDistanceHint(secret, secret)).toMatchObject({
-        emoji: '🟡',
+        emoji: '🤏',
         level: 1,
         distance: 0,
       })
     })
 
-    it('returns Level 1 (Yellow) for close location (<= 2000km)', () => {
+    it('returns Level 4 (Orange-1) for close location (<= 1500km)', () => {
       // 10 degrees lat away ~ 1110 km
       const close = createSquare(10, 0)
       const result = getDistanceHint(close, secret)
-      expect(result.level).toBe(1)
-      expect(result.emoji).toBe('🟡')
+      expect(result.level).toBe(4)
+      expect(result.emoji).toBe('🟠')
       expect(result.distance).toBeGreaterThan(0)
     })
 
-    it('returns Level 2 (Orange) for medium location (<= 6000km)', () => {
+    it('returns Level 6 (Red-1) for medium location (<= 5000km)', () => {
       // 40 degrees lat away ~ 4440 km
       const medium = createSquare(40, 0)
       const result = getDistanceHint(medium, secret)
-      expect(result.level).toBe(2)
-      expect(result.emoji).toBe('🟠')
+      expect(result.level).toBe(6)
+      expect(result.emoji).toBe('🔴')
     })
 
-    it('returns Level 3 (Red) for far location (> 6000km)', () => {
+    it('returns Level 6 (Red-1) for far location (> 5000km)', () => {
       // 70 degrees lat away ~ 7770 km
       const far = createSquare(70, 0)
       const result = getDistanceHint(far, secret)
-      expect(result.level).toBe(3)
+      expect(result.level).toBe(6)
       expect(result.emoji).toBe('🔴')
     })
 
@@ -83,7 +83,52 @@ describe('geography utils', () => {
 
       expect(result.distance).toBe(0)
       expect(result.level).toBe(1)
-      expect(result.emoji).toBe('🟡')
+      expect(result.emoji).toBe('🤏')
+    })
+
+    it('ignores overseas territories (small polygons) for intersection checks', () => {
+      // Secret: MultiPolygon with Main Landmass (far) + Overseas Territory (touching)
+
+      // Main Landmass: Large Square (10,0) to (14,4) -> Area 16
+      const mainLandCoords = [
+        [
+          [10, 0],
+          [14, 0],
+          [14, 4],
+          [10, 4],
+          [10, 0],
+        ],
+      ]
+
+      // Overseas Territory: Small Square (2,0) to (4,2) -> Area 4
+      // This touches the guess at x=2.
+      const overseasCoords = [
+        [
+          [2, 0],
+          [4, 0],
+          [4, 2],
+          [2, 2],
+          [2, 0],
+        ],
+      ]
+
+      const secretFeature: any = {
+        type: 'Feature',
+        geometry: {
+          type: 'MultiPolygon',
+          coordinates: [mainLandCoords, overseasCoords],
+        },
+        properties: {},
+      }
+
+      // Guess: Square (0,0) to (2,2) -> touches overseas territory at x=2
+      const guessFeature = createSquare(1, 1, 2)
+
+      const result = getDistanceHint(guessFeature, secretFeature)
+
+      // Should measure distance to Main Land (x=10), not Overseas (touching).
+      // Distance from x=2 to x=10 is 8 degrees. ~890km.
+      expect(result.distance).toBeGreaterThan(500)
     })
   })
 
