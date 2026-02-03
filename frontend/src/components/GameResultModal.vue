@@ -1,15 +1,35 @@
 <script setup lang="ts">
-defineProps<{
+import { Share, Check } from 'lucide-vue-next'
+import { ref } from 'vue'
+const props = defineProps<{
   show: boolean
   title: string
   message: string
   buttonText: string
   isWin?: boolean
+  shareText?: string
 }>()
 
 const emit = defineEmits<{
   (e: 'confirm'): void
 }>()
+
+const copyButtonText = ref('Share Results')
+
+const handleShare = async () => {
+  if (props.shareText) {
+    try {
+      await navigator.clipboard.writeText(props.shareText)
+      copyButtonText.value = 'Copied!'
+      setTimeout(() => {
+        copyButtonText.value = 'Share Results'
+      }, 2000)
+    } catch (err) {
+      console.error('Failed to copy text: ', err)
+      copyButtonText.value = 'Failed'
+    }
+  }
+}
 </script>
 
 <template>
@@ -46,6 +66,16 @@ const emit = defineEmits<{
           class="w-full btn-pressable bg-yuzu-yellow h-[56px] rounded-xl font-heading text-xl text-pencil-lead uppercase tracking-wider border-2 border-pencil-lead shadow-[4px_4px_0_0_#334155] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all"
         >
           {{ buttonText }}
+        </button>
+
+        <button
+          v-if="shareText"
+          @click="handleShare"
+          class="w-full mt-4 btn-pressable bg-cloud-white h-[56px] rounded-xl font-heading text-xl text-pencil-lead uppercase tracking-wider border-2 border-pencil-lead shadow-[4px_4px_0_0_#334155] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all flex items-center justify-center gap-2"
+        >
+          <Check v-if="copyButtonText === 'Copied!'" class="w-6 h-6" />
+          <Share v-else class="w-6 h-6" />
+          {{ copyButtonText }}
         </button>
       </div>
     </div>

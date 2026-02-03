@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useCountryData } from '../composables/useCountryData'
 import { useRadio } from '../composables/useRadio'
-import { getColorForArrowCount } from '../utils/colors'
-import { getDirectionalArrows } from '../utils/geography'
+import { getColorForDistanceLevel } from '../utils/colors'
+import { getDistanceHint } from '../utils/geography'
 
 const props = defineProps<{
   guesses: string[]
@@ -12,7 +12,7 @@ const maxGuesses = 5
 const { secretCountry } = useRadio()
 const { getCoordinates } = useCountryData()
 
-const getArrowsForGuess = (guessName: string | undefined) => {
+const getHintForGuess = (guessName: string | undefined) => {
   if (!guessName || !secretCountry.value) return null
 
   const guessLoc = getCoordinates(guessName)
@@ -20,13 +20,13 @@ const getArrowsForGuess = (guessName: string | undefined) => {
 
   if (!guessLoc || !secretLoc) return null
 
-  return getDirectionalArrows(guessLoc, secretLoc)
+  return getDistanceHint(guessLoc, secretLoc)
 }
 
 const getGuessColor = (guessName: string | undefined) => {
-  const result = getArrowsForGuess(guessName)
+  const result = getHintForGuess(guessName)
   if (!result) return '#FFFFFF'
-  return getColorForArrowCount(result.count)
+  return getColorForDistanceLevel(result.level)
 }
 </script>
 
@@ -68,12 +68,8 @@ const getGuessColor = (guessName: string | undefined) => {
             <div
               class="flex items-center justify-end gap-0.5 shrink-0 min-w-[60px]"
             >
-              <span
-                v-for="i in getArrowsForGuess(guesses[num - 1])?.count || 0"
-                :key="i"
-                class="text-lg leading-none"
-              >
-                {{ getArrowsForGuess(guesses[num - 1])?.arrows }}
+              <span class="text-xl leading-none tracking-widest">
+                {{ getHintForGuess(guesses[num - 1])?.emoji }}
               </span>
             </div>
           </template>

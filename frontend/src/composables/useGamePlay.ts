@@ -1,8 +1,8 @@
 import gsap from 'gsap'
 import type { Ref } from 'vue'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { getColorForArrowCount } from '../utils/colors'
-import { getDirectionalArrows } from '../utils/geography'
+import { getColorForDistanceLevel } from '../utils/colors'
+import { getDistanceHint } from '../utils/geography'
 import { useCountryData } from './useCountryData'
 import { useRadio } from './useRadio'
 
@@ -24,6 +24,7 @@ export function useGamePlay(options: GamePlayOptions) {
     message: '',
     buttonText: '',
     isWin: false,
+    shareText: undefined as string | undefined, // text to copy to clipboard
   })
 
   // Hooking up radio logic
@@ -43,6 +44,7 @@ export function useGamePlay(options: GamePlayOptions) {
     isDailyChallengeMode,
     completeDailyChallenge,
     getDailyChallengeSeed,
+    dailyChallengeNumber,
   } = useRadio()
 
   // Hooking up country coordinates
@@ -81,13 +83,61 @@ export function useGamePlay(options: GamePlayOptions) {
       const guessCoords = getCoordinates(guess)
 
       if (secretCoords && guessCoords) {
-        const { count } = getDirectionalArrows(guessCoords, secretCoords)
-        const color = getColorForArrowCount(count)
+        const { level } = getDistanceHint(guessCoords, secretCoords)
+        const color = getColorForDistanceLevel(level)
         guessColors.value[guess] = color
       } else {
         guessColors.value[guess] = '#FB923C'
       }
     })
+  }
+
+  const generateShareText = (winningGuess?: string) => {
+    const dayNumber = dailyChallengeNumber.value
+    const lines = [`GeoHearo | #${dayNumber}`, 'https://geohearo.com/']
+
+    // Clone guesses to avoid modifying the reactive array during this operation if needed
+    const currentGuesses = [...guesses.value]
+    if (winningGuess) {
+      currentGuesses.push(winningGuess)
+    }
+
+    let emojiLine = ''
+    currentGuesses.forEach((guess) => {
+      // Check for win
+      if (guess.toLowerCase() === secretCountry.value?.toLowerCase()) {
+        emojiLine += '🏆'
+        return
+      }
+
+      const secretCoords = getCoordinates(secretCountry.value)
+      const guessCoords = getCoordinates(guess)
+      if (secretCoords && guessCoords) {
+        const { level } = getDistanceHint(guessCoords, secretCoords)
+        // Map level to single emoji
+        // Level 1 (Close): 🟡
+        // Level 2 (Medium): 🟠
+        // Level 3 (Far): 🔴
+        switch (level) {
+          case 1:
+            emojiLine += '🟡'
+            break
+          case 2:
+            emojiLine += '🟠'
+            break
+          case 3:
+            emojiLine += '🔴'
+            break
+          default:
+            emojiLine += '🔴'
+        }
+      } else {
+        emojiLine += '⬜' // Fallback
+      }
+    })
+
+    lines.push(emojiLine)
+    return lines.join('\n')
   }
 
   const handleAddGuess = () => {
@@ -97,11 +147,17 @@ export function useGamePlay(options: GamePlayOptions) {
     if (checkGuess(guess)) {
       if (isDailyChallengeMode.value) {
         completeDailyChallenge() // Mark as done for today
+
+        // Generate share text BEFORE clearing state
+        // Pass the winning guess since it's not in `guesses` yet
+        const shareText = generateShareText(guess)
+
         modalConfig.value = {
           title: 'Daily Challenge Complete!',
-          message: `You found ${secretCountry.value}! Logic +1. Come back tomorrow for a new challenge.`,
+          message: `It was ${secretCountry.value}! Come back tomorrow for a new challenge.`,
           buttonText: 'Play Free Mode',
           isWin: true,
+          shareText,
         }
       } else {
         modalConfig.value = {
@@ -109,6 +165,7 @@ export function useGamePlay(options: GamePlayOptions) {
           message: `Wooo! The country was ${secretCountry.value}. Great job!`,
           buttonText: 'Play Again',
           isWin: true,
+          shareText: undefined,
         }
       }
       clearState()
@@ -120,8 +177,8 @@ export function useGamePlay(options: GamePlayOptions) {
     const guessCoords = getCoordinates(guess)
 
     if (secretCoords && guessCoords) {
-      const { count } = getDirectionalArrows(guessCoords, secretCoords)
-      const color = getColorForArrowCount(count)
+      const { level } = getDistanceHint(guessCoords, secretCoords)
+      const color = getColorForDistanceLevel(level)
       guessColors.value[guess] = color
     } else {
       guessColors.value[guess] = '#FB923C'
@@ -135,11 +192,28 @@ export function useGamePlay(options: GamePlayOptions) {
     if (guesses.value.length >= 5) {
       if (isDailyChallengeMode.value) {
         completeDailyChallenge()
+
+        // Game Over - generate share text with checks
+        // The last guess IS added below (line 130 original, now inside this flow?)
+        // Wait, in handleAddGuess structure:
+        // 1. Check Win -> Return
+        // 2. Add Colors
+        // 3. Add Guess
+        // 4. Check Lose (length >= 5) -> Modal
+
+        // So by the time we reach here, the guess IS in `guesses`.
+        // So we don't need to pass it explicitly to generateShareText?
+        // Let's verify where `addGuess` is.
+        // It is called before this block.
+
+        const shareText = generateShareText()
+
         modalConfig.value = {
           title: 'Game Over',
           message: `Better luck next time. The country was ${secretCountry.value}.`,
           buttonText: 'Keep Playing',
           isWin: false,
+          shareText,
         }
       } else {
         modalConfig.value = {
@@ -147,6 +221,7 @@ export function useGamePlay(options: GamePlayOptions) {
           message: `Better luck next time. The country was ${secretCountry.value}. Play again?`,
           buttonText: 'Try Again',
           isWin: false,
+          shareText: undefined,
         }
       }
       clearState()

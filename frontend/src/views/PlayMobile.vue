@@ -105,16 +105,21 @@ const overlayOpacity = computed(() => {
       <div class="pt-6 px-4 flex justify-center relative z-10">
         <div class="relative">
           <h1
-            class="relative z-10 text-center text-pencil-lead text-3xl font-heading tracking-wider pb-3"
+            class="relative z-10 text-center text-pencil-lead text-3xl font-heading tracking-wider"
           >
-            <div
-              v-if="isDailyChallengeMode"
-              class="text-sm uppercase tracking-widest text-[#B45309] font-bold mb-1"
-            >
-              Daily Challenge #{{ dailyChallengeNumber }}
-            </div>
             GeoHearo
           </h1>
+          <div
+            class="relative z-10 text-center text-sm uppercase tracking-widest font-bold mb-1"
+            :class="
+              isDailyChallengeMode ? 'text-[#B45309]' : 'text-eraser-grey'
+            "
+          >
+            <template v-if="isDailyChallengeMode">
+              Daily Challenge! Day #{{ dailyChallengeNumber }}
+            </template>
+            <template v-else> Free play mode </template>
+          </div>
           <img
             src="/emoji.png"
             class="absolute left-full bottom-0 h-12 ml-4 z-[-1] transition-transform duration-700 ease-out"
@@ -179,6 +184,7 @@ const overlayOpacity = computed(() => {
       :message="modalConfig.message"
       :button-text="modalConfig.buttonText"
       :is-win="modalConfig.isWin"
+      :share-text="modalConfig.shareText"
       @confirm="handleModalConfirm"
     />
   </div>

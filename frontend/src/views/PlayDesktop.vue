@@ -71,16 +71,21 @@ const {
           <div class="flex justify-center mb-6">
             <div class="relative z-10">
               <h1
-                class="text-center text-pencil-lead text-3xl font-heading tracking-wider pb-3"
+                class="text-center text-pencil-lead text-3xl font-heading tracking-wider"
               >
-                <div
-                  v-if="isDailyChallengeMode"
-                  class="text-sm uppercase tracking-widest text-[#B45309] font-bold mb-1"
-                >
-                  Daily Challenge #{{ dailyChallengeNumber }}
-                </div>
                 GeoHearo
               </h1>
+              <div
+                class="text-center text-sm uppercase tracking-widest font-bold mb-1"
+                :class="
+                  isDailyChallengeMode ? 'text-[#B45309]' : 'text-eraser-grey'
+                "
+              >
+                <template v-if="isDailyChallengeMode">
+                  Daily Challenge! Day #{{ dailyChallengeNumber }}
+                </template>
+                <template v-else> Free play mode </template>
+              </div>
               <img
                 src="/emoji.png"
                 class="absolute left-full -bottom-6 h-12 ml-4 z-0 transition-transform duration-700 ease-out"
@@ -128,6 +133,7 @@ const {
       :message="modalConfig.message"
       :button-text="modalConfig.buttonText"
       :is-win="modalConfig.isWin"
+      :share-text="modalConfig.shareText"
       @confirm="handleModalConfirm"
     />
   </div>

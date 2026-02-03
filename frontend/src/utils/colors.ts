@@ -1,17 +1,14 @@
-export const ARROW_COLORS = [
-  '#22C55E', // 0: Right (Green)
-  '#84CC16', // 1: Close (Yellow-Green)
-  '#EAB308', // 2: Closer (Yellow)
-  '#F97316', // 3: Far (Reddish-Orange)
-  '#EF4444', // 4+: Wrong (Red)
-]
+// Level 1: Yellow (Close)
+// Level 2: Orange (Medium)
+// Level 3: Red (Far)
 
-export function getColorForArrowCount(count: number): string {
-  // 0 = Correct
-  // 1 = Close
-  // 2 = Closer
-  // 3 = Far
-  // Anything else = Wrong (Red)
-  const index = Math.min(count, 4)
-  return ARROW_COLORS[index] ?? '#EF4444' // Fallback to Red
+export const DISTANCE_COLORS = {
+  1: '#EAB308', // Yellow
+  2: '#F97316', // Orange
+  3: '#EF4444', // Red
+}
+
+export function getColorForDistanceLevel(level: number): string {
+  // @ts-ignore
+  return DISTANCE_COLORS[level] ?? '#A855F7'
 }
