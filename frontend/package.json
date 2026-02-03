@@ -17,6 +17,7 @@
   "dependencies": {
     "@plausible-analytics/tracker": "^0.4.4",
     "@tailwindcss/vite": "^4.1.18",
+    "@turf/area": "^7.3.3",
     "@turf/distance": "^7.3.3",
     "@turf/explode": "^7.3.3",
     "@turf/turf": "^7.3.3",

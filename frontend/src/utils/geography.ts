@@ -1,8 +1,44 @@
 // Imports from Turf.js
 import distance from '@turf/distance'
 import explode from '@turf/explode'
+import area from '@turf/area'
+import { polygon } from '@turf/helpers'
 import booleanIntersects from '@turf/boolean-intersects'
-import type { Feature, Geometry } from 'geojson'
+import type { Feature, Geometry, Polygon } from 'geojson'
+
+// Helper: Extract the largest polygon from a MultiPolygon or FeatureCollection
+// This ensures we calculate distance based on the main landmass, ignoring small islands.
+function getLargestPolygon(
+  feature: Feature<Geometry>
+): Feature<Polygon> | null {
+  if (!feature || !feature.geometry) return null
+
+  const type = feature.geometry.type
+
+  if (type === 'Polygon') {
+    return feature as Feature<Polygon>
+  }
+
+  if (type === 'MultiPolygon') {
+    const coords = (feature.geometry as any).coordinates
+    let maxArea = -1
+    let largestPoly: Feature<Polygon> | null = null
+
+    // Iterate through each polygon in the multipolygon
+    coords.forEach((polyCoords: any) => {
+      const polyFeature = polygon(polyCoords)
+      const polyArea = area(polyFeature)
+      if (polyArea > maxArea) {
+        maxArea = polyArea
+        largestPoly = polyFeature
+      }
+    })
+
+    return largestPoly
+  }
+
+  return null
+}
 
 // Distance Hint Result
 // emoji: The visual hint string (e.g., 🟣🟣🟣🟣)
@@ -42,11 +78,14 @@ export function nearestBorderDistance(
   guessFeature: Feature<Geometry>,
   secretFeature: Feature<Geometry>
 ): number {
-  if (!guessFeature || !secretFeature) return Infinity
+  const guessPoly = getLargestPolygon(guessFeature)
+  const secretPoly = getLargestPolygon(secretFeature)
+
+  if (!guessPoly || !secretPoly) return Infinity
 
   // Extract all vertices from both polygons
-  const guessPoints = explode(guessFeature)
-  const secretPoints = explode(secretFeature)
+  const guessPoints = explode(guessPoly)
+  const secretPoints = explode(secretPoly)
 
   // Find minimum distance between any two border points
   let minDistance = Infinity

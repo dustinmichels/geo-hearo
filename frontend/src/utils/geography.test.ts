@@ -109,5 +109,66 @@ describe('geography utils', () => {
       expect(dist).toBeGreaterThan(220)
       expect(dist).toBeLessThan(225)
     })
+
+    it('ignores smaller polygons (islands) in distance calculation', () => {
+      // Secret: MultiPolygon with Main Landmass + Small Island
+      // Main Landmass: Square (0,0) to (2,2) -> Center (1,1)
+      const mainLand = [
+        [
+          [0, 0],
+          [2, 0],
+          [2, 2],
+          [0, 2],
+          [0, 0],
+        ],
+      ]
+      // Small Island: Square (10,0) to (10.1, 0.1) -> Very far!
+      // If we looked at this island, it would be close to a guess at (9,0).
+      // But we want to ignore it and measure against the main landmass.
+
+      // Guess: Square at (4,0) to (6,2)
+      // Distance to Main Land (x=2) is 2 degrees.
+      // Distance to Island (x=10) is ~4 degrees (from x=6 to x=10).
+      // WAIT. I want to test that we IGNORE the island if it's closer?
+      // No, we want to measure distance to/from largest polygon ONLY.
+
+      // Case 1: Island is CLOSER than Main Land. We should IGNORE it.
+      // Main Land: (0,0) to (2,2)
+      // Island: (5,0) to (5.1, 0.1) -> Closer to guess?
+      // Guess: (6,0) to (8,2).
+      // Distance to island (x=5.1 to x=6) is ~0.9 deg.
+      // Distance to main land (x=2 to x=6) is 4 deg.
+      // If we ignore island, distance should be ~4 deg (~444km).
+      // If we include island, distance should be ~0.9 deg (~100km).
+
+      const closeIsland = [
+        [
+          [5, 0],
+          [5.1, 0],
+          [5.1, 0.1],
+          [5, 0.1],
+          [5, 0],
+        ],
+      ]
+
+      const secretWithCloseIsland: any = {
+        type: 'Feature',
+        geometry: {
+          type: 'MultiPolygon',
+          coordinates: [mainLand, closeIsland],
+        },
+        properties: {},
+      }
+
+      const guessFeature = createSquare(1, 7, 2) // x=6 to x=8
+
+      const dist = nearestBorderDistance(guessFeature, secretWithCloseIsland)
+
+      // Expected: Distance to Main Land (x=2) from Guess (x=6) is 4 degrees.
+      // 4 * 111.32 = 445 km.
+      // If it used the island (x=5.1), distance would be ~0.9 deg (~100km).
+
+      expect(dist).toBeGreaterThan(400) // Definitely not ~100
+    })
   })
 })
