@@ -143,6 +143,7 @@ const initMap = () => {
       },
       center: [0, 20],
       zoom: 1.5,
+      minZoom: isGlobe.value ? 1.5 : undefined,
       dragRotate: false,
       pitchWithRotate: false,
       touchZoomRotate: true,
