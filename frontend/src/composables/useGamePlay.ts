@@ -133,11 +133,21 @@ export function useGamePlay(options: GamePlayOptions) {
     options.onGuessAdded?.()
 
     if (guesses.value.length >= 5) {
-      modalConfig.value = {
-        title: 'Game Over',
-        message: `Better luck next time. The country was ${secretCountry.value}. Play again?`,
-        buttonText: 'Try Again',
-        isWin: false,
+      if (isDailyChallengeMode.value) {
+        completeDailyChallenge()
+        modalConfig.value = {
+          title: 'Game Over',
+          message: `Better luck next time. The country was ${secretCountry.value}.`,
+          buttonText: 'Keep Playing',
+          isWin: false,
+        }
+      } else {
+        modalConfig.value = {
+          title: 'Game Over',
+          message: `Better luck next time. The country was ${secretCountry.value}. Play again?`,
+          buttonText: 'Try Again',
+          isWin: false,
+        }
       }
       clearState()
       showModal.value = true
