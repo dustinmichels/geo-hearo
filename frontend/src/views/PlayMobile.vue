@@ -153,6 +153,7 @@ const overlayOpacity = computed(() => {
           :guess-colors="guessColors"
           :selected-country="guessInput"
           :secret-country="debugCountry"
+          default-projection="globe"
         />
       </div>
     </div>

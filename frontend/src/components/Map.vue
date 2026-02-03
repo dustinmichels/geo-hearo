@@ -10,6 +10,7 @@ const props = defineProps<{
   guessColors?: Record<string, string> // ADMIN -> Color
   selectedCountry?: string // ADMIN name
   secretCountry?: string // ADMIN name
+  defaultProjection?: 'globe' | 'mercator'
 }>()
 
 const mapContainer = ref<HTMLElement | null>(null)
@@ -93,7 +94,11 @@ onMounted(() => {
   if (!mapContainer.value) return
 
   // Default to globe on mobile, flat map on desktop
-  isGlobe.value = window.innerWidth < 768
+  if (props.defaultProjection) {
+    isGlobe.value = props.defaultProjection === 'globe'
+  } else {
+    isGlobe.value = window.innerWidth < 768
+  }
 
   // Start initialization
   initMap()

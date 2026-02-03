@@ -11,7 +11,7 @@ import { useRadio } from '../composables/useRadio'
 const blob1 = ref<HTMLElement | null>(null)
 const blob2 = ref<HTMLElement | null>(null)
 
-const { isDailyChallengeMode, dailyChallengeNumber } = useRadio()
+const { isDailyChallengeMode } = useRadio()
 
 const {
   isPlaying,
@@ -34,7 +34,7 @@ const {
 
 <template>
   <div
-    class="h-screen w-full overflow-hidden bg-cloud-white relative text-pencil-lead font-body px-6 pt-6 pb-2 flex flex-col gap-4"
+    class="h-screen w-full overflow-hidden bg-cloud-white relative text-pencil-lead font-body px-6 pt-3 pb-2 flex flex-col gap-3"
   >
     <!-- Decorative Background Shapes -->
     <div
@@ -58,20 +58,21 @@ const {
           :guess-colors="guessColors"
           :selected-country="guessInput"
           :secret-country="debugCountry"
+          default-projection="mercator"
         />
       </div>
 
       <!-- Right: Sidebar -->
-      <div class="w-[400px] flex flex-col gap-6 relative z-10 shrink-0">
+      <div class="w-[400px] flex flex-col gap-4 relative z-10 shrink-0">
         <!-- Header & Player Card -->
         <div
-          class="bg-paper-white rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] p-6"
+          class="bg-paper-white rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] p-4 overflow-hidden"
         >
           <!-- Title -->
-          <div class="flex justify-center mb-6">
+          <div class="flex justify-center mb-3">
             <div class="relative z-10">
               <h1
-                class="text-center text-pencil-lead text-3xl font-heading tracking-wider"
+                class="text-center text-pencil-lead text-[1.6rem] font-heading tracking-wider"
               >
                 GeoHearo
               </h1>
@@ -88,8 +89,9 @@ const {
               </div>
               <img
                 src="/emoji.png"
-                class="absolute left-full -bottom-6 h-12 ml-4 z-0 transition-transform duration-700 ease-out"
-                :class="isPlaying ? 'translate-y-0' : 'translate-y-16'"
+                class="absolute left-full bottom-0 h-12 ml-4 z-[-1] transition-transform duration-700 ease-out"
+                style="will-change: transform"
+                :class="isPlaying ? 'translate-y-4' : 'translate-y-16'"
               />
             </div>
           </div>
