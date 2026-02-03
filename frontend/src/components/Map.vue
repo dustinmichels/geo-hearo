@@ -367,20 +367,23 @@ onUnmounted(() => {
   >
     <div
       v-show="!loaded"
-      class="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 z-10 w-full h-full gap-4"
+      class="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 z-10 w-full h-full gap-3"
     >
-      <Loader2 class="w-10 h-10 text-indigo-500 animate-spin" />
+      <div class="flex items-center gap-2 text-slate-500">
+        <Loader2 class="w-5 h-5 animate-spin" />
+        <span class="text-sm font-body">Map loading</span>
+      </div>
       <div
         v-if="showReloadInfo"
         class="flex flex-col items-center gap-2 animate-in fade-in duration-500"
       >
-        <p class="text-slate-500 text-sm">Map taking a while?</p>
+        <p class="text-slate-400 text-xs">Taking a while?</p>
         <button
           @click="reloadMap"
           class="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm"
         >
           <RefreshCw class="w-3.5 h-3.5" />
-          <span>Reload Map</span>
+          <span>Reload</span>
         </button>
       </div>
     </div>

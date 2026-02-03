@@ -10,17 +10,17 @@ const props = defineProps<{
 
 const maxGuesses = 5
 const { secretCountry } = useRadio()
-const { getCoordinates } = useCountryData()
+const { getFeature } = useCountryData()
 
 const getHintForGuess = (guessName: string | undefined) => {
   if (!guessName || !secretCountry.value) return null
 
-  const guessLoc = getCoordinates(guessName)
-  const secretLoc = getCoordinates(secretCountry.value)
+  const guessFeature = getFeature(guessName)
+  const secretFeature = getFeature(secretCountry.value)
 
-  if (!guessLoc || !secretLoc) return null
+  if (!guessFeature || !secretFeature) return null
 
-  return getDistanceHint(guessLoc, secretLoc)
+  return getDistanceHint(guessFeature, secretFeature)
 }
 
 const getGuessColor = (guessName: string | undefined) => {

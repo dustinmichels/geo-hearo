@@ -1,9 +1,14 @@
 import { ref } from 'vue'
-import type { CenterProperties } from '../types/geo'
+import type { CenterProperties, NeCountryProperties } from '../types/geo'
+import type { Feature, Geometry } from 'geojson'
 
 // State
 // Maps ADMIN name -> [lon, lat]
 const adminToCenter = ref<Map<string, [number, number]>>(new Map())
+// Maps ADMIN name -> GeoJSON Feature
+const adminToFeature = ref<Map<string, Feature<Geometry, NeCountryProperties>>>(
+  new Map()
+)
 const isLoading = ref(false)
 const error = ref<string | null>(null)
 
@@ -35,6 +40,23 @@ export function useCountryData() {
         })
       }
       adminToCenter.value = adminToC
+
+      // Load Country Geometries
+      const countriesResponse = await fetch('/data/ne_countries.geojson')
+      if (!countriesResponse.ok) throw new Error('Failed to load countries')
+      const countriesData = await countriesResponse.json()
+
+      const adminToF = new Map<string, Feature<Geometry, NeCountryProperties>>()
+
+      if (countriesData.features) {
+        countriesData.features.forEach((feature: any) => {
+          const props = feature.properties as NeCountryProperties
+          if (props && props.ADMIN) {
+            adminToF.set(props.ADMIN, feature)
+          }
+        })
+      }
+      adminToFeature.value = adminToF
     } catch (e: any) {
       console.error('Failed to load country data:', e)
       error.value = e.message || 'Unknown error'
@@ -51,10 +73,17 @@ export function useCountryData() {
     return null
   }
 
+  const getFeature = (
+    countryAdmin: string
+  ): Feature<Geometry, NeCountryProperties> | undefined => {
+    return adminToFeature.value.get(countryAdmin)
+  }
+
   return {
     isLoading,
     error,
     loadCenters,
     getCoordinates,
+    getFeature,
   }
 }

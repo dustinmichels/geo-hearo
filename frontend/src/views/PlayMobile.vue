@@ -12,7 +12,7 @@ import { useGamePlay } from '../composables/useGamePlay'
 const blob1 = ref<HTMLElement | null>(null)
 const blob2 = ref<HTMLElement | null>(null)
 
-const { isDailyChallengeMode, dailyChallengeNumber } = useRadio()
+const { isDailyChallengeMode } = useRadio()
 
 // Vant Floating Panel setup
 const anchors = [

@@ -1,7 +1,8 @@
-interface Coordinates {
-  lat: number
-  lng: number
-}
+// Imports from Turf.js
+import distance from '@turf/distance'
+import explode from '@turf/explode'
+import booleanIntersects from '@turf/boolean-intersects'
+import type { Feature, Geometry } from 'geojson'
 
 // Distance Hint Result
 // emoji: The visual hint string (e.g., 🟣🟣🟣🟣)
@@ -10,26 +11,6 @@ interface DistanceHintResult {
   emoji: string
   level: number
   distance: number
-}
-
-// 1. Haversine Formula (Great Circle Distance)
-// Returns distance in kilometers
-export function getDistance(p1: Coordinates, p2: Coordinates): number {
-  const R = 6371 // Radius of the earth in km
-  const dLat = deg2rad(p2.lat - p1.lat)
-  const dLng = deg2rad(p2.lng - p1.lng)
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(deg2rad(p1.lat)) *
-      Math.cos(deg2rad(p2.lat)) *
-      Math.sin(dLng / 2) *
-      Math.sin(dLng / 2)
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  return R * c
-}
-
-function deg2rad(deg: number): number {
-  return deg * (Math.PI / 180)
 }
 
 // 2. Distance Magnitude Logic
@@ -48,25 +29,70 @@ function getEmojiForLevel(level: number): string {
     case 1:
       return '🟡'
     case 2:
-      return '🟠' // Changed from 🟠🟠
+      return '🟠'
     case 3:
-      return '🔴' // Changed from 🔴🔴🔴
+      return '🔴'
     default:
       return '🔴'
   }
 }
 
+// 4. Border Distance Logic
+export function nearestBorderDistance(
+  guessFeature: Feature<Geometry>,
+  secretFeature: Feature<Geometry>
+): number {
+  if (!guessFeature || !secretFeature) return Infinity
+
+  // Extract all vertices from both polygons
+  const guessPoints = explode(guessFeature)
+  const secretPoints = explode(secretFeature)
+
+  // Find minimum distance between any two border points
+  let minDistance = Infinity
+
+  guessPoints.features.forEach((guessPoint) => {
+    // If efficient approximation is needed, we could optimize this loop,
+    // but for country polygons (usually < 1000 points simplified), n*m might be acceptable
+    // or we rely on the fact that we've simplified geometries.
+    secretPoints.features.forEach((secretPoint) => {
+      const d = distance(guessPoint, secretPoint, { units: 'kilometers' })
+      if (d < minDistance) {
+        minDistance = d
+      }
+    })
+  })
+
+  return minDistance
+}
+
 export function getDistanceHint(
-  guess: Coordinates,
-  secret: Coordinates
+  guessFeature: Feature<Geometry>,
+  secretFeature: Feature<Geometry>
 ): DistanceHintResult {
-  const distance = getDistance(guess, secret)
-  const level = getDistanceLevel(distance)
+  let dist: number
+
+  // Check for intersection first
+  if (
+    guessFeature &&
+    secretFeature &&
+    booleanIntersects(guessFeature, secretFeature)
+  ) {
+    dist = 0
+  } else if (guessFeature && secretFeature) {
+    // Calculate distance between nearest border points
+    dist = nearestBorderDistance(guessFeature, secretFeature)
+  } else {
+    // Fallback if features are missing (should not happen in normal flow)
+    dist = Infinity
+  }
+
+  const level = getDistanceLevel(dist)
   const emoji = getEmojiForLevel(level)
 
   return {
     emoji,
     level,
-    distance,
+    distance: dist,
   }
 }

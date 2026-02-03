@@ -48,7 +48,7 @@ export function useGamePlay(options: GamePlayOptions) {
   } = useRadio()
 
   // Hooking up country coordinates
-  const { loadCenters, getCoordinates } = useCountryData()
+  const { loadCenters, getFeature } = useCountryData()
 
   const currentStationUrl = computed(() => {
     return currentStations.value[currentStation.value - 1]?.channel_resolved_url
@@ -79,11 +79,11 @@ export function useGamePlay(options: GamePlayOptions) {
   const populateGuessColors = () => {
     guesses.value.forEach((guess) => {
       if (guessColors.value[guess]) return
-      const secretCoords = getCoordinates(secretCountry.value)
-      const guessCoords = getCoordinates(guess)
+      const secretFeature = getFeature(secretCountry.value)
+      const guessFeature = getFeature(guess)
 
-      if (secretCoords && guessCoords) {
-        const { level } = getDistanceHint(guessCoords, secretCoords)
+      if (secretFeature && guessFeature) {
+        const { level } = getDistanceHint(guessFeature, secretFeature)
         const color = getColorForDistanceLevel(level)
         guessColors.value[guess] = color
       } else {
@@ -110,10 +110,11 @@ export function useGamePlay(options: GamePlayOptions) {
         return
       }
 
-      const secretCoords = getCoordinates(secretCountry.value)
-      const guessCoords = getCoordinates(guess)
-      if (secretCoords && guessCoords) {
-        const { level } = getDistanceHint(guessCoords, secretCoords)
+      const secretFeature = getFeature(secretCountry.value)
+      const guessFeature = getFeature(guess)
+
+      if (secretFeature && guessFeature) {
+        const { level } = getDistanceHint(guessFeature, secretFeature)
         // Map level to single emoji
         // Level 1 (Close): 🟡
         // Level 2 (Medium): 🟠
@@ -173,11 +174,11 @@ export function useGamePlay(options: GamePlayOptions) {
       return
     }
 
-    const secretCoords = getCoordinates(secretCountry.value)
-    const guessCoords = getCoordinates(guess)
+    const secretFeature = getFeature(secretCountry.value)
+    const guessFeature = getFeature(guess)
 
-    if (secretCoords && guessCoords) {
-      const { level } = getDistanceHint(guessCoords, secretCoords)
+    if (secretFeature && guessFeature) {
+      const { level } = getDistanceHint(guessFeature, secretFeature)
       const color = getColorForDistanceLevel(level)
       guessColors.value[guess] = color
     } else {
