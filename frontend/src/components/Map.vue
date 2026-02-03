@@ -2,7 +2,7 @@
 import { onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { Loader2, RefreshCw } from 'lucide-vue-next'
+import { Loader2, RefreshCw, Globe, Map as MapIcon } from 'lucide-vue-next'
 import type { NeCountryProperties } from '../types/geo'
 
 const props = defineProps<{
@@ -17,6 +17,7 @@ const map = shallowRef<maplibregl.Map | null>(null)
 const loaded = ref(false)
 const resizeObserver = shallowRef<ResizeObserver | null>(null)
 const showReloadInfo = ref(false)
+const isGlobe = ref(true)
 let loadingTimeout: ReturnType<typeof setTimeout> | null = null
 
 const emit = defineEmits<{
@@ -127,6 +128,7 @@ const initMap = () => {
       container: mapContainer.value,
       style: {
         version: 8,
+        projection: { type: 'globe' },
         sources: {},
         layers: [],
       },
@@ -170,13 +172,21 @@ const initMap = () => {
 const setupLayers = () => {
   if (!map.value) return
 
-  // Add background layer (matches slate-50)
+  // Add satellite imagery source
+  map.value.addSource('esri-satellite', {
+    type: 'raster',
+    tiles: [
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    ],
+    tileSize: 256,
+    attribution: 'Tiles &copy; Esri',
+  })
+
+  // Add satellite imagery layer
   map.value.addLayer({
-    id: 'background',
-    type: 'background',
-    paint: {
-      'background-color': '#f8fafc',
-    },
+    id: 'satellite',
+    type: 'raster',
+    source: 'esri-satellite',
   })
 
   // Add countries fill layer (grey)
@@ -186,7 +196,7 @@ const setupLayers = () => {
     source: 'countries',
     paint: {
       'fill-color': '#cbd5e1', // slate-300
-      'fill-opacity': 1,
+      'fill-opacity': 0,
     },
   })
 
@@ -297,6 +307,14 @@ const setupInteractions = () => {
   })
 }
 
+const toggleProjection = () => {
+  if (!map.value) return
+  isGlobe.value = !isGlobe.value
+  map.value.setProjection({
+    type: isGlobe.value ? 'globe' : 'mercator',
+  })
+}
+
 // Manual reload function
 const reloadMap = () => {
   initMap()
@@ -333,6 +351,17 @@ onUnmounted(() => {
       </div>
     </div>
     <div ref="mapContainer" class="w-full h-full" />
+
+    <!-- Projection Toggle -->
+    <button
+      v-if="loaded"
+      @click="toggleProjection"
+      class="absolute top-4 left-4 z-[5] p-2 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm"
+      :title="isGlobe ? 'Switch to Flat Map' : 'Switch to Globe'"
+    >
+      <MapIcon v-if="isGlobe" class="w-5 h-5" />
+      <Globe v-else class="w-5 h-5" />
+    </button>
   </div>
 </template>
 
