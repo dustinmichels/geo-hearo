@@ -17,7 +17,7 @@ const map = shallowRef<maplibregl.Map | null>(null)
 const loaded = ref(false)
 const resizeObserver = shallowRef<ResizeObserver | null>(null)
 const showReloadInfo = ref(false)
-const isGlobe = ref(true)
+const isGlobe = ref(false)
 let loadingTimeout: ReturnType<typeof setTimeout> | null = null
 
 const emit = defineEmits<{
@@ -92,6 +92,9 @@ watch(
 onMounted(() => {
   if (!mapContainer.value) return
 
+  // Default to globe on mobile, flat map on desktop
+  isGlobe.value = window.innerWidth < 768
+
   // Start initialization
   initMap()
 
@@ -128,7 +131,7 @@ const initMap = () => {
       container: mapContainer.value,
       style: {
         version: 8,
-        projection: { type: 'globe' },
+        projection: { type: isGlobe.value ? 'globe' : 'mercator' },
         sources: {},
         layers: [],
         glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
@@ -173,21 +176,13 @@ const initMap = () => {
 const setupLayers = () => {
   if (!map.value) return
 
-  // Add satellite imagery source
-  map.value.addSource('esri-satellite', {
-    type: 'raster',
-    tiles: [
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    ],
-    tileSize: 256,
-    attribution: 'Tiles &copy; Esri',
-  })
-
-  // Add satellite imagery layer
+  // Add background layer (handles oceans and space)
   map.value.addLayer({
-    id: 'satellite',
-    type: 'raster',
-    source: 'esri-satellite',
+    id: 'background',
+    type: 'background',
+    paint: {
+      'background-color': isGlobe.value ? '#0f172a' : '#ffffff', // Navy for globe, White for flat
+    },
   })
 
   // Add countries fill layer (grey)
@@ -197,7 +192,7 @@ const setupLayers = () => {
     source: 'countries',
     paint: {
       'fill-color': '#cbd5e1', // slate-300
-      'fill-opacity': 0,
+      'fill-opacity': 1,
     },
   })
 
@@ -254,7 +249,7 @@ const setupLayers = () => {
     type: 'line',
     source: 'countries',
     paint: {
-      'line-color': '#e2e8f0', // slate-200
+      'line-color': isGlobe.value ? '#e2e8f0' : '#000000', // Light for globe, Black for flat
       'line-width': 1.5,
     },
   })
@@ -333,6 +328,23 @@ const toggleProjection = () => {
   map.value.setProjection({
     type: isGlobe.value ? 'globe' : 'mercator',
   })
+
+  // Update styles based on projection
+  if (map.value.getLayer('background')) {
+    map.value.setPaintProperty(
+      'background',
+      'background-color',
+      isGlobe.value ? '#0f172a' : '#ffffff'
+    )
+  }
+
+  if (map.value.getLayer('countries-border')) {
+    map.value.setPaintProperty(
+      'countries-border',
+      'line-color',
+      isGlobe.value ? '#e2e8f0' : '#000000'
+    )
+  }
 }
 
 // Manual reload function
