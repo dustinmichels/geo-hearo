@@ -9,6 +9,7 @@ interface Coordinates {
 interface DistanceHintResult {
   emoji: string
   level: number
+  distance: number
 }
 
 // 1. Haversine Formula (Great Circle Distance)
@@ -34,8 +35,8 @@ function deg2rad(deg: number): number {
 // 2. Distance Magnitude Logic
 // Distance is in KILOMETERS.
 // Level 1: <= 2000 km  (Close)              -> 🟡
-// Level 2: <= 6000 km  (Medium)             -> 🟠🟠
-// Level 3: > 6000 km   (Far)                -> 🔴🔴🔴
+// Level 2: <= 6000 km  (Medium)             -> 🟠
+// Level 3: > 6000 km   (Far)                -> 🔴
 function getDistanceLevel(distance: number): number {
   if (distance <= 2000) return 1
   if (distance <= 6000) return 2
@@ -47,11 +48,11 @@ function getEmojiForLevel(level: number): string {
     case 1:
       return '🟡'
     case 2:
-      return '🟠🟠'
+      return '🟠' // Changed from 🟠🟠
     case 3:
-      return '🔴🔴🔴'
+      return '🔴' // Changed from 🔴🔴🔴
     default:
-      return '🔴🔴🔴'
+      return '🔴'
   }
 }
 
@@ -66,5 +67,6 @@ export function getDistanceHint(
   return {
     emoji,
     level,
+    distance,
   }
 }

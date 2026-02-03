@@ -116,7 +116,7 @@ const overlayOpacity = computed(() => {
             "
           >
             <template v-if="isDailyChallengeMode">
-              Daily Challenge! Day #{{ dailyChallengeNumber }}
+              Daily Challenge! 📣
             </template>
             <template v-else> Free play mode </template>
           </div>

@@ -28,6 +28,12 @@ const getGuessColor = (guessName: string | undefined) => {
   if (!result) return '#FFFFFF'
   return getColorForDistanceLevel(result.level)
 }
+
+const formatDistance = (km: number | undefined) => {
+  if (km === undefined) return ''
+  const miles = Math.round(km * 0.621371)
+  return `${miles.toLocaleString()} mi`
+}
 </script>
 
 <template>
@@ -66,8 +72,13 @@ const getGuessColor = (guessName: string | undefined) => {
               guesses[num - 1]
             }}</span>
             <div
-              class="flex items-center justify-end gap-0.5 shrink-0 min-w-[60px]"
+              class="flex items-center justify-end gap-2 shrink-0 min-w-[60px]"
             >
+              <span class="text-sm font-bold text-pencil-lead/80 font-body">
+                {{
+                  formatDistance(getHintForGuess(guesses[num - 1])?.distance)
+                }}
+              </span>
               <span class="text-xl leading-none tracking-widest">
                 {{ getHintForGuess(guesses[num - 1])?.emoji }}
               </span>
