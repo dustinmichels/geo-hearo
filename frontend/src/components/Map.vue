@@ -217,7 +217,7 @@ const setTilesVisibility = (visible: boolean) => {
     map.value.setPaintProperty(
       'countries-secret',
       'fill-opacity',
-      visible ? 0 : 1
+      visible ? 0.2 : 1
     )
   }
 
