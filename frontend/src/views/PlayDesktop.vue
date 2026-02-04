@@ -32,6 +32,7 @@ const {
   handleCountrySelect,
   handleNewGame,
   roundFinished,
+  secretCountry,
 } = useGamePlay({
   setupKeyboardShortcuts: true,
   onNewGame: () => mapRef.value?.resetView(),
@@ -67,7 +68,7 @@ const activeStation = computed(() => {
           :guessed-countries="guesses"
           :guess-colors="guessColors"
           :selected-country="guessInput"
-          :secret-country="debugCountry"
+          :secret-country="roundFinished ? secretCountry : debugCountry"
           :stations="currentStations"
           :active-station-id="activeStation?.channel_id"
           :are-stations-visible="roundFinished"

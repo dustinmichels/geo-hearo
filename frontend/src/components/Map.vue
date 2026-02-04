@@ -45,8 +45,16 @@ watch(
 
     if (newGuesses && newGuesses.length > 0) {
       map.value.setFilter('countries-guessed', ['in', 'ADMIN', ...newGuesses])
+      if (map.value.getLayer('countries-guessed-border'))
+        map.value.setFilter('countries-guessed-border', [
+          'in',
+          'ADMIN',
+          ...newGuesses,
+        ])
     } else {
       map.value.setFilter('countries-guessed', ['in', 'ADMIN', '']) // Hide all
+      if (map.value.getLayer('countries-guessed-border'))
+        map.value.setFilter('countries-guessed-border', ['in', 'ADMIN', ''])
     }
   },
   { deep: true }
@@ -82,8 +90,16 @@ watch(
 
     if (newSelected) {
       map.value.setFilter('countries-highlight', ['==', 'ADMIN', newSelected])
+      if (map.value.getLayer('countries-highlight-border'))
+        map.value.setFilter('countries-highlight-border', [
+          '==',
+          'ADMIN',
+          newSelected,
+        ])
     } else {
       map.value.setFilter('countries-highlight', ['==', 'ADMIN', ''])
+      if (map.value.getLayer('countries-highlight-border'))
+        map.value.setFilter('countries-highlight-border', ['==', 'ADMIN', ''])
     }
   }
 )
@@ -96,8 +112,16 @@ watch(
 
     if (newSecret) {
       map.value.setFilter('countries-secret', ['==', 'ADMIN', newSecret])
+      if (map.value.getLayer('countries-secret-border'))
+        map.value.setFilter('countries-secret-border', [
+          '==',
+          'ADMIN',
+          newSecret,
+        ])
     } else {
       map.value.setFilter('countries-secret', ['==', 'ADMIN', ''])
+      if (map.value.getLayer('countries-secret-border'))
+        map.value.setFilter('countries-secret-border', ['==', 'ADMIN', ''])
     }
   }
 )
@@ -119,8 +143,20 @@ const getPillarPolygon = (lat: number, lon: number, radiusKm: number) => {
   ]
 }
 
-const buildStationFeatures = (activeId?: string) => {
+const getZoomScaleFactor = (zoom: number): number => {
+  // At zoom 3 (globe/continent view), scale = 1 (current size)
+  // Halves for each zoom level increase, doubles for each decrease
+  return Math.pow(2, 3 - zoom)
+}
+
+// zoomHeightExpression removed - height scaling is now handled in buildStationFeatures
+
+const buildStationFeatures = (activeId?: string, zoom?: number) => {
   if (!props.stations) return []
+
+  const scale = zoom != null ? getZoomScaleFactor(zoom) : 1
+  const scaledRadius = Math.max(15 * scale, 1.5)
+  const scaledOffset = Math.max(20 * scale, 3.5)
 
   // Group stations by location to detect overlaps
   const locationGroups = new Map<string, number[]>()
@@ -131,11 +167,15 @@ const buildStationFeatures = (activeId?: string) => {
   })
 
   const features = props.stations.map((s, i) => {
-    const baseHeight = 2000000
+    const baseHeight = 600000
     const variableHeight = s.place_size
-      ? Math.min(s.place_size * 500, 8000000)
-      : 2000000
-    const height = baseHeight + variableHeight
+      ? Math.min(s.place_size * 100, 2000000)
+      : 600000
+    let height = (baseHeight + variableHeight) * scale
+
+    if (activeId && s.channel_id === activeId) {
+      height *= 1.5
+    }
 
     // Offset co-located stations so each pillar is visible
     let lat = s.geo_lat
@@ -145,7 +185,7 @@ const buildStationFeatures = (activeId?: string) => {
     if (group.length > 1) {
       const idx = group.indexOf(i)
       const angle = (2 * Math.PI * idx) / group.length
-      const offsetKm = 20 // spread radius in km
+      const offsetKm = scaledOffset
       lat += (offsetKm / 111.32) * Math.sin(angle)
       lon +=
         (offsetKm / (111.32 * Math.cos((s.geo_lat * Math.PI) / 180))) *
@@ -156,7 +196,7 @@ const buildStationFeatures = (activeId?: string) => {
       type: 'Feature',
       geometry: {
         type: 'Polygon',
-        coordinates: getPillarPolygon(lat, lon, 15),
+        coordinates: getPillarPolygon(lat, lon, scaledRadius),
       },
       properties: {
         name: s.channel_name,
@@ -189,9 +229,10 @@ const updateStationsLayer = () => {
   if (map.value.getSource('stations-source'))
     map.value.removeSource('stations-source')
 
+  const zoom = map.value.getZoom()
   const sourceData = {
     type: 'FeatureCollection',
-    features: buildStationFeatures(props.activeStationId),
+    features: buildStationFeatures(props.activeStationId, zoom),
   }
 
   map.value.addSource('stations-source', {
@@ -210,12 +251,7 @@ const updateStationsLayer = () => {
         '#f472b6', // Active: Pink
         '#facc15', // Default: Yellow
       ],
-      'fill-extrusion-height': [
-        'case',
-        ['==', ['get', 'id'], props.activeStationId || ''],
-        ['*', ['get', 'height'], 1.5],
-        ['get', 'height'],
-      ],
+      'fill-extrusion-height': ['get', 'height'],
       'fill-extrusion-base': 0,
       'fill-extrusion-opacity': 0.8,
     },
@@ -225,11 +261,32 @@ const updateStationsLayer = () => {
   })
 
   // Zoom to stations
-  const bounds = new LngLatBounds()
-  props.stations.forEach((s) => bounds.extend([s.geo_lon, s.geo_lat]))
-  map.value.fitBounds(bounds, { padding: 50 })
+  zoomToStations()
+
+  // Register zoom handler to scale pillar width with zoom
+  map.value.off('zoom', handleStationZoom)
+  map.value.on('zoom', handleStationZoom)
 
   stopSpinning()
+}
+
+const handleStationZoom = () => {
+  if (!map.value || !map.value.getSource('stations-source')) return
+  const zoom = map.value.getZoom()
+  const source = map.value.getSource('stations-source') as any
+  if (source) {
+    source.setData({
+      type: 'FeatureCollection',
+      features: buildStationFeatures(props.activeStationId, zoom),
+    })
+  }
+}
+
+const zoomToStations = () => {
+  if (!map.value || !props.stations || props.stations.length === 0) return
+  const bounds = new LngLatBounds()
+  props.stations.forEach((s) => bounds.extend([s.geo_lon, s.geo_lat]))
+  map.value.fitBounds(bounds, { padding: 100, maxZoom: 8 })
 }
 
 const setStationsVisibility = (visible: boolean) => {
@@ -254,11 +311,14 @@ watch(
   { deep: true }
 )
 
-// Watch visibility prop to toggle layer visibility
+// Watch visibility prop to toggle layer visibility and zoom to stations
 watch(
   () => props.areStationsVisible,
   (isVisible) => {
     setStationsVisibility(!!isVisible)
+    if (isVisible) {
+      zoomToStations()
+    }
   }
 )
 
@@ -275,20 +335,15 @@ watch(
       '#facc15',
     ])
 
-    // Make the active pillar taller
-    map.value.setPaintProperty('stations-layer', 'fill-extrusion-height', [
-      'case',
-      ['==', ['get', 'id'], newId || ''],
-      ['*', ['get', 'height'], 1.5],
-      ['get', 'height'],
-    ])
+    // Height is now handled in buildStationFeatures and updated via setData below
 
     // Reorder features so the active station renders on top
     const source = map.value.getSource('stations-source') as any
     if (source) {
+      const zoom = map.value.getZoom()
       source.setData({
         type: 'FeatureCollection',
-        features: buildStationFeatures(newId),
+        features: buildStationFeatures(newId, zoom),
       })
     }
   }
@@ -468,22 +523,58 @@ const setupLayers = () => {
     type: 'fill',
     source: 'countries',
     paint: {
-      'fill-color': '#00ffff',
+      'fill-color': '#4ade80',
       'fill-opacity': 1,
     },
     filter: ['==', 'ADMIN', props.secretCountry || ''],
   })
 
-  // Add countries border layer
+  // Add countries border layer (default: muted border)
   map.value.addLayer({
     id: 'countries-border',
     type: 'line',
     source: 'countries',
     paint: {
-      'line-color': isGlobe.value ? '#e2e8f0' : '#000000', // Light for globe, Black for flat
+      'line-color': isGlobe.value ? '#94a3b8' : '#64748b', // slate-400 for globe, slate-500 for flat
       'line-width': 1.5,
       'line-color-transition': { duration: 500 },
     },
+  })
+
+  // White border for guessed countries
+  map.value.addLayer({
+    id: 'countries-guessed-border',
+    type: 'line',
+    source: 'countries',
+    paint: {
+      'line-color': '#ffffff',
+      'line-width': 1.5,
+    },
+    filter: ['in', 'ADMIN', ...(props.guessedCountries || [])],
+  })
+
+  // White border for highlighted (selected) country
+  map.value.addLayer({
+    id: 'countries-highlight-border',
+    type: 'line',
+    source: 'countries',
+    paint: {
+      'line-color': '#ffffff',
+      'line-width': 1.5,
+    },
+    filter: ['==', 'ADMIN', props.selectedCountry || ''],
+  })
+
+  // White border for secret debug country
+  map.value.addLayer({
+    id: 'countries-secret-border',
+    type: 'line',
+    source: 'countries',
+    paint: {
+      'line-color': '#ffffff',
+      'line-width': 1.5,
+    },
+    filter: ['==', 'ADMIN', props.secretCountry || ''],
   })
 
   // Add country labels
@@ -594,7 +685,7 @@ const toggleProjection = () => {
     map.value.setPaintProperty(
       'countries-border',
       'line-color',
-      isGlobe.value ? '#e2e8f0' : '#000000'
+      isGlobe.value ? '#94a3b8' : '#64748b'
     )
   }
 
@@ -630,7 +721,7 @@ const resetView = () => {
       map.value.setPaintProperty('background', 'background-color', '#0f172a')
     }
     if (map.value.getLayer('countries-border')) {
-      map.value.setPaintProperty('countries-border', 'line-color', '#e2e8f0')
+      map.value.setPaintProperty('countries-border', 'line-color', '#94a3b8')
     }
     map.value.setSky({
       'atmosphere-blend': [
@@ -669,6 +760,7 @@ onUnmounted(() => {
   stopSpinning()
   if (loadingTimeout) clearTimeout(loadingTimeout)
   resizeObserver.value?.disconnect()
+  map.value?.off('zoom', handleStationZoom)
   map.value?.remove()
 })
 </script>
