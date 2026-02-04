@@ -6,38 +6,37 @@ import explode from '@turf/explode'
 import { polygon } from '@turf/helpers'
 import type { Feature, Geometry, Polygon } from 'geojson'
 
-// Helper: Extract the largest polygon from a MultiPolygon or FeatureCollection
-// This ensures we calculate distance based on the main landmass, ignoring small islands.
-function getLargestPolygon(
-  feature: Feature<Geometry>
-): Feature<Polygon> | null {
-  if (!feature || !feature.geometry) return null
+// Helper: Extract major landmasses from a MultiPolygon or FeatureCollection
+// We calculate the total area of the country and include any polygon
+// that contributes at least 20% to the total area.
+function getMajorLandmasses(feature: Feature<Geometry>): Feature<Polygon>[] {
+  if (!feature || !feature.geometry) return []
 
   const type = feature.geometry.type
 
   if (type === 'Polygon') {
-    return feature as Feature<Polygon>
+    return [feature as Feature<Polygon>]
   }
 
   if (type === 'MultiPolygon') {
     const coords = (feature.geometry as any).coordinates
-    let maxArea = -1
-    let largestPoly: Feature<Polygon> | null = null
+    const polygons: { feature: Feature<Polygon>; area: number }[] = []
+    let totalArea = 0
 
-    // Iterate through each polygon in the multipolygon
+    // 1. Calculate areas for all polygons
     coords.forEach((polyCoords: any) => {
       const polyFeature = polygon(polyCoords)
       const polyArea = area(polyFeature)
-      if (polyArea > maxArea) {
-        maxArea = polyArea
-        largestPoly = polyFeature
-      }
+      totalArea += polyArea
+      polygons.push({ feature: polyFeature, area: polyArea })
     })
 
-    return largestPoly
+    // 2. Filter for polygons >= 20% of total area
+    const threshold = totalArea * 0.2
+    return polygons.filter((p) => p.area >= threshold).map((p) => p.feature)
   }
 
-  return null
+  return []
 }
 
 // Distance Hint Result
@@ -88,31 +87,33 @@ export function nearestBorderDistance(
   guessFeature: Feature<Geometry>,
   secretFeature: Feature<Geometry>
 ): number {
-  const guessPoly = getLargestPolygon(guessFeature)
-  const secretPoly = getLargestPolygon(secretFeature)
+  const guessPolys = getMajorLandmasses(guessFeature)
+  const secretPolys = getMajorLandmasses(secretFeature)
 
-  if (!guessPoly || !secretPoly) return Infinity
+  if (guessPolys.length === 0 || secretPolys.length === 0) return Infinity
 
-  // Extract all vertices from both polygons
-  const guessPoints = explode(guessPoly)
-  const secretPoints = explode(secretPoly)
+  let globalMinDistance = Infinity
 
-  // Find minimum distance between any two border points
-  let minDistance = Infinity
+  // Compare every major guess polygon to every major secret polygon
+  for (const guessPoly of guessPolys) {
+    const guessPoints = explode(guessPoly)
 
-  guessPoints.features.forEach((guessPoint) => {
-    // If efficient approximation is needed, we could optimize this loop,
-    // but for country polygons (usually < 1000 points simplified), n*m might be acceptable
-    // or we rely on the fact that we've simplified geometries.
-    secretPoints.features.forEach((secretPoint) => {
-      const d = distance(guessPoint, secretPoint, { units: 'kilometers' })
-      if (d < minDistance) {
-        minDistance = d
-      }
-    })
-  })
+    for (const secretPoly of secretPolys) {
+      const secretPoints = explode(secretPoly)
 
-  return minDistance
+      // Find minimum distance between this pair of polygons
+      guessPoints.features.forEach((guessPoint) => {
+        secretPoints.features.forEach((secretPoint) => {
+          const d = distance(guessPoint, secretPoint, { units: 'kilometers' })
+          if (d < globalMinDistance) {
+            globalMinDistance = d
+          }
+        })
+      })
+    }
+  }
+
+  return globalMinDistance
 }
 
 export function getDistanceHint(
@@ -121,17 +122,28 @@ export function getDistanceHint(
 ): DistanceHintResult {
   let dist: number
 
-  const guessPoly = getLargestPolygon(guessFeature)
-  const secretPoly = getLargestPolygon(secretFeature)
+  const guessPolys = getMajorLandmasses(guessFeature)
+  const secretPolys = getMajorLandmasses(secretFeature)
 
-  // Check for intersection first
-  if (guessPoly && secretPoly && booleanIntersects(guessPoly, secretPoly)) {
+  // Check for intersection first (any pair)
+  let intersects = false
+  for (const gPoly of guessPolys) {
+    for (const sPoly of secretPolys) {
+      if (booleanIntersects(gPoly, sPoly)) {
+        intersects = true
+        break
+      }
+    }
+    if (intersects) break
+  }
+
+  if (intersects) {
     dist = 0
-  } else if (guessPoly && secretPoly) {
-    // Calculate distance between nearest border points
-    dist = nearestBorderDistance(guessPoly, secretPoly)
+  } else if (guessPolys.length > 0 && secretPolys.length > 0) {
+    // Calculate distance between nearest border points of major landmasses
+    dist = nearestBorderDistance(guessFeature, secretFeature)
   } else {
-    // Fallback if features are missing (should not happen in normal flow)
+    // Fallback if features are missing
     dist = Infinity
   }
 

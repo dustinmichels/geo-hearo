@@ -19,6 +19,17 @@ Audio geo-guessing game
 - **Data-prep** - Scrape radiogarden API for radio stations and format data for frontend.
 - **Frontend** - Vue app that plays radio stations and asks user to guess the location of the station.
 
+## Game Logic
+
+### Distance Calculation
+
+To ensure fair gameplay, distance between countries is calculated using the "Main Landmass" rule:
+
+- Total land area for a country is calculated.
+- Only polygons (landmasses) that constitute at least **20%** of the country's total area are used for measurement.
+- Distance is measured from the nearest border point of any "Major Landmass" of the guess to the nearest border point of any "Major Landmass" of the secret country.
+- This effectively excludes small overseas territories (e.g., measuring from French Guiana for "France") while preserving major islands (e.g., North and South Island of New Zealand).
+
 ## Thanks
 
 This is inspired by other geo guessing games:
