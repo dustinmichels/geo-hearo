@@ -72,8 +72,8 @@ export function useRadio() {
       // The keys in index.json are ADMIN names
       countryList.value = Object.keys(indexData.countries).sort()
 
-      // 3. Restore state if available
-      await restoreState()
+      // State restoration is handled by the caller (useGamePlay)
+      // after daily challenge mode is determined
     } catch (error) {
       console.error('Failed to load data:', error)
     } finally {
@@ -300,6 +300,7 @@ export function useRadio() {
     countryList, // Exposed if needed for autocomplete
     secretCountry,
     currentStationIndex,
+    currentSeed,
     isLoading,
     loadStations,
     selectRandomCountry,

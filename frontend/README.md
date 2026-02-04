@@ -46,6 +46,21 @@ src/
 └── main.ts          # Entry point
 ```
 
+## Distance Feedback
+
+After each wrong guess, the player sees a color and emoji indicating how far their guess was from the secret country (measured border-to-border in kilometers).
+
+| Distance (km) | Level | Color         | Hex       | Emoji |
+| ------------- | ----- | ------------- | --------- | ----- |
+| 0 – 50        | 1     | Light Yellow  | `#FDE047` | 🤏    |
+| 50 – 250      | 2     | Golden Yellow | `#FBBF24` | 🟡    |
+| 250 – 750     | 3     | Light Orange  | `#FB923C` | 🟠    |
+| 750 – 1,500   | 4     | Dark Orange   | `#F97316` | 🟠    |
+| 1,500 – 3,000 | 5     | Medium Red    | `#EF4444` | 🔴    |
+| 3,000+        | 6     | Dark Red      | `#B91C1C` | 🔴    |
+
+In the shareable results string, a correct guess is shown as 🟢.
+
 ## Design System
 
 "Saturday Morning Cartoon" — rounded, colorful, tactile. Fredoka for headings, Nunito for body. Candy-inspired palette (Gumball Blue, Yuzu Yellow, Bubblegum Pop). See `src/assets/styles/style.css` for full theme.

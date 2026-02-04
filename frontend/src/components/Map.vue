@@ -723,9 +723,7 @@ onUnmounted(() => {
       ref="mapContainer"
       class="w-full h-full"
       :style="{
-        background: isGlobe
-          ? 'radial-gradient(ellipse at 50% 50%, #1e2d4a 0%, #111827 40%, #070b14 100%)'
-          : '#ffffff',
+        background: isGlobe ? 'transparent' : '#ffffff',
       }"
     />
 

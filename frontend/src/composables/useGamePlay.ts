@@ -47,8 +47,10 @@ export function useGamePlay(options: GamePlayOptions) {
     addGuess,
     clearState,
     currentStationIndex: currentStation,
+    currentSeed,
     saveState,
     checkGuess,
+    restoreState,
     // Daily Challenge
     initDailyChallenge,
     isDailyChallengeMode,
@@ -279,19 +281,28 @@ export function useGamePlay(options: GamePlayOptions) {
     }
 
     // Load both stations (for audio) and country data (for map/distance)
-    Promise.all([loadStations(), loadCountryData()]).then(() => {
+    Promise.all([loadStations(), loadCountryData()]).then(async () => {
       // Initialize Daily Challenge Logic
       initDailyChallenge()
 
-      if (secretCountry.value) {
-        // State was restored from session storage — just repopulate colors
-        populateGuessColors()
-      } else if (isDailyChallengeMode.value) {
-        // Fresh daily challenge
-        selectRandomCountry(getDailyChallengeSeed())
+      if (isDailyChallengeMode.value) {
+        const dailySeed = getDailyChallengeSeed()
+        // Try restoring session state, but only keep it if it matches today's seed
+        const restored = await restoreState()
+        if (restored && currentSeed.value === dailySeed) {
+          populateGuessColors()
+        } else {
+          clearState()
+          selectRandomCountry(dailySeed)
+        }
       } else {
-        // Normal free play random start
-        selectRandomCountry()
+        // Free play or already completed daily challenge
+        const restored = await restoreState()
+        if (restored && secretCountry.value) {
+          populateGuessColors()
+        } else {
+          selectRandomCountry()
+        }
       }
     })
 
