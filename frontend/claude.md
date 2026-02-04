@@ -1,386 +1,72 @@
-# GeoHearo - Developer Guide for AI Assistants
+# GeoHearo - AI Developer Guide
 
-## Project Overview
+Vue 3 + TypeScript geography game. Players identify countries by listening to live local radio stations.
 
-GeoHearo is a Vue 3 + TypeScript geography game built with modern web technologies. This guide provides context for AI assistants working on the codebase.
+## Commands
 
-## Tech Stack & Best Practices
-
-### Vue 3 Composition API
-
-**Always use:**
-
-- `<script setup lang="ts">` syntax in all components
-- Composition API (not Options API)
-- `ref()` for primitive reactive values
-- `shallowRef()` for non-reactive objects (e.g., MapLibre Map instances)
-- Proper TypeScript typing for props and emits
-
-**Example:**
-
-```typescript
-<script setup lang="ts">
-import { ref, computed } from 'vue'
-
-const props = defineProps<{
-  count: number
-  items: string[]
-}>()
-
-const emit = defineEmits<{
-  (e: 'update', value: number): void
-}>()
-
-const localValue = ref(0)
-const doubled = computed(() => localValue.value * 2)
-</script>
+```bash
+npm run dev       # Dev server
+npm test          # Vitest
+npm run build     # Type-check (vue-tsc -b) + Vite bundle → dist/
+npm run format    # Prettier
 ```
 
-### State Management
+## Coding Conventions
 
-**Use composables, not Pinia/Vuex:**
+- **Always** use `<script setup lang="ts">` and Composition API (never Options API)
+- **Reactivity:** `ref()` for primitives, `shallowRef()` for objects like MapLibre Map instances
+- **State management:** Composables in `src/composables/`, not Pinia/Vuex. Module-level reactive variables for shared state.
+- **TypeScript:** Strict mode, `noUnusedLocals`/`noUnusedParameters` enforced. Use `import type` for type-only imports.
+- **Imports:** Use `@/` path alias (e.g., `@/composables/useRadio`)
+- **Styling:** Tailwind v4 utility classes. Theme is defined in `src/assets/styles/style.css` via `@theme` (no JS config). Design colors: `gumball-blue`, `yuzu-yellow`, `bubblegum-pop`, `mint-shake`, `pencil-lead`, etc.
+- **Naming:** Components PascalCase, composables `use` prefix, utils camelCase
+- **ESM only** — no CommonJS syntax
+- **Cleanup:** Always clean up listeners/observers in `onUnmounted()`
+- **MapLibre:** Store map in `shallowRef()`, use `watch()` to sync props to layers, use `ResizeObserver` for resize handling
 
-- Shared state lives in `src/composables/`
-- Main composable: `useRadio.ts` manages game state
-- Use module-level reactive variables for truly shared state
-- Return reactive values and methods from composable functions
+## Key Files
 
-**Example pattern from useRadio.ts:**
-
-```typescript
-// Module-level shared state
-const secretCountry = ref<string>('')
-const guesses = ref<string[]>([])
-
-export function useRadio() {
-  const loadStations = async () => {
-    /* ... */
-  }
-
-  return {
-    secretCountry,
-    guesses,
-    loadStations,
-  }
-}
-```
-
-### TypeScript
-
-**Configuration:**
-
-- Strict mode enabled
-- `noUnusedLocals` and `noUnusedParameters` enforced
-- Always type props, emits, function parameters, and return values
-- Use type imports: `import type { Foo } from './types'`
-
-**Path aliases:**
-
-- Use `@/` for src imports: `import { useRadio } from '@/composables/useRadio'`
-
-### Styling with Tailwind v4
-
-**Configuration location:** `src/assets/styles/style.css` (not a separate config file)
-
-**Custom theme variables:**
-
-```css
-@theme {
-  --color-gumball-blue: #3b82f6;
-  --color-yuzu-yellow: #fcd34d;
-  --font-heading: 'Fredoka', ui-sans-serif, system-ui, sans-serif;
-  --radius-btn: 16px;
-}
-```
-
-**Best practices:**
-
-- Prefer Tailwind utility classes over custom CSS
-- Use design system colors (e.g., `bg-gumball-blue`, `text-pencil-lead`)
-- Follow the "Saturday Morning Cartoon" design language (rounded, colorful, tactile)
-- Avoid inline styles; use Tailwind classes
-
-### Vite Configuration
-
-**Key features:**
-
-- Path alias: `@` → `./src`
-- Git hash injection: `import.meta.env.VITE_GIT_HASH`
-- Manual chunk splitting for optimal loading:
-  - `maplibre` bundle
-  - `vant` bundle
-  - `vue` bundle
-  - `vendor` bundle (other node_modules)
-- Custom plugin to copy `index.html` → `404.html` for SPA routing
-
-**Environment variables:**
-
-- `VITE_DEBUG_MODE=true` - Shows secret country on map (development only)
-
-### File Organization
-
-```
-src/
-├── components/    # Reusable UI components
-├── views/         # Route-level page components
-├── composables/   # Shared reactive state and logic
-├── utils/         # Pure utility functions
-├── router/        # Vue Router setup
-├── assets/        # Styles, images, sounds
-├── App.vue        # Root component (just <router-view />)
-└── main.ts        # Entry point
-```
-
-**Naming conventions:**
-
-- Components: PascalCase (e.g., `RadioPlayer.vue`)
-- Composables: camelCase with `use` prefix (e.g., `useRadio.ts`)
-- Utils: camelCase (e.g., `geography.ts`)
+| File | Purpose |
+|------|---------|
+| `src/composables/useRadio.ts` | Game state, station loading, guess validation, daily challenge logic |
+| `src/composables/useGamePlay.ts` | Game flow orchestration, win/loss handling |
+| `src/components/Map.vue` | MapLibre GL JS map, country selection |
+| `src/components/RadioPlayer.vue` | Audio streaming (HLS/Icecast) |
+| `src/utils/geography.ts` | Haversine distance, bearings |
+| `src/utils/colors.ts` | Hot/cold color feedback |
+| `src/views/Play.vue` | Responsive wrapper (routes to Desktop/Mobile) |
 
 ## Data Schema
 
-All geographic data is linked using the `ADMIN` country name (e.g., `"United States of America"`):
+All data linked by `ADMIN` country name (e.g., `"United States of America"`).
 
-| File                               | Linking Field      | Description                                        |
-| ---------------------------------- | ------------------ | -------------------------------------------------- |
-| `public/data/index.json`           | Object keys        | Maps ADMIN names to byte offsets in stations.jsonl |
-| `public/data/stations.jsonl`       | `ADMIN`            | Fixed-width JSONL records (1053 bytes each)        |
-| `public/data/centers.geojson`      | `properties.ADMIN` | Country center points (lon/lat)                    |
-| `public/data/ne_countries.geojson` | `properties.ADMIN` | Country boundary polygons                          |
+| File | Key Field | Content |
+|------|-----------|---------|
+| `public/data/index.json` | Object keys | Byte offsets into stations.jsonl (`{ config: { line_length: 1053 }, countries: { "Afghanistan": { start: 0, count: 5 } } }`) |
+| `public/data/stations.jsonl` | `ADMIN` | Fixed-width JSONL records (1053 bytes). Fields: `place_id`, `channel_id`, `place_name`, `channel_name`, `geo_lat`, `geo_lon`, `channel_resolved_url`, `ADMIN`, `ISO_A3`, `CONTINENT` |
+| `public/data/centers.geojson` | `properties.ADMIN` | Country center points |
+| `public/data/ne_countries.geojson` | `properties.ADMIN` | Country boundary polygons |
 
-**index.json structure:**
-
-```json
-{
-  "config": { "line_length": 1053 },
-  "countries": {
-    "Afghanistan": { "start": 0, "count": 5 },
-    "Albania": { "start": 5265, "count": 20 }
-  }
-}
-```
-
-**stations.jsonl record fields:**
-
-```json
-{
-  "place_id": "bJHG3R4J",
-  "channel_id": "ndNglOCM",
-  "channel_url": "/listen/...",
-  "place_name": "Kabul",
-  "channel_name": "RTA Taranum Radio 91.3 FM",
-  "place_size": 5,
-  "country": "Afghanistan",
-  "geo_lat": 34.55535,
-  "geo_lon": 69.20749,
-  "channel_resolved_url": "https://...",
-  "ADMIN": "Afghanistan",
-  "ISO_A3": "AFG",
-  "ISO_A2_EH": "AF",
-  "CONTINENT": "Asia"
-}
-```
-
-**Loading strategy:** `useRadio` fetches `index.json` to get byte offsets, then uses HTTP Range requests to lazily load only the stations needed for the current game round from `stations.jsonl`.
+**Loading:** `useRadio` fetches `index.json` for byte offsets, then HTTP Range requests to load only needed stations from `stations.jsonl`.
 
 ## Game Architecture
 
-### Game Modes
+**Two modes** from the same `/play` route:
 
-The game has two modes, both served from the same `/play` route:
+- **Free Play:** Random country, unlimited replays
+- **Daily Challenge:** Seeded RNG (`YYYYMMDD` seed) for deterministic country selection. Completion stored in localStorage (`dailyChallengeDate` key). Session state in sessionStorage.
 
-**Free Play**: Random country each round, unlimited replays.
+**State flow:**
+1. `useRadio.loadStations()` loads index + centers
+2. `useGamePlay` calls `initDailyChallenge()` to check localStorage
+3. `selectRandomCountry(seed?)` picks country + ~5 stations
+4. User clicks map → `select-country` event → parent updates `guessInput`
+5. Submit guess → `checkGuess()` → win/loss or distance feedback
+6. State persists to sessionStorage; daily completion to localStorage
 
-**Daily Challenge**: Deterministic country selection using a seeded RNG based on the current date (YYYYMMDD format). All players get the same country on a given day. Enforced one attempt per day via localStorage.
+**Daily challenge functions** in `useRadio.ts`: `SeededRandom` (LCG), `getDailyChallengeNumber()` (days since launch Feb 2, 2026), `getDailyChallengeSeed()`, `initDailyChallenge()`, `completeDailyChallenge()`
 
-### Daily Challenge Implementation
+## Environment
 
-Key functions in `useRadio.ts`:
-
-- **`SeededRandom`**: Linear Congruential Generator class used for deterministic country selection
-- **`getDailyChallengeNumber()`**: Calculates day number relative to the launch date (Feb 2, 2026)
-- **`getDailyChallengeSeed()`**: Returns YYYYMMDD integer seed from today's date
-- **`initDailyChallenge()`**: Checks localStorage for today's date; sets `isDailyChallengeMode` accordingly
-- **`completeDailyChallenge()`**: Writes today's date to localStorage, preventing replay
-
-Key state variables:
-
-- `isDailyChallengeMode` (`ref<boolean>`): Whether the current session is a daily challenge
-- `dailyChallengeNumber` (`ref<number>`): Current day number displayed in the UI badge
-
-Game flow integration in `useGamePlay.ts`:
-
-1. After data loads, `initDailyChallenge()` checks if today's challenge was already completed
-2. If available: `selectRandomCountry(getDailyChallengeSeed())` ensures deterministic selection
-3. If already completed: falls through to free play mode with `selectRandomCountry()`
-4. On win/loss in daily mode: `completeDailyChallenge()` marks the day as done; modal shows daily-specific messaging
-
-**Storage**: Daily challenge completion stored in localStorage (`dailyChallengeDate` key) with today's date string. Game session state still uses sessionStorage.
-
-### State Flow
-
-1. `useRadio.loadStations()` loads index.json and centers.geojson
-2. `useGamePlay` calls `initDailyChallenge()` to determine mode
-3. `useRadio.selectRandomCountry()` picks a secret country and 5 stations (with optional seed for daily challenge)
-4. User interacts with `Map.vue` (clicks country) → emits `select-country`
-5. Parent view updates `guessInput` → passes to `GuessPanel.vue`
-6. User submits → parent calls `useRadio.checkGuess()`
-7. State persists to sessionStorage via `useRadio.saveState()`; daily completion to localStorage
-
-### Key Files
-
-- **src/composables/useRadio.ts**: Game state, station loading, guess validation, daily challenge logic
-- **src/composables/useGamePlay.ts**: Game flow orchestration, daily challenge initialization, win/loss handling
-- **src/components/Map.vue**: MapLibre GL JS integration, country selection
-- **src/components/RadioPlayer.vue**: Audio streaming with HLS/Icecast support
-- **src/utils/geography.ts**: Distance/direction calculations (haversine, bearings)
-- **src/utils/colors.ts**: Color mapping for hot/cold feedback
-- **src/views/Play.vue**: Responsive wrapper (desktop vs mobile)
-- **src/views/PlayDesktop.vue**: Desktop layout, displays daily challenge badge
-- **src/views/PlayMobile.vue**: Mobile layout, displays daily challenge badge
-
-### MapLibre Integration
-
-**Best practices:**
-
-- Store map instance in `shallowRef()` (not `ref()`)
-- Use `watch()` to sync Vue props → MapLibre layers
-- Call `map.value.resize()` when container size changes
-- Use `ResizeObserver` for automatic resize handling
-
-**Example from Map.vue:**
-
-```typescript
-const map = shallowRef<maplibregl.Map | null>(null)
-
-watch(
-  () => props.guessedCountries,
-  (newGuesses) => {
-    if (!map.value || !map.value.getLayer('countries-guessed')) return
-    map.value.setFilter('countries-guessed', ['in', 'NAME', ...newGuesses])
-  },
-  { deep: true }
-)
-```
-
-## Common Tasks
-
-### Adding a New Component
-
-1. Create file in `src/components/` with PascalCase name
-2. Use `<script setup lang="ts">` syntax
-3. Type all props and emits
-4. Prefer composition over large monolithic components
-5. Use Tailwind classes for styling
-
-### Adding a New Route
-
-1. Create view in `src/views/`
-2. Add route to `src/router/index.ts`:
-
-```typescript
-{
-  path: '/new-page',
-  name: 'NewPage',
-  component: NewPage,
-}
-```
-
-### Adding a New Util Function
-
-1. Create/edit file in `src/utils/`
-2. Export pure functions (no side effects)
-3. Add proper TypeScript types
-4. Consider adding unit tests in `__tests__/`
-
-### Modifying Game State
-
-1. Edit `src/composables/useRadio.ts` for state/data logic, or `src/composables/useGamePlay.ts` for game flow
-2. Add new reactive variables at module level if shared
-3. Expose via return object
-4. Update `saveState()`/`restoreState()` if persistent (sessionStorage for game session, localStorage for daily challenge)
-
-## Testing
-
-**Framework:** Vitest
-
-**Current coverage:** `src/composables/__tests__/useRadio.spec.ts`
-
-**Run tests:**
-
-```bash
-npm test
-```
-
-**When to add tests:**
-
-- New composables
-- Complex utility functions (geography calculations, etc.)
-- Bug fixes (regression tests)
-
-## Build & Deployment
-
-```bash
-npm run build
-```
-
-**Output:** `dist/`
-
-**Build process:**
-
-1. TypeScript type checking (`vue-tsc -b`)
-2. Vite bundling with chunk splitting
-3. Copy `index.html` → `404.html` for SPA routing
-
-**Environment-specific:**
-
-- `import.meta.env.VITE_DEBUG_MODE` - Only set in development
-- `import.meta.env.VITE_GIT_HASH` - Injected at build time
-
-## Code Quality
-
-**Formatting:**
-
-```bash
-npm run format
-```
-
-**Linting:** TypeScript compiler catches most issues via strict mode
-
-**Pre-commit:** No hooks currently, but consider adding Prettier pre-commit
-
-## Design System Reference
-
-**Colors:**
-
-- Primary: `gumball-blue` (#3B82F6)
-- Accents: `yuzu-yellow`, `bubblegum-pop`, `mint-shake`, `berry-oops`
-- Neutrals: `cloud-white` (background), `paper-white`, `pencil-lead`, `eraser-grey`
-
-**Typography:**
-
-- Headings/Buttons: Fredoka (600, 700)
-- Body: Nunito (400, 700)
-
-**Components:**
-
-- Use `.btn-pressable` for tactile button effect
-- All borders are 2-3px with `border-pencil-lead`
-- Rounded corners everywhere (16px buttons, 24px cards)
-
-## Common Pitfalls
-
-1. **Don't** use Options API - always use Composition API
-2. **Don't** use `ref()` for MapLibre instances - use `shallowRef()`
-3. **Don't** import Tailwind config JS - configuration is in CSS using `@theme`
-4. **Don't** mutate props - emit events to parent instead
-5. **Don't** forget to clean up in `onUnmounted()` (event listeners, observers, etc.)
-6. **Don't** use CommonJS syntax - project is ESM (`"type": "module"`)
-
-## Questions?
-
-Refer to:
-
-- **README.md** for high-level overview
-- **src/assets/styles/style.css** for design system implementation
-- **Existing components** for patterns and examples
+- `VITE_DEBUG_MODE=true` — Shows secret country (dev only)
+- `VITE_GIT_HASH` — Injected at build time
