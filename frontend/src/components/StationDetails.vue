@@ -23,6 +23,19 @@ const gardenUrl = computed(() => {
 
   return `https://radio.garden${path}`
 })
+
+const searchUrl = computed(() => {
+  if (!props.station) return ''
+  const query = [
+    props.station.channel_name,
+    props.station.place_name,
+    props.station.country,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  return `https://duckduckgo.com/?q=${encodeURIComponent(query)}`
+})
 </script>
 
 <template>
@@ -42,14 +55,26 @@ const gardenUrl = computed(() => {
       {{ formattedLocation }}
     </div>
 
-    <a
-      :href="gardenUrl"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-gumball-blue hover:underline"
-    >
-      Listen on radio.garden
-      <ExternalLink class="w-3 h-3" />
-    </a>
+    <div class="flex flex-col gap-2 items-center justify-center">
+      <a
+        :href="gardenUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-gumball-blue hover:underline"
+      >
+        Listen on radio.garden
+        <ExternalLink class="w-3 h-3" />
+      </a>
+
+      <a
+        :href="searchUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-gumball-blue hover:underline"
+      >
+        Search this station
+        <ExternalLink class="w-3 h-3" />
+      </a>
+    </div>
   </div>
 </template>
