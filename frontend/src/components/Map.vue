@@ -180,10 +180,10 @@ const buildStationFeatures = (activeId?: string) => {
   return features
 }
 
-const showRadioStations = () => {
+const updateStationsLayer = () => {
   if (!map.value || !props.stations || props.stations.length === 0) return
 
-  // Cleanup old layers if they exist (especially if type changed from circle)
+  // Remove old layer/source if they exist
   if (map.value.getLayer('stations-layer'))
     map.value.removeLayer('stations-layer')
   if (map.value.getSource('stations-source'))
@@ -194,13 +194,11 @@ const showRadioStations = () => {
     features: buildStationFeatures(props.activeStationId),
   }
 
-  // Add source
   map.value.addSource('stations-source', {
     type: 'geojson',
     data: sourceData as any,
   })
 
-  // Add extrusions layer (Light Beams)
   map.value.addLayer({
     id: 'stations-layer',
     type: 'fill-extrusion',
@@ -222,59 +220,45 @@ const showRadioStations = () => {
       'fill-extrusion-opacity': 0.8,
     },
     layout: {
-      visibility: 'visible',
+      visibility: props.areStationsVisible !== false ? 'visible' : 'none',
     },
   })
 
   // Zoom to stations
   const bounds = new LngLatBounds()
-  props.stations.forEach((s) => {
-    bounds.extend([s.geo_lon, s.geo_lat])
-  })
+  props.stations.forEach((s) => bounds.extend([s.geo_lon, s.geo_lat]))
+  map.value.fitBounds(bounds, { padding: 50 })
 
-  // Pad bounds slightly
-  // Push content up with larger bottom padding to leave empty space below (e.g. for UI overlays)
-  map.value.fitBounds(bounds, {
-    padding: { top: 50, bottom: 200, left: 50, right: 50 },
-    maxZoom: 6,
-    duration: 1500,
-  })
-
-  // Since we interacted, stop spinning
   stopSpinning()
 }
 
-const hideRadioStations = () => {
+const setStationsVisibility = (visible: boolean) => {
   if (!map.value || !map.value.getLayer('stations-layer')) return
-  map.value.setLayoutProperty('stations-layer', 'visibility', 'none')
+  map.value.setLayoutProperty(
+    'stations-layer',
+    'visibility',
+    visible ? 'visible' : 'none'
+  )
 }
 
-// Watch stations to show/update them
+// Watch stations data to rebuild the layer
 watch(
   () => props.stations,
   (newStations) => {
-    if (
-      newStations &&
-      newStations.length > 0 &&
-      props.areStationsVisible !== false
-    ) {
-      showRadioStations()
-    } else if (!newStations || newStations.length === 0) {
-      hideRadioStations()
+    if (newStations && newStations.length > 0) {
+      updateStationsLayer()
+    } else {
+      setStationsVisibility(false)
     }
   },
   { deep: true }
 )
 
-// Watch visibility prop
+// Watch visibility prop to toggle layer visibility
 watch(
   () => props.areStationsVisible,
   (isVisible) => {
-    if (isVisible) {
-      showRadioStations()
-    } else {
-      hideRadioStations()
-    }
+    setStationsVisibility(!!isVisible)
   }
 )
 
@@ -404,12 +388,8 @@ const initMap = () => {
       setupInteractions()
 
       // If stations already exist on load
-      if (
-        props.stations &&
-        props.stations.length > 0 &&
-        props.areStationsVisible !== false
-      ) {
-        showRadioStations()
+      if (props.stations && props.stations.length > 0) {
+        updateStationsLayer()
       }
     })
 
