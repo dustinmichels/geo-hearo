@@ -260,14 +260,15 @@ const updateStationsLayer = () => {
     },
   })
 
-  // Zoom to stations
-  zoomToStations()
+  // Zoom to stations if visible
+  if (props.areStationsVisible !== false) {
+    zoomToStations()
+    stopSpinning()
+  }
 
   // Register zoom handler to scale pillar width with zoom
   map.value.off('zoom', handleStationZoom)
   map.value.on('zoom', handleStationZoom)
-
-  stopSpinning()
 }
 
 const handleStationZoom = () => {
