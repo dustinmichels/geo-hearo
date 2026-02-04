@@ -104,63 +104,84 @@ watch(
 
 // --- Radio Station Logic ---
 
+const getPillarPolygon = (lat: number, lon: number, radiusKm: number) => {
+  const dLat = radiusKm / 111.32
+  const dLon = radiusKm / (111.32 * Math.cos((lat * Math.PI) / 180))
+
+  return [
+    [
+      [lon - dLon, lat - dLat],
+      [lon + dLon, lat - dLat],
+      [lon + dLon, lat + dLat],
+      [lon - dLon, lat + dLat],
+      [lon - dLon, lat - dLat],
+    ],
+  ]
+}
+
 const showRadioStations = () => {
   if (!map.value || !props.stations || props.stations.length === 0) return
 
-  const stationFeatures = props.stations.map((s) => ({
-    type: 'Feature',
-    geometry: {
-      type: 'Point',
-      coordinates: [s.geo_lon, s.geo_lat],
-    },
-    properties: {
-      name: s.channel_name,
-      id: s.channel_id,
-    },
-  }))
+  // Cleanup old layers if they exist (especially if type changed from circle)
+  if (map.value.getLayer('stations-layer'))
+    map.value.removeLayer('stations-layer')
+  if (map.value.getSource('stations-source'))
+    map.value.removeSource('stations-source')
+
+  const stationFeatures = props.stations.map((s) => {
+    // Calculate height based on place_size (logarithmic scale or capped)
+    // Adjusted range: 20km - 170km
+    const baseHeight = 20000
+    const variableHeight = s.place_size
+      ? Math.min(s.place_size * 10, 150000)
+      : 20000
+    const height = baseHeight + variableHeight
+
+    return {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: getPillarPolygon(s.geo_lat, s.geo_lon, 2), // 2km wide pillars
+      },
+      properties: {
+        name: s.channel_name,
+        id: s.channel_id,
+        height: height,
+      },
+    }
+  })
 
   const sourceData = {
     type: 'FeatureCollection',
     features: stationFeatures,
   }
 
-  // Add or update source
-  const source = map.value.getSource(
-    'stations-source'
-  ) as maplibregl.GeoJSONSource
-  if (source) {
-    source.setData(sourceData as any)
-  } else {
-    map.value.addSource('stations-source', {
-      type: 'geojson',
-      data: sourceData as any,
-    })
-  }
+  // Add source
+  map.value.addSource('stations-source', {
+    type: 'geojson',
+    data: sourceData as any,
+  })
 
-  // Add or update layer
-  if (!map.value.getLayer('stations-layer')) {
-    map.value.addLayer({
-      id: 'stations-layer',
-      type: 'circle',
-      source: 'stations-source',
-      paint: {
-        'circle-radius': 6,
-        'circle-color': [
-          'case',
-          ['==', ['get', 'id'], props.activeStationId || ''],
-          '#f472b6', // Active: Pink
-          '#facc15', // Default: Yellow
-        ],
-        'circle-stroke-width': 2,
-        'circle-stroke-color': '#ffffff',
-      },
-      layout: {
-        visibility: 'visible',
-      },
-    })
-  } else {
-    map.value.setLayoutProperty('stations-layer', 'visibility', 'visible')
-  }
+  // Add extrusions layer (Light Beams)
+  map.value.addLayer({
+    id: 'stations-layer',
+    type: 'fill-extrusion',
+    source: 'stations-source',
+    paint: {
+      'fill-extrusion-color': [
+        'case',
+        ['==', ['get', 'id'], props.activeStationId || ''],
+        '#f472b6', // Active: Pink
+        '#facc15', // Default: Yellow
+      ],
+      'fill-extrusion-height': ['get', 'height'],
+      'fill-extrusion-base': 0,
+      'fill-extrusion-opacity': 0.8,
+    },
+    layout: {
+      visibility: 'visible',
+    },
+  })
 
   // Zoom to stations
   const bounds = new LngLatBounds()
@@ -220,7 +241,7 @@ watch(
   (newId) => {
     if (!map.value || !map.value.getLayer('stations-layer')) return
 
-    map.value.setPaintProperty('stations-layer', 'circle-color', [
+    map.value.setPaintProperty('stations-layer', 'fill-extrusion-color', [
       'case',
       ['==', ['get', 'id'], newId || ''],
       '#f472b6',
