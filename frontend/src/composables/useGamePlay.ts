@@ -1,5 +1,3 @@
-import gsap from 'gsap'
-import type { Ref } from 'vue'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { getColorForDistanceLevel } from '../utils/colors'
 import { getDistanceHint } from '../utils/geography'
@@ -7,8 +5,6 @@ import { useCountryData } from './useCountryData'
 import { useRadio } from './useRadio'
 
 interface GamePlayOptions {
-  blob1: Ref<HTMLElement | null>
-  blob2: Ref<HTMLElement | null>
   onGuessAdded?: () => void
   onNewGame?: () => void
   setupKeyboardShortcuts?: boolean
@@ -306,25 +302,6 @@ export function useGamePlay(options: GamePlayOptions) {
       }
     })
 
-    gsap.to(options.blob1.value, {
-      x: 50,
-      y: 30,
-      scale: 1.1,
-      duration: 8,
-      yoyo: true,
-      repeat: -1,
-      ease: 'sine.inOut',
-    })
-
-    gsap.to(options.blob2.value, {
-      x: -30,
-      y: -40,
-      scale: 1.2,
-      duration: 10,
-      yoyo: true,
-      repeat: -1,
-      ease: 'sine.inOut',
-    })
   })
 
   onUnmounted(() => {

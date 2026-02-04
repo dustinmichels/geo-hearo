@@ -48,6 +48,11 @@ const getGuessColor = (guessName: string | undefined) => {
   if (!result) return '#FFFFFF'
   return getColorForDistanceLevel(result.level)
 }
+
+const isDarkBackground = (guessName: string | undefined) => {
+  const hint = getHintForGuess(guessName)
+  return hint != null && hint.level >= 5
+}
 </script>
 
 <template>
@@ -83,13 +88,13 @@ const getGuessColor = (guessName: string | undefined) => {
           class="flex-1 font-heading min-w-0 flex items-center justify-between gap-1"
         >
           <template v-if="guesses[num - 1]">
-            <span class="text-pencil-lead text-base truncate">{{
+            <span class="text-base truncate" :class="isDarkBackground(guesses[num - 1]) ? 'text-white' : 'text-pencil-lead'">{{
               guesses[num - 1]
             }}</span>
             <div
               class="flex items-center justify-end gap-2 shrink-0 min-w-[60px]"
             >
-              <span class="text-sm font-bold text-pencil-lead/80 font-body">
+              <span class="text-sm font-bold font-body" :class="isDarkBackground(guesses[num - 1]) ? 'text-white/90' : 'text-pencil-lead/80'">
                 {{
                   formatDistance(getHintForGuess(guesses[num - 1])?.distance)
                 }}

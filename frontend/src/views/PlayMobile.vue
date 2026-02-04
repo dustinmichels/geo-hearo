@@ -10,8 +10,6 @@ import RadioPlayer from '../components/RadioPlayer.vue'
 import { useRadio } from '../composables/useRadio'
 import { useGamePlay } from '../composables/useGamePlay'
 
-const blob1 = ref<HTMLElement | null>(null)
-const blob2 = ref<HTMLElement | null>(null)
 const mapRef = ref<InstanceType<typeof Map> | null>(null)
 
 const { isDailyChallengeMode } = useRadio()
@@ -43,8 +41,6 @@ const {
   handleNewGame,
   roundFinished,
 } = useGamePlay({
-  blob1,
-  blob2,
   onGuessAdded: () => {
     panelHeight.value = anchors[1]
   },
@@ -102,12 +98,10 @@ const activeStation = computed(() => {
   >
     <!-- Decorative Background Shapes -->
     <div
-      ref="blob1"
-      class="absolute top-10 right-[-5%] w-64 h-64 bg-bubblegum-pop/5 rounded-full blur-3xl pointer-events-none"
+      class="animate-blob1 absolute top-10 right-[-5%] w-64 h-64 bg-bubblegum-pop/5 rounded-full blur-3xl pointer-events-none"
     ></div>
     <div
-      ref="blob2"
-      class="absolute bottom-10 left-[-5%] w-80 h-80 bg-gumball-blue/5 rounded-full blur-3xl pointer-events-none"
+      class="animate-blob2 absolute bottom-10 left-[-5%] w-80 h-80 bg-gumball-blue/5 rounded-full blur-3xl pointer-events-none"
     ></div>
 
     <!-- Animated Arrows Hint -->

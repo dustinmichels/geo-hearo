@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
-import maplibregl, { LngLatBounds } from 'maplibre-gl'
-import 'maplibre-gl/dist/maplibre-gl.css'
 import {
-  Loader2,
-  RefreshCw,
   Globe,
+  Loader2,
   Map as MapIcon,
   Minimize2,
+  RefreshCw,
 } from 'lucide-vue-next'
+import maplibregl, { LngLatBounds } from 'maplibre-gl'
+import 'maplibre-gl/dist/maplibre-gl.css'
+import { onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import type { NeCountryProperties, RadioStation } from '../types/geo'
 
 const props = defineProps<{

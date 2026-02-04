@@ -92,3 +92,31 @@ h3,
   transform: translateY(4px);
   box-shadow: 0 4px 0 0 var(--color-pencil-lead);
 }
+
+/* Decorative blob animations (Play views) */
+@keyframes blob1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(50px, 30px) scale(1.1); }
+}
+
+@keyframes blob2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-30px, -40px) scale(1.2); }
+}
+
+@keyframes close-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+.animate-blob1 {
+  animation: blob1 16s ease-in-out infinite;
+}
+
+.animate-blob2 {
+  animation: blob2 20s ease-in-out infinite;
+}
+
+.animate-close-pulse {
+  animation: close-pulse 1.2s ease-in-out infinite;
+}
