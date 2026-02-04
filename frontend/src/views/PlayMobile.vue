@@ -181,6 +181,7 @@ const activeStation = computed(() => {
           :stations="currentStations"
           :active-station-id="activeStation?.channel_id"
           :are-stations-visible="roundFinished"
+          :show-tiles="roundFinished"
           default-projection="globe"
         />
       </div>

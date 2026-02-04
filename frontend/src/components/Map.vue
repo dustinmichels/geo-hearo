@@ -20,6 +20,7 @@ const props = defineProps<{
   stations?: RadioStation[]
   areStationsVisible?: boolean
   activeStationId?: string
+  showTiles?: boolean
 }>()
 
 const mapContainer = ref<HTMLElement | null>(null)
@@ -287,7 +288,14 @@ const zoomToStations = () => {
   if (!map.value || !props.stations || props.stations.length === 0) return
   const bounds = new LngLatBounds()
   props.stations.forEach((s) => bounds.extend([s.geo_lon, s.geo_lat]))
-  map.value.fitBounds(bounds, { padding: 100, maxZoom: 8 })
+
+  // Use a pitch to make the 3D pillars visible
+  // Increase padding to ensure they aren't cut off at the edges
+  map.value.fitBounds(bounds, {
+    padding: { top: 200, bottom: 200, left: 100, right: 100 },
+    maxZoom: 8,
+    pitch: 60,
+  })
 }
 
 const setStationsVisibility = (visible: boolean) => {
@@ -298,6 +306,80 @@ const setStationsVisibility = (visible: boolean) => {
     visible ? 'visible' : 'none'
   )
 }
+
+const setTilesVisibility = (visible: boolean) => {
+  if (!map.value) return
+
+  // Helper to safely set visibility
+  const setLayerVisibility = (layerId: string, isVisible: boolean) => {
+    if (map.value && map.value.getLayer(layerId)) {
+      map.value.setLayoutProperty(
+        layerId,
+        'visibility',
+        isVisible ? 'visible' : 'none'
+      )
+    }
+  }
+
+  // Toggle terrain tiles
+  if (map.value.getLayer('esri-terrain-layer')) {
+    map.value.setLayoutProperty(
+      'esri-terrain-layer',
+      'visibility',
+      visible ? 'visible' : 'none'
+    )
+  }
+
+  // Hide base country fill
+  setLayerVisibility('countries-fill', !visible)
+
+  // Hide global country borders
+  setLayerVisibility('countries-border', !visible)
+
+  // Hide labels when tiles are shown
+  setLayerVisibility('countries-label', !visible)
+
+  // Hide guessed countries polygons
+  setLayerVisibility('countries-guessed', !visible)
+  setLayerVisibility('countries-guessed-border', !visible)
+
+  // Hide highlighted (selected) country
+  setLayerVisibility('countries-highlight', !visible)
+  setLayerVisibility('countries-highlight-border', !visible)
+
+  // Secret Country Styling
+  if (map.value.getLayer('countries-secret')) {
+    // Transparent fill when finished (visible=true), Green fill otherwise
+    map.value.setPaintProperty(
+      'countries-secret',
+      'fill-opacity',
+      visible ? 0 : 1
+    )
+  }
+
+  if (map.value.getLayer('countries-secret-border')) {
+    // Green border when finished, White otherwise
+    map.value.setPaintProperty(
+      'countries-secret-border',
+      'line-color',
+      visible ? '#4ade80' : '#ffffff'
+    )
+    // Ensure the border width is visible enough
+    map.value.setPaintProperty(
+      'countries-secret-border',
+      'line-width',
+      visible ? 3 : 1.5
+    )
+  }
+}
+
+// Watch tiles visibility prop
+watch(
+  () => props.showTiles,
+  (isVisible) => {
+    setTilesVisibility(!!isVisible)
+  }
+)
 
 // Watch stations data to rebuild the layer
 watch(
@@ -472,6 +554,31 @@ const setupLayers = () => {
     },
   })
 
+  // Add ESRI Terrain Source
+  map.value.addSource('esri-terrain', {
+    type: 'raster',
+    tiles: [
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+    ],
+    tileSize: 256,
+    attribution: 'Tiles © Esri',
+  })
+
+  // Add ESRI Terrain Layer (initially hidden)
+  map.value.addLayer({
+    id: 'esri-terrain-layer',
+    type: 'raster',
+    source: 'esri-terrain',
+    minzoom: 0,
+    maxzoom: 22,
+    layout: {
+      visibility: props.showTiles ? 'visible' : 'none',
+    },
+    paint: {
+      'raster-opacity': 1,
+    },
+  })
+
   // Add countries fill layer (grey)
   map.value.addLayer({
     id: 'countries-fill',
@@ -479,7 +586,7 @@ const setupLayers = () => {
     source: 'countries',
     paint: {
       'fill-color': '#cbd5e1', // slate-300
-      'fill-opacity': 1,
+      'fill-opacity': props.showTiles ? 0 : 1,
     },
   })
 
@@ -596,6 +703,9 @@ const setupLayers = () => {
       'text-halo-width': 1.5,
     },
   })
+
+  // Apply initial visibility state
+  setTilesVisibility(!!props.showTiles)
 }
 
 const setupInteractions = () => {
@@ -742,6 +852,7 @@ const resetView = () => {
   map.value.easeTo({
     center: [0, 20],
     zoom: 1.5,
+    pitch: 0,
     duration: 800,
   })
 
