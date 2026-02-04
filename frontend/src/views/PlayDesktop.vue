@@ -75,12 +75,6 @@ const activeStation = computed(() => {
           :show-tiles="roundFinished"
           default-projection="mercator"
         />
-        <div
-          v-if="roundFinished"
-          class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none transition-all duration-300 w-full max-w-xl"
-        >
-          <ResultsPanel :station="activeStation" @new-game="handleNewGame" />
-        </div>
       </div>
 
       <!-- Right: Sidebar -->
@@ -130,8 +124,18 @@ const activeStation = computed(() => {
           </div>
         </div>
 
+        <!-- Results Panel -->
+        <div v-if="roundFinished" class="relative z-10">
+          <ResultsPanel
+            :station="activeStation"
+            @new-game="handleNewGame"
+            layout="desktop"
+          />
+        </div>
+
         <!-- Guess Panel Card -->
         <div
+          v-if="!roundFinished"
           class="flex-1 bg-paper-white rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] overflow-hidden flex flex-col relative"
         >
           <GuessPanel

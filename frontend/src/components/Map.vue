@@ -232,7 +232,7 @@ const setTilesVisibility = (visible: boolean) => {
     map.value.setPaintProperty(
       'countries-secret-border',
       'line-width',
-      visible ? 3 : 1.5
+      visible ? 5 : 1.5
     )
   }
 }

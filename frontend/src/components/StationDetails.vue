@@ -3,9 +3,15 @@ import { ExternalLink } from 'lucide-vue-next'
 import { computed } from 'vue'
 import type { RadioStation } from '../types/geo'
 
-const props = defineProps<{
-  station?: RadioStation
-}>()
+const props = withDefaults(
+  defineProps<{
+    station?: RadioStation
+    layout?: 'default' | 'desktop'
+  }>(),
+  {
+    layout: 'default',
+  }
+)
 
 const formattedLocation = computed(() => {
   if (!props.station) return ''
@@ -44,13 +50,15 @@ const searchUrl = computed(() => {
     class="bg-paper-white rounded-xl border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] p-3 max-w-[280px] w-full text-center pointer-events-auto"
   >
     <div
-      class="font-heading text-lg leading-tight mb-1 text-pencil-lead truncate"
+      class="font-heading leading-tight mb-1 text-pencil-lead truncate"
+      :class="layout === 'desktop' ? 'text-2xl' : 'text-lg'"
     >
       {{ station.channel_name }}
     </div>
 
     <div
-      class="text-sm font-bold text-eraser-grey uppercase tracking-wide mb-2 truncate"
+      class="font-bold text-eraser-grey uppercase tracking-wide mb-2 truncate text-sm"
+      :class="layout === 'desktop' ? 'text-lg' : 'text-sm'"
     >
       {{ formattedLocation }}
     </div>
@@ -60,20 +68,22 @@ const searchUrl = computed(() => {
         :href="gardenUrl"
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-gumball-blue hover:underline"
+        class="inline-flex items-center justify-center gap-1.5 font-bold text-gumball-blue hover:underline text-xs"
+        :class="layout === 'desktop' ? 'text-base' : 'text-xs'"
       >
         Listen on radio.garden
-        <ExternalLink class="w-3 h-3" />
+        <ExternalLink :class="layout === 'desktop' ? 'w-4 h-4' : 'w-3 h-3'" />
       </a>
 
       <a
         :href="searchUrl"
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-gumball-blue hover:underline"
+        class="inline-flex items-center justify-center gap-1.5 font-bold text-gumball-blue hover:underline text-xs"
+        :class="layout === 'desktop' ? 'text-base' : 'text-xs'"
       >
         Search this station
-        <ExternalLink class="w-3 h-3" />
+        <ExternalLink :class="layout === 'desktop' ? 'w-4 h-4' : 'w-3 h-3'" />
       </a>
     </div>
   </div>
