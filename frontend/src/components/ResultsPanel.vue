@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { RotateCcw } from 'lucide-vue-next'
-import StationDetails from './StationDetails.vue'
 import type { RadioStation } from '../types/geo'
+import StationDetails from './StationDetails.vue'
 
 defineProps<{
   station?: RadioStation

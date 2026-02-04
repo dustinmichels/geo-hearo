@@ -88,13 +88,26 @@ const isDarkBackground = (guessName: string | undefined) => {
           class="flex-1 font-heading min-w-0 flex items-center justify-between gap-1"
         >
           <template v-if="guesses[num - 1]">
-            <span class="text-base truncate" :class="isDarkBackground(guesses[num - 1]) ? 'text-white' : 'text-pencil-lead'">{{
-              guesses[num - 1]
-            }}</span>
+            <span
+              class="text-base truncate"
+              :class="
+                isDarkBackground(guesses[num - 1])
+                  ? 'text-white'
+                  : 'text-pencil-lead'
+              "
+              >{{ guesses[num - 1] }}</span
+            >
             <div
               class="flex items-center justify-end gap-2 shrink-0 min-w-[60px]"
             >
-              <span class="text-sm font-bold font-body" :class="isDarkBackground(guesses[num - 1]) ? 'text-white/90' : 'text-pencil-lead/80'">
+              <span
+                class="text-sm font-bold font-body"
+                :class="
+                  isDarkBackground(guesses[num - 1])
+                    ? 'text-white/90'
+                    : 'text-pencil-lead/80'
+                "
+              >
                 {{
                   formatDistance(getHintForGuess(guesses[num - 1])?.distance)
                 }}

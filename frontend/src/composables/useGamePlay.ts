@@ -301,7 +301,6 @@ export function useGamePlay(options: GamePlayOptions) {
         }
       }
     })
-
   })
 
   onUnmounted(() => {

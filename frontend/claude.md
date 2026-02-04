@@ -26,26 +26,26 @@ npm run format    # Prettier
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `src/composables/useRadio.ts` | Game state, station loading, guess validation, daily challenge logic |
-| `src/composables/useGamePlay.ts` | Game flow orchestration, win/loss handling |
-| `src/components/Map.vue` | MapLibre GL JS map, country selection |
-| `src/components/RadioPlayer.vue` | Audio streaming (HLS/Icecast) |
-| `src/utils/geography.ts` | Haversine distance, bearings |
-| `src/utils/colors.ts` | Hot/cold color feedback |
-| `src/views/Play.vue` | Responsive wrapper (routes to Desktop/Mobile) |
+| File                             | Purpose                                                              |
+| -------------------------------- | -------------------------------------------------------------------- |
+| `src/composables/useRadio.ts`    | Game state, station loading, guess validation, daily challenge logic |
+| `src/composables/useGamePlay.ts` | Game flow orchestration, win/loss handling                           |
+| `src/components/Map.vue`         | MapLibre GL JS map, country selection                                |
+| `src/components/RadioPlayer.vue` | Audio streaming (HLS/Icecast)                                        |
+| `src/utils/geography.ts`         | Haversine distance, bearings                                         |
+| `src/utils/colors.ts`            | Hot/cold color feedback                                              |
+| `src/views/Play.vue`             | Responsive wrapper (routes to Desktop/Mobile)                        |
 
 ## Data Schema
 
 All data linked by `ADMIN` country name (e.g., `"United States of America"`).
 
-| File | Key Field | Content |
-|------|-----------|---------|
-| `public/data/index.json` | Object keys | Byte offsets into stations.jsonl (`{ config: { line_length: 1053 }, countries: { "Afghanistan": { start: 0, count: 5 } } }`) |
-| `public/data/stations.jsonl` | `ADMIN` | Fixed-width JSONL records (1053 bytes). Fields: `place_id`, `channel_id`, `place_name`, `channel_name`, `geo_lat`, `geo_lon`, `channel_resolved_url`, `ADMIN`, `ISO_A3`, `CONTINENT` |
-| `public/data/centers.geojson` | `properties.ADMIN` | Country center points |
-| `public/data/ne_countries.geojson` | `properties.ADMIN` | Country boundary polygons |
+| File                               | Key Field          | Content                                                                                                                                                                              |
+| ---------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `public/data/index.json`           | Object keys        | Byte offsets into stations.jsonl (`{ config: { line_length: 1053 }, countries: { "Afghanistan": { start: 0, count: 5 } } }`)                                                         |
+| `public/data/stations.jsonl`       | `ADMIN`            | Fixed-width JSONL records (1053 bytes). Fields: `place_id`, `channel_id`, `place_name`, `channel_name`, `geo_lat`, `geo_lon`, `channel_resolved_url`, `ADMIN`, `ISO_A3`, `CONTINENT` |
+| `public/data/centers.geojson`      | `properties.ADMIN` | Country center points                                                                                                                                                                |
+| `public/data/ne_countries.geojson` | `properties.ADMIN` | Country boundary polygons                                                                                                                                                            |
 
 **Loading:** `useRadio` fetches `index.json` for byte offsets, then HTTP Range requests to load only needed stations from `stations.jsonl`.
 
@@ -57,6 +57,7 @@ All data linked by `ADMIN` country name (e.g., `"United States of America"`).
 - **Daily Challenge:** Seeded RNG (`YYYYMMDD` seed) for deterministic country selection. Completion stored in localStorage (`dailyChallengeDate` key). Session state in sessionStorage.
 
 **State flow:**
+
 1. `useRadio.loadStations()` loads index + centers
 2. `useGamePlay` calls `initDailyChallenge()` to check localStorage
 3. `selectRandomCountry(seed?)` picks country + ~5 stations

@@ -1,9 +1,9 @@
 // Imports from Turf.js
+import area from '@turf/area'
+import booleanIntersects from '@turf/boolean-intersects'
 import distance from '@turf/distance'
 import explode from '@turf/explode'
-import area from '@turf/area'
 import { polygon } from '@turf/helpers'
-import booleanIntersects from '@turf/boolean-intersects'
 import type { Feature, Geometry, Polygon } from 'geojson'
 
 // Helper: Extract the largest polygon from a MultiPolygon or FeatureCollection

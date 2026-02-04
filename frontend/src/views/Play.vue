@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
+import { useRadio } from '../composables/useRadio'
 import PlayDesktop from './PlayDesktop.vue'
 import PlayMobile from './PlayMobile.vue'
-import { useRadio } from '../composables/useRadio'
 
 const isMobile = ref(window.innerWidth < 1024)
 const { secretCountry } = useRadio()

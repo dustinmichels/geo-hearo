@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Share, Check, X } from 'lucide-vue-next'
+import { Check, Share, X } from 'lucide-vue-next'
 import { ref } from 'vue'
 
 const props = defineProps<{

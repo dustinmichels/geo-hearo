@@ -3,9 +3,9 @@
  * npm test -- dailyChallenge
  */
 
-import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
+import { describe, expect, it } from 'vitest'
 import { SeededRandom } from '../useRadio'
 
 /**

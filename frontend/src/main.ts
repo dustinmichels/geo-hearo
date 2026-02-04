@@ -1,9 +1,9 @@
+import { init, track } from '@plausible-analytics/tracker'
+import 'vant/lib/index.css'
 import { createApp } from 'vue'
 import App from './App.vue'
-import 'vant/lib/index.css'
 import './assets/styles/style.css'
 import router from './router'
-import { init, track } from '@plausible-analytics/tracker'
 
 // 1. Initialize and store the instance
 init({

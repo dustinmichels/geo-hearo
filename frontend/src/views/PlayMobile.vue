@@ -4,11 +4,11 @@ import { computed, ref, watch } from 'vue'
 import AnimatedClose from '../components/AnimatedClose.vue'
 import GameResultModal from '../components/GameResultModal.vue'
 import GuessPanel from '../components/GuessPanel.vue'
-import ResultsPanel from '../components/ResultsPanel.vue'
 import Map from '../components/Map.vue'
 import RadioPlayer from '../components/RadioPlayer.vue'
-import { useRadio } from '../composables/useRadio'
+import ResultsPanel from '../components/ResultsPanel.vue'
 import { useGamePlay } from '../composables/useGamePlay'
+import { useRadio } from '../composables/useRadio'
 
 const mapRef = ref<InstanceType<typeof Map> | null>(null)
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Play, Pause, SkipBack, SkipForward } from 'lucide-vue-next'
+import { Pause, Play, SkipBack, SkipForward } from 'lucide-vue-next'
 import { Button as VanButton } from 'vant'
 import { ref, watch } from 'vue'
 import { playRadioStatic } from '../utils/audio'

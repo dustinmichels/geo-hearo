@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import Footer from '../components/Footer.vue'
 import GameResultModal from '../components/GameResultModal.vue'
 import GuessPanel from '../components/GuessPanel.vue'
-import ResultsPanel from '../components/ResultsPanel.vue'
 import Map from '../components/Map.vue'
 import RadioPlayer from '../components/RadioPlayer.vue'
+import ResultsPanel from '../components/ResultsPanel.vue'
 import { useGamePlay } from '../composables/useGamePlay'
 import { useRadio } from '../composables/useRadio'
 

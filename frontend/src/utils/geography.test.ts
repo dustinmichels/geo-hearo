@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest'
-import { getDistanceHint, nearestBorderDistance } from './geography'
 import { polygon } from '@turf/helpers'
+import { describe, expect, it } from 'vitest'
+import { getDistanceHint, nearestBorderDistance } from './geography'
 
 describe('geography utils', () => {
   // Helper to create a small square polygon around a center

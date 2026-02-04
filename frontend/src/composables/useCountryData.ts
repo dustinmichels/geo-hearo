@@ -1,6 +1,6 @@
+import type { Feature, Geometry } from 'geojson'
 import { ref } from 'vue'
 import type { NeCountryProperties } from '../types/geo'
-import type { Feature, Geometry } from 'geojson'
 
 // State
 // Maps ADMIN name -> GeoJSON Feature
