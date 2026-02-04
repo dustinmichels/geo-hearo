@@ -4,6 +4,7 @@ import { computed, ref } from 'vue'
 import AnimatedClose from '../components/AnimatedClose.vue'
 import GameResultModal from '../components/GameResultModal.vue'
 import GuessPanel from '../components/GuessPanel.vue'
+import ResultsPanel from '../components/ResultsPanel.vue'
 import Map from '../components/Map.vue'
 import RadioPlayer from '../components/RadioPlayer.vue'
 import { useRadio } from '../composables/useRadio'
@@ -29,6 +30,7 @@ const {
   modalConfig,
   guesses,
   currentStation,
+  currentStations,
   currentStationUrl,
   debugCountry,
   handlePlayPause,
@@ -37,6 +39,7 @@ const {
   handleAddGuess,
   handleModalConfirm,
   handleCountrySelect,
+  handleReload,
 } = useGamePlay({
   blob1,
   blob2,
@@ -75,6 +78,11 @@ const overlayOpacity = computed(() => {
   const progress = (current - min) / (max - min)
   const clamped = Math.min(Math.max(progress, 0), 1)
   return clamped * 0.6
+})
+
+const activeStation = computed(() => {
+  if (!currentStations.value || !currentStations.value.length) return undefined
+  return currentStations.value[currentStation.value - 1]
 })
 </script>
 
@@ -155,6 +163,17 @@ const overlayOpacity = computed(() => {
           :secret-country="debugCountry"
           default-projection="globe"
         />
+        <!-- Station Details Overlay -->
+        <div
+          class="absolute bottom-14 left-0 right-0 z-30 flex justify-center px-4 pointer-events-none transition-all duration-300"
+          :class="
+            isPanelFullHeight
+              ? 'opacity-0 translate-y-10'
+              : 'opacity-100 translate-y-0'
+          "
+        >
+          <ResultsPanel :station="activeStation" @new-game="handleReload" />
+        </div>
       </div>
     </div>
 

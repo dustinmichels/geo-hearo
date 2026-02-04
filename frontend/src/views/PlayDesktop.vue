@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import Footer from '../components/Footer.vue'
 import GameResultModal from '../components/GameResultModal.vue'
 import GuessPanel from '../components/GuessPanel.vue'
+import ResultsPanel from '../components/ResultsPanel.vue'
 import Map from '../components/Map.vue'
 import RadioPlayer from '../components/RadioPlayer.vue'
 import { useGamePlay } from '../composables/useGamePlay'
@@ -21,6 +22,7 @@ const {
   modalConfig,
   guesses,
   currentStation,
+  currentStations,
   currentStationUrl,
   debugCountry,
   handlePlayPause,
@@ -29,7 +31,13 @@ const {
   handleAddGuess,
   handleModalConfirm,
   handleCountrySelect,
+  handleReload,
 } = useGamePlay({ blob1, blob2, setupKeyboardShortcuts: true })
+
+const activeStation = computed(() => {
+  if (!currentStations.value || !currentStations.value.length) return undefined
+  return currentStations.value[currentStation.value - 1]
+})
 </script>
 
 <template>
@@ -60,6 +68,11 @@ const {
           :secret-country="debugCountry"
           default-projection="mercator"
         />
+        <div
+          class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none transition-all duration-300 w-full max-w-xl"
+        >
+          <ResultsPanel :station="activeStation" @new-game="handleReload" />
+        </div>
       </div>
 
       <!-- Right: Sidebar -->
