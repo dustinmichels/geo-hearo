@@ -2,7 +2,7 @@
 import { onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { Loader2, RefreshCw, Globe, Map as MapIcon } from 'lucide-vue-next'
+import { Loader2, RefreshCw, Globe, Map as MapIcon, Minimize2 } from 'lucide-vue-next'
 import type { NeCountryProperties } from '../types/geo'
 
 const props = defineProps<{
@@ -20,6 +20,9 @@ const resizeObserver = shallowRef<ResizeObserver | null>(null)
 const showReloadInfo = ref(false)
 const isGlobe = ref(false)
 let loadingTimeout: ReturnType<typeof setTimeout> | null = null
+let spinFrameId: number | null = null
+let lastSpinTime = 0
+const SPIN_SPEED = 3 // degrees per second
 
 const emit = defineEmits<{
   (e: 'select-country', admin: string): void
@@ -328,10 +331,50 @@ const setupInteractions = () => {
   map.value.on('mouseleave', 'countries-fill', () => {
     if (map.value) map.value.getCanvas().style.cursor = ''
   })
+
+  // Stop spin permanently on first user interaction
+  map.value.on('mousedown', stopSpinning)
+  map.value.on('touchstart', stopSpinning)
+  map.value.on('wheel', stopSpinning)
+
+  // Start idle spin
+  startSpinning()
+}
+
+// --- Idle globe spin ---
+const spinGlobe = (timestamp: number) => {
+  if (!map.value || !isGlobe.value) {
+    spinFrameId = null
+    return
+  }
+
+  if (lastSpinTime === 0) lastSpinTime = timestamp
+  const delta = (timestamp - lastSpinTime) / 1000 // seconds
+  lastSpinTime = timestamp
+
+  const center = map.value.getCenter()
+  center.lng -= SPIN_SPEED * delta
+  map.value.setCenter(center)
+
+  spinFrameId = requestAnimationFrame(spinGlobe)
+}
+
+const startSpinning = () => {
+  if (!isGlobe.value || spinFrameId != null) return
+  lastSpinTime = 0
+  spinFrameId = requestAnimationFrame(spinGlobe)
+}
+
+const stopSpinning = () => {
+  if (spinFrameId != null) {
+    cancelAnimationFrame(spinFrameId)
+    spinFrameId = null
+  }
 }
 
 const toggleProjection = () => {
   if (!map.value) return
+  stopSpinning()
   isGlobe.value = !isGlobe.value
   map.value.setProjection({
     type: isGlobe.value ? 'globe' : 'mercator',
@@ -355,12 +398,40 @@ const toggleProjection = () => {
   }
 }
 
+const resetView = () => {
+  if (!map.value) return
+  stopSpinning()
+
+  // Switch to globe if not already
+  if (!isGlobe.value) {
+    isGlobe.value = true
+    map.value.setProjection({ type: 'globe' })
+    if (map.value.getLayer('background')) {
+      map.value.setPaintProperty('background', 'background-color', '#0f172a')
+    }
+    if (map.value.getLayer('countries-border')) {
+      map.value.setPaintProperty('countries-border', 'line-color', '#e2e8f0')
+    }
+  }
+
+  map.value.easeTo({
+    center: [0, 20],
+    zoom: 1.5,
+    duration: 800,
+  })
+
+  map.value.once('moveend', () => {
+    startSpinning()
+  })
+}
+
 // Manual reload function
 const reloadMap = () => {
   initMap()
 }
 
 onUnmounted(() => {
+  stopSpinning()
   if (loadingTimeout) clearTimeout(loadingTimeout)
   resizeObserver.value?.disconnect()
   map.value?.remove()
@@ -395,16 +466,24 @@ onUnmounted(() => {
     </div>
     <div ref="mapContainer" class="w-full h-full" />
 
-    <!-- Projection Toggle -->
-    <button
-      v-if="loaded"
-      @click="toggleProjection"
-      class="absolute top-4 left-4 z-[5] p-2 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm"
-      :title="isGlobe ? 'Switch to Flat Map' : 'Switch to Globe'"
-    >
-      <MapIcon v-if="isGlobe" class="w-5 h-5" />
-      <Globe v-else class="w-5 h-5" />
-    </button>
+    <!-- Map Controls -->
+    <div v-if="loaded" class="absolute top-4 left-4 z-[5] flex flex-col gap-2">
+      <button
+        @click="toggleProjection"
+        class="p-2 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm"
+        :title="isGlobe ? 'Switch to Flat Map' : 'Switch to Globe'"
+      >
+        <MapIcon v-if="isGlobe" class="w-5 h-5" />
+        <Globe v-else class="w-5 h-5" />
+      </button>
+      <button
+        @click="resetView"
+        class="p-2 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm"
+        title="Zoom out"
+      >
+        <Minimize2 class="w-5 h-5" />
+      </button>
+    </div>
   </div>
 </template>
 
