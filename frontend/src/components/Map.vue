@@ -358,6 +358,21 @@ const initMap = () => {
         sources: {},
         layers: [],
         glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
+        sky: isGlobe.value
+          ? {
+              'atmosphere-blend': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                0,
+                1,
+                5,
+                1,
+                7,
+                0,
+              ],
+            }
+          : {},
       },
       center: [0, 20],
       zoom: 1.5,
@@ -600,6 +615,15 @@ const toggleProjection = () => {
       isGlobe.value ? '#e2e8f0' : '#000000'
     )
   }
+
+  // Toggle atmosphere
+  map.value.setSky(
+    isGlobe.value
+      ? {
+          'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 5, 1, 7, 0],
+        }
+      : {}
+  )
 }
 
 const resetView = () => {
@@ -616,6 +640,9 @@ const resetView = () => {
     if (map.value.getLayer('countries-border')) {
       map.value.setPaintProperty('countries-border', 'line-color', '#e2e8f0')
     }
+    map.value.setSky({
+      'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 5, 1, 7, 0],
+    })
   }
 
   map.value.easeTo({
@@ -670,7 +697,15 @@ onUnmounted(() => {
         </button>
       </div>
     </div>
-    <div ref="mapContainer" class="w-full h-full" />
+    <div
+      ref="mapContainer"
+      class="w-full h-full"
+      :style="{
+        background: isGlobe
+          ? 'radial-gradient(ellipse at 50% 50%, #1e2d4a 0%, #111827 40%, #070b14 100%)'
+          : '#ffffff',
+      }"
+    />
 
     <!-- Map Controls -->
     <div v-if="loaded" class="absolute top-4 left-4 z-[5] flex flex-col gap-2">

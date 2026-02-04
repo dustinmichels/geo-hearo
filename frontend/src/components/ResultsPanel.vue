@@ -28,7 +28,7 @@ defineEmits<{
     <div class="flex flex-col shrink-0 w-24">
       <!-- New Game -->
       <button
-        class="flex-1 bg-mint-shake text-pencil-lead rounded-2xl border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] active:translate-y-1 active:shadow-none transition-all duration-100 flex flex-col items-center justify-center gap-1 hover:brightness-110 p-1"
+        class="flex-1 bg-yuzu-yellow text-pencil-lead rounded-2xl border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] active:translate-y-1 active:shadow-none transition-all duration-100 flex flex-col items-center justify-center gap-1 hover:brightness-110 p-1"
         @click="$emit('newGame')"
         title="New Game"
       >
