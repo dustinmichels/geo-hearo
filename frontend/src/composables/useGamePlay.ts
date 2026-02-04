@@ -10,6 +10,7 @@ interface GamePlayOptions {
   blob1: Ref<HTMLElement | null>
   blob2: Ref<HTMLElement | null>
   onGuessAdded?: () => void
+  onNewGame?: () => void
   setupKeyboardShortcuts?: boolean
 }
 
@@ -25,6 +26,18 @@ export function useGamePlay(options: GamePlayOptions) {
     buttonText: '',
     isWin: false,
     shareText: undefined as string | undefined, // text to copy to clipboard
+    resultsGrid: undefined as string | undefined,
+    secretCountry: undefined as string | undefined,
+    dailyChallengeNumber: undefined as number | undefined,
+  })
+
+  const roundFinished = computed(() => {
+    return (
+      guesses.value.length >= 5 ||
+      guesses.value.some(
+        (g) => g.toLowerCase() === secretCountry.value?.toLowerCase()
+      )
+    )
   })
 
   // Hooking up radio logic
@@ -79,6 +92,13 @@ export function useGamePlay(options: GamePlayOptions) {
   const populateGuessColors = () => {
     guesses.value.forEach((guess) => {
       if (guessColors.value[guess]) return
+
+      // Explicit check for exact match (Win) -> Green
+      if (guess.toLowerCase() === secretCountry.value?.toLowerCase()) {
+        guessColors.value[guess] = '#4ade80' // Green-400
+        return
+      }
+
       const secretFeature = getFeature(secretCountry.value)
       const guessFeature = getFeature(guess)
 
@@ -92,10 +112,7 @@ export function useGamePlay(options: GamePlayOptions) {
     })
   }
 
-  const generateShareText = (winningGuess?: string) => {
-    const dayNumber = dailyChallengeNumber.value
-    const lines = [`GeoHearo | #${dayNumber}`, 'https://geohearo.com/']
-
+  const generateEmojiString = (winningGuess?: string) => {
     // Clone guesses to avoid modifying the reactive array during this operation if needed
     const currentGuesses = [...guesses.value]
     if (winningGuess) {
@@ -106,7 +123,7 @@ export function useGamePlay(options: GamePlayOptions) {
     currentGuesses.forEach((guess) => {
       // Check for win
       if (guess.toLowerCase() === secretCountry.value?.toLowerCase()) {
-        emojiLine += '🏆'
+        emojiLine += '🟢'
         return
       }
 
@@ -120,22 +137,29 @@ export function useGamePlay(options: GamePlayOptions) {
         emojiLine += '⬜' // Fallback
       }
     })
+    return emojiLine
+  }
 
+  const generateShareText = (winningGuess?: string) => {
+    const dayNumber = dailyChallengeNumber.value
+    const lines = [`GeoHearo | #${dayNumber}`, 'https://geohearo.com/']
+
+    const emojiLine = generateEmojiString(winningGuess)
     lines.push(emojiLine)
     return lines.join('\n')
   }
 
   const handleAddGuess = () => {
     const guess = guessInput.value.trim()
-    if (!guess || guesses.value.length >= 5) return
+    if (!guess || guesses.value.length >= 5 || roundFinished.value) return
 
     if (checkGuess(guess)) {
+      addGuess(guess) // Ensure winning guess is added to state
       if (isDailyChallengeMode.value) {
         completeDailyChallenge() // Mark as done for today
 
-        // Generate share text BEFORE clearing state
-        // Pass the winning guess since it's not in `guesses` yet
-        const shareText = generateShareText(guess)
+        const shareText = generateShareText()
+        const resultsGrid = generateEmojiString()
 
         modalConfig.value = {
           title: 'Daily Challenge Complete!',
@@ -143,17 +167,24 @@ export function useGamePlay(options: GamePlayOptions) {
           buttonText: 'Play Free Mode',
           isWin: true,
           shareText,
+          resultsGrid,
+          secretCountry: secretCountry.value,
+          dailyChallengeNumber: dailyChallengeNumber.value,
         }
       } else {
+        const resultsGrid = generateEmojiString()
         modalConfig.value = {
           title: 'You got it!',
           message: `Wooo! The country was ${secretCountry.value}. Great job!`,
           buttonText: 'Play Again',
           isWin: true,
           shareText: undefined,
+          resultsGrid,
+          secretCountry: secretCountry.value,
+          dailyChallengeNumber: undefined,
         }
       }
-      clearState()
+      // clearState() <-- REMOVED
       showModal.value = true
       return
     }
@@ -161,7 +192,10 @@ export function useGamePlay(options: GamePlayOptions) {
     const secretFeature = getFeature(secretCountry.value)
     const guessFeature = getFeature(guess)
 
-    if (secretFeature && guessFeature) {
+    // Check for exact match first (Win condition color)
+    if (guess.toLowerCase() === secretCountry.value?.toLowerCase()) {
+      guessColors.value[guess] = '#4ade80'
+    } else if (secretFeature && guessFeature) {
       const { level } = getDistanceHint(guessFeature, secretFeature)
       const color = getColorForDistanceLevel(level)
       guessColors.value[guess] = color
@@ -178,20 +212,8 @@ export function useGamePlay(options: GamePlayOptions) {
       if (isDailyChallengeMode.value) {
         completeDailyChallenge()
 
-        // Game Over - generate share text with checks
-        // The last guess IS added below (line 130 original, now inside this flow?)
-        // Wait, in handleAddGuess structure:
-        // 1. Check Win -> Return
-        // 2. Add Colors
-        // 3. Add Guess
-        // 4. Check Lose (length >= 5) -> Modal
-
-        // So by the time we reach here, the guess IS in `guesses`.
-        // So we don't need to pass it explicitly to generateShareText?
-        // Let's verify where `addGuess` is.
-        // It is called before this block.
-
         const shareText = generateShareText()
+        const resultsGrid = generateEmojiString()
 
         modalConfig.value = {
           title: 'Game Over',
@@ -199,23 +221,36 @@ export function useGamePlay(options: GamePlayOptions) {
           buttonText: 'Keep Playing',
           isWin: false,
           shareText,
+          resultsGrid,
+          secretCountry: secretCountry.value,
+          dailyChallengeNumber: dailyChallengeNumber.value,
         }
       } else {
+        const resultsGrid = generateEmojiString()
         modalConfig.value = {
           title: 'Game Over',
-          message: `Better luck next time. The country was ${secretCountry.value}. Play again?`,
+          message: `The secret country was ${secretCountry.value}.`,
           buttonText: 'Try Again',
           isWin: false,
           shareText: undefined,
+          resultsGrid,
+          secretCountry: secretCountry.value,
+          dailyChallengeNumber: undefined,
         }
       }
-      clearState()
+      // clearState() <-- REMOVED
       showModal.value = true
     }
   }
 
   const handleModalConfirm = () => {
-    window.location.reload()
+    clearState()
+    guessInput.value = ''
+    guessColors.value = {}
+    isPlaying.value = false
+    showModal.value = false
+    options.onNewGame?.()
+    selectRandomCountry()
   }
 
   const handleCountrySelect = (name: string) => {
@@ -306,12 +341,22 @@ export function useGamePlay(options: GamePlayOptions) {
     currentStations,
     currentStationUrl,
     debugCountry,
+    roundFinished,
     handlePlayPause,
     handlePrevious,
     handleNext,
     handleAddGuess,
     handleModalConfirm,
     handleCountrySelect,
+    handleNewGame: () => {
+      clearState()
+      guessInput.value = ''
+      guessColors.value = {}
+      isPlaying.value = false
+      showModal.value = false
+      options.onNewGame?.()
+      selectRandomCountry()
+    },
     handleShare: async () => {
       const text = generateShareText()
       try {
@@ -321,6 +366,5 @@ export function useGamePlay(options: GamePlayOptions) {
         console.error('Failed to copy results', err)
       }
     },
-    handleReload: () => window.location.reload(),
   }
 }

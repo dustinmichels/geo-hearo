@@ -576,6 +576,8 @@ const reloadMap = () => {
   initMap()
 }
 
+defineExpose({ resetView })
+
 onUnmounted(() => {
   stopSpinning()
   if (loadingTimeout) clearTimeout(loadingTimeout)

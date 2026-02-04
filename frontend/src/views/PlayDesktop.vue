@@ -11,6 +11,7 @@ import { useRadio } from '../composables/useRadio'
 
 const blob1 = ref<HTMLElement | null>(null)
 const blob2 = ref<HTMLElement | null>(null)
+const mapRef = ref<InstanceType<typeof Map> | null>(null)
 
 const { isDailyChallengeMode } = useRadio()
 
@@ -31,8 +32,14 @@ const {
   handleAddGuess,
   handleModalConfirm,
   handleCountrySelect,
-  handleReload,
-} = useGamePlay({ blob1, blob2, setupKeyboardShortcuts: true })
+  handleNewGame,
+  roundFinished,
+} = useGamePlay({
+  blob1,
+  blob2,
+  setupKeyboardShortcuts: true,
+  onNewGame: () => mapRef.value?.resetView(),
+})
 
 const activeStation = computed(() => {
   if (!currentStations.value || !currentStations.value.length) return undefined
@@ -61,6 +68,7 @@ const activeStation = computed(() => {
         class="flex-1 bg-sea-blue/10 rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] overflow-hidden relative z-10"
       >
         <Map
+          ref="mapRef"
           @select-country="handleCountrySelect"
           :guessed-countries="guesses"
           :guess-colors="guessColors"
@@ -68,12 +76,14 @@ const activeStation = computed(() => {
           :secret-country="debugCountry"
           :stations="currentStations"
           :active-station-id="activeStation?.channel_id"
+          :are-stations-visible="roundFinished"
           default-projection="mercator"
         />
         <div
+          v-if="roundFinished"
           class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none transition-all duration-300 w-full max-w-xl"
         >
-          <ResultsPanel :station="activeStation" @new-game="handleReload" />
+          <ResultsPanel :station="activeStation" @new-game="handleNewGame" />
         </div>
       </div>
 
@@ -151,7 +161,11 @@ const activeStation = computed(() => {
       :button-text="modalConfig.buttonText"
       :is-win="modalConfig.isWin"
       :share-text="modalConfig.shareText"
+      :results-grid="modalConfig.resultsGrid"
+      :secret-country="modalConfig.secretCountry"
+      :daily-challenge-number="modalConfig.dailyChallengeNumber"
       @confirm="handleModalConfirm"
+      @close="showModal = false"
     />
   </div>
 </template>

@@ -17,6 +17,15 @@ const { toggleUnit, formatDistance } = useDistanceUnit()
 const getHintForGuess = (guessName: string | undefined) => {
   if (!guessName || !secretCountry.value) return null
 
+  // Exact match override (Win)
+  if (guessName.toLowerCase() === secretCountry.value.toLowerCase()) {
+    return {
+      emoji: '🟢',
+      level: 0, // Special case
+      distance: 0,
+    }
+  }
+
   const guessFeature = getFeature(guessName)
   const secretFeature = getFeature(secretCountry.value)
 
@@ -26,6 +35,15 @@ const getHintForGuess = (guessName: string | undefined) => {
 }
 
 const getGuessColor = (guessName: string | undefined) => {
+  // Exact match override (Win)
+  if (
+    guessName &&
+    secretCountry.value &&
+    guessName.toLowerCase() === secretCountry.value.toLowerCase()
+  ) {
+    return '#4ade80' // Green-400
+  }
+
   const result = getHintForGuess(guessName)
   if (!result) return '#FFFFFF'
   return getColorForDistanceLevel(result.level)

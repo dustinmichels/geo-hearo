@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { FloatingPanel as VanFloatingPanel } from 'vant'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import AnimatedClose from '../components/AnimatedClose.vue'
 import GameResultModal from '../components/GameResultModal.vue'
 import GuessPanel from '../components/GuessPanel.vue'
@@ -12,6 +12,7 @@ import { useGamePlay } from '../composables/useGamePlay'
 
 const blob1 = ref<HTMLElement | null>(null)
 const blob2 = ref<HTMLElement | null>(null)
+const mapRef = ref<InstanceType<typeof Map> | null>(null)
 
 const { isDailyChallengeMode } = useRadio()
 
@@ -39,13 +40,22 @@ const {
   handleAddGuess,
   handleModalConfirm,
   handleCountrySelect,
-  handleReload,
+  handleNewGame,
+  roundFinished,
 } = useGamePlay({
   blob1,
   blob2,
   onGuessAdded: () => {
     panelHeight.value = anchors[1]
   },
+  onNewGame: () => mapRef.value?.resetView(),
+})
+
+// Collapse panel when round finishes
+watch(roundFinished, (finished) => {
+  if (finished) {
+    panelHeight.value = anchors[0]
+  }
 })
 
 const handleArrowClick = () => {
@@ -156,6 +166,7 @@ const activeStation = computed(() => {
       <!-- Globe - takes remaining space -->
       <div class="flex-1 px-4 pb-2 min-h-0 relative">
         <Map
+          ref="mapRef"
           @select-country="handleCountrySelect"
           :guessed-countries="guesses"
           :guess-colors="guessColors"
@@ -163,10 +174,12 @@ const activeStation = computed(() => {
           :secret-country="debugCountry"
           :stations="currentStations"
           :active-station-id="activeStation?.channel_id"
+          :are-stations-visible="roundFinished"
           default-projection="globe"
         />
         <!-- Station Details Overlay -->
         <div
+          v-if="roundFinished"
           class="absolute bottom-14 left-0 right-0 z-30 flex justify-center px-4 pointer-events-none transition-all duration-300"
           :class="
             isPanelFullHeight
@@ -174,7 +187,7 @@ const activeStation = computed(() => {
               : 'opacity-100 translate-y-0'
           "
         >
-          <ResultsPanel :station="activeStation" @new-game="handleReload" />
+          <ResultsPanel :station="activeStation" @new-game="handleNewGame" />
         </div>
       </div>
     </div>
@@ -207,7 +220,11 @@ const activeStation = computed(() => {
       :button-text="modalConfig.buttonText"
       :is-win="modalConfig.isWin"
       :share-text="modalConfig.shareText"
+      :results-grid="modalConfig.resultsGrid"
+      :secret-country="modalConfig.secretCountry"
+      :daily-challenge-number="modalConfig.dailyChallengeNumber"
       @confirm="handleModalConfirm"
+      @close="showModal = false"
     />
   </div>
 </template>
