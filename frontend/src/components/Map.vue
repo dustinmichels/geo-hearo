@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
-import maplibregl from 'maplibre-gl'
+import maplibregl, { LngLatBounds } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import {
   Loader2,
@@ -9,7 +9,7 @@ import {
   Map as MapIcon,
   Minimize2,
 } from 'lucide-vue-next'
-import type { NeCountryProperties } from '../types/geo'
+import type { NeCountryProperties, RadioStation } from '../types/geo'
 
 const props = defineProps<{
   guessedCountries?: string[] // List of ADMIN names
@@ -17,6 +17,9 @@ const props = defineProps<{
   selectedCountry?: string // ADMIN name
   secretCountry?: string // ADMIN name
   defaultProjection?: 'globe' | 'mercator'
+  stations?: RadioStation[]
+  areStationsVisible?: boolean
+  activeStationId?: string
 }>()
 
 const mapContainer = ref<HTMLElement | null>(null)
@@ -99,6 +102,133 @@ watch(
   }
 )
 
+// --- Radio Station Logic ---
+
+const showRadioStations = () => {
+  if (!map.value || !props.stations || props.stations.length === 0) return
+
+  const stationFeatures = props.stations.map((s) => ({
+    type: 'Feature',
+    geometry: {
+      type: 'Point',
+      coordinates: [s.geo_lon, s.geo_lat],
+    },
+    properties: {
+      name: s.channel_name,
+      id: s.channel_id,
+    },
+  }))
+
+  const sourceData = {
+    type: 'FeatureCollection',
+    features: stationFeatures,
+  }
+
+  // Add or update source
+  const source = map.value.getSource(
+    'stations-source'
+  ) as maplibregl.GeoJSONSource
+  if (source) {
+    source.setData(sourceData as any)
+  } else {
+    map.value.addSource('stations-source', {
+      type: 'geojson',
+      data: sourceData as any,
+    })
+  }
+
+  // Add or update layer
+  if (!map.value.getLayer('stations-layer')) {
+    map.value.addLayer({
+      id: 'stations-layer',
+      type: 'circle',
+      source: 'stations-source',
+      paint: {
+        'circle-radius': 6,
+        'circle-color': [
+          'case',
+          ['==', ['get', 'id'], props.activeStationId || ''],
+          '#f472b6', // Active: Pink
+          '#facc15', // Default: Yellow
+        ],
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#ffffff',
+      },
+      layout: {
+        visibility: 'visible',
+      },
+    })
+  } else {
+    map.value.setLayoutProperty('stations-layer', 'visibility', 'visible')
+  }
+
+  // Zoom to stations
+  const bounds = new LngLatBounds()
+  props.stations.forEach((s) => {
+    bounds.extend([s.geo_lon, s.geo_lat])
+  })
+
+  // Pad bounds slightly
+  // Push content up with larger bottom padding to leave empty space below (e.g. for UI overlays)
+  map.value.fitBounds(bounds, {
+    padding: { top: 50, bottom: 200, left: 50, right: 50 },
+    maxZoom: 6,
+    duration: 1500,
+  })
+
+  // Since we interacted, stop spinning
+  stopSpinning()
+}
+
+const hideRadioStations = () => {
+  if (!map.value || !map.value.getLayer('stations-layer')) return
+  map.value.setLayoutProperty('stations-layer', 'visibility', 'none')
+}
+
+// Watch stations to show/update them
+watch(
+  () => props.stations,
+  (newStations) => {
+    if (
+      newStations &&
+      newStations.length > 0 &&
+      props.areStationsVisible !== false
+    ) {
+      showRadioStations()
+    } else if (!newStations || newStations.length === 0) {
+      hideRadioStations()
+    }
+  },
+  { deep: true }
+)
+
+// Watch visibility prop
+watch(
+  () => props.areStationsVisible,
+  (isVisible) => {
+    if (isVisible) {
+      showRadioStations()
+    } else {
+      hideRadioStations()
+    }
+  }
+)
+
+// Watch active station to update colors without re-zooming
+watch(
+  () => props.activeStationId,
+  (newId) => {
+    if (!map.value || !map.value.getLayer('stations-layer')) return
+
+    map.value.setPaintProperty('stations-layer', 'circle-color', [
+      'case',
+      ['==', ['get', 'id'], newId || ''],
+      '#f472b6',
+      '#facc15',
+    ])
+  }
+)
+
 onMounted(() => {
   if (!mapContainer.value) return
 
@@ -176,6 +306,15 @@ const initMap = () => {
 
       setupLayers()
       setupInteractions()
+
+      // If stations already exist on load
+      if (
+        props.stations &&
+        props.stations.length > 0 &&
+        props.areStationsVisible !== false
+      ) {
+        showRadioStations()
+      }
     })
 
     map.value.on('error', (e) => {
@@ -289,7 +428,6 @@ const setupLayers = () => {
       'text-halo-width': 1.5,
     },
   })
-
 }
 
 const setupInteractions = () => {

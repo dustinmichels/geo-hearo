@@ -66,6 +66,8 @@ const activeStation = computed(() => {
           :guess-colors="guessColors"
           :selected-country="guessInput"
           :secret-country="debugCountry"
+          :stations="currentStations"
+          :active-station-id="activeStation?.channel_id"
           default-projection="mercator"
         />
         <div
