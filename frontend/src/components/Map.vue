@@ -186,9 +186,9 @@ const setTilesVisibility = (visible: boolean) => {
   }
 
   // Toggle terrain tiles
-  if (map.value.getLayer('esri-terrain-layer')) {
+  if (map.value.getLayer('carto-light-layer')) {
     map.value.setLayoutProperty(
-      'esri-terrain-layer',
+      'carto-light-layer',
       'visibility',
       visible ? 'visible' : 'none'
     )
@@ -357,21 +357,24 @@ const setupLayers = () => {
     },
   })
 
-  // Add ESRI Terrain Source
-  map.value.addSource('esri-terrain', {
+  // Add Carto Light Source
+  map.value.addSource('carto-light', {
     type: 'raster',
     tiles: [
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+      'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+      'https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+      'https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+      'https://d.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
     ],
     tileSize: 256,
-    attribution: 'Tiles © Esri',
+    attribution: 'Tiles © Carto',
   })
 
-  // Add ESRI Terrain Layer (initially hidden)
+  // Add Carto Light Layer (initially hidden)
   map.value.addLayer({
-    id: 'esri-terrain-layer',
+    id: 'carto-light-layer',
     type: 'raster',
-    source: 'esri-terrain',
+    source: 'carto-light',
     minzoom: 0,
     maxzoom: 22,
     layout: {
