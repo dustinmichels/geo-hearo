@@ -70,11 +70,11 @@ const handleShare = async () => {
 
         <!-- Secret Country -->
         <p class="text-lg text-pencil-lead/80 mb-6 leading-relaxed">
-          The secret country was
+          The secret country was:
+          <br />
           <strong class="text-pencil-lead font-bold">{{
             secretCountry || 'Unknown'
-          }}</strong
-          >.
+          }}</strong>
         </p>
 
         <!-- Emoji Grid -->
@@ -108,9 +108,9 @@ const handleShare = async () => {
         <!-- Close Button -->
         <button
           @click="emit('close')"
-          class="w-full btn-pressable bg-paper-white h-[56px] rounded-xl font-heading text-xl text-pencil-lead uppercase tracking-wider border-2 border-pencil-lead shadow-[4px_4px_0_0_#334155] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all flex items-center justify-center"
+          class="w-full btn-pressable bg-yuzu-yellow h-[56px] rounded-xl font-heading text-xl text-pencil-lead uppercase tracking-wider border-2 border-pencil-lead shadow-[4px_4px_0_0_#334155] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all flex items-center justify-center"
         >
-          See stations
+          Reveal stations 📻
         </button>
       </div>
     </div>

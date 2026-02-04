@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useMapStations } from '@/composables/useMapStations'
+import { useGameStore } from '@/stores/game'
 import {
   Globe,
   Loader2,
@@ -6,8 +8,9 @@ import {
   Minimize2,
   RefreshCw,
 } from 'lucide-vue-next'
-import maplibregl, { LngLatBounds } from 'maplibre-gl'
+import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import { storeToRefs } from 'pinia'
 import { onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import type { NeCountryProperties, RadioStation } from '../types/geo'
 
@@ -22,6 +25,9 @@ const props = defineProps<{
   activeStationId?: string
   showTiles?: boolean
 }>()
+
+const gameStore = useGameStore()
+const { roundFinished } = storeToRefs(gameStore)
 
 const mapContainer = ref<HTMLElement | null>(null)
 const map = shallowRef<maplibregl.Map | null>(null)
@@ -127,185 +133,43 @@ watch(
   }
 )
 
-// --- Radio Station Logic ---
-
-const getPillarPolygon = (lat: number, lon: number, radiusKm: number) => {
-  const dLat = radiusKm / 111.32
-  const dLon = radiusKm / (111.32 * Math.cos((lat * Math.PI) / 180))
-
-  return [
-    [
-      [lon - dLon, lat - dLat],
-      [lon + dLon, lat - dLat],
-      [lon + dLon, lat + dLat],
-      [lon - dLon, lat + dLat],
-      [lon - dLon, lat - dLat],
-    ],
-  ]
-}
-
-const getZoomScaleFactor = (zoom: number): number => {
-  // At zoom 3 (globe/continent view), scale = 1 (current size)
-  // Halves for each zoom level increase, doubles for each decrease
-  return Math.pow(2, 3 - zoom)
-}
-
-// zoomHeightExpression removed - height scaling is now handled in buildStationFeatures
-
-const buildStationFeatures = (activeId?: string, zoom?: number) => {
-  if (!props.stations) return []
-
-  const scale = zoom != null ? getZoomScaleFactor(zoom) : 1
-  const scaledRadius = Math.max(15 * scale, 1.5)
-  const scaledOffset = Math.max(20 * scale, 3.5)
-
-  // Group stations by location to detect overlaps
-  const locationGroups = new Map<string, number[]>()
-  props.stations.forEach((s, i) => {
-    const key = `${s.geo_lat},${s.geo_lon}`
-    if (!locationGroups.has(key)) locationGroups.set(key, [])
-    locationGroups.get(key)!.push(i)
-  })
-
-  const features = props.stations.map((s, i) => {
-    const baseHeight = 600000
-    const variableHeight = s.place_size
-      ? Math.min(s.place_size * 100, 2000000)
-      : 600000
-    let height = (baseHeight + variableHeight) * scale
-
-    if (activeId && s.channel_id === activeId) {
-      height *= 1.5
-    }
-
-    // Offset co-located stations so each pillar is visible
-    let lat = s.geo_lat
-    let lon = s.geo_lon
-    const key = `${s.geo_lat},${s.geo_lon}`
-    const group = locationGroups.get(key)!
-    if (group.length > 1) {
-      const idx = group.indexOf(i)
-      const angle = (2 * Math.PI * idx) / group.length
-      const offsetKm = scaledOffset
-      lat += (offsetKm / 111.32) * Math.sin(angle)
-      lon +=
-        (offsetKm / (111.32 * Math.cos((s.geo_lat * Math.PI) / 180))) *
-        Math.cos(angle)
-    }
-
+const getSkyConfig = () => {
+  if (isGlobe.value && !roundFinished.value) {
     return {
-      type: 'Feature',
-      geometry: {
-        type: 'Polygon',
-        coordinates: getPillarPolygon(lat, lon, scaledRadius),
-      },
-      properties: {
-        name: s.channel_name,
-        id: s.channel_id,
-        height: height,
-      },
-    }
-  })
-
-  // Move the active station to the end so it renders on top
-  if (activeId) {
-    const activeIdx = features.findIndex((f) => f.properties.id === activeId)
-    if (activeIdx > -1) {
-      const [active] = features.splice(activeIdx, 1)
-      if (active) {
-        features.push(active)
-      }
-    }
-  }
-
-  return features
-}
-
-const updateStationsLayer = () => {
-  if (!map.value || !props.stations || props.stations.length === 0) return
-
-  // Remove old layer/source if they exist
-  if (map.value.getLayer('stations-layer'))
-    map.value.removeLayer('stations-layer')
-  if (map.value.getSource('stations-source'))
-    map.value.removeSource('stations-source')
-
-  const zoom = map.value.getZoom()
-  const sourceData = {
-    type: 'FeatureCollection',
-    features: buildStationFeatures(props.activeStationId, zoom),
-  }
-
-  map.value.addSource('stations-source', {
-    type: 'geojson',
-    data: sourceData as any,
-  })
-
-  map.value.addLayer({
-    id: 'stations-layer',
-    type: 'fill-extrusion',
-    source: 'stations-source',
-    paint: {
-      'fill-extrusion-color': [
-        'case',
-        ['==', ['get', 'id'], props.activeStationId || ''],
-        '#f472b6', // Active: Pink
-        '#facc15', // Default: Yellow
+      'atmosphere-blend': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        0,
+        1,
+        5,
+        1,
+        7,
+        0,
       ],
-      'fill-extrusion-height': ['get', 'height'],
-      'fill-extrusion-base': 0,
-      'fill-extrusion-opacity': 0.8,
-    },
-    layout: {
-      visibility: props.areStationsVisible !== false ? 'visible' : 'none',
-    },
-  })
-
-  // Zoom to stations if visible
-  if (props.areStationsVisible !== false) {
-    zoomToStations()
-    stopSpinning()
+    } as any
   }
-
-  // Register zoom handler to scale pillar width with zoom
-  map.value.off('zoom', handleStationZoom)
-  map.value.on('zoom', handleStationZoom)
+  return undefined
 }
 
-const handleStationZoom = () => {
-  if (!map.value || !map.value.getSource('stations-source')) return
-  const zoom = map.value.getZoom()
-  const source = map.value.getSource('stations-source') as any
-  if (source) {
-    source.setData({
-      type: 'FeatureCollection',
-      features: buildStationFeatures(props.activeStationId, zoom),
-    })
+const updateSky = () => {
+  if (!map.value) return
+  try {
+    // Only attempt to set sky if the style is ready
+    if (map.value.getStyle()) {
+      const config = getSkyConfig()
+      // setSky(undefined) removes the sky layer
+      map.value.setSky(config)
+    }
+  } catch (err) {
+    console.warn('Error updating sky:', err)
   }
 }
 
-const zoomToStations = () => {
-  if (!map.value || !props.stations || props.stations.length === 0) return
-  const bounds = new LngLatBounds()
-  props.stations.forEach((s) => bounds.extend([s.geo_lon, s.geo_lat]))
-
-  // Use a pitch to make the 3D pillars visible
-  // Increase padding to ensure they aren't cut off at the edges
-  map.value.fitBounds(bounds, {
-    padding: { top: 200, bottom: 200, left: 100, right: 100 },
-    maxZoom: 8,
-    pitch: 60,
-  })
-}
-
-const setStationsVisibility = (visible: boolean) => {
-  if (!map.value || !map.value.getLayer('stations-layer')) return
-  map.value.setLayoutProperty(
-    'stations-layer',
-    'visibility',
-    visible ? 'visible' : 'none'
-  )
-}
+watch(roundFinished, (newVal) => {
+  console.log('Round finished changed:', newVal)
+  updateSky()
+})
 
 const setTilesVisibility = (visible: boolean) => {
   if (!map.value) return
@@ -381,57 +245,6 @@ watch(
   }
 )
 
-// Watch stations data to rebuild the layer
-watch(
-  () => props.stations,
-  (newStations) => {
-    if (newStations && newStations.length > 0) {
-      updateStationsLayer()
-    } else {
-      setStationsVisibility(false)
-    }
-  },
-  { deep: true }
-)
-
-// Watch visibility prop to toggle layer visibility and zoom to stations
-watch(
-  () => props.areStationsVisible,
-  (isVisible) => {
-    setStationsVisibility(!!isVisible)
-    if (isVisible) {
-      zoomToStations()
-    }
-  }
-)
-
-// Watch active station to update colors and reorder so active is on top
-watch(
-  () => props.activeStationId,
-  (newId) => {
-    if (!map.value || !map.value.getLayer('stations-layer')) return
-
-    map.value.setPaintProperty('stations-layer', 'fill-extrusion-color', [
-      'case',
-      ['==', ['get', 'id'], newId || ''],
-      '#f472b6',
-      '#facc15',
-    ])
-
-    // Height is now handled in buildStationFeatures and updated via setData below
-
-    // Reorder features so the active station renders on top
-    const source = map.value.getSource('stations-source') as any
-    if (source) {
-      const zoom = map.value.getZoom()
-      source.setData({
-        type: 'FeatureCollection',
-        features: buildStationFeatures(newId, zoom),
-      })
-    }
-  }
-)
-
 onMounted(() => {
   if (!mapContainer.value) return
 
@@ -482,21 +295,7 @@ const initMap = () => {
         sources: {},
         layers: [],
         glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
-        sky: isGlobe.value
-          ? {
-              'atmosphere-blend': [
-                'interpolate',
-                ['linear'],
-                ['zoom'],
-                0,
-                1,
-                5,
-                1,
-                7,
-                0,
-              ],
-            }
-          : {},
+        ...(getSkyConfig() ? { sky: getSkyConfig() } : {}),
       },
       center: [0, 20],
       zoom: 1.5,
@@ -549,8 +348,12 @@ const setupLayers = () => {
     id: 'background',
     type: 'background',
     paint: {
-      'background-color': isGlobe.value ? '#0f172a' : '#ffffff', // Navy for globe, White for flat
-      'background-color-transition': { duration: 200 },
+      'background-color': isGlobe.value
+        ? roundFinished.value
+          ? '#020617' // darker slate-950 for finished
+          : '#0f172a' // slate-900
+        : '#ffffff',
+      'background-color-transition': { duration: 1000 }, // slower transition for dramatic effect
     },
   })
 
@@ -775,6 +578,12 @@ const stopSpinning = () => {
   }
 }
 
+const { updateStationsLayer, cleanup: cleanupStations } = useMapStations(
+  map,
+  props,
+  { stopSpinning }
+)
+
 const toggleProjection = () => {
   if (!map.value) return
   stopSpinning()
@@ -800,24 +609,8 @@ const toggleProjection = () => {
     )
   }
 
-  // Toggle atmosphere
-  map.value.setSky(
-    isGlobe.value
-      ? {
-          'atmosphere-blend': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            0,
-            1,
-            5,
-            1,
-            7,
-            0,
-          ],
-        }
-      : {}
-  )
+  // Update atmosphere
+  updateSky()
 }
 
 const resetView = () => {
@@ -834,19 +627,7 @@ const resetView = () => {
     if (map.value.getLayer('countries-border')) {
       map.value.setPaintProperty('countries-border', 'line-color', '#94a3b8')
     }
-    map.value.setSky({
-      'atmosphere-blend': [
-        'interpolate',
-        ['linear'],
-        ['zoom'],
-        0,
-        1,
-        5,
-        1,
-        7,
-        0,
-      ],
-    })
+    updateSky()
   }
 
   map.value.easeTo({
@@ -872,7 +653,7 @@ onUnmounted(() => {
   stopSpinning()
   if (loadingTimeout) clearTimeout(loadingTimeout)
   resizeObserver.value?.disconnect()
-  map.value?.off('zoom', handleStationZoom)
+  cleanupStations()
   map.value?.remove()
 })
 </script>
