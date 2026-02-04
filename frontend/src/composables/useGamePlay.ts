@@ -47,8 +47,8 @@ export function useGamePlay(options: GamePlayOptions) {
     dailyChallengeNumber,
   } = useRadio()
 
-  // Hooking up country coordinates
-  const { loadCenters, getFeature } = useCountryData()
+  // Hooking up country data
+  const { loadCountryData, getFeature } = useCountryData()
 
   const currentStationUrl = computed(() => {
     return currentStations.value[currentStation.value - 1]?.channel_resolved_url
@@ -251,8 +251,8 @@ export function useGamePlay(options: GamePlayOptions) {
       window.addEventListener('keydown', handleKeydown)
     }
 
-    // Load both stations (for audio) and centers (for map/distance)
-    Promise.all([loadStations(), loadCenters()]).then(() => {
+    // Load both stations (for audio) and country data (for map/distance)
+    Promise.all([loadStations(), loadCountryData()]).then(() => {
       // Initialize Daily Challenge Logic
       initDailyChallenge()
 
@@ -312,5 +312,15 @@ export function useGamePlay(options: GamePlayOptions) {
     handleAddGuess,
     handleModalConfirm,
     handleCountrySelect,
+    handleShare: async () => {
+      const text = generateShareText()
+      try {
+        await navigator.clipboard.writeText(text)
+        // Could add toast notification here
+      } catch (err) {
+        console.error('Failed to copy results', err)
+      }
+    },
+    handleReload: () => window.location.reload(),
   }
 }

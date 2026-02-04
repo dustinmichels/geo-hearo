@@ -3,11 +3,6 @@ export interface NeCountryProperties {
   [key: string]: any
 }
 
-export interface CenterProperties {
-  ADMIN: string
-  [key: string]: any
-}
-
 export interface RadioStation {
   place_name: string
   place_id: string

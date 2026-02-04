@@ -2,7 +2,13 @@
 import { onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { Loader2, RefreshCw, Globe, Map as MapIcon, Minimize2 } from 'lucide-vue-next'
+import {
+  Loader2,
+  RefreshCw,
+  Globe,
+  Map as MapIcon,
+  Minimize2,
+} from 'lucide-vue-next'
 import type { NeCountryProperties } from '../types/geo'
 
 const props = defineProps<{
@@ -284,25 +290,6 @@ const setupLayers = () => {
     },
   })
 
-  // Add source for centroids (debug only)
-  if (import.meta.env.VITE_DEBUG_MODE === 'true') {
-    map.value.addSource('centroids', {
-      type: 'geojson',
-      data: '/data/centers.geojson',
-    })
-
-    // Add centroids layer (faint dots)
-    map.value.addLayer({
-      id: 'centroids-layer',
-      type: 'circle',
-      source: 'centroids',
-      paint: {
-        'circle-radius': 2.5,
-        'circle-color': '#0f172a', // slate-900
-        'circle-opacity': 0.3,
-      },
-    })
-  }
 }
 
 const setupInteractions = () => {
