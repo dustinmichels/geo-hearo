@@ -1,4 +1,6 @@
+import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
+import { useGameStore } from '../stores/game'
 import type { IndexStructure, RadioStation } from '../types/geo'
 
 /**
@@ -20,23 +22,26 @@ export class SeededRandom {
   }
 }
 
-// State
+// Data Cache (kept local as it is resource data, not game state)
 const countriesIndex = ref<IndexStructure | null>(null)
 const countryList = ref<string[]>([])
-const secretCountry = ref<string>('') // This is the ADMIN name
-const guesses = ref<string[]>([]) // Array of ADMIN names
-const currentStations = ref<RadioStation[]>([])
-const currentStationIndex = ref(3)
-const currentSeed = ref<number | null>(null)
-const STORAGE_KEY = 'geo_hearo_state'
 const isLoading = ref(false)
 
-// Daily Challenge State
-const isDailyChallengeMode = ref(false)
-const dailyChallengeNumber = ref(0)
+const STORAGE_KEY = 'geo_hearo_state'
 const STORAGE_KEY_DAILY_DATE = 'dailyChallengeDate'
 
 export function useRadio() {
+  const store = useGameStore()
+  const {
+    secretCountry,
+    guesses,
+    currentStations,
+    currentStationIndex,
+    currentSeed,
+    isDailyChallengeMode,
+    dailyChallengeNumber,
+  } = storeToRefs(store)
+
   /**
    * Fetches a single record from the JSONL file using a byte range
    */
@@ -97,11 +102,7 @@ export function useRadio() {
 
   const clearState = () => {
     sessionStorage.removeItem(STORAGE_KEY)
-    guesses.value = []
-    secretCountry.value = ''
-    currentStations.value = []
-    currentStationIndex.value = 3
-    currentSeed.value = null
+    store.resetGame()
   }
 
   const selectRandomCountry = async (seedInput?: number | string) => {
@@ -120,7 +121,7 @@ export function useRadio() {
 
     // Initialize RNG
     const rng = new SeededRandom(seed)
-    currentSeed.value = seed
+    store.setSeed(seed)
 
     // 1. Pick a Random Country (key is ADMIN)
     const idx = countriesIndex.value
@@ -145,9 +146,11 @@ export function useRadio() {
     }
 
     // Clear previous game state (except seed which we just set)
-    guesses.value = []
-    secretCountry.value = countryName
-    currentStationIndex.value = 3
+    // Manually resetting specific fields instead of full reset to preserve seed/mode if needed?
+    // Actually standard flow for NEW game (random) or daily challenge init
+    store.guesses = []
+    store.setSecretCountry(countryName)
+    store.setStationIndex(3)
 
     // 2. Determine which unique indices to fetch (up to 5)
     // Validate country data availability to satisfy TypeScript
@@ -184,7 +187,7 @@ export function useRadio() {
         })
       )
 
-      currentStations.value = stations
+      store.setStations(stations)
       saveState()
     } catch (err) {
       console.error('Error fetching stations:', err)
@@ -205,8 +208,8 @@ export function useRadio() {
         }
 
         // Restore guesses and stationIndex AFTER selectRandomCountry, which clears them
-        if (g) guesses.value = g
-        if (typeof si === 'number') currentStationIndex.value = si
+        if (g) store.guesses = g
+        if (typeof si === 'number') store.setStationIndex(si)
 
         return true
       } catch (e) {
@@ -221,7 +224,7 @@ export function useRadio() {
     if (!guessAdmin) return
     // Avoid duplicates
     if (!guesses.value.includes(guessAdmin)) {
-      guesses.value.push(guessAdmin)
+      store.addGuess(guessAdmin)
       saveState()
     }
   }
@@ -231,13 +234,6 @@ export function useRadio() {
 
     // Direct match check (ADMIN === ADMIN)
     if (guessAdmin === secretCountry.value) return true
-
-    // Fallback: Check strictly by coordinates if names differ but represent same place?
-    // In our new clean data regime, ADMIN should be unique and sufficient.
-    // If ADMIN strings match, we are good.
-    // We can also double check via coordinates just in case of slight string variations if data isn't perfectly normalized?
-    // But data prep should handle that. Let's rely on strict string equality first.
-    // And for logic "linked by ADMIN", string equality is the way.
 
     return false
   }
@@ -283,16 +279,15 @@ export function useRadio() {
     const lastCompleted = localStorage.getItem(STORAGE_KEY_DAILY_DATE)
 
     if (lastCompleted === todayStr) {
-      isDailyChallengeMode.value = false
+      store.setDailyChallengeMode(false)
     } else {
-      isDailyChallengeMode.value = true
-      dailyChallengeNumber.value = getDailyChallengeNumber()
+      store.setDailyChallengeMode(true, getDailyChallengeNumber())
     }
   }
 
   const completeDailyChallenge = () => {
     localStorage.setItem(STORAGE_KEY_DAILY_DATE, new Date().toDateString())
-    isDailyChallengeMode.value = false
+    store.setDailyChallengeMode(false)
   }
 
   return {

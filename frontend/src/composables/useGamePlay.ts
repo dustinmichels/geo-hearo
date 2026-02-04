@@ -1,4 +1,6 @@
+import { storeToRefs } from 'pinia'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useGameStore } from '../stores/game'
 import { getColorForDistanceLevel } from '../utils/colors'
 import { getDistanceHint } from '../utils/geography'
 import { useCountryData } from './useCountryData'
@@ -24,14 +26,9 @@ export function useGamePlay(options: GamePlayOptions) {
     dailyChallengeNumber: undefined as number | undefined,
   })
 
-  const roundFinished = computed(() => {
-    return (
-      guesses.value.length >= 5 ||
-      guesses.value.some(
-        (g) => g.toLowerCase() === secretCountry.value?.toLowerCase()
-      )
-    )
-  })
+  // State
+  const store = useGameStore()
+  const { roundFinished } = storeToRefs(store)
 
   // Hooking up radio logic
   const {
