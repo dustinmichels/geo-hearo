@@ -21,9 +21,6 @@ export function useGamePlay(options: GamePlayOptions) {
 
   const showModal = ref(false)
   const modalConfig = ref({
-    title: '',
-    message: '',
-    buttonText: '',
     isWin: false,
     shareText: undefined as string | undefined, // text to copy to clipboard
     resultsGrid: undefined as string | undefined,
@@ -169,9 +166,6 @@ export function useGamePlay(options: GamePlayOptions) {
         const resultsGrid = generateEmojiString()
 
         modalConfig.value = {
-          title: 'Daily Challenge Complete!',
-          message: `It was ${secretCountry.value}! Come back tomorrow for a new challenge.`,
-          buttonText: 'Play Free Mode',
           isWin: true,
           shareText,
           resultsGrid,
@@ -181,9 +175,6 @@ export function useGamePlay(options: GamePlayOptions) {
       } else {
         const resultsGrid = generateEmojiString()
         modalConfig.value = {
-          title: 'You got it!',
-          message: `Wooo! The country was ${secretCountry.value}. Great job!`,
-          buttonText: 'Play Again',
           isWin: true,
           shareText: undefined,
           resultsGrid,
@@ -223,9 +214,6 @@ export function useGamePlay(options: GamePlayOptions) {
         const resultsGrid = generateEmojiString()
 
         modalConfig.value = {
-          title: 'Game Over',
-          message: `Better luck next time. The country was ${secretCountry.value}.`,
-          buttonText: 'Keep Playing',
           isWin: false,
           shareText,
           resultsGrid,
@@ -235,9 +223,6 @@ export function useGamePlay(options: GamePlayOptions) {
       } else {
         const resultsGrid = generateEmojiString()
         modalConfig.value = {
-          title: 'Game Over',
-          message: `The secret country was ${secretCountry.value}.`,
-          buttonText: 'Try Again',
           isWin: false,
           shareText: undefined,
           resultsGrid,

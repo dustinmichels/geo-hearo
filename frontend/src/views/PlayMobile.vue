@@ -216,9 +216,6 @@ const activeStation = computed(() => {
     <!-- Game Result Modal -->
     <GameResultModal
       :show="showModal"
-      :title="modalConfig.title"
-      :message="modalConfig.message"
-      :button-text="modalConfig.buttonText"
       :is-win="modalConfig.isWin"
       :share-text="modalConfig.shareText"
       :results-grid="modalConfig.resultsGrid"
