@@ -171,7 +171,9 @@ const buildStationFeatures = (activeId?: string) => {
     const activeIdx = features.findIndex((f) => f.properties.id === activeId)
     if (activeIdx > -1) {
       const [active] = features.splice(activeIdx, 1)
-      features.push(active)
+      if (active) {
+        features.push(active)
+      }
     }
   }
 
@@ -620,7 +622,17 @@ const toggleProjection = () => {
   map.value.setSky(
     isGlobe.value
       ? {
-          'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 5, 1, 7, 0],
+          'atmosphere-blend': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            0,
+            1,
+            5,
+            1,
+            7,
+            0,
+          ],
         }
       : {}
   )
@@ -641,7 +653,17 @@ const resetView = () => {
       map.value.setPaintProperty('countries-border', 'line-color', '#e2e8f0')
     }
     map.value.setSky({
-      'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 5, 1, 7, 0],
+      'atmosphere-blend': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        0,
+        1,
+        5,
+        1,
+        7,
+        0,
+      ],
     })
   }
 
