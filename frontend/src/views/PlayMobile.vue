@@ -58,6 +58,12 @@ const handleArrowClick = () => {
   panelHeight.value = anchors[0]
 }
 
+const onMapCountrySelect = (country: any) => {
+  if (!roundFinished.value) {
+    handleCountrySelect(country)
+  }
+}
+
 const isPanelFullHeight = computed(() => {
   const fullHeight = anchors[1]
   if (
@@ -111,10 +117,10 @@ const activeStation = computed(() => {
 
     <!-- Fixed content area -->
     <div
-      class="h-full w-full flex flex-col max-w-md mx-auto pb-[100px] relative z-10"
+      class="h-full w-full flex flex-col max-w-md mx-auto pb-[20px] relative z-10 transition-all duration-500"
     >
       <!-- Title -->
-      <div class="pt-2 px-4 flex justify-center relative z-10">
+      <div class="pt-2 px-4 flex justify-center relative z-10 order-1">
         <div class="relative">
           <h1
             class="relative z-10 text-center text-pencil-lead text-2xl font-heading tracking-wider"
@@ -133,6 +139,7 @@ const activeStation = computed(() => {
             <template v-else> Free play mode </template>
           </div>
           <img
+            v-if="!roundFinished"
             src="/emoji.png"
             class="absolute left-full bottom-0 h-12 ml-4 z-[-1] transition-transform duration-700 ease-out"
             style="will-change: transform"
@@ -143,7 +150,8 @@ const activeStation = computed(() => {
 
       <!-- Radio Player -->
       <div
-        class="px-4 pb-2 relative z-50"
+        class="px-4 pb-2 relative z-50 transition-all duration-500"
+        :class="roundFinished ? 'order-4' : 'order-2'"
         style="transform: translate3d(0, 0, 0)"
       >
         <RadioPlayer
@@ -158,10 +166,13 @@ const activeStation = computed(() => {
       </div>
 
       <!-- Globe - takes remaining space -->
-      <div class="flex-1 px-4 pb-2 min-h-0 relative">
+      <div
+        class="flex-1 px-4 pb-2 min-h-0 relative transition-all duration-500"
+        :class="roundFinished ? 'order-2' : 'order-3'"
+      >
         <Map
           ref="mapRef"
-          @select-country="handleCountrySelect"
+          @select-country="onMapCountrySelect"
           :guessed-countries="guesses"
           :guess-colors="guessColors"
           :selected-country="guessInput"
@@ -171,18 +182,19 @@ const activeStation = computed(() => {
           :are-stations-visible="roundFinished"
           default-projection="globe"
         />
-        <!-- Station Details Overlay -->
-        <div
-          v-if="roundFinished"
-          class="absolute bottom-14 left-0 right-0 z-30 flex justify-center px-4 pointer-events-none transition-all duration-300"
-          :class="
-            isPanelFullHeight
-              ? 'opacity-0 translate-y-10'
-              : 'opacity-100 translate-y-0'
-          "
-        >
-          <ResultsPanel :station="activeStation" @new-game="handleNewGame" />
-        </div>
+      </div>
+
+      <!-- RESULTS PANEL (only visible when roundFinished) -->
+      <div
+        v-if="roundFinished"
+        class="order-3 px-4 pb-2 z-30 flex justify-center transition-all duration-500"
+        :class="
+          roundFinished
+            ? 'opacity-100 translate-y-0'
+            : 'opacity-0 translate-y-10'
+        "
+      >
+        <ResultsPanel :station="activeStation" @new-game="handleNewGame" />
       </div>
     </div>
 
@@ -194,6 +206,7 @@ const activeStation = computed(() => {
 
     <!-- Vant Floating Panel -->
     <van-floating-panel
+      v-if="!roundFinished"
       v-model:height="panelHeight"
       :anchors="anchors"
       :content-class="'bg-paper-white rounded-t-[24px] border-t-3 border-l-3 border-r-3 border-pencil-lead shadow-[0_-4px_0_0_#334155] flex flex-col'"

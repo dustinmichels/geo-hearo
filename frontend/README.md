@@ -30,6 +30,23 @@ Players listen to radio stations from a mystery country and try to identify it o
 - **Free Play** — Random country each round, unlimited replays
 - **Daily Challenge** — One shared puzzle per day for all players, seeded by date. Tracked in localStorage to prevent replays.
 
+### Country Selection
+
+Both modes funnel through `selectRandomCountry(seed?)` in `useRadio.ts`:
+
+1. **Seed** — Daily challenge passes a deterministic seed; free play generates a random one.
+2. **Pick country** — A `SeededRandom` LCG (multiplier 1103515245, increment 12345, mod 2^31) selects an index into the sorted country list from `index.json`.
+3. **Pick stations** — The same RNG draws up to 5 unique station indices from that country's pool (sampling without replacement).
+
+| Mode            | Seed source                                         | Result                                            |
+| --------------- | --------------------------------------------------- | ------------------------------------------------- |
+| Daily Challenge | `YYYYMMDD` integer (`year*10000 + month*100 + day`) | Same country & stations for every player that day |
+| Free Play       | `Math.floor(Math.random() * 10000000)`              | Different country each round                      |
+
+The daily challenge seed is based on the user's **local** date. `initDailyChallenge()` checks localStorage to see if today's puzzle was already completed; if so, the player falls through to free play.
+
+The env var `VITE_SECRET_COUNTRY` overrides country selection entirely (dev only).
+
 **Data Loading:** The app fetches a country index (`public/data/index.json`), then uses HTTP Range requests to lazily load only the needed station records from `public/data/stations.jsonl`. All geographic data is linked by the `ADMIN` country name field.
 
 ## Project Structure
@@ -68,4 +85,5 @@ In the shareable results string, a correct guess is shown as 🟢.
 ## Environment Variables
 
 - `VITE_DEBUG_MODE=true` — Shows secret country on map (dev only)
+- `VITE_ROUND_FINISHED=true` — Forces the game into a "completed round" state (dev only)
 - `VITE_GIT_HASH` — Injected at build time

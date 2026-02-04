@@ -14,6 +14,9 @@ export const useGameStore = defineStore('game', () => {
 
   // Getters
   const roundFinished = computed(() => {
+    // Debug override
+    if (import.meta.env.VITE_ROUND_FINISHED === 'true') return true
+
     return (
       guesses.value.length >= 5 ||
       guesses.value.some(

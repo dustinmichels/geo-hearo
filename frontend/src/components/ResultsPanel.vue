@@ -14,7 +14,7 @@ defineEmits<{
 
 <template>
   <div
-    class="flex items-stretch justify-center gap-2 pointer-events-auto w-[360px] max-w-full mx-auto"
+    class="flex items-stretch justify-center gap-2 pointer-events-auto w-full max-w-sm mx-auto"
   >
     <!-- Center: Station Details -->
     <div class="flex-1 w-full min-w-0">
