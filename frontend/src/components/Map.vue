@@ -119,29 +119,44 @@ const getPillarPolygon = (lat: number, lon: number, radiusKm: number) => {
   ]
 }
 
-const showRadioStations = () => {
-  if (!map.value || !props.stations || props.stations.length === 0) return
+const buildStationFeatures = (activeId?: string) => {
+  if (!props.stations) return []
 
-  // Cleanup old layers if they exist (especially if type changed from circle)
-  if (map.value.getLayer('stations-layer'))
-    map.value.removeLayer('stations-layer')
-  if (map.value.getSource('stations-source'))
-    map.value.removeSource('stations-source')
+  // Group stations by location to detect overlaps
+  const locationGroups = new Map<string, number[]>()
+  props.stations.forEach((s, i) => {
+    const key = `${s.geo_lat},${s.geo_lon}`
+    if (!locationGroups.has(key)) locationGroups.set(key, [])
+    locationGroups.get(key)!.push(i)
+  })
 
-  const stationFeatures = props.stations.map((s) => {
-    // Calculate height based on place_size (logarithmic scale or capped)
-    // Adjusted range: 20km - 170km
-    const baseHeight = 20000
+  const features = props.stations.map((s, i) => {
+    const baseHeight = 2000000
     const variableHeight = s.place_size
-      ? Math.min(s.place_size * 10, 150000)
-      : 20000
+      ? Math.min(s.place_size * 500, 8000000)
+      : 2000000
     const height = baseHeight + variableHeight
+
+    // Offset co-located stations so each pillar is visible
+    let lat = s.geo_lat
+    let lon = s.geo_lon
+    const key = `${s.geo_lat},${s.geo_lon}`
+    const group = locationGroups.get(key)!
+    if (group.length > 1) {
+      const idx = group.indexOf(i)
+      const angle = (2 * Math.PI * idx) / group.length
+      const offsetKm = 20 // spread radius in km
+      lat += (offsetKm / 111.32) * Math.sin(angle)
+      lon +=
+        (offsetKm / (111.32 * Math.cos((s.geo_lat * Math.PI) / 180))) *
+        Math.cos(angle)
+    }
 
     return {
       type: 'Feature',
       geometry: {
         type: 'Polygon',
-        coordinates: getPillarPolygon(s.geo_lat, s.geo_lon, 2), // 2km wide pillars
+        coordinates: getPillarPolygon(lat, lon, 15),
       },
       properties: {
         name: s.channel_name,
@@ -151,9 +166,30 @@ const showRadioStations = () => {
     }
   })
 
+  // Move the active station to the end so it renders on top
+  if (activeId) {
+    const activeIdx = features.findIndex((f) => f.properties.id === activeId)
+    if (activeIdx > -1) {
+      const [active] = features.splice(activeIdx, 1)
+      features.push(active)
+    }
+  }
+
+  return features
+}
+
+const showRadioStations = () => {
+  if (!map.value || !props.stations || props.stations.length === 0) return
+
+  // Cleanup old layers if they exist (especially if type changed from circle)
+  if (map.value.getLayer('stations-layer'))
+    map.value.removeLayer('stations-layer')
+  if (map.value.getSource('stations-source'))
+    map.value.removeSource('stations-source')
+
   const sourceData = {
     type: 'FeatureCollection',
-    features: stationFeatures,
+    features: buildStationFeatures(props.activeStationId),
   }
 
   // Add source
@@ -174,7 +210,12 @@ const showRadioStations = () => {
         '#f472b6', // Active: Pink
         '#facc15', // Default: Yellow
       ],
-      'fill-extrusion-height': ['get', 'height'],
+      'fill-extrusion-height': [
+        'case',
+        ['==', ['get', 'id'], props.activeStationId || ''],
+        ['*', ['get', 'height'], 1.5],
+        ['get', 'height'],
+      ],
       'fill-extrusion-base': 0,
       'fill-extrusion-opacity': 0.8,
     },
@@ -235,7 +276,7 @@ watch(
   }
 )
 
-// Watch active station to update colors without re-zooming
+// Watch active station to update colors and reorder so active is on top
 watch(
   () => props.activeStationId,
   (newId) => {
@@ -247,6 +288,23 @@ watch(
       '#f472b6',
       '#facc15',
     ])
+
+    // Make the active pillar taller
+    map.value.setPaintProperty('stations-layer', 'fill-extrusion-height', [
+      'case',
+      ['==', ['get', 'id'], newId || ''],
+      ['*', ['get', 'height'], 1.5],
+      ['get', 'height'],
+    ])
+
+    // Reorder features so the active station renders on top
+    const source = map.value.getSource('stations-source') as any
+    if (source) {
+      source.setData({
+        type: 'FeatureCollection',
+        features: buildStationFeatures(newId),
+      })
+    }
   }
 )
 

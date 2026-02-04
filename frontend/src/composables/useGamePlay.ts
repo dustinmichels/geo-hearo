@@ -1,6 +1,6 @@
 import gsap from 'gsap'
 import type { Ref } from 'vue'
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { getColorForDistanceLevel } from '../utils/colors'
 import { getDistanceHint } from '../utils/geography'
 import { useCountryData } from './useCountryData'
@@ -59,6 +59,13 @@ export function useGamePlay(options: GamePlayOptions) {
     getDailyChallengeSeed,
     dailyChallengeNumber,
   } = useRadio()
+
+  // Watch for round completion to fill in the secret country
+  watch(roundFinished, (finished) => {
+    if (finished && secretCountry.value) {
+      guessInput.value = secretCountry.value
+    }
+  })
 
   // Hooking up country data
   const { loadCountryData, getFeature } = useCountryData()
@@ -340,6 +347,7 @@ export function useGamePlay(options: GamePlayOptions) {
     currentStation,
     currentStations,
     currentStationUrl,
+    secretCountry,
     debugCountry,
     roundFinished,
     handlePlayPause,

@@ -9,9 +9,11 @@ const props = withDefaults(
     modelValue: string
     guesses: string[]
     withFooter?: boolean
+    disabled?: boolean
   }>(),
   {
     withFooter: true,
+    disabled: false,
   }
 )
 
@@ -45,7 +47,7 @@ const handleGuess = () => {
           :model-value="modelValue"
           @update:model-value="emit('update:modelValue', $event)"
           placeholder="Select a country"
-          :disabled="guesses.length >= 5"
+          :disabled="guesses.length >= 5 || disabled"
           readonly
           @keypress.enter="handleGuess"
           class="flex-1 !border-3 !rounded-2xl !py-3 !px-4 !text-[18px] font-body text-pencil-lead placeholder:text-eraser-grey transition-colors bg-white"
@@ -53,6 +55,7 @@ const handleGuess = () => {
           :border="false"
         />
         <button
+          v-if="!disabled"
           @click="handleGuess"
           :disabled="!modelValue.trim() || guesses.length >= 5"
           :class="{ shake: isShaking }"

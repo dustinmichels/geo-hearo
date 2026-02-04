@@ -208,6 +208,7 @@ const activeStation = computed(() => {
       <GuessPanel
         v-model="guessInput"
         :guesses="guesses"
+        :disabled="roundFinished"
         @add-guess="handleAddGuess"
       />
     </van-floating-panel>
