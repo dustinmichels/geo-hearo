@@ -47,6 +47,8 @@ The daily challenge seed is based on the user's **local** date. `initDailyChalle
 
 The env var `VITE_SECRET_COUNTRY` overrides country selection entirely (dev only).
 
+**Repetition & distribution notes:** The LCG stride through the country list has a GCD of 1 with the country count, so daily challenge seeds map to distinct countries — empirically verified with zero repeats across 60+ simulated days. Free play has no anti-repetition mechanism; each round draws independently, so repeats are expected after ~√N rounds (~12 with 142 countries). Modulo bias is negligible (~10⁻⁷).
+
 **Data Loading:** The app fetches a country index (`public/data/index.json`), then uses HTTP Range requests to lazily load only the needed station records from `public/data/stations.jsonl`. All geographic data is linked by the `ADMIN` country name field.
 
 ## Project Structure
