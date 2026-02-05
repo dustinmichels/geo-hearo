@@ -17,7 +17,7 @@ export function useOnboarding() {
           element: '#tour-play-btn',
           popover: {
             title: 'Play Radio',
-            description: 'Click to stream radio from the mystery country',
+            description: 'Click to stream radio from the mystery country.',
             side: 'bottom',
             align: 'center',
           },
@@ -35,8 +35,8 @@ export function useOnboarding() {
         {
           element: '#tour-map-container',
           popover: {
-            title: 'Identify Country',
-            description: 'Click a country on the map to populate a guess.',
+            title: 'Make a guess',
+            description: 'Click a country on the map, then press "Guess."',
             side: 'left',
             align: 'center',
           },
