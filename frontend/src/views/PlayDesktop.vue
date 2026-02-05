@@ -42,6 +42,11 @@ const activeStation = computed(() => {
   if (!currentStations.value || !currentStations.value.length) return undefined
   return currentStations.value[currentStation.value - 1]
 })
+
+const handleModalClose = () => {
+  showModal.value = false
+  mapRef.value?.zoomToStations()
+}
 </script>
 
 <template>
@@ -162,7 +167,7 @@ const activeStation = computed(() => {
       :secret-country="modalConfig.secretCountry"
       :daily-challenge-number="modalConfig.dailyChallengeNumber"
       @confirm="handleModalConfirm"
-      @close="showModal = false"
+      @close="handleModalClose"
     />
   </div>
 </template>

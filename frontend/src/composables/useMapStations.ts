@@ -212,14 +212,11 @@ export function useMapStations(
     }
   )
 
-  // Watch visibility prop to toggle layer visibility and zoom to stations
+  // Watch visibility prop to toggle layer visibility
   watch(
     () => props.areStationsVisible,
     (isVisible) => {
       setStationsVisibility(!!isVisible)
-      if (isVisible) {
-        zoomToStations()
-      }
     }
   )
 
@@ -252,5 +249,5 @@ export function useMapStations(
     map.value?.off('zoom', handleStationZoom)
   }
 
-  return { updateStationsLayer, cleanup }
+  return { updateStationsLayer, zoomToStations, cleanup }
 }

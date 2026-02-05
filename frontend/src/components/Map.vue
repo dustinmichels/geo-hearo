@@ -551,11 +551,11 @@ const stopSpinning = () => {
   }
 }
 
-const { updateStationsLayer, cleanup: cleanupStations } = useMapStations(
-  map,
-  props,
-  { stopSpinning }
-)
+const {
+  updateStationsLayer,
+  zoomToStations,
+  cleanup: cleanupStations,
+} = useMapStations(map, props, { stopSpinning })
 
 const applyProjectionStyles = () => {
   if (!map.value) return
@@ -622,7 +622,7 @@ const resetView = () => {
   })
 }
 
-defineExpose({ resetView })
+defineExpose({ resetView, zoomToStations })
 
 onUnmounted(() => {
   stopSpinning()

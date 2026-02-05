@@ -43,7 +43,7 @@
               <li
                 v-for="(item, i) in section.content"
                 :key="i"
-                class="flex items-start gap-3 text-lg md:text-xl text-pencil-lead/90 font-body leading-relaxed"
+                class="flex items-start gap-3 text-base md:text-lg text-pencil-lead/90 font-body leading-relaxed"
               >
                 <span class="text-gumball-blue shrink-0 mt-[6px] text-sm"
                   >⟡</span
@@ -54,7 +54,7 @@
           </div>
           <div
             v-else
-            class="text-lg md:text-xl text-pencil-lead/90 font-body leading-relaxed"
+            class="text-base md:text-lg text-pencil-lead/90 font-body leading-relaxed"
             v-html="section.content"
           ></div>
         </section>
@@ -115,7 +115,7 @@ const sections = [
     title: 'Data Sources',
     content: [
       'The country polygons are from <a href="https://www.naturalearthdata.com/" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Natural Earth</a>. They are the ones that decide what counts as a country.',
-      'The underlying radio data is borrowed, gratefully, from <a href="https://radio.garden/" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Radio.Garden</a>.',
+      'The underlying radio data is borrowed, gratefully, from <a href="https://radio.garden/" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Radio.Garden</a>. There are over 30,000 stations to chose from when you start a game.',
     ],
   },
   {
@@ -144,11 +144,6 @@ const sections = [
       'When a new round begins, I randomly select a country and five stations, and load the relevant lines from the jsonl file using ranged Fetch requests',
       'For the daily challenge, I use the date as a random seed so all players get the same mystery country.',
     ],
-  },
-  {
-    emoji: '👏',
-    title: 'Thanks & Attributions',
-    content: ['Thank you to friends and family for testing!'],
   },
 ]
 
