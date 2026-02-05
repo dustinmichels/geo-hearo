@@ -186,9 +186,9 @@ const setTilesVisibility = (visible: boolean) => {
   }
 
   // Toggle terrain tiles
-  if (map.value.getLayer('carto-light-layer')) {
+  if (map.value.getLayer('stadia-smooth-dark-layer')) {
     map.value.setLayoutProperty(
-      'carto-light-layer',
+      'stadia-smooth-dark-layer',
       'visibility',
       visible ? 'visible' : 'none'
     )
@@ -357,24 +357,24 @@ const setupLayers = () => {
     },
   })
 
-  // Add Carto Light Source
-  map.value.addSource('carto-light', {
+  // Add Stadia Alidade Smooth Dark Source
+  map.value.addSource('stadia-smooth-dark', {
     type: 'raster',
     tiles: [
-      'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-      'https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-      'https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-      'https://d.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+      'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png',
     ],
     tileSize: 256,
-    attribution: 'Tiles © Carto',
+    attribution:
+      '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    minzoom: 0,
+    maxzoom: 20,
   })
 
-  // Add Carto Light Layer (initially hidden)
+  // Add Stadia Alidade Smooth Dark Layer (initially hidden)
   map.value.addLayer({
-    id: 'carto-light-layer',
+    id: 'stadia-smooth-dark-layer',
     type: 'raster',
-    source: 'carto-light',
+    source: 'stadia-smooth-dark',
     minzoom: 0,
     maxzoom: 22,
     layout: {

@@ -101,7 +101,7 @@
             class="inline-block lg:block mx-auto border-4 border-dotted border-pencil-lead/30 rounded-3xl p-6 sm:p-8"
           >
             <h2
-              class="text-xl sm:text-2xl font-bold text-pencil-lead mb-6 font-heading uppercase tracking-wider text-left"
+              class="text-xl sm:text-2xl font-bold text-pencil-lead mb-4 font-heading uppercase tracking-wider text-left"
             >
               How it works:
             </h2>
