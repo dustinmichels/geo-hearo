@@ -2,14 +2,6 @@
   <div
     class="min-h-screen w-screen no-scroll-container flex flex-col items-center justify-center p-6 md:p-12 overflow-x-hidden relative"
   >
-    <!-- Under Construction Banner -->
-    <div class="fixed top-4 right-4 z-50 pointer-events-none">
-      <div
-        class="bg-yuzu-yellow text-pencil-lead font-heading px-4 py-2 rounded-full border-3 border-pencil-lead text-sm font-bold shadow-[4px_4px_0px_0px_#334155] transform rotate-3"
-      >
-        🚧 UNDER CONSTRUCTION
-      </div>
-    </div>
     <!-- Decorative Background Shapes for "Pop" -->
     <div
       ref="blob1"
@@ -71,43 +63,42 @@
             ref="mainTitle"
             class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-[1.1] tracking-tight text-pencil-lead opacity-0 translate-y-10"
           >
-            GeoHearo is the geo-guessing game where you
-            <span class="text-gumball-blue inline-block"
+            <span class="text-gumball-blue">GeoHearo</span> is the geo-guessing
+            game where you
+            <span class="text-gumball-blue inline-block italic"
               >win with your ears.</span
             >
           </h1>
 
-          <ul
-            class="space-y-4 md:space-y-6 text-lg sm:text-xl lg:text-2xl text-pencil-lead/90 font-body text-left inline-block lg:block mx-auto"
+          <div
+            class="inline-block lg:block mx-auto border-4 border-dotted border-pencil-lead/30 rounded-3xl p-6 sm:p-8"
           >
-            <li
-              v-for="(step, index) in steps"
-              :key="index"
-              ref="stepItems"
-              class="flex items-center gap-4 sm:gap-6 opacity-0 -translate-x-10"
-              @mouseenter="onStepHover($event.currentTarget as HTMLElement)"
-              @mouseleave="onStepLeave($event.currentTarget as HTMLElement)"
+            <h2
+              class="text-xl sm:text-2xl font-bold text-pencil-lead mb-6 font-heading uppercase tracking-wider text-left"
             >
-              <div :class="['step-badge', step.colorClass]">
-                {{ index + 1 }}
-              </div>
-              <span class="leading-snug">{{ step.text }}</span>
-            </li>
-          </ul>
+              How it works:
+            </h2>
+            <ul
+              class="space-y-4 md:space-y-6 text-base sm:text-lg lg:text-xl text-pencil-lead/90 font-body text-left"
+            >
+              <li
+                v-for="(step, index) in steps"
+                :key="index"
+                ref="stepItems"
+                class="flex items-center gap-4 sm:gap-6 opacity-0 -translate-x-10"
+                @mouseenter="onStepHover($event.currentTarget as HTMLElement)"
+                @mouseleave="onStepLeave($event.currentTarget as HTMLElement)"
+              >
+                <div :class="['step-badge', step.colorClass]">
+                  {{ index + 1 }}
+                </div>
+                <span class="leading-snug" v-html="step.text"></span>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <div class="space-y-6 sm:space-y-8">
-          <p
-            ref="heroQuestion"
-            class="text-xl sm:text-2xl md:text-3xl font-heading text-bubblegum-pop uppercase tracking-tight leading-none opacity-0"
-          >
-            Do you have what it takes to be... <br />
-            <span
-              class="text-3xl sm:text-4xl md:text-5xl text-pencil-lead block mt-2"
-              >The Geo Hearo?</span
-            >
-          </p>
-
           <div class="flex justify-center lg:justify-start pt-2 pb-6 lg:pb-0">
             <button
               ref="ctaButton"
@@ -116,7 +107,7 @@
               @mouseenter="onButtonHover"
               @mouseleave="onButtonLeave"
             >
-              Tune In
+              PLAY
             </button>
           </div>
         </div>
@@ -151,12 +142,16 @@ const steps = [
     colorClass: 'bg-gumball-blue',
   },
   {
-    text: 'Pay attention to what you hear',
+    text: 'Pay attention to what you hear, then make a guess.',
     colorClass: 'bg-bubblegum-pop',
   },
   {
-    text: 'Make a guess, get a hint, repeat',
+    text: 'You get a hint: the distance between the countries',
     colorClass: 'bg-mint-shake',
+  },
+  {
+    text: 'Each day has a Daily Challenge.',
+    colorClass: 'bg-berry-oops',
   },
 ]
 
