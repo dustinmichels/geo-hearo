@@ -51,6 +51,33 @@
           >
             <span class="text-xl sm:text-4xl">📢</span>
           </div>
+
+          <!-- Buttons Overlay (Desktop Only) -->
+          <div
+            class="hidden lg:flex absolute inset-0 z-30 items-center justify-center gap-4 sm:gap-6 pointer-events-none"
+          >
+            <div
+              ref="ctaButtonDesktop"
+              class="relative group cursor-pointer pointer-events-auto opacity-0 scale-50"
+              @click="handleTuneIn($event)"
+              @mouseenter="onButtonHover($event.currentTarget as HTMLElement)"
+              @mouseleave="onButtonLeave($event.currentTarget as HTMLElement)"
+            >
+              <div class="magic-container">
+                <div
+                  class="magic-wave wave-1 rounded-[30px] sm:rounded-[36px]"
+                ></div>
+                <div
+                  class="magic-wave wave-2 rounded-[30px] sm:rounded-[36px]"
+                ></div>
+              </div>
+              <button
+                class="btn-pressable bg-yuzu-yellow px-12 sm:px-16 py-6 sm:py-8 rounded-[30px] sm:rounded-[36px] text-4xl sm:text-6xl btn-text uppercase tracking-widest text-pencil-lead relative z-10 block"
+              >
+                PLAY
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -98,28 +125,30 @@
           </div>
         </div>
 
-        <div class="space-y-6 sm:space-y-8">
-          <div
-            class="flex justify-center lg:justify-start pt-0 pb-6 lg:pb-0 gap-4 sm:gap-6"
-          >
-            <button
-              ref="ctaButton"
-              class="btn-pressable bg-yuzu-yellow px-12 sm:px-16 py-6 sm:py-8 rounded-[30px] sm:rounded-[36px] text-4xl sm:text-6xl btn-text uppercase tracking-widest text-pencil-lead opacity-0 scale-50"
-              @click="handleTuneIn"
+        <!-- Mobile Buttons (Original Position) -->
+        <div class="lg:hidden space-y-6 sm:space-y-8">
+          <div class="flex justify-center pt-0 pb-6 gap-4 sm:gap-6">
+            <div
+              ref="ctaButtonMobile"
+              class="relative group cursor-pointer opacity-0 scale-50"
+              @click="handleTuneIn($event)"
               @mouseenter="onButtonHover($event.currentTarget as HTMLElement)"
               @mouseleave="onButtonLeave($event.currentTarget as HTMLElement)"
             >
-              PLAY
-            </button>
-            <button
-              ref="aboutButton"
-              class="btn-pressable bg-paper-white px-12 sm:px-16 py-6 sm:py-8 rounded-[30px] sm:rounded-[36px] text-4xl sm:text-6xl btn-text uppercase tracking-widest text-pencil-lead opacity-0 scale-50"
-              @click="handleAbout"
-              @mouseenter="onButtonHover($event.currentTarget as HTMLElement)"
-              @mouseleave="onButtonLeave($event.currentTarget as HTMLElement)"
-            >
-              ABOUT
-            </button>
+              <div class="magic-container">
+                <div
+                  class="magic-wave wave-1 rounded-[30px] sm:rounded-[36px]"
+                ></div>
+                <div
+                  class="magic-wave wave-2 rounded-[30px] sm:rounded-[36px]"
+                ></div>
+              </div>
+              <button
+                class="btn-pressable bg-yuzu-yellow px-12 sm:px-16 py-6 sm:py-8 rounded-[30px] sm:rounded-[36px] text-4xl sm:text-6xl btn-text uppercase tracking-widest text-pencil-lead relative z-10 block"
+              >
+                PLAY
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -129,7 +158,12 @@
     <div
       class="absolute bottom-4 w-full text-center text-eraser-grey text-sm font-heading z-20 pointer-events-auto"
     >
-      Created by
+      <router-link
+        :to="{ name: 'About' }"
+        class="hover:text-bubblegum-pop transition-colors underline decoration-2 decoration-bubblegum-pop/30 underline-offset-2"
+        >About</router-link
+      >
+      &bull; Created by
       <a
         href="https://dustinmichels.com/"
         target="_blank"
@@ -159,8 +193,8 @@ const sticker2 = ref(null)
 const mainTitle = ref(null)
 const stepItems = ref<HTMLElement[]>([])
 const heroQuestion = ref(null)
-const ctaButton = ref(null)
-const aboutButton = ref(null)
+const ctaButtonDesktop = ref(null)
+const ctaButtonMobile = ref(null)
 
 const steps = [
   {
@@ -186,27 +220,16 @@ const handleImageError = (event: Event) => {
   img.src = 'https://via.placeholder.com/400?text=< '
 }
 
-const handleTuneIn = () => {
+const handleTuneIn = (event: Event) => {
   // Animate button press before navigating
-  gsap.to(ctaButton.value, {
+  const btn = event.currentTarget as HTMLElement
+  gsap.to(btn, {
     scale: 0.95,
     duration: 0.1,
     yoyo: true,
     repeat: 1,
     onComplete: () => {
       router.push({ name: 'Play' })
-    },
-  })
-}
-
-const handleAbout = () => {
-  gsap.to(aboutButton.value, {
-    scale: 0.95,
-    duration: 0.1,
-    yoyo: true,
-    repeat: 1,
-    onComplete: () => {
-      router.push({ name: 'About' })
     },
   })
 }
@@ -255,20 +278,41 @@ const onButtonHover = (el: HTMLElement) => {
   gsap.to(el, {
     scale: 1.05,
     rotation: -2,
-    boxShadow: '0 12px 0 0 #334155',
     duration: 0.2,
     ease: 'power1.out',
   })
+
+  // Handle shadow on child button if wrapped
+  const target = el.classList.contains('btn-pressable')
+    ? el
+    : el.querySelector('.btn-pressable')
+  if (target) {
+    gsap.to(target, {
+      boxShadow: '0 12px 0 0 #334155',
+      duration: 0.2,
+      ease: 'power1.out',
+    })
+  }
 }
 
 const onButtonLeave = (el: HTMLElement) => {
   gsap.to(el, {
     scale: 1,
     rotation: 0,
-    boxShadow: '0 8px 0 0 #334155',
     duration: 0.2,
     ease: 'power1.out',
   })
+
+  const target = el.classList.contains('btn-pressable')
+    ? el
+    : el.querySelector('.btn-pressable')
+  if (target) {
+    gsap.to(target, {
+      boxShadow: '0 8px 0 0 #334155',
+      duration: 0.2,
+      ease: 'power1.out',
+    })
+  }
 }
 
 onMounted(() => {
@@ -300,7 +344,7 @@ onMounted(() => {
       '-=0.4'
     )
     .to(
-      [ctaButton.value, aboutButton.value],
+      [ctaButtonDesktop.value, ctaButtonMobile.value],
       {
         scale: 1,
         opacity: 1,
@@ -432,5 +476,45 @@ onMounted(() => {
     overflow: hidden;
     height: 100vh;
   }
+}
+
+/* Magic Ripple Effect */
+@keyframes ripple {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.magic-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.magic-wave {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  animation: ripple 3s infinite cubic-bezier(0, 0, 0.2, 1);
+}
+
+.wave-1 {
+  background-color: rgba(244, 114, 182, 0.5); /* Bubblegum Pop */
+  animation-delay: 0s;
+}
+
+.wave-2 {
+  background-color: rgba(244, 114, 182, 0.5); /* Bubblegum Pop */
+  animation-delay: 1.5s;
 }
 </style>
