@@ -21,6 +21,7 @@
     "@turf/distance": "^7.3.3",
     "@turf/explode": "^7.3.3",
     "@turf/turf": "^7.3.3",
+    "driver.js": "^1.4.0",
     "gsap": "^3.14.2",
     "lucide-vue-next": "^0.562.0",
     "maplibre-gl": "^5.15.0",

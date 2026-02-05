@@ -149,6 +149,7 @@ const onNext = () => {
           <div class="magic-wave wave-2"></div>
         </div>
         <van-button
+          id="tour-skip-back-btn"
           plain
           class="relative z-10 !p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead"
           :class="compact ? '!h-10 !w-10' : '!h-12 !w-12'"
@@ -167,6 +168,7 @@ const onNext = () => {
           <div class="magic-wave wave-2"></div>
         </div>
         <van-button
+          id="tour-play-btn"
           type="primary"
           round
           class="relative z-10 !p-0 !border-3 !border-pencil-lead shadow-[0_4px_0_0_#334155] active:translate-y-1 active:shadow-none transition-all duration-100 bg-gumball-blue"
@@ -192,6 +194,7 @@ const onNext = () => {
           <div class="magic-wave wave-2"></div>
         </div>
         <van-button
+          id="tour-skip-forward-btn"
           plain
           class="relative z-10 !p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead"
           :class="compact ? '!h-10 !w-10' : '!h-12 !w-12'"

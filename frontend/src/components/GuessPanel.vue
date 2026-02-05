@@ -44,6 +44,7 @@ const handleGuess = () => {
       <!-- Input Area -->
       <div class="flex gap-3 items-center">
         <van-field
+          id="tour-guess-input"
           :model-value="modelValue"
           @update:model-value="emit('update:modelValue', $event)"
           placeholder="Select a country"
@@ -55,6 +56,7 @@ const handleGuess = () => {
           :border="false"
         />
         <button
+          id="tour-guess-btn"
           v-if="!disabled"
           @click="handleGuess"
           :disabled="!modelValue.trim() || guesses.length >= 5"

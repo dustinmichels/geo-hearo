@@ -55,6 +55,8 @@ The env var `VITE_SECRET_COUNTRY` overrides country selection entirely (dev only
 
 **Audio Reliability:** To ensure uninterrupted gameplay, the app monitors the audio stream for silence. If a station connects but broadcasts silence for more than 2 seconds, it automatically skips to the next available station.
 
+**Round End Flow:** When a round ends (win or loss), the result modal appears, stations become visible on the map, and the map resets to the default zoomed-out view. The zoom animation to the stations is deliberately delayed until the user dismisses the modal by clicking "See the stations", allowing them to watch the satisfying zoom transition.
+
 ## Project Structure
 
 ```

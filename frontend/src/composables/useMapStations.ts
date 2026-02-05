@@ -184,9 +184,8 @@ export function useMapStations(
       },
     })
 
-    // Zoom to stations if visible
+    // Stop spinning when stations are shown (zoom handled separately by parent)
     if (props.areStationsVisible !== false) {
-      zoomToStations()
       callbacks.stopSpinning()
     }
   }

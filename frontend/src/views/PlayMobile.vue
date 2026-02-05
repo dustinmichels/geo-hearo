@@ -167,6 +167,7 @@ const handleModalClose = () => {
 
       <!-- Globe - takes remaining space -->
       <div
+        id="tour-map-container"
         class="flex-1 px-4 pb-2 min-h-0 relative order-3 transition-all duration-500"
       >
         <Map

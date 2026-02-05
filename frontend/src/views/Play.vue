@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
+import { useOnboarding } from '../composables/useOnboarding'
 import { useRadio } from '../composables/useRadio'
 import PlayDesktop from './PlayDesktop.vue'
 import PlayMobile from './PlayMobile.vue'
@@ -7,6 +8,7 @@ import PlayMobile from './PlayMobile.vue'
 const isMobile = ref(window.innerWidth < 1024)
 const { secretCountry } = useRadio()
 const isDebug = import.meta.env.VITE_DEBUG_MODE === 'true'
+const { startTour } = useOnboarding()
 
 const checkDevice = () => {
   isMobile.value = window.innerWidth < 1024 // standard tablet/mobile breakpoint
@@ -15,6 +17,10 @@ const checkDevice = () => {
 onMounted(() => {
   checkDevice()
   window.addEventListener('resize', checkDevice)
+  // Give child components time to mount and settle
+  setTimeout(() => {
+    startTour()
+  }, 1000)
 })
 
 onUnmounted(() => {

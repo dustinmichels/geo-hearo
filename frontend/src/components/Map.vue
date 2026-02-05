@@ -143,8 +143,18 @@ const updateSky = () => {
   }
 }
 
-watch(roundFinished, () => {
+watch(roundFinished, (isFinished) => {
   updateSky()
+  // Reset to default view when round finishes (zoom to stations happens later on user action)
+  if (isFinished && map.value) {
+    stopSpinning()
+    map.value.easeTo({
+      center: [0, 20],
+      zoom: 1.5,
+      pitch: 0,
+      duration: 800,
+    })
+  }
 })
 
 const setTilesVisibility = (visible: boolean) => {

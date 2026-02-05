@@ -65,6 +65,7 @@ const handleModalClose = () => {
     <div class="flex-1 flex gap-6 min-h-0 relative z-10">
       <!-- Left: Map Area -->
       <div
+        id="tour-map-container"
         class="flex-1 bg-sea-blue/10 rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] overflow-hidden relative z-10"
       >
         <Map
