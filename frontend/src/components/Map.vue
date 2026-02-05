@@ -45,7 +45,10 @@ const emit = defineEmits<{
 }>()
 
 // Update map filter when guesses change
-const setLayerFilter = (layer: string, filter: maplibregl.FilterSpecification) => {
+const setLayerFilter = (
+  layer: string,
+  filter: maplibregl.FilterSpecification
+) => {
   if (!map.value) return
   if (map.value.getLayer(layer)) map.value.setFilter(layer, filter)
   const border = `${layer}-border`
@@ -91,10 +94,7 @@ watch(
 watch(
   () => props.selectedCountry,
   (newSelected) => {
-    setLayerFilter(
-      'countries-highlight',
-      ['==', 'ADMIN', newSelected || '']
-    )
+    setLayerFilter('countries-highlight', ['==', 'ADMIN', newSelected || ''])
   }
 )
 
@@ -102,10 +102,7 @@ watch(
 watch(
   () => props.secretCountry,
   (newSecret) => {
-    setLayerFilter(
-      'countries-secret',
-      ['==', 'ADMIN', newSecret || '']
-    )
+    setLayerFilter('countries-secret', ['==', 'ADMIN', newSecret || ''])
   }
 )
 
@@ -135,7 +132,11 @@ const updateSky = () => {
     if (map.value.getStyle()) {
       const config = getSkyConfig()
       // setSky(undefined) removes the sky layer
-      map.value.setSky(config)
+      if (Object.keys(config).length === 0) {
+        map.value.setSky(undefined as any)
+      } else {
+        map.value.setSky(config)
+      }
     }
   } catch (err) {
     console.warn('Error updating sky:', err)
