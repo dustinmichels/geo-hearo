@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Pause, Play, SkipBack, SkipForward } from 'lucide-vue-next'
 import { Button as VanButton } from 'vant'
-import { ref, watch } from 'vue'
-import { playRadioStatic } from '../utils/audio'
+import { onUnmounted, ref, watch } from 'vue'
+import { playRadioStatic, setupAudioMonitoring } from '../utils/audio'
 
 const props = withDefaults(
   defineProps<{
@@ -24,6 +24,7 @@ const emit = defineEmits<{
 
 const audioPlayer = ref<HTMLAudioElement | null>(null)
 const currentStaticSource = ref<AudioBufferSourceNode | null>(null) // Store the source node
+const cleanupMonitoring = ref<(() => void) | null>(null)
 
 const playStatic = () => {
   // Stop any existing static first
@@ -49,7 +50,25 @@ const onAudioPlaying = () => {
     }
     currentStaticSource.value = null
   }
+
+  // Start monitoring for silence
+  if (cleanupMonitoring.value) {
+    cleanupMonitoring.value()
+  }
+
+  if (audioPlayer.value) {
+    cleanupMonitoring.value = setupAudioMonitoring(audioPlayer.value, () => {
+      console.log('Silence detected, skipping...')
+      onNext()
+    })
+  }
 }
+
+onUnmounted(() => {
+  if (cleanupMonitoring.value) {
+    cleanupMonitoring.value()
+  }
+})
 
 watch(
   () => props.isPlaying,
@@ -68,6 +87,10 @@ watch(
           currentStaticSource.value.stop()
         } catch (e) {}
         currentStaticSource.value = null
+      }
+      if (cleanupMonitoring.value) {
+        cleanupMonitoring.value()
+        cleanupMonitoring.value = null
       }
     }
   }
@@ -216,7 +239,12 @@ const onNext = () => {
     </div>
 
     <!-- Audio Element -->
-    <audio ref="audioPlayer" class="hidden" @playing="onAudioPlaying" />
+    <audio
+      ref="audioPlayer"
+      class="hidden"
+      crossorigin="anonymous"
+      @playing="onAudioPlaying"
+    />
   </div>
 </template>
 

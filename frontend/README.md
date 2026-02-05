@@ -53,6 +53,8 @@ The env var `VITE_SECRET_COUNTRY` overrides country selection entirely (dev only
 
 **Data Loading:** The app fetches a country index (`public/data/index.json`), then uses HTTP Range requests to lazily load only the needed station records from `public/data/stations.jsonl`. All geographic data is linked by the `ADMIN` country name field.
 
+**Audio Reliability:** To ensure uninterrupted gameplay, the app monitors the audio stream for silence. If a station connects but broadcasts silence for more than 2 seconds, it automatically skips to the next available station.
+
 ## Project Structure
 
 ```
