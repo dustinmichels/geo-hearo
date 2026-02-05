@@ -8,7 +8,7 @@ import {
   Minimize2,
   RefreshCw,
 } from 'lucide-vue-next'
-import maplibregl from 'maplibre-gl'
+import maplibregl, { type SkySpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { storeToRefs } from 'pinia'
 import { onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
@@ -45,24 +45,22 @@ const emit = defineEmits<{
 }>()
 
 // Update map filter when guesses change
+const setLayerFilter = (layer: string, filter: maplibregl.FilterSpecification) => {
+  if (!map.value) return
+  if (map.value.getLayer(layer)) map.value.setFilter(layer, filter)
+  const border = `${layer}-border`
+  if (map.value.getLayer(border)) map.value.setFilter(border, filter)
+}
+
 watch(
   () => props.guessedCountries,
   (newGuesses) => {
     if (!map.value || !map.value.getLayer('countries-guessed')) return
-
-    if (newGuesses && newGuesses.length > 0) {
-      map.value.setFilter('countries-guessed', ['in', 'ADMIN', ...newGuesses])
-      if (map.value.getLayer('countries-guessed-border'))
-        map.value.setFilter('countries-guessed-border', [
-          'in',
-          'ADMIN',
-          ...newGuesses,
-        ])
-    } else {
-      map.value.setFilter('countries-guessed', ['in', 'ADMIN', '']) // Hide all
-      if (map.value.getLayer('countries-guessed-border'))
-        map.value.setFilter('countries-guessed-border', ['in', 'ADMIN', ''])
-    }
+    const filter: maplibregl.FilterSpecification =
+      newGuesses && newGuesses.length > 0
+        ? ['in', 'ADMIN', ...newGuesses]
+        : ['in', 'ADMIN', '']
+    setLayerFilter('countries-guessed', filter)
   },
   { deep: true }
 )
@@ -74,9 +72,9 @@ watch(
     if (!map.value || !map.value.getLayer('countries-guessed') || !newColors)
       return
 
-    let fillColor: any = '#86efac'
+    let fillColor: string | unknown[] = '#86efac'
     if (Object.keys(newColors).length > 0) {
-      const matchExpression: any[] = ['match', ['get', 'ADMIN']]
+      const matchExpression: unknown[] = ['match', ['get', 'ADMIN']]
       for (const [countryAdmin, color] of Object.entries(newColors)) {
         matchExpression.push(countryAdmin, color)
       }
@@ -89,51 +87,29 @@ watch(
   { deep: true }
 )
 
-// Update highlight when selected country passes from parent
+// Update highlight when selected country changes
 watch(
   () => props.selectedCountry,
   (newSelected) => {
-    if (!map.value || !map.value.getLayer('countries-highlight')) return
-
-    if (newSelected) {
-      map.value.setFilter('countries-highlight', ['==', 'ADMIN', newSelected])
-      if (map.value.getLayer('countries-highlight-border'))
-        map.value.setFilter('countries-highlight-border', [
-          '==',
-          'ADMIN',
-          newSelected,
-        ])
-    } else {
-      map.value.setFilter('countries-highlight', ['==', 'ADMIN', ''])
-      if (map.value.getLayer('countries-highlight-border'))
-        map.value.setFilter('countries-highlight-border', ['==', 'ADMIN', ''])
-    }
+    setLayerFilter(
+      'countries-highlight',
+      ['==', 'ADMIN', newSelected || '']
+    )
   }
 )
 
-// Update secret highlight
+// Update secret country highlight
 watch(
   () => props.secretCountry,
   (newSecret) => {
-    if (!map.value || !map.value.getLayer('countries-secret')) return
-
-    if (newSecret) {
-      map.value.setFilter('countries-secret', ['==', 'ADMIN', newSecret])
-      if (map.value.getLayer('countries-secret-border'))
-        map.value.setFilter('countries-secret-border', [
-          '==',
-          'ADMIN',
-          newSecret,
-        ])
-    } else {
-      map.value.setFilter('countries-secret', ['==', 'ADMIN', ''])
-      if (map.value.getLayer('countries-secret-border'))
-        map.value.setFilter('countries-secret-border', ['==', 'ADMIN', ''])
-    }
+    setLayerFilter(
+      'countries-secret',
+      ['==', 'ADMIN', newSecret || '']
+    )
   }
 )
 
-const getSkyConfig = () => {
+const getSkyConfig = (): SkySpecification => {
   if (isGlobe.value && !roundFinished.value) {
     return {
       'atmosphere-blend': [
@@ -147,9 +123,9 @@ const getSkyConfig = () => {
         7,
         0,
       ],
-    } as any
+    }
   }
-  return undefined
+  return {}
 }
 
 const updateSky = () => {
@@ -166,8 +142,7 @@ const updateSky = () => {
   }
 }
 
-watch(roundFinished, (newVal) => {
-  console.log('Round finished changed:', newVal)
+watch(roundFinished, () => {
   updateSky()
 })
 
@@ -186,13 +161,7 @@ const setTilesVisibility = (visible: boolean) => {
   }
 
   // Toggle terrain tiles
-  if (map.value.getLayer('esri-world-topo-layer')) {
-    map.value.setLayoutProperty(
-      'esri-world-topo-layer',
-      'visibility',
-      visible ? 'visible' : 'none'
-    )
-  }
+  setLayerVisibility('esri-world-topo-layer', visible)
 
   // Hide base country fill
   setLayerVisibility('countries-fill', !visible)
@@ -287,6 +256,7 @@ const initMap = () => {
   }, 5000)
 
   try {
+    const sky = getSkyConfig()
     map.value = new maplibregl.Map({
       container: mapContainer.value,
       style: {
@@ -295,7 +265,7 @@ const initMap = () => {
         sources: {},
         layers: [],
         glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
-        ...(getSkyConfig() ? { sky: getSkyConfig() } : {}),
+        ...(Object.keys(sky).length > 0 ? { sky } : {}),
       },
       center: [0, 20],
       zoom: 1.5,
@@ -395,9 +365,9 @@ const setupLayers = () => {
   })
 
   // Prepare initial match expression if colors exist
-  let initialFillColor: any = '#86efac'
+  let initialFillColor: string | unknown[] = '#86efac'
   if (props.guessColors && Object.keys(props.guessColors).length > 0) {
-    const matchExpression: any[] = ['match', ['get', 'ADMIN']]
+    const matchExpression: unknown[] = ['match', ['get', 'ADMIN']]
     for (const [countryAdmin, color] of Object.entries(props.guessColors)) {
       matchExpression.push(countryAdmin, color)
     }
@@ -411,7 +381,7 @@ const setupLayers = () => {
     type: 'fill',
     source: 'countries',
     paint: {
-      'fill-color': initialFillColor,
+      'fill-color': initialFillColor as string,
       'fill-opacity': 1,
     },
     filter: ['in', 'ADMIN', ...(props.guessedCountries || [])],
@@ -522,9 +492,9 @@ const setupInteractions = () => {
     const feature = e.features[0]
     if (!feature) return
 
-    const props = feature.properties as NeCountryProperties | undefined
-    if (props && props.ADMIN) {
-      emit('select-country', props.ADMIN)
+    const featureProps = feature.properties as NeCountryProperties | undefined
+    if (featureProps && featureProps.ADMIN) {
+      emit('select-country', featureProps.ADMIN)
     } else {
       console.warn('Click on country with no ADMIN property:', feature)
     }
@@ -585,15 +555,8 @@ const { updateStationsLayer, cleanup: cleanupStations } = useMapStations(
   { stopSpinning }
 )
 
-const toggleProjection = () => {
+const applyProjectionStyles = () => {
   if (!map.value) return
-  stopSpinning()
-  isGlobe.value = !isGlobe.value
-  map.value.setProjection({
-    type: isGlobe.value ? 'globe' : 'mercator',
-  })
-
-  // Update styles based on projection
   if (map.value.getLayer('background')) {
     map.value.setPaintProperty(
       'background',
@@ -601,7 +564,6 @@ const toggleProjection = () => {
       isGlobe.value ? '#0f172a' : '#ffffff'
     )
   }
-
   if (map.value.getLayer('countries-border')) {
     map.value.setPaintProperty(
       'countries-border',
@@ -609,26 +571,27 @@ const toggleProjection = () => {
       isGlobe.value ? '#94a3b8' : '#64748b'
     )
   }
-
-  // Update atmosphere
   updateSky()
+}
+
+const toggleProjection = () => {
+  if (!map.value) return
+  stopSpinning()
+  isGlobe.value = !isGlobe.value
+  map.value.setProjection({
+    type: isGlobe.value ? 'globe' : 'mercator',
+  })
+  applyProjectionStyles()
 }
 
 const resetView = () => {
   if (!map.value) return
   stopSpinning()
 
-  // Switch to globe if not already
   if (!isGlobe.value) {
     isGlobe.value = true
     map.value.setProjection({ type: 'globe' })
-    if (map.value.getLayer('background')) {
-      map.value.setPaintProperty('background', 'background-color', '#0f172a')
-    }
-    if (map.value.getLayer('countries-border')) {
-      map.value.setPaintProperty('countries-border', 'line-color', '#94a3b8')
-    }
-    updateSky()
+    applyProjectionStyles()
   }
 
   map.value.easeTo({
@@ -641,11 +604,6 @@ const resetView = () => {
   map.value.once('moveend', () => {
     startSpinning()
   })
-}
-
-// Manual reload function
-const reloadMap = () => {
-  initMap()
 }
 
 defineExpose({ resetView })
@@ -677,7 +635,7 @@ onUnmounted(() => {
       >
         <p class="text-slate-400 text-xs">Taking a while?</p>
         <button
-          @click="reloadMap"
+          @click="initMap"
           class="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm"
         >
           <RefreshCw class="w-3.5 h-3.5" />

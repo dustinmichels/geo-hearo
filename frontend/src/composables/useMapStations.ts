@@ -1,7 +1,7 @@
 import type { ShallowRef } from 'vue'
 import { watch } from 'vue'
 import type maplibregl from 'maplibre-gl'
-import { LngLatBounds } from 'maplibre-gl'
+import { type GeoJSONSource, LngLatBounds } from 'maplibre-gl'
 import type { RadioStation } from '../types/geo'
 
 const getPillarPolygon = (lat: number, lon: number, radiusKm: number) => {
@@ -82,9 +82,9 @@ export function useMapStations(
       }
 
       return {
-        type: 'Feature',
+        type: 'Feature' as const,
         geometry: {
-          type: 'Polygon',
+          type: 'Polygon' as const,
           coordinates: getPillarPolygon(lat, lon, scaledRadius),
         },
         properties: {
@@ -135,7 +135,7 @@ export function useMapStations(
   const handleStationZoom = () => {
     if (!map.value || !map.value.getSource('stations-source')) return
     const zoom = map.value.getZoom()
-    const source = map.value.getSource('stations-source') as any
+    const source = map.value.getSource('stations-source') as GeoJSONSource
     if (source) {
       source.setData({
         type: 'FeatureCollection',
@@ -155,13 +155,13 @@ export function useMapStations(
 
     const zoom = map.value.getZoom()
     const sourceData = {
-      type: 'FeatureCollection',
+      type: 'FeatureCollection' as const,
       features: buildStationFeatures(props.activeStationId, zoom),
     }
 
     map.value.addSource('stations-source', {
       type: 'geojson',
-      data: sourceData as any,
+      data: sourceData,
     })
 
     map.value.addLayer({
@@ -190,9 +190,14 @@ export function useMapStations(
       callbacks.stopSpinning()
     }
 
-    // Register zoom handler to scale pillar width with zoom
-    map.value.off('zoom', handleStationZoom)
+  }
+
+  // Register zoom handler once — it early-returns when there's no source
+  let zoomHandlerRegistered = false
+  const ensureZoomHandler = () => {
+    if (zoomHandlerRegistered || !map.value) return
     map.value.on('zoom', handleStationZoom)
+    zoomHandlerRegistered = true
   }
 
   // Watch stations data to rebuild the layer
@@ -201,11 +206,11 @@ export function useMapStations(
     (newStations) => {
       if (newStations && newStations.length > 0) {
         updateStationsLayer()
+        ensureZoomHandler()
       } else {
         setStationsVisibility(false)
       }
-    },
-    { deep: true }
+    }
   )
 
   // Watch visibility prop to toggle layer visibility and zoom to stations
@@ -233,7 +238,7 @@ export function useMapStations(
       ])
 
       // Reorder features so the active station renders on top
-      const source = map.value.getSource('stations-source') as any
+      const source = map.value.getSource('stations-source') as GeoJSONSource
       if (source) {
         const zoom = map.value.getZoom()
         source.setData({
