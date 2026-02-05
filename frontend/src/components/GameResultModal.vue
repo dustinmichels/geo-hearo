@@ -110,7 +110,7 @@ const handleShare = async () => {
           @click="emit('close')"
           class="w-full btn-pressable bg-yuzu-yellow h-[56px] rounded-xl font-heading text-xl text-pencil-lead uppercase tracking-wider border-2 border-pencil-lead shadow-[4px_4px_0_0_#334155] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all flex items-center justify-center"
         >
-          Reveal stations 📻
+          See the stations 📻
         </button>
       </div>
     </div>
