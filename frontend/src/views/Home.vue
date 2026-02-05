@@ -197,16 +197,12 @@ const steps = [
     colorClass: 'bg-gumball-blue',
   },
   {
-    text: 'Make a guess, based on what you hear',
+    text: 'Make a guess, get a hint, repeat',
     colorClass: 'bg-bubblegum-pop',
   },
   {
-    text: 'Get a hint about the distance to go',
+    text: 'Tomrrow will bring a new daily challenge',
     colorClass: 'bg-mint-shake',
-  },
-  {
-    text: 'Each day there is a new Daily Challenge',
-    colorClass: 'bg-berry-oops',
   },
 ]
 
