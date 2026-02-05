@@ -151,7 +151,7 @@ watch(roundFinished, (isFinished) => {
     map.value.easeTo({
       center: [0, 20],
       zoom: 1.5,
-      pitch: 0,
+      pitch: 50,
       duration: 800,
     })
   }
@@ -632,7 +632,12 @@ const resetView = () => {
   })
 }
 
-defineExpose({ resetView, zoomToStations })
+const zoomToStationsWrapped = () => {
+  stopSpinning()
+  zoomToStations()
+}
+
+defineExpose({ resetView, zoomToStations: zoomToStationsWrapped })
 
 onUnmounted(() => {
   stopSpinning()
