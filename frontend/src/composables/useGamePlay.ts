@@ -139,8 +139,7 @@ export function useGamePlay(options: GamePlayOptions) {
     return emojiLine
   }
 
-  const generateShareText = (winningGuess?: string) => {
-    const dayNumber = dailyChallengeNumber.value
+  const generateShareText = (dayNumber: number, winningGuess?: string) => {
     const lines = [`GeoHearo | #${dayNumber}`, 'https://geohearo.com/']
 
     const emojiLine = generateEmojiString(winningGuess)
@@ -155,17 +154,18 @@ export function useGamePlay(options: GamePlayOptions) {
     if (checkGuess(guess)) {
       addGuess(guess) // Ensure winning guess is added to state
       if (isDailyChallengeMode.value) {
+        const dayNumber = dailyChallengeNumber.value || 0
         completeDailyChallenge() // Mark as done for today
 
-        const shareText = generateShareText()
-        const resultsGrid = generateEmojiString()
+        const shareText = generateShareText(dayNumber, guess)
+        const resultsGrid = generateEmojiString(guess)
 
         modalConfig.value = {
           isWin: true,
           shareText,
           resultsGrid,
           secretCountry: secretCountry.value,
-          dailyChallengeNumber: dailyChallengeNumber.value,
+          dailyChallengeNumber: dayNumber,
         }
       } else {
         const resultsGrid = generateEmojiString()
@@ -203,9 +203,10 @@ export function useGamePlay(options: GamePlayOptions) {
 
     if (guesses.value.length >= 5) {
       if (isDailyChallengeMode.value) {
+        const dayNumber = dailyChallengeNumber.value || 0
         completeDailyChallenge()
 
-        const shareText = generateShareText()
+        const shareText = generateShareText(dayNumber)
         const resultsGrid = generateEmojiString()
 
         modalConfig.value = {
@@ -213,7 +214,7 @@ export function useGamePlay(options: GamePlayOptions) {
           shareText,
           resultsGrid,
           secretCountry: secretCountry.value,
-          dailyChallengeNumber: dailyChallengeNumber.value,
+          dailyChallengeNumber: dayNumber,
         }
       } else {
         const resultsGrid = generateEmojiString()
@@ -335,7 +336,7 @@ export function useGamePlay(options: GamePlayOptions) {
       selectRandomCountry()
     },
     handleShare: async () => {
-      const text = generateShareText()
+      const text = generateShareText(dailyChallengeNumber.value || 0)
       try {
         await navigator.clipboard.writeText(text)
         // Could add toast notification here
