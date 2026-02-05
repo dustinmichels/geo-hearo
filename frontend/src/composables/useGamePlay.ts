@@ -111,12 +111,9 @@ export function useGamePlay(options: GamePlayOptions) {
     })
   }
 
-  const generateEmojiString = (winningGuess?: string) => {
+  const generateEmojiString = () => {
     // Clone guesses to avoid modifying the reactive array during this operation if needed
     const currentGuesses = [...guesses.value]
-    if (winningGuess) {
-      currentGuesses.push(winningGuess)
-    }
 
     let emojiLine = ''
     currentGuesses.forEach((guess) => {
@@ -139,10 +136,10 @@ export function useGamePlay(options: GamePlayOptions) {
     return emojiLine
   }
 
-  const generateShareText = (dayNumber: number, winningGuess?: string) => {
+  const generateShareText = (dayNumber: number) => {
     const lines = [`GeoHearo | #${dayNumber}`, 'https://geohearo.com/']
 
-    const emojiLine = generateEmojiString(winningGuess)
+    const emojiLine = generateEmojiString()
     lines.push(emojiLine)
     return lines.join('\n')
   }
@@ -157,8 +154,8 @@ export function useGamePlay(options: GamePlayOptions) {
         const dayNumber = dailyChallengeNumber.value || 0
         completeDailyChallenge() // Mark as done for today
 
-        const shareText = generateShareText(dayNumber, guess)
-        const resultsGrid = generateEmojiString(guess)
+        const shareText = generateShareText(dayNumber)
+        const resultsGrid = generateEmojiString()
 
         modalConfig.value = {
           isWin: true,
