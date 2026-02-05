@@ -206,11 +206,11 @@ const steps = [
     colorClass: 'bg-bubblegum-pop',
   },
   {
-    text: 'You get a hint: the distance between your guess and the correct country',
+    text: 'Get a hint about the distance to go',
     colorClass: 'bg-mint-shake',
   },
   {
-    text: 'Come back each day for a new Daily Challenge',
+    text: 'Each day there is a new Daily Challenge',
     colorClass: 'bg-berry-oops',
   },
 ]
