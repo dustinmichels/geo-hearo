@@ -1,7 +1,7 @@
-import type { ShallowRef } from 'vue'
-import { watch } from 'vue'
 import type maplibregl from 'maplibre-gl'
 import { type GeoJSONSource, LngLatBounds } from 'maplibre-gl'
+import type { ShallowRef } from 'vue'
+import { watch } from 'vue'
 import type { RadioStation } from '../types/geo'
 
 const getPillarPolygon = (lat: number, lon: number, radiusKm: number) => {
@@ -119,7 +119,7 @@ export function useMapStations(
     map.value.fitBounds(bounds, {
       padding: { top: 200, bottom: 200, left: 100, right: 100 },
       maxZoom: 8,
-      pitch: 60,
+      pitch: 50,
     })
   }
 
@@ -189,7 +189,6 @@ export function useMapStations(
       zoomToStations()
       callbacks.stopSpinning()
     }
-
   }
 
   // Register zoom handler once — it early-returns when there's no source
