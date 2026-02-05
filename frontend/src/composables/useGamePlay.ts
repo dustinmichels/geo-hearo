@@ -271,8 +271,12 @@ export function useGamePlay(options: GamePlayOptions) {
 
       if (import.meta.env.VITE_ROUND_FINISHED === 'true') {
         // Debug mode: Show modal immediately to allow "See Stations" flow
-        // Must initialize stations first!
-        await selectRandomCountry()
+
+        // Try to restore existing session state first so refreshing doesn't change the country
+        const restored = await restoreState()
+        if (!restored) {
+          await selectRandomCountry()
+        }
 
         modalConfig.value = {
           isWin: false,

@@ -11,6 +11,8 @@ export const useGameStore = defineStore('game', () => {
   const dailyChallengeNumber = ref<number | undefined>(undefined)
   const currentSeed = ref<number | null>(null)
   const currentStationIndex = ref(3)
+  const hasPlayedRadio = ref(false)
+  const hasSkippedStation = ref(false)
 
   // Getters
   const roundFinished = computed(() => {
@@ -59,6 +61,8 @@ export const useGameStore = defineStore('game', () => {
     currentStations.value = []
     currentStationIndex.value = 3
     currentSeed.value = null
+    hasPlayedRadio.value = false
+    hasSkippedStation.value = false
     // We explicitly DO NOT reset isDailyChallengeMode here as that is a mode switch
   }
 
@@ -71,6 +75,8 @@ export const useGameStore = defineStore('game', () => {
     dailyChallengeNumber,
     currentSeed,
     currentStationIndex,
+    hasPlayedRadio,
+    hasSkippedStation,
 
     // Getters
     roundFinished,

@@ -2,7 +2,10 @@
 import { Pause, Play, SkipBack, SkipForward } from 'lucide-vue-next'
 import { Button as VanButton } from 'vant'
 import { ref, watch } from 'vue'
+import { useGameStore } from '@/stores/game'
 import { playRadioStatic } from '../utils/audio'
+
+const store = useGameStore()
 
 const props = withDefaults(
   defineProps<{
@@ -90,26 +93,23 @@ watch(
     }
   }
 )
-const hasPlayed = ref(false)
-const hasSkipped = ref(false)
-
 watch(
   () => props.isPlaying,
   (playing) => {
     if (playing) {
-      hasPlayed.value = true
+      store.hasPlayedRadio = true
     }
   },
   { immediate: true }
 )
 
 const onPrevious = () => {
-  hasSkipped.value = true
+  store.hasSkippedStation = true
   emit('previous')
 }
 
 const onNext = () => {
-  hasSkipped.value = true
+  store.hasSkippedStation = true
   emit('next')
 }
 </script>
@@ -144,7 +144,7 @@ const onNext = () => {
       :class="compact ? 'gap-4 mb-3' : 'gap-6 mb-6'"
     >
       <div class="relative">
-        <div v-if="hasPlayed && !hasSkipped" class="magic-container">
+        <div v-if="store.hasPlayedRadio && !store.hasSkippedStation" class="magic-container">
           <div class="magic-wave wave-1"></div>
           <div class="magic-wave wave-2"></div>
         </div>
@@ -163,7 +163,7 @@ const onNext = () => {
       </div>
 
       <div class="relative group">
-        <div v-if="!hasPlayed && !isPlaying" class="magic-container">
+        <div v-if="!store.hasPlayedRadio" class="magic-container">
           <div class="magic-wave wave-1"></div>
           <div class="magic-wave wave-2"></div>
         </div>
@@ -189,7 +189,7 @@ const onNext = () => {
       </div>
 
       <div class="relative">
-        <div v-if="hasPlayed && !hasSkipped" class="magic-container">
+        <div v-if="store.hasPlayedRadio && !store.hasSkippedStation" class="magic-container">
           <div class="magic-wave wave-1"></div>
           <div class="magic-wave wave-2"></div>
         </div>
