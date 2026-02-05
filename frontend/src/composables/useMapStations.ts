@@ -110,14 +110,25 @@ export function useMapStations(
   }
 
   const zoomToStations = () => {
-    if (!map.value || !props.stations || props.stations.length === 0) return
+    if (!map.value || !props.stations || props.stations.length === 0) {
+      console.warn('zoomToStations: No stations or map not ready')
+      return
+    }
     const bounds = new LngLatBounds()
     props.stations.forEach((s) => bounds.extend([s.geo_lon, s.geo_lat]))
 
-    // Use a pitch to make the 3D pillars visible
-    // Increase padding to ensure they aren't cut off at the edges
+    // Responsive padding to avoid errors on small screens
+    const isSmall = window.innerWidth < 768 || window.innerHeight < 600
+    const vPadding = isSmall ? 80 : 200
+    const hPadding = isSmall ? 40 : 100
+
     map.value.fitBounds(bounds, {
-      padding: { top: 200, bottom: 200, left: 100, right: 100 },
+      padding: {
+        top: vPadding,
+        bottom: vPadding,
+        left: hPadding,
+        right: hPadding,
+      },
       maxZoom: 8,
       pitch: 50,
     })

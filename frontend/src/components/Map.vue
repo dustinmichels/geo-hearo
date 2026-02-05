@@ -634,7 +634,15 @@ const resetView = () => {
 
 const zoomToStationsWrapped = () => {
   stopSpinning()
-  zoomToStations()
+  // Stop any ongoing animations (e.g. from roundFinished transition)
+  if (map.value) {
+    map.value.stop()
+  }
+
+  // Small delay to ensure clean state for fitBounds
+  setTimeout(() => {
+    zoomToStations()
+  }, 100)
 }
 
 defineExpose({ resetView, zoomToStations: zoomToStationsWrapped })
