@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Check, Share, X } from 'lucide-vue-next'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 const props = defineProps<{
   show: boolean
@@ -32,6 +32,10 @@ const handleShare = async () => {
     }
   }
 }
+
+const computedGuessCount = computed(() => {
+  return [...(props.resultsGrid || '')].length
+})
 </script>
 
 <template>
@@ -75,6 +79,18 @@ const handleShare = async () => {
           <strong class="text-pencil-lead font-bold">{{
             secretCountry || 'Unknown'
           }}</strong>
+        </p>
+
+        <!-- Result Message -->
+        <p class="text-lg text-pencil-lead/80 mb-6 leading-relaxed">
+          <span v-if="isWin">
+            You got it in
+            <strong class="text-pencil-lead font-bold">{{
+              computedGuessCount
+            }}</strong>
+            {{ computedGuessCount === 1 ? 'guess' : 'guesses' }}.
+          </span>
+          <span v-else> You'll get it next time! </span>
         </p>
 
         <!-- Emoji Grid -->
