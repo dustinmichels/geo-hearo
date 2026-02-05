@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Pause, Play, SkipBack, SkipForward } from 'lucide-vue-next'
+import { useGameStore } from '@/stores/game'
+import { Loader2, Pause, Play, SkipBack, SkipForward } from 'lucide-vue-next'
 import { Button as VanButton } from 'vant'
 import { ref, watch } from 'vue'
-import { useGameStore } from '@/stores/game'
 import { playRadioStatic } from '../utils/audio'
 
 const store = useGameStore()
@@ -27,6 +27,7 @@ const emit = defineEmits<{
 
 const audioPlayer = ref<HTMLAudioElement | null>(null)
 const currentStaticSource = ref<AudioBufferSourceNode | null>(null) // Store the source node
+const isLoading = ref(false)
 
 const playStatic = () => {
   // Stop any existing static first
@@ -44,6 +45,7 @@ const playStatic = () => {
 }
 
 const onAudioPlaying = () => {
+  isLoading.value = false
   if (currentStaticSource.value) {
     try {
       currentStaticSource.value.stop()
@@ -59,12 +61,15 @@ watch(
   (playing) => {
     if (!audioPlayer.value) return
     if (playing) {
+      isLoading.value = true
       playStatic()
       audioPlayer.value.play().catch((e) => {
+        isLoading.value = false
         if (e.name === 'AbortError') return
         console.error('Playback failed', e)
       })
     } else {
+      isLoading.value = false
       audioPlayer.value.pause()
       // Also stop static if pausing
       if (currentStaticSource.value) {
@@ -84,8 +89,10 @@ watch(
     if (newUrl) {
       audioPlayer.value.src = newUrl
       if (props.isPlaying) {
+        isLoading.value = true
         playStatic()
         audioPlayer.value.play().catch((e) => {
+          isLoading.value = false
           if (e.name === 'AbortError') return
           console.error('Playback failed', e)
         })
@@ -144,7 +151,10 @@ const onNext = () => {
       :class="compact ? 'gap-4 mb-3' : 'gap-6 mb-6'"
     >
       <div class="relative">
-        <div v-if="store.hasPlayedRadio && !store.hasSkippedStation" class="magic-container">
+        <div
+          v-if="store.hasPlayedRadio && !store.hasSkippedStation"
+          class="magic-container"
+        >
           <div class="magic-wave wave-1"></div>
           <div class="magic-wave wave-2"></div>
         </div>
@@ -175,8 +185,13 @@ const onNext = () => {
           :class="compact ? '!h-14 !w-14' : '!h-16 !w-16'"
           @click="emit('playPause')"
         >
+          <Loader2
+            v-if="isLoading"
+            class="animate-spin text-white"
+            :class="compact ? 'h-6 w-6' : 'h-8 w-8'"
+          />
           <Pause
-            v-if="isPlaying"
+            v-else-if="isPlaying"
             class="text-white fill-current"
             :class="compact ? 'h-6 w-6' : 'h-8 w-8'"
           />
@@ -189,7 +204,10 @@ const onNext = () => {
       </div>
 
       <div class="relative">
-        <div v-if="store.hasPlayedRadio && !store.hasSkippedStation" class="magic-container">
+        <div
+          v-if="store.hasPlayedRadio && !store.hasSkippedStation"
+          class="magic-container"
+        >
           <div class="magic-wave wave-1"></div>
           <div class="magic-wave wave-2"></div>
         </div>
@@ -238,6 +256,19 @@ const onNext = () => {
 
 .animate-blink {
   animation: blink 1.5s ease-in-out infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
 
 @keyframes ripple {
