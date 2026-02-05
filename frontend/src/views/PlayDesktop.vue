@@ -141,7 +141,6 @@ const activeStation = computed(() => {
           <GuessPanel
             v-model="guessInput"
             :guesses="guesses"
-            :disabled="roundFinished"
             @add-guess="handleAddGuess"
             :with-footer="false"
           />

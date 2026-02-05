@@ -1,5 +1,5 @@
 import { storeToRefs } from 'pinia'
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useGameStore } from '../stores/game'
 import { getColorForDistanceLevel } from '../utils/colors'
 import { getDistanceHint } from '../utils/geography'
@@ -51,13 +51,6 @@ export function useGamePlay(options: GamePlayOptions) {
     getDailyChallengeSeed,
     dailyChallengeNumber,
   } = useRadio()
-
-  // Watch for round completion to fill in the secret country
-  watch(roundFinished, (finished) => {
-    if (finished && secretCountry.value) {
-      guessInput.value = secretCountry.value
-    }
-  })
 
   // Hooking up country data
   const { loadCountryData, getFeature } = useCountryData()
@@ -146,7 +139,7 @@ export function useGamePlay(options: GamePlayOptions) {
 
   const handleAddGuess = () => {
     const guess = guessInput.value.trim()
-    if (!guess || guesses.value.length >= 5 || roundFinished.value) return
+    if (!guess || guesses.value.length >= 5) return
 
     if (checkGuess(guess)) {
       addGuess(guess) // Ensure winning guess is added to state
