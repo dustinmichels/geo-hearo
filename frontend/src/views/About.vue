@@ -1,6 +1,6 @@
 <template>
   <div
-    class="min-h-screen w-screen no-scroll-container flex flex-col items-center justify-center p-6 md:p-12 overflow-x-hidden relative"
+    class="min-h-screen w-screen flex flex-col items-center justify-center p-6 md:p-12 overflow-x-hidden relative"
   >
     <!-- Decorative Background Shapes -->
     <div
@@ -38,10 +38,25 @@
             <span class="text-3xl md:text-4xl">{{ section.emoji }}</span>
             {{ section.title }}
           </h2>
-          <p
+          <div v-if="Array.isArray(section.content)">
+            <ul class="space-y-3">
+              <li
+                v-for="(item, i) in section.content"
+                :key="i"
+                class="flex items-start gap-3 text-lg md:text-xl text-pencil-lead/90 font-body leading-relaxed"
+              >
+                <span class="text-gumball-blue shrink-0 mt-[6px] text-sm"
+                  >⟡</span
+                >
+                <span v-html="item"></span>
+              </li>
+            </ul>
+          </div>
+          <div
+            v-else
             class="text-lg md:text-xl text-pencil-lead/90 font-body leading-relaxed"
             v-html="section.content"
-          ></p>
+          ></div>
         </section>
       </div>
 
@@ -93,13 +108,47 @@ const sections = [
     emoji: '🌍',
     title: 'What is GeoHearo?',
     content:
-      'GeoHearo is a passion project of a solo developer, <a href="https://dustinmichels.com" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Dustin Michels</a>. Its free and open-source. There is no business model.',
+      'GeoHearo is a passion project of a solo developer, <a href="https://dustinmichels.com" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Dustin Michels</a>. Its free and <a href="https://github.com/dustinmichels/geo-hearo" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">open-source</a>. There is no business model.',
+  },
+  {
+    emoji: '💾',
+    title: 'Data Sources',
+    content: [
+      'The country polygons are from <a href="https://www.naturalearthdata.com/" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Natural Earth</a>. They are the ones that decide what counts as a country.',
+      'The underlying radio data is borrowed, gratefully, from <a href="https://radio.garden/" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Radio.Garden</a>.',
+    ],
+  },
+  {
+    emoji: '📏',
+    title: 'Distance Considerations',
+    content: [
+      'The clue you get is based on this distance between countries, from border to border.',
+      'I filter out polygons that makeup &lt; 20% of the countrys land mass, so as to exclude overseas terriroties but include major islands. The idea is to direct the player towards the main borders of the country.',
+    ],
+  },
+  {
+    emoji: '📡',
+    title: 'Radio Considerations',
+    content: [
+      'Stations can be weird! Its not always a bug. Sometimes you get a Labanese station in Germany, because there really is a Labanese station in Germany. The world is complicated! The "show stations" feature is provided so you can find out more about the stations you hear.',
+      'Sometimes a radio stream gives you commercials localized to your location, which is confusing and unfortunate.',
+      'Sometimes a station is just being weird, which is why I give you five to choose from!',
+    ],
+  },
+  {
+    emoji: '🤨',
+    title: 'Technical Notes',
+    content: [
+      'I have streaming links for over 30,000 stations. They are stored in a jsonl files, where each line is a fixed number of bytes.',
+      'I have an index file that lists the countries available the locations of their stations in the mega jsonl file.',
+      'When a new round begins, I randomly select a country and five stations, and load the relevant lines from the jsonl file using ranged Fetch requests',
+      'For the daily challenge, I use the date as a random seed so all players get the same mystery country.',
+    ],
   },
   {
     emoji: '👏',
-    title: 'Thanks!',
-    content:
-      'Thank you to friends and family for testing! Thanks to <a href="https://radio.garden/" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">radio garden</a> for the curated list of stations.',
+    title: 'Thanks & Attributions',
+    content: ['Thank you to friends and family for testing!'],
   },
 ]
 
@@ -210,12 +259,5 @@ onMounted(() => {
   border: 3px solid #334155;
   transform-origin: center center;
   cursor: pointer;
-}
-
-@media (min-height: 700px) {
-  .no-scroll-container {
-    overflow: hidden;
-    height: 100vh;
-  }
 }
 </style>
