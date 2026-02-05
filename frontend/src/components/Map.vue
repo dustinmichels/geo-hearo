@@ -5,8 +5,8 @@ import {
   Globe,
   Loader2,
   Map as MapIcon,
-  Minimize2,
   RefreshCw,
+  Search,
 } from 'lucide-vue-next'
 import maplibregl, { type SkySpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
@@ -589,6 +589,20 @@ const resetView = () => {
   if (!map.value) return
   stopSpinning()
 
+  if (roundFinished.value && props.stations && props.stations.length > 0) {
+    const bounds = new maplibregl.LngLatBounds()
+    props.stations.forEach((station) => {
+      bounds.extend([station.geo_lon, station.geo_lat])
+    })
+
+    map.value.fitBounds(bounds, {
+      padding: 100,
+      maxZoom: 6,
+      duration: 1000,
+    })
+    return
+  }
+
   if (!isGlobe.value) {
     isGlobe.value = true
     map.value.setProjection({ type: 'globe' })
@@ -667,7 +681,7 @@ onUnmounted(() => {
         class="p-2 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm"
         title="Zoom out"
       >
-        <Minimize2 class="w-5 h-5" />
+        <Search class="w-5 h-5" />
       </button>
     </div>
   </div>

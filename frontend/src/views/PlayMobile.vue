@@ -108,7 +108,7 @@ const activeStation = computed(() => {
     ></div>
 
     <!-- Animated Arrows Hint -->
-    <div class="relative z-[60]" v-show="isPanelFullHeight">
+    <div class="relative z-[60]" v-show="isPanelFullHeight && !roundFinished">
       <AnimatedClose class="!top-16" @click="handleArrowClick" />
     </div>
 
