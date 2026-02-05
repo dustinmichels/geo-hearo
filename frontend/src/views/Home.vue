@@ -34,29 +34,29 @@
             ref="globe"
             :src="globeImage"
             alt="GeoHearo Globe"
-            class="w-32 sm:w-64 md:w-80 lg:w-[480px] xl:w-[540px] object-contain relative z-10"
+            class="w-24 sm:w-64 md:w-80 lg:w-[480px] xl:w-[540px] object-contain relative z-10"
             @error="handleImageError"
           />
 
           <!-- Floating Sticker Decorations (Visible on mobile now) -->
           <div
             ref="sticker1"
-            class="absolute -top-3 -right-3 sm:-top-6 sm:-right-6 bg-paper-white border-3 border-pencil-lead p-3 sm:p-4 rounded-xl sm:rounded-3xl shadow-lg rotate-12 z-20"
+            class="absolute -top-3 -right-3 sm:-top-6 sm:-right-6 bg-paper-white border-3 border-pencil-lead p-2 sm:p-4 rounded-xl sm:rounded-3xl shadow-lg rotate-12 z-20"
           >
-            <span class="text-2xl sm:text-4xl">🎵</span>
+            <span class="text-xl sm:text-4xl">🎵</span>
           </div>
           <div
             ref="sticker2"
-            class="absolute bottom-6 -left-6 sm:bottom-10 sm:-left-10 bg-paper-white border-3 border-pencil-lead p-3 sm:p-4 rounded-xl sm:rounded-3xl shadow-lg -rotate-12 z-20"
+            class="absolute bottom-6 -left-6 sm:bottom-10 sm:-left-10 bg-paper-white border-3 border-pencil-lead p-2 sm:p-4 rounded-xl sm:rounded-3xl shadow-lg -rotate-12 z-20"
           >
-            <span class="text-2xl sm:text-4xl">📢</span>
+            <span class="text-xl sm:text-4xl">📢</span>
           </div>
         </div>
       </div>
 
       <!-- Copy Section: Bottom on Mobile, Left on Desktop -->
       <div
-        class="space-y-6 sm:space-y-10 order-2 lg:order-1 text-center lg:text-left"
+        class="space-y-4 sm:space-y-6 order-2 lg:order-1 text-center lg:text-left"
       >
         <div class="space-y-6 lg:space-y-10">
           <h1
@@ -99,20 +99,45 @@
         </div>
 
         <div class="space-y-6 sm:space-y-8">
-          <div class="flex justify-center lg:justify-start pt-2 pb-6 lg:pb-0">
+          <div
+            class="flex justify-center lg:justify-start pt-0 pb-6 lg:pb-0 gap-4 sm:gap-6"
+          >
             <button
               ref="ctaButton"
-              class="btn-pressable bg-yuzu-yellow px-10 sm:px-14 py-4 sm:py-6 rounded-[22px] sm:rounded-[26px] text-2xl sm:text-3xl btn-text uppercase tracking-widest text-pencil-lead opacity-0 scale-50"
+              class="btn-pressable bg-yuzu-yellow px-12 sm:px-16 py-6 sm:py-8 rounded-[30px] sm:rounded-[36px] text-4xl sm:text-6xl btn-text uppercase tracking-widest text-pencil-lead opacity-0 scale-50"
               @click="handleTuneIn"
-              @mouseenter="onButtonHover"
-              @mouseleave="onButtonLeave"
+              @mouseenter="onButtonHover($event.currentTarget as HTMLElement)"
+              @mouseleave="onButtonLeave($event.currentTarget as HTMLElement)"
             >
               PLAY
+            </button>
+            <button
+              ref="aboutButton"
+              class="btn-pressable bg-paper-white px-12 sm:px-16 py-6 sm:py-8 rounded-[30px] sm:rounded-[36px] text-4xl sm:text-6xl btn-text uppercase tracking-widest text-pencil-lead opacity-0 scale-50"
+              @click="handleAbout"
+              @mouseenter="onButtonHover($event.currentTarget as HTMLElement)"
+              @mouseleave="onButtonLeave($event.currentTarget as HTMLElement)"
+            >
+              ABOUT
             </button>
           </div>
         </div>
       </div>
     </main>
+
+    <!-- Footer -->
+    <div
+      class="absolute bottom-4 w-full text-center text-eraser-grey text-sm font-heading z-20 pointer-events-auto"
+    >
+      Created by
+      <a
+        href="https://dustinmichels.com/"
+        target="_blank"
+        class="hover:text-bubblegum-pop transition-colors underline decoration-2 decoration-bubblegum-pop/30 underline-offset-2"
+        >Dustin Michels</a
+      >
+      © 2026
+    </div>
   </div>
 </template>
 
@@ -135,6 +160,7 @@ const mainTitle = ref(null)
 const stepItems = ref<HTMLElement[]>([])
 const heroQuestion = ref(null)
 const ctaButton = ref(null)
+const aboutButton = ref(null)
 
 const steps = [
   {
@@ -142,15 +168,15 @@ const steps = [
     colorClass: 'bg-gumball-blue',
   },
   {
-    text: 'Pay attention to what you hear, then make a guess.',
+    text: 'Make a guess, based on what you hear',
     colorClass: 'bg-bubblegum-pop',
   },
   {
-    text: 'You get a hint: the distance between the countries',
+    text: 'You get a hint: the distance between your guess and the correct country',
     colorClass: 'bg-mint-shake',
   },
   {
-    text: 'Each day has a Daily Challenge.',
+    text: 'Come back each day for a new Daily Challenge',
     colorClass: 'bg-berry-oops',
   },
 ]
@@ -169,6 +195,18 @@ const handleTuneIn = () => {
     repeat: 1,
     onComplete: () => {
       router.push({ name: 'Play' })
+    },
+  })
+}
+
+const handleAbout = () => {
+  gsap.to(aboutButton.value, {
+    scale: 0.95,
+    duration: 0.1,
+    yoyo: true,
+    repeat: 1,
+    onComplete: () => {
+      router.push({ name: 'About' })
     },
   })
 }
@@ -213,8 +251,8 @@ const onStepLeave = (el: HTMLElement) => {
   }
 }
 
-const onButtonHover = () => {
-  gsap.to(ctaButton.value, {
+const onButtonHover = (el: HTMLElement) => {
+  gsap.to(el, {
     scale: 1.05,
     rotation: -2,
     boxShadow: '0 12px 0 0 #334155',
@@ -223,8 +261,8 @@ const onButtonHover = () => {
   })
 }
 
-const onButtonLeave = () => {
-  gsap.to(ctaButton.value, {
+const onButtonLeave = (el: HTMLElement) => {
+  gsap.to(el, {
     scale: 1,
     rotation: 0,
     boxShadow: '0 8px 0 0 #334155',
@@ -262,10 +300,11 @@ onMounted(() => {
       '-=0.4'
     )
     .to(
-      ctaButton.value,
+      [ctaButton.value, aboutButton.value],
       {
         scale: 1,
         opacity: 1,
+        stagger: 0.1,
         duration: 0.6,
         ease: 'elastic.out(1, 0.5)',
       },
