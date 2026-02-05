@@ -269,7 +269,20 @@ export function useGamePlay(options: GamePlayOptions) {
       // Initialize Daily Challenge Logic
       initDailyChallenge()
 
-      if (isDailyChallengeMode.value) {
+      if (import.meta.env.VITE_ROUND_FINISHED === 'true') {
+        // Debug mode: Show modal immediately to allow "See Stations" flow
+        // Must initialize stations first!
+        await selectRandomCountry()
+
+        modalConfig.value = {
+          isWin: false,
+          shareText: undefined,
+          resultsGrid: undefined,
+          secretCountry: secretCountry.value,
+          dailyChallengeNumber: undefined,
+        }
+        showModal.value = true
+      } else if (isDailyChallengeMode.value) {
         const dailySeed = getDailyChallengeSeed()
         // Try restoring session state, but only keep it if it matches today's seed
         const restored = await restoreState()
@@ -323,7 +336,19 @@ export function useGamePlay(options: GamePlayOptions) {
       isPlaying.value = false
       showModal.value = false
       options.onNewGame?.()
-      selectRandomCountry()
+      selectRandomCountry().then(() => {
+        // Debug override: Show modal again on new game
+        if (import.meta.env.VITE_ROUND_FINISHED === 'true') {
+          modalConfig.value = {
+            isWin: false,
+            shareText: undefined,
+            resultsGrid: undefined,
+            secretCountry: secretCountry.value,
+            dailyChallengeNumber: undefined,
+          }
+          showModal.value = true
+        }
+      })
     },
     handleShare: async () => {
       const text = generateShareText(dailyChallengeNumber.value || 0)
