@@ -186,9 +186,9 @@ const setTilesVisibility = (visible: boolean) => {
   }
 
   // Toggle terrain tiles
-  if (map.value.getLayer('stadia-smooth-dark-layer')) {
+  if (map.value.getLayer('esri-world-topo-layer')) {
     map.value.setLayoutProperty(
-      'stadia-smooth-dark-layer',
+      'esri-world-topo-layer',
       'visibility',
       visible ? 'visible' : 'none'
     )
@@ -357,24 +357,22 @@ const setupLayers = () => {
     },
   })
 
-  // Add Stadia Alidade Smooth Dark Source
-  map.value.addSource('stadia-smooth-dark', {
+  // Add Esri World Topo Map Source
+  map.value.addSource('esri-world-topo', {
     type: 'raster',
     tiles: [
-      'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png',
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
     ],
     tileSize: 256,
     attribution:
-      '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    minzoom: 0,
-    maxzoom: 20,
+      'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community',
   })
 
-  // Add Stadia Alidade Smooth Dark Layer (initially hidden)
+  // Add Esri World Topo Map Layer (initially hidden)
   map.value.addLayer({
-    id: 'stadia-smooth-dark-layer',
+    id: 'esri-world-topo-layer',
     type: 'raster',
-    source: 'stadia-smooth-dark',
+    source: 'esri-world-topo',
     minzoom: 0,
     maxzoom: 22,
     layout: {
