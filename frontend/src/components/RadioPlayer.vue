@@ -77,6 +77,7 @@ watch(
     if (playing) {
       playStatic()
       audioPlayer.value.play().catch((e) => {
+        if (e.name === 'AbortError') return
         console.error('Playback failed', e)
       })
     } else {
@@ -105,6 +106,7 @@ watch(
       if (props.isPlaying) {
         playStatic()
         audioPlayer.value.play().catch((e) => {
+          if (e.name === 'AbortError') return
           console.error('Playback failed', e)
         })
       }

@@ -193,7 +193,7 @@ const ctaButtonMobile = ref(null)
 
 const steps = [
   {
-    text: 'Stream live radio station from a mystery country (you get 5 stations)',
+    text: 'Stream five live, random radio stations from a mystery country',
     colorClass: 'bg-gumball-blue',
   },
   {
