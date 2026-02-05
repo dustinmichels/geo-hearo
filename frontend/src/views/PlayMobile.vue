@@ -61,12 +61,6 @@ const handleArrowClick = () => {
   panelHeight.value = anchors[0]
 }
 
-const onMapCountrySelect = (country: any) => {
-  if (!roundFinished.value) {
-    handleCountrySelect(country)
-  }
-}
-
 const isPanelFullHeight = computed(() => {
   const fullHeight = anchors[1]
   if (
@@ -172,7 +166,7 @@ const activeStation = computed(() => {
       >
         <Map
           ref="mapRef"
-          @select-country="onMapCountrySelect"
+          @select-country="handleCountrySelect"
           :guessed-countries="guesses"
           :guess-colors="guessColors"
           :selected-country="guessInput"
