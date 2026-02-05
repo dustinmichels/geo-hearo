@@ -8,7 +8,7 @@ import router from './router'
 // 1. Initialize and store the instance
 init({
   domain: 'geohearo.com',
-  endpoint: 'https://geohearo.com/stats/api/event', // Your proxy endpoint
+  endpoint: 'https://geohearo.com/we-hear/for-you', // Your proxy endpoint
   autoCapturePageviews: false, // Disable auto-capture since we're tracking manually
 })
 
