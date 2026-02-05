@@ -15,7 +15,7 @@ npm run format    # Prettier
 
 - **Always** use `<script setup lang="ts">` and Composition API (never Options API)
 - **Reactivity:** `ref()` for primitives, `shallowRef()` for objects like MapLibre Map instances
-- **State management:** Composables in `src/composables/`, not Pinia/Vuex. Module-level reactive variables for shared state.
+- **State management:** Pinia store (`src/stores/game.ts`) for core game state. Composables in `src/composables/` for domain logic and shared reactive state (module-level variables).
 - **TypeScript:** Strict mode, `noUnusedLocals`/`noUnusedParameters` enforced. Use `import type` for type-only imports.
 - **Imports:** Use `@/` path alias (e.g., `@/composables/useRadio`)
 - **Styling:** Tailwind v4 utility classes. Theme is defined in `src/assets/styles/style.css` via `@theme` (no JS config). Design colors: `gumball-blue`, `yuzu-yellow`, `bubblegum-pop`, `mint-shake`, `pencil-lead`, etc.
@@ -26,15 +26,24 @@ npm run format    # Prettier
 
 ## Key Files
 
-| File                             | Purpose                                                              |
-| -------------------------------- | -------------------------------------------------------------------- |
-| `src/composables/useRadio.ts`    | Game state, station loading, guess validation, daily challenge logic |
-| `src/composables/useGamePlay.ts` | Game flow orchestration, win/loss handling                           |
-| `src/components/Map.vue`         | MapLibre GL JS map, country selection                                |
-| `src/components/RadioPlayer.vue` | Audio streaming (HLS/Icecast)                                        |
-| `src/utils/geography.ts`         | Haversine distance, bearings                                         |
-| `src/utils/colors.ts`            | Hot/cold color feedback                                              |
-| `src/views/Play.vue`             | Responsive wrapper (routes to Desktop/Mobile)                        |
+| File                                  | Purpose                                                              |
+| ------------------------------------- | -------------------------------------------------------------------- |
+| `src/stores/game.ts`                  | Pinia store: core game state (guesses, secret country, stations)     |
+| `src/types/geo.ts`                    | Shared TypeScript interfaces (RadioStation, IndexStructure, etc.)    |
+| `src/composables/useRadio.ts`         | Station loading, guess validation, daily challenge logic             |
+| `src/composables/useGamePlay.ts`      | Game flow orchestration, win/loss handling                           |
+| `src/composables/useCountryData.ts`   | Loads and caches country GeoJSON features by ADMIN name              |
+| `src/composables/useDistanceUnit.ts`  | km/mi toggle with locale-aware defaults                              |
+| `src/composables/useMapStations.ts`   | 3D station pillars on the MapLibre map (fill-extrusion layer)        |
+| `src/components/Map.vue`              | MapLibre GL JS map, country selection                                |
+| `src/components/RadioPlayer.vue`      | Audio streaming (HLS/Icecast)                                        |
+| `src/components/GameResultModal.vue`  | Win/loss modal with share functionality                              |
+| `src/components/GuessDisplay.vue`     | Renders guess history with distance/color feedback                   |
+| `src/components/ResultsPanel.vue`     | Post-round station details + new game button                         |
+| `src/components/StationDetails.vue`   | Station name, location, and Radio Garden link                        |
+| `src/utils/geography.ts`             | Haversine distance, bearings                                         |
+| `src/utils/colors.ts`                | Hot/cold color feedback                                              |
+| `src/views/Play.vue`                 | Responsive wrapper (routes to Desktop/Mobile)                        |
 
 ## Data Schema
 
@@ -69,5 +78,7 @@ All data linked by `ADMIN` country name (e.g., `"United States of America"`).
 
 ## Environment
 
-- `VITE_DEBUG_MODE=true` — Shows secret country (dev only)
+- `VITE_DEBUG_MODE=true` — Shows secret country on map (dev only)
+- `VITE_SECRET_COUNTRY` — Overrides country selection entirely (dev only)
+- `VITE_ROUND_FINISHED=true` — Forces the game into a "completed round" state (dev only)
 - `VITE_GIT_HASH` — Injected at build time

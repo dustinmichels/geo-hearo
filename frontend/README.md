@@ -15,11 +15,13 @@ npm run format    # Format code
 ## Tech Stack
 
 - **Framework:** Vue 3 (Composition API) + TypeScript (strict)
+- **State:** Pinia
 - **Build:** Vite 7
 - **Styling:** Tailwind CSS v4 + Vant UI + Lucide Icons
-- **Maps:** MapLibre GL JS
+- **Maps:** MapLibre GL JS + Turf.js
 - **Animation:** GSAP
 - **Testing:** Vitest
+- **Analytics:** Plausible
 
 ## How It Works
 
@@ -55,9 +57,11 @@ The env var `VITE_SECRET_COUNTRY` overrides country selection entirely (dev only
 
 ```
 src/
-├── components/      # UI components (Map, RadioPlayer, GuessPanel, etc.)
+├── components/      # UI components (Map, RadioPlayer, GuessPanel, GameResultModal, etc.)
 ├── views/           # Route pages (Home, Play, PlayDesktop, PlayMobile, About)
-├── composables/     # Shared state (useRadio.ts, useGamePlay.ts)
+├── stores/          # Pinia stores (game.ts)
+├── composables/     # Domain logic & shared state (useRadio, useGamePlay, useCountryData, etc.)
+├── types/           # Shared TypeScript interfaces (geo.ts)
 ├── utils/           # Pure functions (geography, colors, audio)
 ├── router/          # Vue Router config
 ├── assets/styles/   # Tailwind v4 theme + custom styles

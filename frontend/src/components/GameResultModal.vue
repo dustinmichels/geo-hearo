@@ -82,7 +82,10 @@ const computedGuessCount = computed(() => {
         </p>
 
         <!-- Result Message -->
-        <p class="text-lg text-pencil-lead/80 mb-6 leading-relaxed">
+        <p
+          v-if="!isWin || !dailyChallengeNumber"
+          class="text-lg text-pencil-lead/80 mb-6 leading-relaxed"
+        >
           <span v-if="isWin">
             You got it in
             <strong class="text-pencil-lead font-bold">{{
