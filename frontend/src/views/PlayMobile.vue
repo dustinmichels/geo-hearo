@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { FloatingPanel as VanFloatingPanel } from 'vant'
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import AnimatedClose from '../components/AnimatedClose.vue'
 import GameResultModal from '../components/GameResultModal.vue'
 import GuessPanel from '../components/GuessPanel.vue'
@@ -45,14 +45,10 @@ const {
   onGuessAdded: () => {
     panelHeight.value = anchors[1]
   },
-  onNewGame: () => mapRef.value?.resetView(),
-})
-
-// Collapse panel when round finishes
-watch(roundFinished, (finished) => {
-  if (finished) {
+  onNewGame: () => {
+    mapRef.value?.resetView()
     panelHeight.value = anchors[0]
-  }
+  },
 })
 
 const handleArrowClick = () => {
@@ -140,7 +136,6 @@ const activeStation = computed(() => {
             <template v-else> Free play mode </template>
           </div>
           <img
-            v-if="!roundFinished"
             src="/emoji.png"
             class="absolute left-full bottom-0 h-12 ml-4 z-[-1] transition-transform duration-700 ease-out"
             style="will-change: transform"
@@ -151,8 +146,7 @@ const activeStation = computed(() => {
 
       <!-- Radio Player -->
       <div
-        class="px-4 pb-2 relative z-50 transition-all duration-500"
-        :class="roundFinished ? 'order-4' : 'order-2'"
+        class="px-4 pb-2 relative z-50 order-2 transition-all duration-500"
         style="transform: translate3d(0, 0, 0)"
       >
         <RadioPlayer
@@ -168,8 +162,7 @@ const activeStation = computed(() => {
 
       <!-- Globe - takes remaining space -->
       <div
-        class="flex-1 px-4 pb-2 min-h-0 relative transition-all duration-500"
-        :class="roundFinished ? 'order-2' : 'order-3'"
+        class="flex-1 px-4 pb-2 min-h-0 relative order-3 transition-all duration-500"
       >
         <Map
           ref="mapRef"
@@ -189,7 +182,7 @@ const activeStation = computed(() => {
       <!-- RESULTS PANEL (only visible when roundFinished) -->
       <div
         v-if="roundFinished"
-        class="order-3 px-4 pb-2 z-30 flex justify-center transition-all duration-500"
+        class="order-4 px-4 pb-2 z-30 flex justify-center transition-all duration-500"
         :class="
           roundFinished
             ? 'opacity-100 translate-y-0'
