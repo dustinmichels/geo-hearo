@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { FloatingPanel as VanFloatingPanel } from 'vant'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import AnimatedClose from '../components/AnimatedClose.vue'
 import GameResultModal from '../components/GameResultModal.vue'
 import GuessPanel from '../components/GuessPanel.vue'
@@ -49,6 +49,12 @@ const {
     mapRef.value?.resetView()
     panelHeight.value = anchors[0]
   },
+})
+
+watch(roundFinished, (isFinished) => {
+  if (isFinished) {
+    panelHeight.value = anchors[0]
+  }
 })
 
 const handleArrowClick = () => {
@@ -108,7 +114,7 @@ const activeStation = computed(() => {
     ></div>
 
     <!-- Animated Arrows Hint -->
-    <div class="relative z-[60]" v-show="isPanelFullHeight && !roundFinished">
+    <div class="relative z-[60]" v-show="isPanelFullHeight">
       <AnimatedClose class="!top-16" @click="handleArrowClick" />
     </div>
 

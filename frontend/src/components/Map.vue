@@ -275,7 +275,14 @@ const initMap = () => {
       pitchWithRotate: false,
       touchZoomRotate: true,
       keyboard: false,
+      attributionControl: false,
     })
+
+    map.value.addControl(
+      new maplibregl.AttributionControl({
+        compact: true,
+      })
+    )
 
     // Disable touch rotation but keep pinch-to-zoom
     map.value.touchZoomRotate.disableRotation()
