@@ -23,12 +23,12 @@ Audio geo-guessing game
 
 ### Distance Calculation
 
-To ensure fair gameplay, distance between countries is calculated using the "Main Landmass" rule:
+The distance between countries is calculated using the "Main Landmass" rule:
 
 - Total land area for a country is calculated.
 - Only polygons (landmasses) that constitute at least **20%** of the country's total area are used for measurement.
 - Distance is measured from the nearest border point of any "Major Landmass" of the guess to the nearest border point of any "Major Landmass" of the secret country.
-- This effectively excludes small overseas territories (e.g., measuring from French Guiana for "France") while preserving major islands (e.g., North and South Island of New Zealand).
+- This effectively excludes small overseas territories (e.g., measuring from French Guiana for "France") while preserving major islands (e.g., North and South Island of New Zealand). It also filters out Alaska (17% of US landmass.)
 
 ## Thanks
 
