@@ -28,6 +28,7 @@ export function playRadioStatic(duration = 2) {
 
   const source = audioCtx.createBufferSource()
   source.buffer = buffer
+  source.loop = true
 
   const filter = audioCtx.createBiquadFilter()
   filter.type = 'bandpass'

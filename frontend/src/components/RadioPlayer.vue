@@ -2,7 +2,7 @@
 import { useGameStore } from '@/stores/game'
 import { Loader2, Pause, Play, SkipBack, SkipForward } from 'lucide-vue-next'
 import { Button as VanButton } from 'vant'
-import { ref, watch } from 'vue'
+import { onUnmounted, ref, watch } from 'vue'
 import { playRadioStatic } from '../utils/audio'
 
 const store = useGameStore()
@@ -28,24 +28,9 @@ const emit = defineEmits<{
 const audioPlayer = ref<HTMLAudioElement | null>(null)
 const currentStaticSource = ref<AudioBufferSourceNode | null>(null) // Store the source node
 const isLoading = ref(false)
+let loadingTimeout: ReturnType<typeof setTimeout> | undefined
 
-const playStatic = () => {
-  // Stop any existing static first
-  if (currentStaticSource.value) {
-    try {
-      currentStaticSource.value.stop()
-    } catch (e) {
-      // ignore
-    }
-  }
-  const source = playRadioStatic()
-  if (source) {
-    currentStaticSource.value = source
-  }
-}
-
-const onAudioPlaying = () => {
-  isLoading.value = false
+const stopStatic = () => {
   if (currentStaticSource.value) {
     try {
       currentStaticSource.value.stop()
@@ -54,6 +39,19 @@ const onAudioPlaying = () => {
     }
     currentStaticSource.value = null
   }
+}
+
+const playStatic = () => {
+  stopStatic()
+  const source = playRadioStatic()
+  if (source) {
+    currentStaticSource.value = source
+  }
+}
+
+const onAudioPlaying = () => {
+  isLoading.value = false
+  stopStatic()
 }
 
 watch(
@@ -65,19 +63,14 @@ watch(
       playStatic()
       audioPlayer.value.play().catch((e) => {
         isLoading.value = false
+        stopStatic()
         if (e.name === 'AbortError') return
         console.error('Playback failed', e)
       })
     } else {
       isLoading.value = false
       audioPlayer.value.pause()
-      // Also stop static if pausing
-      if (currentStaticSource.value) {
-        try {
-          currentStaticSource.value.stop()
-        } catch (e) {}
-        currentStaticSource.value = null
-      }
+      stopStatic()
     }
   }
 )
@@ -93,6 +86,7 @@ watch(
         playStatic()
         audioPlayer.value.play().catch((e) => {
           isLoading.value = false
+          stopStatic()
           if (e.name === 'AbortError') return
           console.error('Playback failed', e)
         })
@@ -100,6 +94,28 @@ watch(
     }
   }
 )
+
+watch(isLoading, (loading) => {
+  if (loading) {
+    // Clear any existing timeout just in case
+    if (loadingTimeout) clearTimeout(loadingTimeout)
+    // Set new timeout
+    loadingTimeout = setTimeout(() => {
+      if (isLoading.value) {
+        console.log('Loading timed out, skipping to next station')
+        isLoading.value = false // Stop loading state locally
+        onNext()
+      }
+    }, 3000)
+  } else {
+    // Clear timeout if loading stops
+    if (loadingTimeout) {
+      clearTimeout(loadingTimeout)
+      loadingTimeout = undefined
+    }
+  }
+})
+
 watch(
   () => props.isPlaying,
   (playing) => {
@@ -119,6 +135,11 @@ const onNext = () => {
   store.hasSkippedStation = true
   emit('next')
 }
+
+onUnmounted(() => {
+  if (loadingTimeout) clearTimeout(loadingTimeout)
+  stopStatic()
+})
 </script>
 
 <template>

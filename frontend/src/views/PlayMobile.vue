@@ -215,7 +215,7 @@ const handleModalClose = () => {
       v-if="!roundFinished"
       v-model:height="panelHeight"
       :anchors="anchors"
-      :content-class="'bg-paper-white rounded-t-[24px] border-t-3 border-l-3 border-r-3 border-pencil-lead shadow-[0_-4px_0_0_#334155] flex flex-col'"
+      :content-class="'flex flex-col'"
       style="z-index: 50"
     >
       <GuessPanel
@@ -241,7 +241,14 @@ const handleModalClose = () => {
 
 <style scoped>
 :deep(.van-floating-panel) {
-  background-color: transparent !important;
+  background-color: #f3f4f6 !important;
+  border-top: 3px solid var(--color-pencil-lead) !important;
+  border-left: 3px solid var(--color-pencil-lead) !important;
+  border-right: 3px solid var(--color-pencil-lead) !important;
+  border-top-left-radius: 24px !important;
+  border-top-right-radius: 24px !important;
+  box-shadow: 0 -4px 0 0 #334155 !important;
+  overflow: hidden !important;
 }
 
 :deep(.van-floating-panel__header) {
