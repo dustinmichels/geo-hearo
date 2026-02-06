@@ -71,7 +71,10 @@ const computedGuessCount = computed(() => {
         </div>
 
         <!-- Header -->
-        <h2 class="text-3xl font-heading text-pencil-lead mb-4 tracking-wide">
+        <h2
+          class="text-3xl font-heading mb-4 tracking-wide"
+          :class="isWin ? 'text-mint-shake' : 'text-berry-oops'"
+        >
           {{ isWin ? 'Nice work!' : 'Game Over!' }}
         </h2>
 
@@ -84,7 +87,7 @@ const computedGuessCount = computed(() => {
         </p>
 
         <!-- Result Message -->
-        <p
+        <!-- <p
           v-if="!isWin || !dailyChallengeNumber"
           class="text-lg text-pencil-lead/80 mb-6 leading-relaxed"
         >
@@ -96,7 +99,7 @@ const computedGuessCount = computed(() => {
             {{ computedGuessCount === 1 ? 'guess' : 'guesses' }}.
           </span>
           <span v-else> Hey, you'll get it next time! </span>
-        </p>
+        </p> -->
 
         <!-- Emoji Grid -->
         <div

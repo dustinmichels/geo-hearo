@@ -35,11 +35,7 @@ const averageScore = computed(() => {
     <h3
       class="text-sm font-heading text-pencil-lead/60 mb-3 text-center uppercase tracking-wider"
     >
-      GAME HISTORY [{{
-        new Date()
-          .toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-          .toUpperCase()
-      }}]
+      GAME HISTORY
       <span
         v-if="history && history.length > 0"
         class="block text-xs mt-1 lowercase text-pencil-lead"
@@ -51,12 +47,17 @@ const averageScore = computed(() => {
       <div
         v-for="(item, idx) in history.slice().reverse()"
         :key="idx"
-        class="grid grid-cols-[1fr_auto_auto] gap-3 items-center text-sm bg-paper-white/50 p-2 rounded-lg border transition-colors"
-        :class="
+        class="grid grid-cols-[1fr_auto_auto] gap-3 items-center text-sm p-2 rounded-lg border transition-colors"
+        :class="[
           item.mode === 'daily'
-            ? 'border-[#B45309]/50 text-[#B45309] bg-orange-50/50'
-            : 'border-pencil-lead/5 text-pencil-lead'
-        "
+            ? 'bg-orange-50/50 text-[#B45309]'
+            : 'bg-paper-white/50 text-pencil-lead',
+          idx === 0
+            ? 'border-gumball-blue border-2'
+            : item.mode === 'daily'
+              ? 'border-[#B45309]/50'
+              : 'border-pencil-lead/5',
+        ]"
       >
         <span class="font-bold truncate">{{ item.country }}</span>
         <span class="tracking-widest">{{ item.score }}</span>
