@@ -56,7 +56,56 @@ export function useOnboarding() {
     driverObj.drive()
   }
 
+  const startResultsTour = () => {
+    const hasSeenResultsTour = localStorage.getItem(
+      'geo-hearo-results-tour-seen'
+    )
+
+    if (hasSeenResultsTour) return
+
+    const isMobile = window.innerWidth < 1024
+    const placement = isMobile ? 'top' : 'left'
+
+    const driverObj = driver({
+      showProgress: true,
+      steps: [
+        {
+          element: '#station-details-panel',
+          popover: {
+            title: 'Station Details',
+            description:
+              'See details about the stations you were just listening to.',
+            side: placement,
+            align: 'center',
+          },
+        },
+        {
+          element: '#new-game-btn',
+          popover: {
+            title: 'New Game',
+            description:
+              'Listen as long as you like! Click new game when ready.',
+            side: placement,
+            align: 'center',
+          },
+        },
+      ],
+      onDestroyStarted: () => {
+        if (
+          !driverObj.hasNextStep() ||
+          confirm('Are you sure used want to skip the tour?')
+        ) {
+          driverObj.destroy()
+          localStorage.setItem('geo-hearo-results-tour-seen', 'true')
+        }
+      },
+    })
+
+    driverObj.drive()
+  }
+
   return {
     startTour,
+    startResultsTour,
   }
 }

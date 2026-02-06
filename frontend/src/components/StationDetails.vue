@@ -29,19 +29,6 @@ const gardenUrl = computed(() => {
 
   return `https://radio.garden${path}`
 })
-
-const searchUrl = computed(() => {
-  if (!props.station) return ''
-  const query = [
-    props.station.channel_name,
-    props.station.place_name,
-    props.station.country,
-  ]
-    .filter(Boolean)
-    .join(' ')
-
-  return `https://duckduckgo.com/?q=${encodeURIComponent(query)}`
-})
 </script>
 
 <template>
@@ -72,17 +59,6 @@ const searchUrl = computed(() => {
         :class="layout === 'desktop' ? 'text-base' : 'text-xs'"
       >
         Listen on radio.garden
-        <ExternalLink :class="layout === 'desktop' ? 'w-4 h-4' : 'w-3 h-3'" />
-      </a>
-
-      <a
-        :href="searchUrl"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="inline-flex items-center justify-center gap-1.5 font-bold text-gumball-blue hover:underline text-xs"
-        :class="layout === 'desktop' ? 'text-base' : 'text-xs'"
-      >
-        Search this station
         <ExternalLink :class="layout === 'desktop' ? 'w-4 h-4' : 'w-3 h-3'" />
       </a>
     </div>

@@ -24,7 +24,7 @@ defineEmits<{
     :class="layout === 'desktop' ? 'flex-col' : 'flex-row'"
   >
     <!-- Center: Station Details -->
-    <div class="flex-1 w-full min-w-0">
+    <div id="station-details-panel" class="flex-1 w-full min-w-0">
       <StationDetails
         :station="station"
         :layout="layout"
@@ -41,6 +41,7 @@ defineEmits<{
     >
       <!-- New Game -->
       <button
+        id="new-game-btn"
         class="flex-1 bg-yuzu-yellow text-pencil-lead rounded-2xl border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] active:translate-y-1 active:shadow-none transition-all duration-100 flex items-center justify-center gap-1 hover:brightness-110 p-1"
         :class="layout === 'desktop' ? 'flex-row' : 'flex-col'"
         @click="$emit('newGame')"

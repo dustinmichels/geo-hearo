@@ -35,7 +35,7 @@ const loaded = ref(false)
 const resizeObserver = shallowRef<ResizeObserver | null>(null)
 const showReloadInfo = ref(false)
 const isGlobe = ref(false)
-const currentZoom = ref(1.5)
+
 let loadingTimeout: ReturnType<typeof setTimeout> | null = null
 let spinFrameId: number | null = null
 let lastSpinTime = 0
@@ -531,9 +531,6 @@ const setupInteractions = () => {
   startSpinning()
 
   // Sync zoom level
-  map.value.on('zoom', () => {
-    if (map.value) currentZoom.value = map.value.getZoom()
-  })
 }
 
 // --- Idle globe spin ---
@@ -651,14 +648,6 @@ const zoomToStationsWrapped = () => {
   }, 100)
 }
 
-const handleZoomInput = (e: Event) => {
-  stopSpinning()
-  if (!map.value) return
-  const target = e.target as HTMLInputElement
-  const val = parseFloat(target.value)
-  map.value.setZoom(val)
-}
-
 defineExpose({ resetView, zoomToStations: zoomToStationsWrapped })
 
 onUnmounted(() => {
@@ -721,33 +710,10 @@ onUnmounted(() => {
       >
         <Search class="w-5 h-5" />
       </button>
-
-      <!-- Zoom Slider -->
-      <div
-        class="py-3 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg shadow-sm flex justify-center h-32"
-      >
-        <input
-          type="range"
-          :min="isGlobe ? 1.5 : 1"
-          max="12"
-          step="0.1"
-          :value="currentZoom"
-          @input="handleZoomInput"
-          @mousedown="stopSpinning"
-          orient="vertical"
-          class="h-full w-2 vertical-slider cursor-pointer accent-slate-600"
-        />
-      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
 /* MapLibre attribution is kept visible for license compliance */
-
-.vertical-slider {
-  writing-mode: bt-lr; /* IE */
-  -webkit-appearance: slider-vertical; /* WebKit */
-  appearance: slider-vertical;
-}
 </style>

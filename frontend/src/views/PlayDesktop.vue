@@ -7,11 +7,13 @@ import Map from '../components/Map.vue'
 import RadioPlayer from '../components/RadioPlayer.vue'
 import ResultsPanel from '../components/ResultsPanel.vue'
 import { useGamePlay } from '../composables/useGamePlay'
+import { useOnboarding } from '../composables/useOnboarding'
 import { useRadio } from '../composables/useRadio'
 
 const mapRef = ref<InstanceType<typeof Map> | null>(null)
 
 const { isDailyChallengeMode } = useRadio()
+const { startResultsTour } = useOnboarding()
 
 const {
   isPlaying,
@@ -46,6 +48,9 @@ const activeStation = computed(() => {
 const handleModalClose = () => {
   showModal.value = false
   mapRef.value?.zoomToStations()
+  setTimeout(() => {
+    startResultsTour()
+  }, 500)
 }
 </script>
 
