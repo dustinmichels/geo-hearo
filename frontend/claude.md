@@ -35,14 +35,19 @@ npm run format    # Prettier
 | `src/composables/useCountryData.ts`   | Loads and caches country GeoJSON features by ADMIN name              |
 | `src/composables/useDistanceUnit.ts`  | km/mi toggle with locale-aware defaults                              |
 | `src/composables/useMapStations.ts`   | 3D station pillars on the MapLibre map (fill-extrusion layer)        |
+| `src/composables/useOnboarding.ts`    | Onboarding tours via driver.js (startTour, startResultsTour)         |
 | `src/components/Map.vue`              | MapLibre GL JS map, country selection                                |
 | `src/components/RadioPlayer.vue`      | Audio streaming (HLS/Icecast)                                        |
 | `src/components/GameResultModal.vue`  | Win/loss modal with share functionality                              |
+| `src/components/GuessPanel.vue`       | Guess input panel (Vant Field) with shake animation                  |
 | `src/components/GuessDisplay.vue`     | Renders guess history with distance/color feedback                   |
+| `src/components/GameHistoryList.vue`  | Game history display with average score                              |
 | `src/components/ResultsPanel.vue`     | Post-round station details + new game button                         |
 | `src/components/StationDetails.vue`   | Station name, location, and Radio Garden link                        |
+| `src/components/Footer.vue`          | Navigation footer with Home/About links and git hash                 |
 | `src/utils/geography.ts`             | Haversine distance, bearings                                         |
 | `src/utils/colors.ts`                | Hot/cold color feedback                                              |
+| `src/utils/audio.ts`                 | Radio static sound effect via Web Audio API                          |
 | `src/views/Play.vue`                 | Responsive wrapper (routes to Desktop/Mobile)                        |
 
 ## Data Schema

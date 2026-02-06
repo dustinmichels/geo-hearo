@@ -19,6 +19,8 @@ npm run format    # Format code
 - **Build:** Vite 7
 - **Styling:** Tailwind CSS v4 + Vant UI + Lucide Icons
 - **Maps:** MapLibre GL JS + Turf.js
+- **Icons:** Lucide
+- **Onboarding:** driver.js
 - **Animation:** GSAP
 - **Testing:** Vitest
 - **Analytics:** Plausible
@@ -61,12 +63,12 @@ The env var `VITE_SECRET_COUNTRY` overrides country selection entirely (dev only
 
 ```
 src/
-├── components/      # UI components (Map, RadioPlayer, GuessPanel, GameResultModal, etc.)
+├── components/      # UI components (Map, RadioPlayer, GuessPanel, GameResultModal, GameHistoryList, etc.)
 ├── views/           # Route pages (Home, Play, PlayDesktop, PlayMobile, About)
 ├── stores/          # Pinia stores (game.ts)
-├── composables/     # Domain logic & shared state (useRadio, useGamePlay, useCountryData, etc.)
+├── composables/     # Domain logic & shared state (useRadio, useGamePlay, useCountryData, useOnboarding, etc.)
 ├── types/           # Shared TypeScript interfaces (geo.ts)
-├── utils/           # Pure functions (geography, colors, audio)
+├── utils/           # Pure functions (geography, colors, audio static)
 ├── router/          # Vue Router config
 ├── assets/styles/   # Tailwind v4 theme + custom styles
 ├── App.vue          # Root component
