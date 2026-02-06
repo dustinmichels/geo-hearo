@@ -4,12 +4,10 @@
   >
     <!-- Decorative Background Shapes for "Pop" -->
     <div
-      ref="blob1"
-      class="absolute top-10 right-[-5%] w-64 h-64 bg-bubblegum-pop/5 rounded-full blur-3xl -z-10"
+      class="absolute top-10 right-[-5%] w-64 h-64 bg-bubblegum-pop/5 rounded-full blur-3xl -z-10 animate-blob1"
     ></div>
     <div
-      ref="blob2"
-      class="absolute bottom-10 left-[-5%] w-80 h-80 bg-gumball-blue/5 rounded-full blur-3xl -z-10"
+      class="absolute bottom-10 left-[-5%] w-80 h-80 bg-gumball-blue/5 rounded-full blur-3xl -z-10 animate-blob2"
     ></div>
 
     <!-- Main Content Container -->
@@ -20,10 +18,7 @@
       <div
         class="order-1 lg:order-2 flex justify-center items-center py-2 lg:py-0"
       >
-        <div
-          ref="globeContainer"
-          class="relative scale-100 sm:scale-100 opacity-0"
-        >
+        <div class="relative scale-100 sm:scale-100 animate-fade-in-delayed">
           <!-- Squishy Background Glow -->
           <div
             class="absolute inset-0 bg-mint-shake rounded-full blur-3xl opacity-25 scale-125"
@@ -31,23 +26,20 @@
 
           <!-- Globe Image -->
           <img
-            ref="globe"
             :src="globeImage"
             alt="GeoHearo Globe"
-            class="w-24 sm:w-64 md:w-80 lg:w-[480px] xl:w-[540px] object-contain relative z-10"
+            class="w-24 sm:w-64 md:w-80 lg:w-[480px] xl:w-[540px] object-contain relative z-10 animate-float-globe"
             @error="handleImageError"
           />
 
           <!-- Floating Sticker Decorations (Visible on mobile now) -->
           <div
-            ref="sticker1"
-            class="absolute -top-3 -right-3 sm:-top-6 sm:-right-6 bg-paper-white border-3 border-pencil-lead p-2 sm:p-4 rounded-xl sm:rounded-3xl shadow-lg rotate-12 z-20"
+            class="absolute -top-3 -right-3 sm:-top-6 sm:-right-6 bg-paper-white border-3 border-pencil-lead p-2 sm:p-4 rounded-xl sm:rounded-3xl shadow-lg rotate-12 z-20 animate-float-sticker1"
           >
             <span class="text-xl sm:text-4xl">🎵</span>
           </div>
           <div
-            ref="sticker2"
-            class="absolute bottom-6 -left-6 sm:bottom-10 sm:-left-10 bg-paper-white border-3 border-pencil-lead p-2 sm:p-4 rounded-xl sm:rounded-3xl shadow-lg -rotate-12 z-20"
+            class="absolute bottom-6 -left-6 sm:bottom-10 sm:-left-10 bg-paper-white border-3 border-pencil-lead p-2 sm:p-4 rounded-xl sm:rounded-3xl shadow-lg -rotate-12 z-20 animate-float-sticker2"
           >
             <span class="text-xl sm:text-4xl">📢</span>
           </div>
@@ -57,11 +49,8 @@
             class="hidden lg:flex absolute inset-0 z-30 items-center justify-center gap-4 sm:gap-6 pointer-events-none"
           >
             <div
-              ref="ctaButtonDesktop"
-              class="relative group cursor-pointer pointer-events-auto opacity-0 scale-50"
-              @click="handleTuneIn($event)"
-              @mouseenter="onButtonHover($event.currentTarget as HTMLElement)"
-              @mouseleave="onButtonLeave($event.currentTarget as HTMLElement)"
+              class="relative group cursor-pointer pointer-events-auto animate-pop-in-delayed hover-scale"
+              @click="handleTuneIn"
             >
               <div class="magic-container">
                 <div
@@ -72,7 +61,7 @@
                 ></div>
               </div>
               <button
-                class="btn-pressable bg-yuzu-yellow px-12 sm:px-16 py-6 sm:py-8 rounded-[30px] sm:rounded-[36px] text-4xl sm:text-6xl btn-text uppercase tracking-widest text-pencil-lead relative z-10 block"
+                class="btn-pressable bg-yuzu-yellow px-12 sm:px-16 py-6 sm:py-8 rounded-[30px] sm:rounded-[36px] text-4xl sm:text-6xl btn-text uppercase tracking-widest text-pencil-lead relative z-10 block transition-transform duration-200"
               >
                 PLAY
               </button>
@@ -87,8 +76,7 @@
       >
         <div class="space-y-6 lg:space-y-10">
           <h1
-            ref="mainTitle"
-            class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-[1.1] tracking-tight text-pencil-lead opacity-0 translate-y-10"
+            class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-[1.1] tracking-tight text-pencil-lead animate-slide-up"
           >
             <span class="text-gumball-blue">GeoHearo</span> is the geo-guessing
             game where you
@@ -106,10 +94,8 @@
               <li
                 v-for="(step, index) in steps"
                 :key="index"
-                ref="stepItems"
-                class="flex items-center gap-4 sm:gap-6 opacity-0 -translate-x-10"
-                @mouseenter="onStepHover($event.currentTarget as HTMLElement)"
-                @mouseleave="onStepLeave($event.currentTarget as HTMLElement)"
+                class="flex items-center gap-4 sm:gap-6 animate-slide-in-right hover-step"
+                :style="{ animationDelay: `${0.6 + index * 0.2}s` }"
               >
                 <div :class="['step-badge', step.colorClass]">
                   {{ index + 1 }}
@@ -124,11 +110,8 @@
         <div class="lg:hidden space-y-6 sm:space-y-8">
           <div class="flex justify-center pt-0 pb-6 gap-4 sm:gap-6">
             <div
-              ref="ctaButtonMobile"
-              class="relative group cursor-pointer opacity-0 scale-50"
-              @click="handleTuneIn($event)"
-              @mouseenter="onButtonHover($event.currentTarget as HTMLElement)"
-              @mouseleave="onButtonLeave($event.currentTarget as HTMLElement)"
+              class="relative group cursor-pointer animate-pop-in-late hover-scale"
+              @click="handleTuneIn"
             >
               <div class="magic-container">
                 <div
@@ -139,7 +122,7 @@
                 ></div>
               </div>
               <button
-                class="btn-pressable bg-yuzu-yellow px-12 sm:px-16 py-6 sm:py-8 rounded-[30px] sm:rounded-[36px] text-4xl sm:text-6xl btn-text uppercase tracking-widest text-pencil-lead relative z-10 block"
+                class="btn-pressable bg-yuzu-yellow px-12 sm:px-16 py-6 sm:py-8 rounded-[30px] sm:rounded-[36px] text-4xl sm:text-6xl btn-text uppercase tracking-widest text-pencil-lead relative z-10 block transition-transform duration-200"
               >
                 PLAY
               </button>
@@ -171,25 +154,11 @@
 </template>
 
 <script setup lang="ts">
-import gsap from 'gsap'
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const globeImage = ref('/globe.png')
-
-// Refs for GSAP
-const blob1 = ref(null)
-const blob2 = ref(null)
-const globeContainer = ref(null)
-const globe = ref(null)
-const sticker1 = ref(null)
-const sticker2 = ref(null)
-const mainTitle = ref(null)
-const stepItems = ref<HTMLElement[]>([])
-const heroQuestion = ref(null)
-const ctaButtonDesktop = ref(null)
-const ctaButtonMobile = ref(null)
 
 const steps = [
   {
@@ -212,227 +181,36 @@ const handleImageError = (event: Event) => {
 }
 
 const handleTuneIn = (event: Event) => {
-  // Animate button press before navigating
-  const btn = event.currentTarget as HTMLElement
-  gsap.to(btn, {
-    scale: 0.95,
-    duration: 0.1,
-    yoyo: true,
-    repeat: 1,
-    onComplete: () => {
-      router.push({ name: 'Play' })
-    },
-  })
+  // Simple click animation feedback handled by :active CSS or small JS delay if critical
+  // For now, just navigate immediately as CSS active state provides feedback
+  router.push({ name: 'Play' })
 }
-
-// Hover effects
-const onStepHover = (el: HTMLElement) => {
-  gsap.to(el, {
-    scale: 1.05,
-    x: 10,
-    duration: 0.3,
-    ease: 'back.out(1.7)',
-  })
-
-  // Animate the badge inside
-  const badge = el.querySelector('.step-badge')
-  if (badge) {
-    gsap.to(badge, {
-      rotate: 15,
-      scale: 1.2,
-      duration: 0.3,
-      ease: 'back.out(2)',
-    })
-  }
-}
-
-const onStepLeave = (el: HTMLElement) => {
-  gsap.to(el, {
-    scale: 1,
-    x: 0,
-    duration: 0.3,
-    ease: 'power2.out',
-  })
-
-  const badge = el.querySelector('.step-badge')
-  if (badge) {
-    gsap.to(badge, {
-      rotate: 0,
-      scale: 1,
-      duration: 0.3,
-      ease: 'power2.out',
-    })
-  }
-}
-
-const onButtonHover = (el: HTMLElement) => {
-  gsap.to(el, {
-    scale: 1.05,
-    rotation: -2,
-    duration: 0.2,
-    ease: 'power1.out',
-  })
-
-  // Handle shadow on child button if wrapped
-  const target = el.classList.contains('btn-pressable')
-    ? el
-    : el.querySelector('.btn-pressable')
-  if (target) {
-    gsap.to(target, {
-      boxShadow: '0 12px 0 0 #334155',
-      duration: 0.2,
-      ease: 'power1.out',
-    })
-  }
-}
-
-const onButtonLeave = (el: HTMLElement) => {
-  gsap.to(el, {
-    scale: 1,
-    rotation: 0,
-    duration: 0.2,
-    ease: 'power1.out',
-  })
-
-  const target = el.classList.contains('btn-pressable')
-    ? el
-    : el.querySelector('.btn-pressable')
-  if (target) {
-    gsap.to(target, {
-      boxShadow: '0 8px 0 0 #334155',
-      duration: 0.2,
-      ease: 'power1.out',
-    })
-  }
-}
-
-onMounted(() => {
-  const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
-
-  // 1. Entrance Animations
-  tl.to(mainTitle.value, {
-    y: 0,
-    opacity: 1,
-    duration: 1,
-  })
-    .to(
-      stepItems.value,
-      {
-        x: 0,
-        opacity: 1,
-        stagger: 0.2,
-        duration: 0.8,
-        ease: 'back.out(1.2)',
-      },
-      '-=0.6'
-    )
-    .to(
-      heroQuestion.value,
-      {
-        opacity: 1,
-        duration: 0.8,
-      },
-      '-=0.4'
-    )
-    .to(
-      [ctaButtonDesktop.value, ctaButtonMobile.value],
-      {
-        scale: 1,
-        opacity: 1,
-        stagger: 0.1,
-        duration: 0.6,
-        ease: 'elastic.out(1, 0.5)',
-      },
-      '-=0.4'
-    )
-    .to(
-      globeContainer.value,
-      {
-        opacity: 1,
-        duration: 1,
-      },
-      '-=1.5'
-    )
-    .from(
-      [sticker1.value, sticker2.value],
-      {
-        scale: 0,
-        rotation: 0,
-        opacity: 0,
-        stagger: 0.2,
-        duration: 0.6,
-        ease: 'back.out(2)',
-      },
-      '-=0.8'
-    )
-
-  // 2. Continuous Animations (Looping)
-  // Float the globe
-  gsap.to(globe.value, {
-    y: -20,
-    rotation: 2,
-    duration: 3,
-    yoyo: true,
-    repeat: -1,
-    ease: 'sine.inOut',
-  })
-
-  // Float the stickers slightly differently
-  gsap.to(sticker1.value, {
-    y: -10,
-    rotation: 15,
-    duration: 2.5,
-    yoyo: true,
-    repeat: -1,
-    ease: 'sine.inOut',
-    delay: 0.5,
-  })
-
-  gsap.to(sticker2.value, {
-    y: -12,
-    rotation: -15,
-    duration: 3.5,
-    yoyo: true,
-    repeat: -1,
-    ease: 'sine.inOut',
-    delay: 1,
-  })
-
-  // Move blobs around
-  gsap.to(blob1.value, {
-    x: 50,
-    y: 30,
-    scale: 1.1,
-    duration: 8,
-    yoyo: true,
-    repeat: -1,
-    ease: 'sine.inOut',
-  })
-
-  gsap.to(blob2.value, {
-    x: -30,
-    y: -40,
-    scale: 1.2,
-    duration: 10,
-    yoyo: true,
-    repeat: -1,
-    ease: 'sine.inOut',
-  })
-})
 </script>
 
 <style scoped>
-/* The "Pressable" Button Effect - Base styles only, GSAP handles hover/active mostly */
+/* The "Pressable" Button Effect */
 .btn-pressable {
   position: relative;
-  /* transition: all 0.1s ease;  <-- Removing transition to let GSAP handle it */
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease;
   box-shadow: 0 8px 0 0 #334155;
   border: 3px solid #334155;
   transform-origin: center center;
   cursor: pointer;
 }
 
-/* Badge Style */
+.hover-scale:hover .btn-pressable {
+  transform: scale(1.05) rotate(-2deg);
+  box-shadow: 0 12px 0 0 #334155;
+}
+
+.hover-scale:active .btn-pressable {
+  transform: scale(0.95);
+  box-shadow: 0 4px 0 0 #334155;
+}
+
+/* Badge Style and List Item Hover */
 .step-badge {
   display: flex;
   align-items: center;
@@ -447,8 +225,20 @@ onMounted(() => {
   font-size: 1.1rem;
   color: white;
   box-shadow: 3px 3px 0px 0px #334155;
-  /* transition removed for GSAP */
   cursor: default;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.hover-step {
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.hover-step:hover {
+  transform: translateX(10px) scale(1.05);
+}
+
+.hover-step:hover .step-badge {
+  transform: scale(1.2) rotate(15deg);
 }
 
 @media (min-width: 768px) {
@@ -461,7 +251,7 @@ onMounted(() => {
   }
 }
 
-/* Handle high-aspect ratio devices (tall phones) to keep centered */
+/* Handle high-aspect ratio devices */
 @media (min-height: 700px) {
   .no-scroll-container {
     overflow: hidden;
@@ -507,5 +297,148 @@ onMounted(() => {
 .wave-2 {
   background-color: rgba(244, 114, 182, 0.5); /* Bubblegum Pop */
   animation-delay: 1.5s;
+}
+
+/* ------------------
+   New CSS Animations
+   ------------------ */
+
+/* Fade/Slide In Animations */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-in-right {
+  opacity: 0; /* Starts hidden */
+  animation: slideInRight 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.animate-fade-in-delayed {
+  opacity: 0;
+  animation: fadeIn 1s ease-out 0.5s forwards;
+}
+
+.animate-pop-in-delayed {
+  opacity: 0;
+  animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1s forwards;
+}
+
+.animate-pop-in-late {
+  opacity: 0;
+  animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.2s forwards;
+}
+
+/* Floating / Continuous Animations */
+
+/* Globe specific float */
+@keyframes floatY {
+  0%,
+  100% {
+    transform: translateY(-20px) rotate(2deg);
+  }
+  50% {
+    transform: translateY(0px) rotate(-2deg);
+  }
+}
+.animate-float-globe {
+  animation: floatY 6s ease-in-out infinite;
+}
+
+/* Sticker 1 Float */
+@keyframes floatSticker1 {
+  0%,
+  100% {
+    transform: translateY(-10px) rotate(15deg);
+  }
+  50% {
+    transform: translateY(0px) rotate(12deg);
+  }
+}
+.animate-float-sticker1 {
+  /* Starting rotation was 12deg in HTML class, animation will override, so baked into keyframes */
+  animation: floatSticker1 5s ease-in-out infinite 0.5s;
+}
+
+/* Sticker 2 Float */
+@keyframes floatSticker2 {
+  0%,
+  100% {
+    transform: translateY(-12px) rotate(-15deg);
+  }
+  50% {
+    transform: translateY(0px) rotate(-12deg);
+  }
+}
+.animate-float-sticker2 {
+  animation: floatSticker2 7s ease-in-out infinite 1s;
+}
+
+/* Blobs */
+@keyframes blobMove1 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(50px, 30px) scale(1.1);
+  }
+}
+.animate-blob1 {
+  animation: blobMove1 16s ease-in-out infinite;
+}
+
+@keyframes blobMove2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-30px, -40px) scale(1.2);
+  }
+}
+.animate-blob2 {
+  animation: blobMove2 20s ease-in-out infinite;
 }
 </style>
