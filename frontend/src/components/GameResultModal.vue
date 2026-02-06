@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Check, Share, X } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import type { GameHistoryItem } from '../types/geo'
 import GameHistoryList from './GameHistoryList.vue'
 
@@ -35,10 +35,6 @@ const handleShare = async () => {
     }
   }
 }
-
-const computedGuessCount = computed(() => {
-  return [...(props.resultsGrid || '')].length
-})
 </script>
 
 <template>
