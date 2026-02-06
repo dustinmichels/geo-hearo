@@ -617,12 +617,6 @@ const resetView = () => {
     return
   }
 
-  if (!isGlobe.value) {
-    isGlobe.value = true
-    map.value.setProjection({ type: 'globe' })
-    applyProjectionStyles()
-  }
-
   map.value.easeTo({
     center: [0, 20],
     zoom: 1.5,
