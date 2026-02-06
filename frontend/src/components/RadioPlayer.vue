@@ -91,7 +91,7 @@ watch(
             isLoading.value = false // Stop loading state locally
             onNext()
           }
-        }, 3000)
+        }, 3500)
 
         playStatic()
         audioPlayer.value.play().catch((e) => {
@@ -116,7 +116,7 @@ watch(isLoading, (loading) => {
         isLoading.value = false // Stop loading state locally
         onNext()
       }
-    }, 3000)
+    }, 3500)
   } else {
     // Clear timeout if loading stops
     if (loadingTimeout) {
