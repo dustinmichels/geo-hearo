@@ -35,12 +35,11 @@ const averageScore = computed(() => {
     <h3
       class="text-sm font-heading text-pencil-lead/60 mb-3 text-center uppercase tracking-wider"
     >
-      GAME HISTORY
       <span
         v-if="history && history.length > 0"
-        class="block text-xs mt-1 lowercase text-pencil-lead"
+        class="block text-sm mt-1 lowercase text-pencil-lead"
       >
-        Avg Score: {{ averageScore }}
+        Avg Score Today: {{ averageScore }}
       </span>
     </h3>
     <div class="space-y-2">

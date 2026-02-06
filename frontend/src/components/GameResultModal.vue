@@ -76,7 +76,7 @@ const handleShare = async () => {
 
         <!-- Secret Country -->
         <p class="text-lg text-pencil-lead/80 mb-6 leading-relaxed">
-          The secret country was:
+          The country was:
           <strong class="text-pencil-lead font-bold">{{
             secretCountry || 'Unknown'
           }}</strong>
