@@ -180,7 +180,7 @@ const handleImageError = (event: Event) => {
   img.src = 'https://via.placeholder.com/400?text=< '
 }
 
-const handleTuneIn = (event: Event) => {
+const handleTuneIn = (_event: Event) => {
   // Simple click animation feedback handled by :active CSS or small JS delay if critical
   // For now, just navigate immediately as CSS active state provides feedback
   router.push({ name: 'Play' })

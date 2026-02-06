@@ -26,6 +26,8 @@ export interface IndexStructure {
   countries: Record<string, { start: number; count: number }>
 }
 
+export type GamePhase = 'newRound' | 'guessMode' | 'roundFinished' | 'listenMode'
+
 export interface GameHistoryItem {
   country: string
   score: string
