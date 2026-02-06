@@ -5,7 +5,8 @@ rm -rf frontend/public/data
 mkdir -p frontend/public/data
 
 # centers
-cp data-prep/data/out/centers.geojson frontend/public/data/centers.geojson
+# No longer used
+# cp data-prep/data/out/centers.geojson frontend/public/data/centers.geojson
 
 # countries
 cp data-prep/data/ne/ne_110m_admin_only.geojson frontend/public/data/ne_countries.geojson
