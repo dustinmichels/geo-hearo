@@ -101,6 +101,21 @@ const isDarkBackground = (guessName: string | undefined) => {
               class="flex items-center justify-end gap-2 shrink-0 min-w-[60px]"
             >
               <span
+                v-if="
+                  getHintForGuess(guesses[num - 1])?.distance === 0 &&
+                  getHintForGuess(guesses[num - 1])?.level !== 0
+                "
+                class="text-xs italic font-bold font-body"
+                :class="
+                  isDarkBackground(guesses[num - 1])
+                    ? 'text-white/90'
+                    : 'text-pencil-lead/80'
+                "
+              >
+                TOUCHING
+              </span>
+              <span
+                v-else
                 class="text-sm font-bold font-body"
                 :class="
                   isDarkBackground(guesses[num - 1])
