@@ -2,6 +2,8 @@
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/3ab5d931-9245-4a8b-bacc-b0c75dce967f/deploy-status)](https://app.netlify.com/projects/geohearo/deploys)
 
+[![Plausible Analytics](https://img.shields.io/badge/Analytics-Plausible-5850EC?style=flat&logo=simpleanalytics&logoColor=white)](https://plausible.io/geohearo.com)
+
 > GeoHearo is the geo-guessing game where you win with your ears.
 >
 > 1. Stream live radio station from a mystery country (you get 5 stations)
