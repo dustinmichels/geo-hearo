@@ -53,7 +53,9 @@ const averageScore = computed(() => {
             ? 'bg-orange-50/50 text-[#B45309]'
             : 'bg-paper-white/50 text-pencil-lead',
           idx === 0
-            ? 'border-gumball-blue border-2'
+            ? getScore(item) > 0
+              ? 'border-mint-shake border-2'
+              : 'border-berry-oops border-2'
             : item.mode === 'daily'
               ? 'border-[#B45309]/50'
               : 'border-pencil-lead/5',
