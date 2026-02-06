@@ -400,6 +400,19 @@ const setupLayers = () => {
     filter: ['in', 'ADMIN', ...(props.guessedCountries || [])],
   })
 
+  // Add flash layer (white overlay) - initially hidden via filter
+  map.value.addLayer({
+    id: 'countries-flash',
+    type: 'fill',
+    source: 'countries',
+    paint: {
+      'fill-color': '#ffffff',
+      'fill-opacity': 0.4,
+      'fill-opacity-transition': { duration: 100 },
+    },
+    filter: ['in', 'ADMIN', ''], // Initially matches nothing
+  })
+
   // Add highlight layer (pink fill) - initially hidden via filter
   map.value.addLayer({
     id: 'countries-highlight',
@@ -495,6 +508,21 @@ const setupLayers = () => {
   setTilesVisibility(!!props.showTiles)
 }
 
+const triggerFlash = (admin: string) => {
+  if (!map.value) return
+  if (!map.value.getLayer('countries-flash')) return
+
+  // Show flash
+  map.value.setFilter('countries-flash', ['==', 'ADMIN', admin])
+
+  // Hide after delay
+  setTimeout(() => {
+    if (map.value && map.value.getLayer('countries-flash')) {
+      map.value.setFilter('countries-flash', ['in', 'ADMIN', ''])
+    }
+  }, 150)
+}
+
 const setupInteractions = () => {
   if (!map.value) return
 
@@ -507,7 +535,11 @@ const setupInteractions = () => {
 
     const featureProps = feature.properties as NeCountryProperties | undefined
     if (featureProps && featureProps.ADMIN) {
-      emit('select-country', featureProps.ADMIN)
+      if (props.guessedCountries?.includes(featureProps.ADMIN)) {
+        triggerFlash(featureProps.ADMIN)
+      } else {
+        emit('select-country', featureProps.ADMIN)
+      }
     } else {
       console.warn('Click on country with no ADMIN property:', feature)
     }
