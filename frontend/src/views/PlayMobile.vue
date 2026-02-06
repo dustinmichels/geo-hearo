@@ -43,6 +43,7 @@ const {
   handleNewGame,
   roundFinished,
   secretCountry,
+  gameHistory,
 } = useGamePlay({
   onGuessAdded: () => {
     panelHeight.value = anchors[1]
@@ -233,6 +234,7 @@ const handleModalClose = () => {
       :results-grid="modalConfig.resultsGrid"
       :secret-country="modalConfig.secretCountry"
       :daily-challenge-number="modalConfig.dailyChallengeNumber"
+      :history="gameHistory"
       @confirm="handleModalConfirm"
       @close="handleModalClose"
     />

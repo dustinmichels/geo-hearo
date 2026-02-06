@@ -74,7 +74,7 @@ export function useOnboarding() {
           popover: {
             title: 'Station Details',
             description:
-              'See details about the stations you were just listening to.',
+              'Nice job! Now you can see details about the stations you were just listening to.',
             side: placement,
             align: 'center',
           },

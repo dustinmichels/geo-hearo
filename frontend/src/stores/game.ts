@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import type { RadioStation } from '../types/geo'
+import type { GameHistoryItem, RadioStation } from '../types/geo'
 
 export const useGameStore = defineStore('game', () => {
   // State
@@ -13,6 +13,8 @@ export const useGameStore = defineStore('game', () => {
   const currentStationIndex = ref(3)
   const hasPlayedRadio = ref(false)
   const hasSkippedStation = ref(false)
+  const gameHistory = ref<GameHistoryItem[]>([])
+  const STORAGE_KEY_HISTORY = 'geo_hearo_history'
 
   // Getters
   const roundFinished = computed(() => {
@@ -66,6 +68,28 @@ export const useGameStore = defineStore('game', () => {
     // We explicitly DO NOT reset isDailyChallengeMode here as that is a mode switch
   }
 
+  function loadHistory() {
+    const stored = localStorage.getItem(STORAGE_KEY_HISTORY)
+    if (stored) {
+      try {
+        gameHistory.value = JSON.parse(stored)
+      } catch (e) {
+        console.error('Failed to parse history', e)
+      }
+    }
+  }
+
+  function addToHistory(item: GameHistoryItem) {
+    loadHistory() // Ensure latest
+    gameHistory.value.push(item)
+    localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(gameHistory.value))
+  }
+
+  function clearHistory() {
+    gameHistory.value = []
+    localStorage.removeItem(STORAGE_KEY_HISTORY)
+  }
+
   return {
     // State
     secretCountry,
@@ -77,6 +101,7 @@ export const useGameStore = defineStore('game', () => {
     currentStationIndex,
     hasPlayedRadio,
     hasSkippedStation,
+    gameHistory,
 
     // Getters
     roundFinished,
@@ -89,5 +114,8 @@ export const useGameStore = defineStore('game', () => {
     setDailyChallengeMode,
     setSeed,
     resetGame,
+    loadHistory,
+    addToHistory,
+    clearHistory,
   }
 })

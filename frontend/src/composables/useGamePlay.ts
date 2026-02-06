@@ -28,7 +28,8 @@ export function useGamePlay(options: GamePlayOptions) {
 
   // State
   const store = useGameStore()
-  const { roundFinished } = storeToRefs(store)
+  const { roundFinished, gameHistory } = storeToRefs(store)
+  const { addToHistory, loadHistory } = store
 
   // Hooking up radio logic
   const {
@@ -143,30 +144,33 @@ export function useGamePlay(options: GamePlayOptions) {
 
     if (checkGuess(guess)) {
       addGuess(guess) // Ensure winning guess is added to state
+
+      const resultsGrid = generateEmojiString()
+      let shareText: string | undefined
+      let dayNumber: number | undefined
+
       if (isDailyChallengeMode.value) {
-        const dayNumber = dailyChallengeNumber.value || 0
+        dayNumber = dailyChallengeNumber.value || 0
         completeDailyChallenge() // Mark as done for today
-
-        const shareText = generateShareText(dayNumber)
-        const resultsGrid = generateEmojiString()
-
-        modalConfig.value = {
-          isWin: true,
-          shareText,
-          resultsGrid,
-          secretCountry: secretCountry.value,
-          dailyChallengeNumber: dayNumber,
-        }
-      } else {
-        const resultsGrid = generateEmojiString()
-        modalConfig.value = {
-          isWin: true,
-          shareText: undefined,
-          resultsGrid,
-          secretCountry: secretCountry.value,
-          dailyChallengeNumber: undefined,
-        }
+        shareText = generateShareText(dayNumber)
       }
+
+      modalConfig.value = {
+        isWin: true,
+        shareText,
+        resultsGrid,
+        secretCountry: secretCountry.value,
+        dailyChallengeNumber: dayNumber,
+      }
+
+      addToHistory({
+        country: secretCountry.value || 'Unknown',
+        score: resultsGrid,
+        numericScore: 6 - guesses.value.length,
+        date: new Date().toISOString(),
+        mode: isDailyChallengeMode.value ? 'daily' : 'free',
+      })
+
       // clearState() <-- REMOVED
       showModal.value = true
       return
@@ -192,30 +196,32 @@ export function useGamePlay(options: GamePlayOptions) {
     options.onGuessAdded?.()
 
     if (guesses.value.length >= 5) {
+      const resultsGrid = generateEmojiString()
+      let shareText: string | undefined
+      let dayNumber: number | undefined
+
       if (isDailyChallengeMode.value) {
-        const dayNumber = dailyChallengeNumber.value || 0
+        dayNumber = dailyChallengeNumber.value || 0
         completeDailyChallenge()
-
-        const shareText = generateShareText(dayNumber)
-        const resultsGrid = generateEmojiString()
-
-        modalConfig.value = {
-          isWin: false,
-          shareText,
-          resultsGrid,
-          secretCountry: secretCountry.value,
-          dailyChallengeNumber: dayNumber,
-        }
-      } else {
-        const resultsGrid = generateEmojiString()
-        modalConfig.value = {
-          isWin: false,
-          shareText: undefined,
-          resultsGrid,
-          secretCountry: secretCountry.value,
-          dailyChallengeNumber: undefined,
-        }
+        shareText = generateShareText(dayNumber)
       }
+
+      modalConfig.value = {
+        isWin: false,
+        shareText,
+        resultsGrid,
+        secretCountry: secretCountry.value,
+        dailyChallengeNumber: dayNumber,
+      }
+
+      addToHistory({
+        country: secretCountry.value || 'Unknown',
+        score: resultsGrid,
+        numericScore: 0, // 0 for a loss
+        date: new Date().toISOString(),
+        mode: isDailyChallengeMode.value ? 'daily' : 'free',
+      })
+
       // clearState() <-- REMOVED
       showModal.value = true
     }
@@ -263,6 +269,8 @@ export function useGamePlay(options: GamePlayOptions) {
     if (options.setupKeyboardShortcuts) {
       window.addEventListener('keydown', handleKeydown)
     }
+
+    loadHistory()
 
     // Load both stations (for audio) and country data (for map/distance)
     Promise.all([loadStations(), loadCountryData()]).then(async () => {
@@ -320,6 +328,7 @@ export function useGamePlay(options: GamePlayOptions) {
     guessColors,
     showModal,
     modalConfig,
+    gameHistory,
     guesses,
     currentStation,
     currentStations,

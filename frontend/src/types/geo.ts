@@ -25,3 +25,11 @@ export interface IndexStructure {
   }
   countries: Record<string, { start: number; count: number }>
 }
+
+export interface GameHistoryItem {
+  country: string
+  score: string
+  numericScore: number
+  date: string
+  mode: 'daily' | 'free'
+}

@@ -3,6 +3,13 @@ import { ref } from 'vue'
 import { useGameStore } from '../stores/game'
 import type { IndexStructure, RadioStation } from '../types/geo'
 
+export interface GameHistoryItem {
+  country: string
+  score: string
+  date: string
+  mode: 'daily' | 'free'
+}
+
 /**
  * LCG Randomizer
  * A simple seeded random number generator (Linear Congruential Generator)
@@ -282,6 +289,8 @@ export function useRadio() {
       store.setDailyChallengeMode(false)
     } else {
       store.setDailyChallengeMode(true, getDailyChallengeNumber())
+      // Clear history on new daily challenge start
+      store.clearHistory()
     }
   }
 
