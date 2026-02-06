@@ -78,7 +78,6 @@ const computedGuessCount = computed(() => {
         <!-- Secret Country -->
         <p class="text-lg text-pencil-lead/80 mb-6 leading-relaxed">
           The secret country was:
-          <br />
           <strong class="text-pencil-lead font-bold">{{
             secretCountry || 'Unknown'
           }}</strong>
@@ -96,19 +95,19 @@ const computedGuessCount = computed(() => {
             }}</strong>
             {{ computedGuessCount === 1 ? 'guess' : 'guesses' }}.
           </span>
-          <span v-else> You'll get it next time! </span>
+          <span v-else> Hey, you'll get it next time! </span>
         </p>
 
         <!-- Emoji Grid -->
         <div
-          v-if="resultsGrid"
+          v-if="resultsGrid && dailyChallengeNumber"
           class="mb-6 bg-paper-white/50 rounded-xl p-4 border-2 border-pencil-lead/10 font-mono text-2xl tracking-widest leading-relaxed whitespace-pre font-bold text-center"
         >
           {{ resultsGrid }}
         </div>
 
         <!-- History Section -->
-        <GameHistoryList :history="history" />
+        <GameHistoryList v-if="!dailyChallengeNumber" :history="history" />
 
         <!-- Daily Challenge Message -->
         <div

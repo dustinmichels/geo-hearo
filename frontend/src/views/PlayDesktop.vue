@@ -35,6 +35,7 @@ const {
   handleNewGame,
   roundFinished,
   secretCountry,
+  gameHistory,
 } = useGamePlay({
   setupKeyboardShortcuts: true,
   onNewGame: () => mapRef.value?.resetView(),
@@ -172,6 +173,7 @@ const handleModalClose = () => {
       :results-grid="modalConfig.resultsGrid"
       :secret-country="modalConfig.secretCountry"
       :daily-challenge-number="modalConfig.dailyChallengeNumber"
+      :history="gameHistory"
       @confirm="handleModalConfirm"
       @close="handleModalClose"
     />

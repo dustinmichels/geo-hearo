@@ -36,7 +36,7 @@ export function useOnboarding() {
           element: '#tour-map-container',
           popover: {
             title: 'Make a guess',
-            description: 'Click a country on the map, then press "Guess."',
+            description: 'Select a country on the map, then press "Guess."',
             side: 'left',
             align: 'center',
           },
@@ -82,7 +82,7 @@ export function useOnboarding() {
         {
           element: '#new-game-btn',
           popover: {
-            title: 'New Game',
+            title: "When you're ready",
             description:
               'Listen as long as you like! Click new game when ready.',
             side: placement,
