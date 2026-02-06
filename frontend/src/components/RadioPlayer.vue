@@ -62,9 +62,9 @@ watch(
       isLoading.value = true
       playStatic()
       audioPlayer.value.play().catch((e) => {
+        if (e.name === 'AbortError') return
         isLoading.value = false
         stopStatic()
-        if (e.name === 'AbortError') return
         console.error('Playback failed', e)
       })
     } else {
@@ -83,11 +83,21 @@ watch(
       audioPlayer.value.src = newUrl
       if (props.isPlaying) {
         isLoading.value = true
+        // Manually trigger timer reset since isLoading might not change
+        if (loadingTimeout) clearTimeout(loadingTimeout)
+        loadingTimeout = setTimeout(() => {
+          if (isLoading.value) {
+            console.log('Loading timed out, skipping to next station')
+            isLoading.value = false // Stop loading state locally
+            onNext()
+          }
+        }, 3000)
+
         playStatic()
         audioPlayer.value.play().catch((e) => {
+          if (e.name === 'AbortError') return
           isLoading.value = false
           stopStatic()
-          if (e.name === 'AbortError') return
           console.error('Playback failed', e)
         })
       }
