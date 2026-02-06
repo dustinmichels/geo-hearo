@@ -195,12 +195,41 @@ export function useRadio() {
       )
 
       store.setStations(stations)
+      updatePreconnectLinks(stations)
       saveState()
     } catch (err) {
       console.error('Error fetching stations:', err)
     } finally {
       isLoading.value = false
     }
+  }
+
+  const updatePreconnectLinks = (stations: RadioStation[]) => {
+    // 1. Clear old preconnects specific to our app
+    document
+      .querySelectorAll('link[data-gh-preconnect]')
+      .forEach((el) => el.remove())
+
+    // 2. Add new ones
+    stations.forEach((station) => {
+      try {
+        const url = new URL(station.channel_resolved_url)
+        // Only preconnect to the origin (protocol + domain)
+        const origin = url.origin
+
+        // Avoid duplicates if multiple stations share an origin
+        if (document.head.querySelector(`link[href="${origin}"]`)) return
+
+        const link = document.createElement('link')
+        link.rel = 'preconnect'
+        link.href = origin
+        link.crossOrigin = 'anonymous' // Audio is often CORS-enabled
+        link.dataset.ghPreconnect = 'true'
+        document.head.appendChild(link)
+      } catch (e) {
+        // Ignore invalid URLs
+      }
+    })
   }
 
   const restoreState = async (): Promise<boolean> => {
