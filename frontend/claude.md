@@ -51,4 +51,4 @@ Transitions: `guessing → seeResults` (win/loss) → `listening` (close modal) 
 
 - `VITE_DEBUG_MODE=true` — Shows secret country on map
 - `VITE_SECRET_COUNTRY` — Overrides country selection
-- `VITE_ROUND_FINISHED=true` — Forces `seeResults` stage on load
+- `VITE_GAME_STAGE=seeResults|listening` — Forces game into specified stage on load

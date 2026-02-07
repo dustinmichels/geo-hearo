@@ -1,6 +1,7 @@
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useGameStore } from '../stores/game'
+import type { GamePhase } from '../types/geo'
 import { getColorForDistanceLevel } from '../utils/colors'
 import { getDistanceHint } from '../utils/geography'
 import { useCountryData } from './useCountryData'
@@ -286,8 +287,9 @@ export function useGamePlay(options: GamePlayOptions) {
       // Initialize Daily Challenge Logic
       initDailyChallenge()
 
-      if (import.meta.env.VITE_ROUND_FINISHED === 'true') {
-        // Debug mode: Show modal immediately to allow "See Stations" flow
+      const debugStage = import.meta.env.VITE_GAME_STAGE as GamePhase | undefined
+      if (debugStage === 'seeResults' || debugStage === 'listening') {
+        // Debug mode: Skip to specified stage
 
         // Try to restore existing session state first so refreshing doesn't change the country
         const restored = await restoreState()
@@ -302,7 +304,7 @@ export function useGamePlay(options: GamePlayOptions) {
           secretCountry: secretCountry.value,
           dailyChallengeNumber: undefined,
         }
-        store.setGameStage('seeResults')
+        store.setGameStage(debugStage)
       } else if (isDailyChallengeMode.value) {
         const dailySeed = getDailyChallengeSeed()
         // Try restoring session state, but only keep it if it matches today's seed
@@ -383,8 +385,9 @@ export function useGamePlay(options: GamePlayOptions) {
       isPlaying.value = false
       options.onNewGame?.()
       selectRandomCountry().then(() => {
-        // Debug override: Show modal again on new game
-        if (import.meta.env.VITE_ROUND_FINISHED === 'true') {
+        // Debug override: Skip to specified stage on new game
+        const debugStage = import.meta.env.VITE_GAME_STAGE as GamePhase | undefined
+        if (debugStage === 'seeResults' || debugStage === 'listening') {
           modalConfig.value = {
             isWin: false,
             shareText: undefined,
@@ -392,7 +395,7 @@ export function useGamePlay(options: GamePlayOptions) {
             secretCountry: secretCountry.value,
             dailyChallengeNumber: undefined,
           }
-          store.setGameStage('seeResults')
+          store.setGameStage(debugStage)
         }
       })
     },

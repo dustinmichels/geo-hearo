@@ -108,5 +108,5 @@ In the shareable results string, a correct guess is shown as 🟢.
 ## Environment Variables
 
 - `VITE_DEBUG_MODE=true` — Shows secret country on map (dev only)
-- `VITE_ROUND_FINISHED=true` — Forces the game into `seeResults` stage on load (dev only)
+- `VITE_GAME_STAGE=seeResults|listening` — Forces game into specified stage on load (dev only)
 - `VITE_GIT_HASH` — Injected at build time

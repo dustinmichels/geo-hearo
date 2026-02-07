@@ -20,7 +20,8 @@ export const useGameStore = defineStore('game', () => {
   // Getters
   const roundFinished = computed(() => {
     // Debug override
-    if (import.meta.env.VITE_ROUND_FINISHED === 'true') return true
+    const debugStage = import.meta.env.VITE_GAME_STAGE
+    if (debugStage === 'seeResults' || debugStage === 'listening') return true
 
     return (
       guesses.value.length >= 5 ||
