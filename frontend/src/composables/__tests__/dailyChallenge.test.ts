@@ -113,6 +113,24 @@ describe('daily challenge country selection', () => {
     expect(values).toEqual([478, 607, 100, 61, 50, 875, 488, 1, 742, 87])
   })
 
+  it('same seed produces same country and station indices', () => {
+    for (const seed of [9999999, 20260207, 42]) {
+      const result1 = selectCountryAndStations(
+        seed,
+        sortedNames,
+        indexData.countries
+      )
+      const result2 = selectCountryAndStations(
+        seed,
+        sortedNames,
+        indexData.countries
+      )
+
+      expect(result1.country).toBe(result2.country)
+      expect(result1.stationIndices).toEqual(result2.stationIndices)
+    }
+  })
+
   it('country list has expected length', () => {
     // If countries are added/removed from index.json, country selection
     // indices will shift. This test catches that.
