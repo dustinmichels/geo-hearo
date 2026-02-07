@@ -9,6 +9,7 @@ import { useRadio } from './useRadio'
 interface GamePlayOptions {
   onGuessAdded?: () => void
   onNewGame?: () => void
+  onModalClose?: () => void
   setupKeyboardShortcuts?: boolean
 }
 
@@ -17,7 +18,6 @@ export function useGamePlay(options: GamePlayOptions) {
   const guessInput = ref('')
   const guessColors = ref<Record<string, string>>({})
 
-  const showModal = ref(false)
   const modalConfig = ref({
     isWin: false,
     shareText: undefined as string | undefined, // text to copy to clipboard
@@ -28,8 +28,10 @@ export function useGamePlay(options: GamePlayOptions) {
 
   // State
   const store = useGameStore()
-  const { roundFinished, gameHistory } = storeToRefs(store)
+  const { roundFinished, gameHistory, gameStage } = storeToRefs(store)
   const { addToHistory, loadHistory } = store
+
+  const showModal = computed(() => gameStage.value === 'seeResults')
 
   // Hooking up radio logic
   const {
@@ -172,7 +174,8 @@ export function useGamePlay(options: GamePlayOptions) {
       })
 
       // clearState() <-- REMOVED
-      showModal.value = true
+      store.setGameStage('seeResults')
+      saveState()
       return
     }
 
@@ -223,8 +226,15 @@ export function useGamePlay(options: GamePlayOptions) {
       })
 
       // clearState() <-- REMOVED
-      showModal.value = true
+      store.setGameStage('seeResults')
+      saveState()
     }
+  }
+
+  const handleModalClose = () => {
+    store.setGameStage('listening')
+    saveState()
+    options.onModalClose?.()
   }
 
   const handleModalConfirm = () => {
@@ -232,7 +242,6 @@ export function useGamePlay(options: GamePlayOptions) {
     guessInput.value = ''
     guessColors.value = {}
     isPlaying.value = false
-    showModal.value = false
     options.onNewGame?.()
     selectRandomCountry()
   }
@@ -293,13 +302,25 @@ export function useGamePlay(options: GamePlayOptions) {
           secretCountry: secretCountry.value,
           dailyChallengeNumber: undefined,
         }
-        showModal.value = true
+        store.setGameStage('seeResults')
       } else if (isDailyChallengeMode.value) {
         const dailySeed = getDailyChallengeSeed()
         // Try restoring session state, but only keep it if it matches today's seed
         const restored = await restoreState()
         if (restored && currentSeed.value === dailySeed) {
           populateGuessColors()
+          // Re-populate modal config if we're restoring into seeResults
+          if (gameStage.value === 'seeResults') {
+            modalConfig.value = {
+              isWin: roundFinished.value && guesses.value.some(
+                (g) => g.toLowerCase() === secretCountry.value?.toLowerCase()
+              ),
+              shareText: undefined,
+              resultsGrid: undefined,
+              secretCountry: secretCountry.value,
+              dailyChallengeNumber: dailyChallengeNumber.value,
+            }
+          }
         } else {
           clearState()
           selectRandomCountry(dailySeed)
@@ -309,6 +330,18 @@ export function useGamePlay(options: GamePlayOptions) {
         const restored = await restoreState()
         if (restored && secretCountry.value) {
           populateGuessColors()
+          // Re-populate modal config if we're restoring into seeResults
+          if (gameStage.value === 'seeResults') {
+            modalConfig.value = {
+              isWin: roundFinished.value && guesses.value.some(
+                (g) => g.toLowerCase() === secretCountry.value?.toLowerCase()
+              ),
+              shareText: undefined,
+              resultsGrid: undefined,
+              secretCountry: secretCountry.value,
+              dailyChallengeNumber: undefined,
+            }
+          }
         } else {
           selectRandomCountry()
         }
@@ -335,11 +368,12 @@ export function useGamePlay(options: GamePlayOptions) {
     currentStationUrl,
     secretCountry,
     debugCountry,
-    roundFinished,
+    gameStage,
     handlePlayPause,
     handlePrevious,
     handleNext,
     handleAddGuess,
+    handleModalClose,
     handleModalConfirm,
     handleCountrySelect,
     handleNewGame: () => {
@@ -347,7 +381,6 @@ export function useGamePlay(options: GamePlayOptions) {
       guessInput.value = ''
       guessColors.value = {}
       isPlaying.value = false
-      showModal.value = false
       options.onNewGame?.()
       selectRandomCountry().then(() => {
         // Debug override: Show modal again on new game
@@ -359,7 +392,7 @@ export function useGamePlay(options: GamePlayOptions) {
             secretCountry: secretCountry.value,
             dailyChallengeNumber: undefined,
           }
-          showModal.value = true
+          store.setGameStage('seeResults')
         }
       })
     },

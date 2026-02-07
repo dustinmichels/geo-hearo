@@ -26,7 +26,7 @@ export interface IndexStructure {
   countries: Record<string, { start: number; count: number }>
 }
 
-export type GamePhase = 'newRound' | 'guessMode' | 'roundFinished' | 'listenMode'
+export type GamePhase = 'guessing' | 'seeResults' | 'listening'
 
 export interface GameHistoryItem {
   country: string

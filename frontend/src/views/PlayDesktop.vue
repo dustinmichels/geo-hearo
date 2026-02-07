@@ -32,13 +32,20 @@ const {
   handleAddGuess,
   handleModalConfirm,
   handleCountrySelect,
+  handleModalClose,
   handleNewGame,
-  roundFinished,
+  gameStage,
   secretCountry,
   gameHistory,
 } = useGamePlay({
   setupKeyboardShortcuts: true,
   onNewGame: () => mapRef.value?.resetView(),
+  onModalClose: () => {
+    mapRef.value?.zoomToStations()
+    setTimeout(() => {
+      startResultsTour()
+    }, 500)
+  },
 })
 
 const activeStation = computed(() => {
@@ -46,13 +53,7 @@ const activeStation = computed(() => {
   return currentStations.value[currentStation.value - 1]
 })
 
-const handleModalClose = () => {
-  showModal.value = false
-  mapRef.value?.zoomToStations()
-  setTimeout(() => {
-    startResultsTour()
-  }, 500)
-}
+
 </script>
 
 <template>
@@ -80,11 +81,11 @@ const handleModalClose = () => {
           :guessed-countries="guesses"
           :guess-colors="guessColors"
           :selected-country="guessInput"
-          :secret-country="roundFinished ? secretCountry : debugCountry"
+          :secret-country="gameStage !== 'guessing' ? secretCountry : debugCountry"
           :stations="currentStations"
           :active-station-id="activeStation?.channel_id"
-          :are-stations-visible="roundFinished"
-          :show-tiles="roundFinished"
+          :are-stations-visible="gameStage === 'listening'"
+          :show-tiles="gameStage === 'listening'"
           default-projection="mercator"
         />
       </div>
@@ -137,7 +138,7 @@ const handleModalClose = () => {
         </div>
 
         <!-- Results Panel -->
-        <div v-if="roundFinished" class="relative z-10">
+        <div v-if="gameStage === 'listening'" class="relative z-10">
           <ResultsPanel
             :station="activeStation"
             @new-game="handleNewGame"
@@ -147,7 +148,7 @@ const handleModalClose = () => {
 
         <!-- Guess Panel Card -->
         <div
-          v-if="!roundFinished"
+          v-if="gameStage === 'guessing'"
           class="flex-1 bg-paper-white rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] overflow-hidden flex flex-col relative"
         >
           <GuessPanel

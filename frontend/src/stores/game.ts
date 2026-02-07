@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import type { GameHistoryItem, RadioStation } from '../types/geo'
+import type { GameHistoryItem, GamePhase, RadioStation } from '../types/geo'
 
 export const useGameStore = defineStore('game', () => {
   // State
@@ -13,6 +13,7 @@ export const useGameStore = defineStore('game', () => {
   const currentStationIndex = ref(3)
   const hasPlayedRadio = ref(false)
   const hasSkippedStation = ref(false)
+  const gameStage = ref<GamePhase>('guessing')
   const gameHistory = ref<GameHistoryItem[]>([])
   const STORAGE_KEY_HISTORY = 'geo_hearo_history'
 
@@ -57,6 +58,10 @@ export const useGameStore = defineStore('game', () => {
     currentSeed.value = seed
   }
 
+  function setGameStage(stage: GamePhase) {
+    gameStage.value = stage
+  }
+
   function resetGame() {
     guesses.value = []
     secretCountry.value = ''
@@ -65,6 +70,7 @@ export const useGameStore = defineStore('game', () => {
     currentSeed.value = null
     hasPlayedRadio.value = false
     hasSkippedStation.value = false
+    gameStage.value = 'guessing'
     // We explicitly DO NOT reset isDailyChallengeMode here as that is a mode switch
   }
 
@@ -101,6 +107,7 @@ export const useGameStore = defineStore('game', () => {
     currentStationIndex,
     hasPlayedRadio,
     hasSkippedStation,
+    gameStage,
     gameHistory,
 
     // Getters
@@ -108,6 +115,7 @@ export const useGameStore = defineStore('game', () => {
 
     // Actions
     setSecretCountry,
+    setGameStage,
     addGuess,
     setStations,
     setStationIndex,

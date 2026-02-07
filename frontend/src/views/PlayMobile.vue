@@ -40,8 +40,9 @@ const {
   handleAddGuess,
   handleModalConfirm,
   handleCountrySelect,
+  handleModalClose,
   handleNewGame,
-  roundFinished,
+  gameStage,
   secretCountry,
   gameHistory,
 } = useGamePlay({
@@ -52,10 +53,16 @@ const {
     mapRef.value?.resetView()
     panelHeight.value = anchors[0]
   },
+  onModalClose: () => {
+    mapRef.value?.zoomToStations()
+    setTimeout(() => {
+      startResultsTour()
+    }, 500)
+  },
 })
 
-watch(roundFinished, (isFinished) => {
-  if (isFinished) {
+watch(gameStage, (stage) => {
+  if (stage !== 'guessing') {
     panelHeight.value = anchors[0]
   }
 })
@@ -97,13 +104,7 @@ const activeStation = computed(() => {
   return currentStations.value[currentStation.value - 1]
 })
 
-const handleModalClose = () => {
-  showModal.value = false
-  mapRef.value?.zoomToStations()
-  setTimeout(() => {
-    startResultsTour()
-  }, 500)
-}
+
 </script>
 
 <template>
@@ -182,24 +183,19 @@ const handleModalClose = () => {
           :guessed-countries="guesses"
           :guess-colors="guessColors"
           :selected-country="guessInput"
-          :secret-country="roundFinished ? secretCountry : debugCountry"
+          :secret-country="gameStage !== 'guessing' ? secretCountry : debugCountry"
           :stations="currentStations"
           :active-station-id="activeStation?.channel_id"
-          :are-stations-visible="roundFinished"
-          :show-tiles="roundFinished"
+          :are-stations-visible="gameStage === 'listening'"
+          :show-tiles="gameStage === 'listening'"
           default-projection="globe"
         />
       </div>
 
       <!-- RESULTS PANEL (only visible when roundFinished) -->
       <div
-        v-if="roundFinished"
-        class="order-4 px-4 pb-2 z-30 flex justify-center transition-all duration-500"
-        :class="
-          roundFinished
-            ? 'opacity-100 translate-y-0'
-            : 'opacity-0 translate-y-10'
-        "
+        v-if="gameStage === 'listening'"
+        class="order-4 px-4 pb-2 z-30 flex justify-center transition-all duration-500 opacity-100 translate-y-0"
       >
         <ResultsPanel :station="activeStation" @new-game="handleNewGame" />
       </div>
@@ -213,7 +209,7 @@ const handleModalClose = () => {
 
     <!-- Vant Floating Panel -->
     <van-floating-panel
-      v-if="!roundFinished"
+      v-if="gameStage === 'guessing'"
       v-model:height="panelHeight"
       :anchors="anchors"
       :content-class="'bg-paper-white rounded-t-[24px] border-t-3 border-l-3 border-r-3 border-pencil-lead shadow-[0_-4px_0_0_#334155] flex flex-col'"

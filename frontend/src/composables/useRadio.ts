@@ -103,6 +103,7 @@ export function useRadio() {
         secretCountry: secretCountry.value,
         guesses: guesses.value,
         stationIndex: currentStationIndex.value,
+        gameStage: store.gameStage,
       })
     )
   }
@@ -112,25 +113,16 @@ export function useRadio() {
     store.resetGame()
   }
 
-  const selectRandomCountry = async (seedInput?: number | string) => {
+  /**
+   * Core logic: use a seed to deterministically pick a country and fetch its stations.
+   * Does NOT save to sessionStorage — callers decide when to persist.
+   */
+  const loadCountryBySeed = async (seed: number) => {
     if (!countriesIndex.value) return
 
-    // Determine seed
-    let seed: number
-    if (typeof seedInput === 'number') {
-      seed = seedInput
-    } else if (typeof seedInput === 'string') {
-      seed = parseInt(seedInput, 10)
-    } else {
-      // Random seed if none provided
-      seed = Math.floor(Math.random() * 10000000)
-    }
-
-    // Initialize RNG
     const rng = new SeededRandom(seed)
     store.setSeed(seed)
 
-    // 1. Pick a Random Country (key is ADMIN)
     const idx = countriesIndex.value
     const countries = idx.countries
     const names = countryList.value
@@ -152,15 +144,10 @@ export function useRadio() {
       return
     }
 
-    // Clear previous game state (except seed which we just set)
-    // Manually resetting specific fields instead of full reset to preserve seed/mode if needed?
-    // Actually standard flow for NEW game (random) or daily challenge init
     store.guesses = []
     store.setSecretCountry(countryName)
     store.setStationIndex(3)
 
-    // 2. Determine which unique indices to fetch (up to 5)
-    // Validate country data availability to satisfy TypeScript
     const countryData = countries[countryName]
     if (!countryData) {
       console.error(`Missing data for country: ${countryName}`)
@@ -181,7 +168,6 @@ export function useRadio() {
       }
     }
 
-    // 3. Fetch specific stations
     isLoading.value = true
     try {
       const lineLength = idx.config.line_length
@@ -196,12 +182,28 @@ export function useRadio() {
 
       store.setStations(stations)
       updatePreconnectLinks(stations)
-      saveState()
     } catch (err) {
       console.error('Error fetching stations:', err)
     } finally {
       isLoading.value = false
     }
+  }
+
+  /**
+   * Start a new round: pick a country (optionally from a seed) and persist to sessionStorage.
+   */
+  const selectRandomCountry = async (seedInput?: number | string) => {
+    let seed: number
+    if (typeof seedInput === 'number') {
+      seed = seedInput
+    } else if (typeof seedInput === 'string') {
+      seed = parseInt(seedInput, 10)
+    } else {
+      seed = Math.floor(Math.random() * 10000000)
+    }
+
+    await loadCountryBySeed(seed)
+    saveState()
   }
 
   const updatePreconnectLinks = (stations: RadioStation[]) => {
@@ -236,16 +238,17 @@ export function useRadio() {
     const stored = sessionStorage.getItem(STORAGE_KEY)
     if (stored) {
       try {
-        const { seed, guesses: g, stationIndex: si } = JSON.parse(stored)
+        const { seed, guesses: g, stationIndex: si, gameStage: gs } = JSON.parse(stored)
 
-        // Re-run selection to fetch stations (this resets guesses and stationIndex)
+        // Re-fetch country + stations from the seed without saving state
         if (typeof seed === 'number') {
-          await selectRandomCountry(seed)
+          await loadCountryBySeed(seed)
         }
 
-        // Restore guesses and stationIndex AFTER selectRandomCountry, which clears them
+        // Restore game progress AFTER loadCountryBySeed, which resets guesses/stationIndex
         if (g) store.guesses = g
         if (typeof si === 'number') store.setStationIndex(si)
+        if (gs) store.setGameStage(gs)
 
         return true
       } catch (e) {

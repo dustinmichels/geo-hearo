@@ -27,7 +27,7 @@ const props = defineProps<{
 }>()
 
 const gameStore = useGameStore()
-const { roundFinished } = storeToRefs(gameStore)
+const { gameStage } = storeToRefs(gameStore)
 
 const mapContainer = ref<HTMLElement | null>(null)
 const map = shallowRef<maplibregl.Map | null>(null)
@@ -108,7 +108,7 @@ watch(
 )
 
 const getSkyConfig = (): SkySpecification => {
-  if (isGlobe.value && !roundFinished.value) {
+  if (isGlobe.value && gameStage.value === 'guessing') {
     return {
       'atmosphere-blend': [
         'interpolate',
@@ -144,10 +144,10 @@ const updateSky = () => {
   }
 }
 
-watch(roundFinished, (isFinished) => {
+watch(gameStage, (stage) => {
   updateSky()
   // Reset to default view when round finishes (zoom to stations happens later on user action)
-  if (isFinished && map.value) {
+  if (stage !== 'guessing' && map.value) {
     stopSpinning()
     map.value.easeTo({
       center: [0, 20],
@@ -332,7 +332,7 @@ const setupLayers = () => {
     type: 'background',
     paint: {
       'background-color': isGlobe.value
-        ? roundFinished.value
+        ? gameStage.value !== 'guessing'
           ? '#020617' // darker slate-950 for finished
           : '#0f172a' // slate-900
         : '#ffffff',
@@ -635,7 +635,7 @@ const resetView = () => {
   if (!map.value) return
   stopSpinning()
 
-  if (roundFinished.value && props.stations && props.stations.length > 0) {
+  if (gameStage.value === 'listening' && props.stations && props.stations.length > 0) {
     const bounds = new maplibregl.LngLatBounds()
     props.stations.forEach((station) => {
       bounds.extend([station.geo_lon, station.geo_lat])

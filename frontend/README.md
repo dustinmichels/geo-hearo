@@ -21,7 +21,7 @@ npm run format    # Format code
 - **Maps:** MapLibre GL JS + Turf.js
 - **Icons:** Lucide
 - **Onboarding:** driver.js
-- **Animation:** GSAP
+- **Animation:** CSS transitions
 - **Testing:** Vitest
 - **Analytics:** Plausible
 
@@ -36,7 +36,12 @@ Players listen to radio stations from a mystery country and try to identify it o
 
 ### Country Selection
 
-Both modes funnel through `selectRandomCountry(seed?)` in `useRadio.ts`:
+Both modes funnel through `useRadio.ts`, which splits country loading into two functions:
+
+- **`loadCountryBySeed(seed)`** — Core logic: deterministically picks a country and fetches stations. Does not persist to sessionStorage. Used by `restoreState()` to re-hydrate an in-progress game on refresh.
+- **`selectRandomCountry(seed?)`** — Resolves/generates a seed, calls `loadCountryBySeed`, then persists to sessionStorage. Used when starting a new round.
+
+The selection algorithm:
 
 1. **Seed** — Daily challenge passes a deterministic seed; free play generates a random one.
 2. **Pick country** — A `SeededRandom` LCG (multiplier 1103515245, increment 12345, mod 2^31) selects an index into the sorted country list from `index.json`.
@@ -57,7 +62,13 @@ The env var `VITE_SECRET_COUNTRY` overrides country selection entirely (dev only
 
 **Audio Reliability:** To ensure uninterrupted gameplay, the app monitors the audio stream for silence. If a station connects but broadcasts silence for more than 2 seconds, it automatically skips to the next available station.
 
-**Round End Flow:** When a round ends (win or loss), the result modal appears, stations become visible on the map, and the map resets to the default zoomed-out view. The zoom animation to the stations is deliberately delayed until the user dismisses the modal by clicking "See the stations", allowing them to watch the satisfying zoom transition.
+**Round End Flow:** The game tracks an explicit `gameStage` state (`GamePhase` type: `'guessing' | 'seeResults' | 'listening'`) persisted to sessionStorage:
+
+1. **`guessing`** — Clickable map polygons, guess panel visible, no stations shown.
+2. **`seeResults`** — Results modal open (win/loss). Map shows the secret country but not stations yet.
+3. **`listening`** — Modal dismissed, stations + basemap tiles visible, results panel with "New Game" button.
+
+Transitions: `guessing → seeResults` (win or 5th guess) → `seeResults → listening` (close modal) → `listening → guessing` (new game). Refreshing the page restores the correct stage, including re-showing the modal if the user was in `seeResults`.
 
 ## Project Structure
 
@@ -97,5 +108,5 @@ In the shareable results string, a correct guess is shown as 🟢.
 ## Environment Variables
 
 - `VITE_DEBUG_MODE=true` — Shows secret country on map (dev only)
-- `VITE_ROUND_FINISHED=true` — Forces the game into a "completed round" state (dev only)
+- `VITE_ROUND_FINISHED=true` — Forces the game into `seeResults` stage on load (dev only)
 - `VITE_GIT_HASH` — Injected at build time
