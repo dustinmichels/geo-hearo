@@ -40,6 +40,7 @@ const averageScore = computed(() => {
         class="block text-sm mt-1 lowercase text-pencil-lead"
       >
         Avg Score Today: {{ averageScore }}
+        <span class="text-eraser-grey">/ 10</span>
       </span>
     </h3>
     <div class="space-y-2">

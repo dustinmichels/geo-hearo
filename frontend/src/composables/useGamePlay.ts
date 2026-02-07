@@ -14,6 +14,58 @@ interface GamePlayOptions {
   setupKeyboardShortcuts?: boolean
 }
 
+const calculateScore = (attempts: number[]) => {
+  if (!attempts || attempts.length === 0) return (0).toFixed(2)
+
+  const winIndex = attempts.findIndex((lvl) => lvl === 0)
+  const isWin = winIndex !== -1
+  const maxAttempts = 5
+  const actualAttempts = attempts.slice(0, maxAttempts)
+
+  if (isWin) {
+    // WIN SCORING (Range 5.0 - 10.0)
+    // 1. Base 5.0 for winning.
+    // 2. Speed bonus: up to 4.0 points (Earlier win = more points).
+    const speedBonus = ((maxAttempts - winIndex) / maxAttempts) * 4.0
+
+    // 3. Quality bonus: up to 1.0 point (Closeness of previous guesses).
+    let qualitySum = 0
+    if (winIndex > 0) {
+      const prevGuesses = attempts.slice(0, winIndex)
+      // Normalized: Level 1 (🤏) is best (1.0). Level 4 (🔴) is least (0.2).
+      const qualityScore =
+        prevGuesses.reduce((acc, lvl) => {
+          const val = lvl === 1 ? 1.0 : lvl === 2 ? 0.7 : lvl === 3 ? 0.4 : 0.1
+          return acc + val
+        }, 0) / winIndex
+      qualitySum = qualityScore * 1.0
+    } else {
+      // Instant win gets full quality bonus
+      qualitySum = 1.0
+    }
+
+    return Math.min(10, 5.0 + speedBonus + qualitySum).toFixed(2)
+  } else {
+    // FAIL SCORING (Range 0.0 - 4.99)
+    // Weighted partial credit for proximity.
+    const weightMap: Record<number, number> = {
+      1: 1.0, // 🤏 Highest credit
+      2: 0.6, // 🟡 Medium credit
+      3: 0.2, // 🟠 Low credit
+      4: 0.0, // 🔴 No credit
+    }
+
+    const totalWeight = actualAttempts.reduce(
+      (acc, lvl) => acc + (weightMap[lvl] || 0),
+      0
+    )
+    const maxPossibleWeightForFail = 5.0 // Five 🤏s
+    const score = (totalWeight / maxPossibleWeightForFail) * 4.99
+
+    return score.toFixed(2)
+  }
+}
+
 export function useGamePlay(options: GamePlayOptions) {
   const isPlaying = ref(false)
   const guessInput = ref('')
@@ -141,6 +193,23 @@ export function useGamePlay(options: GamePlayOptions) {
     return lines.join('\n')
   }
 
+  const getScoreLevels = (): number[] => {
+    return guesses.value.map((g) => {
+      if (g.toLowerCase() === secretCountry.value?.toLowerCase()) return 0
+      const sFeature = getFeature(secretCountry.value)
+      const gFeature = getFeature(g)
+      if (sFeature && gFeature) {
+        const { level } = getDistanceHint(gFeature, sFeature)
+        // Map 1-6 to user's 1-4 scale
+        if (level === 1) return 1
+        if (level === 2) return 2
+        if (level === 3 || level === 4) return 3
+        return 4
+      }
+      return 4
+    })
+  }
+
   const handleAddGuess = () => {
     const guess = guessInput.value.trim()
     if (!guess || guesses.value.length >= 5) return
@@ -166,10 +235,13 @@ export function useGamePlay(options: GamePlayOptions) {
         dailyChallengeNumber: dayNumber,
       }
 
+      const attempts = getScoreLevels()
+      const numericScore = parseFloat(calculateScore(attempts))
+
       addToHistory({
         country: secretCountry.value || 'Unknown',
         score: resultsGrid,
-        numericScore: 6 - guesses.value.length,
+        numericScore: numericScore,
         date: new Date().toISOString(),
         mode: isDailyChallengeMode.value ? 'daily' : 'free',
       })
@@ -218,10 +290,13 @@ export function useGamePlay(options: GamePlayOptions) {
         dailyChallengeNumber: dayNumber,
       }
 
+      const attempts = getScoreLevels()
+      const numericScore = parseFloat(calculateScore(attempts))
+
       addToHistory({
         country: secretCountry.value || 'Unknown',
         score: resultsGrid,
-        numericScore: 0, // 0 for a loss
+        numericScore: numericScore, // 0 for a loss
         date: new Date().toISOString(),
         mode: isDailyChallengeMode.value ? 'daily' : 'free',
       })
