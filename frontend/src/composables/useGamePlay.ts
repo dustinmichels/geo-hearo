@@ -134,7 +134,7 @@ export function useGamePlay(options: GamePlayOptions) {
   }
 
   const generateShareText = (dayNumber: number) => {
-    const lines = [`GeoHearo | #${dayNumber}`, 'https://geohearo.com/']
+    const lines = [`GeoHearo #${dayNumber}`, 'https://geohearo.com/']
 
     const emojiLine = generateEmojiString()
     lines.push(emojiLine)
