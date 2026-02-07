@@ -39,11 +39,11 @@ All data files in `public/data/`, linked by `ADMIN` country name. `useRadio` fet
 
 **Game stage** (`gameStage` in Pinia, type `GamePhase`):
 
-| Stage | UI | Map |
-| --- | --- | --- |
-| `'guessing'` | Guess panel, clickable polygons | Globe/flat, no stations |
-| `'seeResults'` | Results modal | Secret country shown |
-| `'listening'` | Results panel + new game btn | Stations visible |
+| Stage          | UI                              | Map                     |
+| -------------- | ------------------------------- | ----------------------- |
+| `'guessing'`   | Guess panel, clickable polygons | Globe/flat, no stations |
+| `'seeResults'` | Results modal                   | Secret country shown    |
+| `'listening'`  | Results panel + new game btn    | Stations visible        |
 
 Transitions: `guessing → seeResults` (win/loss) → `listening` (close modal) → `guessing` (new game). Persisted to sessionStorage.
 

@@ -635,7 +635,11 @@ const resetView = () => {
   if (!map.value) return
   stopSpinning()
 
-  if (gameStage.value === 'listening' && props.stations && props.stations.length > 0) {
+  if (
+    gameStage.value === 'listening' &&
+    props.stations &&
+    props.stations.length > 0
+  ) {
     const bounds = new maplibregl.LngLatBounds()
     props.stations.forEach((station) => {
       bounds.extend([station.geo_lon, station.geo_lat])

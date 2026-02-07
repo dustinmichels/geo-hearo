@@ -52,8 +52,6 @@ const activeStation = computed(() => {
   if (!currentStations.value || !currentStations.value.length) return undefined
   return currentStations.value[currentStation.value - 1]
 })
-
-
 </script>
 
 <template>
@@ -81,7 +79,9 @@ const activeStation = computed(() => {
           :guessed-countries="guesses"
           :guess-colors="guessColors"
           :selected-country="guessInput"
-          :secret-country="gameStage !== 'guessing' ? secretCountry : debugCountry"
+          :secret-country="
+            gameStage !== 'guessing' ? secretCountry : debugCountry
+          "
           :stations="currentStations"
           :active-station-id="activeStation?.channel_id"
           :are-stations-visible="gameStage === 'listening'"

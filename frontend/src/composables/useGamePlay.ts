@@ -287,7 +287,9 @@ export function useGamePlay(options: GamePlayOptions) {
       // Initialize Daily Challenge Logic
       initDailyChallenge()
 
-      const debugStage = import.meta.env.VITE_GAME_STAGE as GamePhase | undefined
+      const debugStage = import.meta.env.VITE_GAME_STAGE as
+        | GamePhase
+        | undefined
       if (debugStage === 'seeResults' || debugStage === 'listening') {
         // Debug mode: Skip to specified stage
 
@@ -314,9 +316,11 @@ export function useGamePlay(options: GamePlayOptions) {
           // Re-populate modal config if we're restoring into seeResults
           if (gameStage.value === 'seeResults') {
             modalConfig.value = {
-              isWin: roundFinished.value && guesses.value.some(
-                (g) => g.toLowerCase() === secretCountry.value?.toLowerCase()
-              ),
+              isWin:
+                roundFinished.value &&
+                guesses.value.some(
+                  (g) => g.toLowerCase() === secretCountry.value?.toLowerCase()
+                ),
               shareText: undefined,
               resultsGrid: undefined,
               secretCountry: secretCountry.value,
@@ -335,9 +339,11 @@ export function useGamePlay(options: GamePlayOptions) {
           // Re-populate modal config if we're restoring into seeResults
           if (gameStage.value === 'seeResults') {
             modalConfig.value = {
-              isWin: roundFinished.value && guesses.value.some(
-                (g) => g.toLowerCase() === secretCountry.value?.toLowerCase()
-              ),
+              isWin:
+                roundFinished.value &&
+                guesses.value.some(
+                  (g) => g.toLowerCase() === secretCountry.value?.toLowerCase()
+                ),
               shareText: undefined,
               resultsGrid: undefined,
               secretCountry: secretCountry.value,
@@ -386,7 +392,9 @@ export function useGamePlay(options: GamePlayOptions) {
       options.onNewGame?.()
       selectRandomCountry().then(() => {
         // Debug override: Skip to specified stage on new game
-        const debugStage = import.meta.env.VITE_GAME_STAGE as GamePhase | undefined
+        const debugStage = import.meta.env.VITE_GAME_STAGE as
+          | GamePhase
+          | undefined
         if (debugStage === 'seeResults' || debugStage === 'listening') {
           modalConfig.value = {
             isWin: false,

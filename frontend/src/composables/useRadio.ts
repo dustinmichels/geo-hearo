@@ -238,7 +238,12 @@ export function useRadio() {
     const stored = sessionStorage.getItem(STORAGE_KEY)
     if (stored) {
       try {
-        const { seed, guesses: g, stationIndex: si, gameStage: gs } = JSON.parse(stored)
+        const {
+          seed,
+          guesses: g,
+          stationIndex: si,
+          gameStage: gs,
+        } = JSON.parse(stored)
 
         // Re-fetch country + stations from the seed without saving state
         if (typeof seed === 'number') {
