@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Check, Share, X } from 'lucide-vue-next'
+import { ArrowRight, Check, Share, X } from 'lucide-vue-next'
 import { ref } from 'vue'
 import type { GameHistoryItem } from '../types/geo'
 import GameHistoryList from './GameHistoryList.vue'
@@ -19,7 +19,7 @@ const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
-const copyButtonText = ref('Share Results')
+const copyButtonText = ref('Click to copy your shareable score')
 
 const handleShare = async () => {
   if (props.shareText) {
@@ -27,7 +27,7 @@ const handleShare = async () => {
       await navigator.clipboard.writeText(props.shareText)
       copyButtonText.value = 'Copied!'
       setTimeout(() => {
-        copyButtonText.value = 'Share Results'
+        copyButtonText.value = 'Click to copy your shareable score'
       }, 2000)
     } catch (err) {
       console.error('Failed to copy text: ', err)
@@ -82,58 +82,41 @@ const handleShare = async () => {
           }}</strong>
         </p>
 
-        <!-- Result Message -->
-        <!-- <p
-          v-if="!isWin || !dailyChallengeNumber"
-          class="text-lg text-pencil-lead/80 mb-6 leading-relaxed"
+        <!-- Emoji Grid & Share Combined -->
+        <button
+          v-if="resultsGrid && dailyChallengeNumber && shareText"
+          @click="handleShare"
+          class="w-full mb-6 bg-paper-white/50 hover:bg-paper-white/80 active:scale-[0.98] transition-all rounded-xl p-4 border-2 border-pencil-lead/10 group cursor-pointer"
         >
-          <span v-if="isWin">
-            You got it in
-            <strong class="text-pencil-lead font-bold">{{
-              computedGuessCount
-            }}</strong>
-            {{ computedGuessCount === 1 ? 'guess' : 'guesses' }}.
-          </span>
-          <span v-else> Hey, you'll get it next time! </span>
-        </p> -->
+          <div
+            class="font-mono text-2xl tracking-widest leading-relaxed whitespace-pre font-bold text-center mb-3"
+          >
+            {{ resultsGrid }}
+          </div>
 
-        <!-- Emoji Grid -->
-        <div
-          v-if="resultsGrid && dailyChallengeNumber"
-          class="mb-6 bg-paper-white/50 rounded-xl p-4 border-2 border-pencil-lead/10 font-mono text-2xl tracking-widest leading-relaxed whitespace-pre font-bold text-center"
-        >
-          {{ resultsGrid }}
-        </div>
+          <div
+            class="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-pencil-lead/60 group-hover:text-pencil-lead transition-colors"
+          >
+            <Check
+              v-if="copyButtonText === 'Copied!'"
+              class="w-5 h-5 text-mint-shake"
+            />
+            <Share v-else class="w-5 h-5" />
+            <span :class="{ 'text-mint-shake': copyButtonText === 'Copied!' }">
+              {{ copyButtonText }}
+            </span>
+          </div>
+        </button>
 
         <!-- History Section -->
         <GameHistoryList v-if="!dailyChallengeNumber" :history="history" />
 
-        <!-- Daily Challenge Message -->
-        <div
-          v-if="dailyChallengeNumber"
-          class="mb-6 text-sm text-pencil-lead/70"
-        >
-          You just completed daily challenge #{{ dailyChallengeNumber }}. Click
-          to share your result with friends.
-        </div>
-
-        <!-- Share Button (Daily Challenge) -->
-        <button
-          v-if="dailyChallengeNumber && shareText"
-          @click="handleShare"
-          class="w-full mb-4 btn-pressable bg-cloud-white h-[56px] rounded-xl font-heading text-xl text-pencil-lead uppercase tracking-wider border-2 border-pencil-lead shadow-[4px_4px_0_0_#334155] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all flex items-center justify-center gap-2"
-        >
-          <Check v-if="copyButtonText === 'Copied!'" class="w-6 h-6" />
-          <Share v-else class="w-6 h-6" />
-          {{ copyButtonText }}
-        </button>
-
         <!-- Close Button -->
         <button
           @click="emit('close')"
-          class="w-full btn-pressable bg-yuzu-yellow h-[56px] rounded-xl font-heading text-xl text-pencil-lead uppercase tracking-wider border-2 border-pencil-lead shadow-[4px_4px_0_0_#334155] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all flex items-center justify-center"
+          class="w-full btn-pressable bg-yuzu-yellow h-[56px] rounded-xl font-heading text-xl text-pencil-lead uppercase tracking-wider border-2 border-pencil-lead shadow-[4px_4px_0_0_#334155] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all flex items-center justify-center gap-2"
         >
-          See the stations 📻
+          See the stations <ArrowRight class="w-6 h-6" />
         </button>
       </div>
     </div>
