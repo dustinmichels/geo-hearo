@@ -90,29 +90,29 @@ const sections = [
     emoji: '🌍',
     title: 'What is GeoHearo?',
     content:
-      'GeoHearo is a passion project of a solo developer, <a href="https://dustinmichels.com" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Dustin Michels</a>. Its free and <a href="https://github.com/dustinmichels/geo-hearo" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">open-source</a>. There is no business model.',
+      'GeoHearo is a passion project of a solo developer, <a href="https://dustinmichels.com" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Dustin Michels</a>. It\'s free and <a href="https://github.com/dustinmichels/geo-hearo" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">open-source</a>. There is no business model.',
   },
   {
     emoji: '💾',
     title: 'Data Sources',
     content: [
       'The country polygons are from <a href="https://www.naturalearthdata.com/" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Natural Earth</a>. They are the ones that decide what counts as a country.',
-      'The underlying radio data is borrowed, gratefully, from <a href="https://radio.garden/" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Radio.Garden</a>. There are over 30,000 stations to chose from when you start a game.',
+      'The underlying radio data is borrowed, gratefully, from <a href="https://radio.garden/" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Radio.Garden</a>. There are over 30,000 stations to choose from when you start a game.',
     ],
   },
   {
     emoji: '📏',
     title: 'Distance Considerations',
     content: [
-      'The clue you get is based on this distance between countries, from border to border.',
-      'I filter out polygons that makeup &lt; 20% of the countrys land mass, so as to exclude overseas terriroties but include major islands. The idea is to direct the player towards the main borders of the country.',
+      'The clue you get is based on the distance between countries, from border to border.',
+      "I filter out polygons that makeup &lt; 20% of the country's land mass, so as to exclude overseas territories but include major islands. The idea is to direct the player towards the main borders of the country.",
     ],
   },
   {
     emoji: '📡',
     title: 'Radio Considerations',
     content: [
-      'Stations can be weird! Its not always a bug. Sometimes you get a Labanese station in Germany, because there really is a Labanese station in Germany. The world is complicated! The "show stations" feature is provided so you can find out more about the stations you hear.',
+      'Stations can be weird! It\'s not always a bug. Sometimes you get a Lebanese station in Germany, because there really is a Lebanese station in Germany. The world is complicated! The "show stations" feature is provided so you can find out more about the stations you hear.',
       'Sometimes a radio stream gives you commercials localized to your location, which is confusing and unfortunate.',
       'Sometimes a station is just being weird, which is why I give you five to choose from!',
     ],
@@ -121,9 +121,9 @@ const sections = [
     emoji: '🤨',
     title: 'Technical Notes',
     content: [
-      'I have streaming links for over 30,000 stations. They are stored in a jsonl files, where each line is a fixed number of bytes.',
-      'I have an index file that lists the countries available the locations of their stations in the mega jsonl file.',
-      'When a new round begins, I randomly select a country and five stations, and load the relevant lines from the jsonl file using ranged Fetch requests',
+      'I have streaming links for over 30,000 stations. They are stored in a jsonl file, where each line is a fixed number of bytes.',
+      'I have an index file that lists the countries available and the locations of their stations in the mega jsonl file.',
+      'When a new round begins, I randomly select a country and five stations, and load the relevant lines from the jsonl file using ranged Fetch requests.',
       'For the daily challenge, I use the date as a random seed so all players get the same mystery country.',
     ],
   },
