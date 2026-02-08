@@ -170,7 +170,7 @@ const steps = [
     colorClass: 'bg-bubblegum-pop',
   },
   {
-    text: 'Tomrrow will bring a new daily challenge',
+    text: 'Tomorrow will bring a new daily challenge',
     colorClass: 'bg-mint-shake',
   },
 ]

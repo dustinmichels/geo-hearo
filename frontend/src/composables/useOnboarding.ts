@@ -1,15 +1,29 @@
-import { driver } from 'driver.js'
+import { ref } from 'vue'
+import { driver, type Driver } from 'driver.js'
 import 'driver.js/dist/driver.css'
+
+const isTourActive = ref(false)
+let activeDriver: Driver | null = null
+let activeTourKey: string | null = null
+
+function skipTour() {
+  if (activeDriver) {
+    activeDriver.destroy()
+  }
+  if (activeTourKey) {
+    localStorage.setItem(activeTourKey, 'true')
+  }
+  activeDriver = null
+  activeTourKey = null
+  isTourActive.value = false
+}
 
 export function useOnboarding() {
   const startTour = () => {
-    const hasSeenOnboarding = localStorage.getItem('geo-hearo-onboarding-seen')
+    const key = 'geo-hearo-onboarding-seen'
+    if (localStorage.getItem(key)) return
 
-    // Always run for testing if needed, but per requirements usually we check.
-    // User implies "When the user goes to the 'play' view I want to create an onboarding flow"
-    // Usually means only once.
-    if (hasSeenOnboarding) return
-
+    activeTourKey = key
     const driverObj = driver({
       showProgress: true,
       steps: [
@@ -43,26 +57,24 @@ export function useOnboarding() {
         },
       ],
       onDestroyStarted: () => {
-        if (
-          !driverObj.hasNextStep() ||
-          confirm('Are you sure used want to skip the tour?')
-        ) {
-          driverObj.destroy()
-          localStorage.setItem('geo-hearo-onboarding-seen', 'true')
-        }
+        driverObj.destroy()
+        localStorage.setItem(key, 'true')
+        activeDriver = null
+        activeTourKey = null
+        isTourActive.value = false
       },
     })
 
+    activeDriver = driverObj
+    isTourActive.value = true
     driverObj.drive()
   }
 
   const startResultsTour = () => {
-    const hasSeenResultsTour = localStorage.getItem(
-      'geo-hearo-results-tour-seen'
-    )
+    const key = 'geo-hearo-results-tour-seen'
+    if (localStorage.getItem(key)) return
 
-    if (hasSeenResultsTour) return
-
+    activeTourKey = key
     const isMobile = window.innerWidth < 1024
     const placement = isMobile ? 'top' : 'left'
 
@@ -91,21 +103,23 @@ export function useOnboarding() {
         },
       ],
       onDestroyStarted: () => {
-        if (
-          !driverObj.hasNextStep() ||
-          confirm('Are you sure used want to skip the tour?')
-        ) {
-          driverObj.destroy()
-          localStorage.setItem('geo-hearo-results-tour-seen', 'true')
-        }
+        driverObj.destroy()
+        localStorage.setItem(key, 'true')
+        activeDriver = null
+        activeTourKey = null
+        isTourActive.value = false
       },
     })
 
+    activeDriver = driverObj
+    isTourActive.value = true
     driverObj.drive()
   }
 
   return {
     startTour,
     startResultsTour,
+    isTourActive,
+    skipTour,
   }
 }
