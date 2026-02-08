@@ -187,7 +187,7 @@ const activeStation = computed(() => {
           :stations="currentStations"
           :active-station-id="activeStation?.channel_id"
           :are-stations-visible="gameStage === 'listening'"
-          :show-tiles="gameStage === 'listening'"
+          :show-tiles="gameStage !== 'guessing'"
           default-projection="globe"
         />
       </div>
