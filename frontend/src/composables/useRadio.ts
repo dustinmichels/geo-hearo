@@ -100,7 +100,6 @@ export function useRadio() {
       STORAGE_KEY,
       JSON.stringify({
         seed: currentSeed.value,
-        secretCountry: secretCountry.value,
         guesses: guesses.value,
         stationIndex: currentStationIndex.value,
         gameStage: store.gameStage,
