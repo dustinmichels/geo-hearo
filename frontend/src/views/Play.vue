@@ -8,7 +8,7 @@ import PlayMobile from './PlayMobile.vue'
 const isMobile = ref(window.innerWidth < 1024)
 const { secretCountry } = useRadio()
 const isDebug = import.meta.env.VITE_DEBUG_MODE === 'true'
-const { startTour, isTourActive, skipTour } = useOnboarding()
+const { startTour, isTourActive, skipTour, activeTourKey } = useOnboarding()
 
 const checkDevice = () => {
   isMobile.value = window.innerWidth < 1024 // standard tablet/mobile breakpoint
@@ -39,7 +39,12 @@ onUnmounted(() => {
   <PlayDesktop v-else />
   <button
     v-if="isTourActive"
-    class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100002] bg-white/90 backdrop-blur-md text-slate-900 border border-white/50 rounded-full px-8 py-3 text-base font-bold shadow-2xl hover:bg-white hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer tracking-wide uppercase"
+    class="fixed z-[100002] bg-white/90 backdrop-blur-md text-slate-900 border border-white/50 rounded-full px-8 py-3 text-base font-bold shadow-2xl hover:bg-white hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer tracking-wide uppercase"
+    :class="
+      activeTourKey === 'geo-hearo-results-tour-seen'
+        ? 'top-4 right-4'
+        : 'bottom-10 left-1/2 -translate-x-1/2'
+    "
     @click="skipTour"
   >
     Skip Tour

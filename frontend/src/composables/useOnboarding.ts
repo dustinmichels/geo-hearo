@@ -1,20 +1,20 @@
-import { ref } from 'vue'
 import { driver, type Driver } from 'driver.js'
 import 'driver.js/dist/driver.css'
+import { ref } from 'vue'
 
 const isTourActive = ref(false)
+const activeTourKey = ref<string | null>(null)
 let activeDriver: Driver | null = null
-let activeTourKey: string | null = null
 
 function skipTour() {
   if (activeDriver) {
     activeDriver.destroy()
   }
-  if (activeTourKey) {
-    localStorage.setItem(activeTourKey, 'true')
+  if (activeTourKey.value) {
+    localStorage.setItem(activeTourKey.value, 'true')
   }
   activeDriver = null
-  activeTourKey = null
+  activeTourKey.value = null
   isTourActive.value = false
 }
 
@@ -23,7 +23,7 @@ export function useOnboarding() {
     const key = 'geo-hearo-onboarding-seen'
     if (localStorage.getItem(key)) return
 
-    activeTourKey = key
+    activeTourKey.value = key
     const driverObj = driver({
       showProgress: true,
       steps: [
@@ -60,7 +60,7 @@ export function useOnboarding() {
         driverObj.destroy()
         localStorage.setItem(key, 'true')
         activeDriver = null
-        activeTourKey = null
+        activeTourKey.value = null
         isTourActive.value = false
       },
     })
@@ -74,7 +74,7 @@ export function useOnboarding() {
     const key = 'geo-hearo-results-tour-seen'
     if (localStorage.getItem(key)) return
 
-    activeTourKey = key
+    activeTourKey.value = key
     const isMobile = window.innerWidth < 1024
     const placement = isMobile ? 'top' : 'left'
 
@@ -106,7 +106,7 @@ export function useOnboarding() {
         driverObj.destroy()
         localStorage.setItem(key, 'true')
         activeDriver = null
-        activeTourKey = null
+        activeTourKey.value = null
         isTourActive.value = false
       },
     })
@@ -121,5 +121,6 @@ export function useOnboarding() {
     startResultsTour,
     isTourActive,
     skipTour,
+    activeTourKey, // Export this
   }
 }
