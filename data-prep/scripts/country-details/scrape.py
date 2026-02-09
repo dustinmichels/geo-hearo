@@ -1,8 +1,9 @@
 """
 USAGE:
-    uv run scripts/country_details.py
+    uv run scripts/country_details/scrape.py
 """
 
+import io
 import json
 import os
 
@@ -28,23 +29,20 @@ def main():
     # 1. Scrape Wikipedia Data
     console.print(f"[bold blue]Scraping Wikipedia article:[/bold blue] {WIKI_URL}")
 
-    # Define a User-Agent to avoid 403 Forbidden errors
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
     }
 
     try:
-        # Use requests to fetch the content with headers
         response = requests.get(WIKI_URL, headers=headers)
-        response.raise_for_status()  # Raise an error for bad status codes (4xx, 5xx)
+        response.raise_for_status()
 
-        # Pass the text content of the response to pandas
-        tables = pd.read_html(response.text)
+        # Use io.StringIO to avoid the BeautifulSoup/Pandas FutureWarning
+        html_data = io.StringIO(response.text)
+        tables = pd.read_html(html_data)
 
-        # Look for the relevant table
         df = None
         for t in tables:
-            # Check if columns exist and match expected keywords
             cols_str = " ".join([str(c) for c in t.columns])
             if "Official language" in cols_str:
                 df = t
@@ -56,7 +54,6 @@ def main():
             )
             return
 
-        # Standardize column names
         col_mapping = {
             "Country/Region": "country",
             "Official language(s)": "official_languages",
@@ -64,7 +61,6 @@ def main():
             "Minority language(s)": "minority_languages",
         }
 
-        # Flexible renaming logic
         final_cols = {}
         for c in df.columns:
             column_name = str(c)
@@ -74,7 +70,6 @@ def main():
 
         df = df.rename(columns=final_cols)
 
-        # Keep only found columns, filtering out extras
         target_cols = [
             "country",
             "official_languages",
@@ -118,26 +113,36 @@ def main():
     matched_data = []
     unmatched_countries = []
 
+    def clean_val(val):
+        """Helper to return empty string for NaN or null values."""
+        if pd.isna(val) or val is None:
+            return ""
+        return str(val).strip()
+
     for _, row in df.iterrows():
-        raw_country = str(row["country"]).strip()
-        # Clean Wikipedia footnotes like "France[a]" or "India[12]"
-        clean_name = raw_country.split("[")[0].strip()
-        lookup_key = clean_name.lower()
+        raw_wiki_country = str(row["country"]).strip()
+        # Clean Wikipedia footnotes
+        clean_name_search = raw_wiki_country.split("[")[0].strip()
+        lookup_key = clean_name_search.lower()
 
         if lookup_key in lookup:
             ne_idx = lookup[lookup_key]
-            iso_code = ne.iloc[ne_idx].get("ISO_A3", "N/A")
+            ne_row = ne.iloc[ne_idx]
+
+            # Use ADMIN name from Natural Earth as requested
+            ne_admin_name = str(ne_row.get("ADMIN", clean_name_search))
+            iso_code = ne_row.get("ISO_A3", "N/A")
 
             entry = {
-                "country": clean_name,
+                "country": ne_admin_name,
                 "iso_a3": iso_code,
-                "official_languages": row.get("official_languages", ""),
-                "regional_languages": row.get("regional_languages", ""),
-                "minority_languages": row.get("minority_languages", ""),
+                "official_languages": clean_val(row.get("official_languages")),
+                "regional_languages": clean_val(row.get("regional_languages")),
+                "minority_languages": clean_val(row.get("minority_languages")),
             }
             matched_data.append(entry)
         else:
-            unmatched_countries.append(raw_country)
+            unmatched_countries.append(raw_wiki_country)
 
     # 5. Reporting
     if unmatched_countries:
@@ -146,7 +151,6 @@ def main():
         )
         table = Table(show_header=True, header_style="bold magenta")
         table.add_column("Dropped Country")
-        # Show first 10 failures to avoid flooding the console
         for c in unmatched_countries[:10]:
             table.add_row(c)
         if len(unmatched_countries) > 10:
