@@ -2,6 +2,10 @@
   <div
     class="min-h-screen w-screen flex flex-col items-center justify-center p-6 md:p-12 overflow-x-hidden relative"
   >
+    <!-- Hamburger Menu (Mobile Only) -->
+    <div class="fixed top-4 left-4 z-[9999] lg:hidden">
+      <HamburgerMenu />
+    </div>
     <!-- Decorative Background Shapes -->
     <div
       class="absolute top-10 right-[-5%] w-64 h-64 bg-bubblegum-pop/5 rounded-full blur-3xl -z-10 animate-blob1"
@@ -82,6 +86,7 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import HamburgerMenu from '../components/HamburgerMenu.vue'
 
 const router = useRouter()
 

@@ -4,6 +4,7 @@ import { computed, ref, watch } from 'vue'
 import AnimatedClose from '../components/AnimatedClose.vue'
 import GameResultModal from '../components/GameResultModal.vue'
 import GuessPanel from '../components/GuessPanel.vue'
+import HamburgerMenu from '../components/HamburgerMenu.vue'
 import Map from '../components/Map.vue'
 import RadioPlayer from '../components/RadioPlayer.vue'
 import ResultsPanel from '../components/ResultsPanel.vue'
@@ -116,6 +117,10 @@ const activeStation = computed(() => {
     <div
       class="animate-blob2 absolute bottom-10 left-[-5%] w-80 h-80 bg-gumball-blue/5 rounded-full blur-3xl pointer-events-none"
     ></div>
+
+    <div class="fixed top-4 left-4 z-[9999]">
+      <HamburgerMenu />
+    </div>
 
     <!-- Animated Arrows Hint -->
     <div class="relative z-[60]" v-show="isPanelFullHeight">
