@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { usePwaInstall } from '@/composables/usePwaInstall'
+
 const version = import.meta.env.VITE_GIT_HASH || 'dev'
+const { canInstall, installApp } = usePwaInstall()
 </script>
 
 <template>
@@ -16,6 +19,13 @@ const version = import.meta.env.VITE_GIT_HASH || 'dev'
     >
       About
     </RouterLink>
+    <button
+      v-if="canInstall"
+      class="font-heading text-eraser-grey hover:text-bubblegum-pop transition-colors cursor-pointer"
+      @click="installApp"
+    >
+      Install App
+    </button>
     <div class="text-[10px] text-eraser-grey">Hash #{{ version }}</div>
   </div>
 </template>
