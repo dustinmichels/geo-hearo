@@ -1,0 +1,24 @@
+# Dependencies
+frontend/node_modules/
+frontend-old/node_modules/
+data-prep/.venv/
+data-prep/.mypy_cache/
+.mypy_cache/
+
+# Build output
+frontend/dist/
+frontend-old/dist/
+
+# Old frontend (superseded)
+frontend-old/
+
+# Data prep raw data
+data-prep/data/
+
+# Lock files
+frontend/package-lock.json
+data-prep/uv.lock
+
+# Misc
+.DS_Store
+*.log

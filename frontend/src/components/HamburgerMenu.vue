@@ -60,53 +60,104 @@ const closeMenu = () => {
           <nav class="flex flex-col gap-4">
             <RouterLink
               to="/"
-              class="group flex items-center gap-4 p-3 rounded-xl border-2 border-transparent hover:border-pencil-lead hover:bg-cloud-white transition-all duration-200"
+              class="group relative flex items-center gap-4 p-3 rounded-xl border-2 border-transparent hover:border-pencil-lead hover:bg-cloud-white transition-all duration-200"
               :class="{
-                'opacity-50 grayscale pointer-events-none':
-                  currentRouteName === 'Home',
+                'pointer-events-none': currentRouteName === 'Home',
               }"
               @click="closeMenu"
             >
               <div
                 class="w-10 h-10 rounded-full bg-gumball-blue/20 text-gumball-blue flex items-center justify-center border-2 border-gumball-blue group-hover:scale-110 transition-transform"
+                :class="{
+                  'opacity-50 grayscale': currentRouteName === 'Home',
+                }"
               >
                 <Home :size="20" :stroke-width="2.5" />
               </div>
-              <span class="font-heading text-lg text-pencil-lead">Home</span>
+
+              <div class="relative">
+                <span
+                  class="font-heading text-lg text-pencil-lead"
+                  :class="{
+                    'opacity-50 grayscale': currentRouteName === 'Home',
+                  }"
+                >
+                  Home
+                </span>
+                <!-- Scribble Underline -->
+                <div
+                  v-if="currentRouteName === 'Home'"
+                  class="absolute -bottom-2 -left-1 -right-1 h-3 bg-scribble bg-no-repeat bg-center bg-contain opacity-100"
+                ></div>
+              </div>
             </RouterLink>
 
             <RouterLink
               to="/play"
-              class="group flex items-center gap-4 p-3 rounded-xl border-2 border-transparent hover:border-pencil-lead hover:bg-cloud-white transition-all duration-200"
+              class="group relative flex items-center gap-4 p-3 rounded-xl border-2 border-transparent hover:border-pencil-lead hover:bg-cloud-white transition-all duration-200"
               :class="{
-                'opacity-50 grayscale pointer-events-none':
-                  currentRouteName === 'Play',
+                'pointer-events-none': currentRouteName === 'Play',
               }"
               @click="closeMenu"
             >
               <div
                 class="w-10 h-10 rounded-full bg-mint-shake/20 text-emerald-600 flex items-center justify-center border-2 border-emerald-600 group-hover:scale-110 transition-transform"
+                :class="{
+                  'opacity-50 grayscale': currentRouteName === 'Play',
+                }"
               >
                 <CirclePlay :size="20" :stroke-width="2.5" />
               </div>
-              <span class="font-heading text-lg text-pencil-lead">Play</span>
+
+              <div class="relative">
+                <span
+                  class="font-heading text-lg text-pencil-lead"
+                  :class="{
+                    'opacity-50 grayscale': currentRouteName === 'Play',
+                  }"
+                >
+                  Play
+                </span>
+                <!-- Scribble Underline -->
+                <div
+                  v-if="currentRouteName === 'Play'"
+                  class="absolute -bottom-2 -left-1 -right-1 h-3 bg-scribble bg-no-repeat bg-center bg-contain opacity-100"
+                ></div>
+              </div>
             </RouterLink>
 
             <RouterLink
               to="/about"
-              class="group flex items-center gap-4 p-3 rounded-xl border-2 border-transparent hover:border-pencil-lead hover:bg-cloud-white transition-all duration-200"
+              class="group relative flex items-center gap-4 p-3 rounded-xl border-2 border-transparent hover:border-pencil-lead hover:bg-cloud-white transition-all duration-200"
               :class="{
-                'opacity-50 grayscale pointer-events-none':
-                  currentRouteName === 'About',
+                'pointer-events-none': currentRouteName === 'About',
               }"
               @click="closeMenu"
             >
               <div
                 class="w-10 h-10 rounded-full bg-yuzu-yellow/20 text-[#d97706] flex items-center justify-center border-2 border-[#d97706] group-hover:scale-110 transition-transform"
+                :class="{
+                  'opacity-50 grayscale': currentRouteName === 'About',
+                }"
               >
                 <Info :size="20" :stroke-width="2.5" />
               </div>
-              <span class="font-heading text-lg text-pencil-lead">About</span>
+
+              <div class="relative">
+                <span
+                  class="font-heading text-lg text-pencil-lead"
+                  :class="{
+                    'opacity-50 grayscale': currentRouteName === 'About',
+                  }"
+                >
+                  About
+                </span>
+                <!-- Scribble Underline -->
+                <div
+                  v-if="currentRouteName === 'About'"
+                  class="absolute -bottom-2 -left-1 -right-1 h-3 bg-scribble bg-no-repeat bg-center bg-contain opacity-100"
+                ></div>
+              </div>
             </RouterLink>
           </nav>
 
@@ -154,5 +205,9 @@ const closeMenu = () => {
 .slide-enter-from,
 .slide-leave-to {
   transform: translateX(-100%);
+}
+
+.bg-scribble {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20' preserveAspectRatio='none'%3E%3Cpath d='M0 13 Q 25 18 50 12 T 100 15' stroke='%23fcd34d' stroke-width='10' fill='none' stroke-linecap='round' stroke-linejoin='round' /%3E%3C/svg%3E");
 }
 </style>
