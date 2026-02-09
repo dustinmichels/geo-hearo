@@ -12,6 +12,13 @@ npm run build     # Production build (output: dist/)
 npm run format    # Format code
 ```
 
+## Symlinked Files
+
+```bash
+ln -s .claudeignore .aiexclude
+ln -s claude.md .gemini-instructions
+```
+
 ## Tech Stack
 
 - **Framework:** Vue 3 (Composition API) + TypeScript (strict)

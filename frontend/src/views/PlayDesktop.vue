@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import { RotateCcw } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
+import CountryDetails from '../components/CountryDetails.vue'
 import Footer from '../components/Footer.vue'
 import GameResultModal from '../components/GameResultModal.vue'
 import GuessPanel from '../components/GuessPanel.vue'
 import Map from '../components/Map.vue'
 import RadioPlayer from '../components/RadioPlayer.vue'
-import ResultsPanel from '../components/ResultsPanel.vue'
+import StationDetails from '../components/StationDetails.vue'
 import { useGamePlay } from '../composables/useGamePlay'
 import { useOnboarding } from '../composables/useOnboarding'
 import { useRadio } from '../composables/useRadio'
@@ -138,12 +140,34 @@ const activeStation = computed(() => {
         </div>
 
         <!-- Results Panel -->
-        <div v-if="gameStage === 'listening'" class="relative z-10">
-          <ResultsPanel
-            :station="activeStation"
-            @new-game="handleNewGame"
-            layout="desktop"
-          />
+        <div
+          v-if="gameStage === 'listening'"
+          class="relative z-10 flex flex-col gap-4"
+        >
+          <!-- Station Details -->
+          <div id="station-details-panel">
+            <StationDetails
+              :station="activeStation"
+              layout="desktop"
+              class="!shadow-[0_4px_0_0_#334155] w-full !max-w-none"
+            />
+          </div>
+
+          <!-- Country Details -->
+          <CountryDetails :country-name="secretCountry" />
+
+          <!-- New Game Button -->
+          <button
+            id="new-game-btn"
+            class="w-full h-14 bg-yuzu-yellow text-pencil-lead rounded-2xl border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] active:translate-y-1 active:shadow-none transition-all duration-100 flex items-center justify-center gap-2 hover:brightness-110"
+            @click="handleNewGame"
+            title="New Game"
+          >
+            <RotateCcw class="w-4 h-4" />
+            <span class="font-bold uppercase tracking-wider text-sm">
+              New Game
+            </span>
+          </button>
         </div>
 
         <!-- Guess Panel Card -->

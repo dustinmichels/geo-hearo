@@ -2,6 +2,7 @@
 import { FloatingPanel as VanFloatingPanel } from 'vant'
 import { computed, ref, watch } from 'vue'
 import AnimatedClose from '../components/AnimatedClose.vue'
+import CountryDetails from '../components/CountryDetails.vue'
 import GameResultModal from '../components/GameResultModal.vue'
 import GuessPanel from '../components/GuessPanel.vue'
 import HamburgerMenu from '../components/HamburgerMenu.vue'
@@ -23,6 +24,13 @@ const anchors = [
   Math.round(window.innerHeight * 0.9), // Fully open
 ]
 const panelHeight = ref(anchors[0])
+
+// Results floating panel setup
+const resultsAnchors = [
+  160, // Collapsed: station details + new game button visible
+  Math.round(window.innerHeight * 0.7), // Expanded: country details visible
+]
+const resultsPanelHeight = ref(resultsAnchors[0])
 
 const {
   isPlaying,
@@ -65,6 +73,9 @@ const {
 watch(gameStage, (stage) => {
   if (stage !== 'guessing') {
     panelHeight.value = anchors[0]
+  }
+  if (stage === 'listening') {
+    resultsPanelHeight.value = resultsAnchors[0]
   }
 })
 
@@ -197,14 +208,23 @@ const activeStation = computed(() => {
         />
       </div>
 
-      <!-- RESULTS PANEL (only visible when roundFinished) -->
-      <div
-        v-if="gameStage === 'listening'"
-        class="order-4 px-4 pb-2 z-30 flex justify-center transition-all duration-500 opacity-100 translate-y-0"
-      >
+    </div>
+
+    <!-- Results Floating Panel (listening stage) -->
+    <van-floating-panel
+      v-if="gameStage === 'listening'"
+      v-model:height="resultsPanelHeight"
+      :anchors="resultsAnchors"
+      :content-class="'bg-paper-white rounded-t-[24px] border-t-3 border-l-3 border-r-3 border-pencil-lead shadow-[0_-4px_0_0_#334155] flex flex-col'"
+      style="z-index: 50"
+    >
+      <div class="px-4 pt-2 pb-4">
         <ResultsPanel :station="activeStation" @new-game="handleNewGame" />
       </div>
-    </div>
+      <div class="border-t border-pencil-lead/20 overflow-y-auto">
+        <CountryDetails :country-name="secretCountry" />
+      </div>
+    </van-floating-panel>
 
     <!-- Overlay for dimming effect -->
     <div
