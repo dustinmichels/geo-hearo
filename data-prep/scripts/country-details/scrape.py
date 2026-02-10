@@ -6,6 +6,7 @@ USAGE:
 import io
 import json
 import os
+import re
 
 import geopandas as gpd
 import pandas as pd
@@ -23,6 +24,22 @@ OUTPUT = "data/out/country_details.json"
 WIKI_URL = (
     "https://en.wikipedia.org/wiki/List_of_official_languages_by_country_and_territory"
 )
+
+
+def clean_text(text):
+    """
+    Removes Wikipedia footnotes/citations like [1], [a], [10][b], etc.
+    Also strips leading/trailing whitespace and handles nulls.
+    """
+    if pd.isna(text) or text is None:
+        return ""
+
+    # Regex explanation:
+    # \[      : Matches literal opening bracket
+    # [^\]]+  : Matches one or more characters that are NOT a closing bracket
+    # \]      : Matches literal closing bracket
+    cleaned = re.sub(r"\[[^\]]+\]", "", str(text))
+    return cleaned.strip()
 
 
 def main():
@@ -113,32 +130,28 @@ def main():
     matched_data = []
     unmatched_countries = []
 
-    def clean_val(val):
-        """Helper to return empty string for NaN or null values."""
-        if pd.isna(val) or val is None:
-            return ""
-        return str(val).strip()
-
     for _, row in df.iterrows():
         raw_wiki_country = str(row["country"]).strip()
-        # Clean Wikipedia footnotes
-        clean_name_search = raw_wiki_country.split("[")[0].strip()
+
+        # Clean country name for lookup (e.g., "Argentina[a]" -> "Argentina")
+        clean_name_search = clean_text(raw_wiki_country)
         lookup_key = clean_name_search.lower()
 
         if lookup_key in lookup:
             ne_idx = lookup[lookup_key]
             ne_row = ne.iloc[ne_idx]
 
-            # Use ADMIN name from Natural Earth as requested
+            # Use ADMIN name from Natural Earth for consistency
             ne_admin_name = str(ne_row.get("ADMIN", clean_name_search))
             iso_code = ne_row.get("ISO_A3", "N/A")
 
+            # Apply clean_text to all language fields
             entry = {
                 "country": ne_admin_name,
                 "iso_a3": iso_code,
-                "official_languages": clean_val(row.get("official_languages")),
-                "regional_languages": clean_val(row.get("regional_languages")),
-                "minority_languages": clean_val(row.get("minority_languages")),
+                "official_languages": clean_text(row.get("official_languages")),
+                "regional_languages": clean_text(row.get("regional_languages")),
+                "minority_languages": clean_text(row.get("minority_languages")),
             }
             matched_data.append(entry)
         else:

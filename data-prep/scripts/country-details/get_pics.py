@@ -22,7 +22,7 @@ OUTPUT_JSON = "data/out/country_details_with_pics.json"
 PEXELS_SEARCH_URL = "https://api.pexels.com/v1/search"
 
 # Set to None to process all countries, or an integer to test a small sample
-SAMPLE_N = 5
+SAMPLE_N = None
 
 
 def main():

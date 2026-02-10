@@ -14,3 +14,6 @@ cp data-prep/data/ne/ne_110m_admin_only.geojson frontend/public/data/ne_countrie
 # radio
 cp data-prep/data/out/stations.jsonl frontend/public/data/stations.jsonl
 cp data-prep/data/out/index.json frontend/public/data/index.json
+
+# country details
+cp data-prep/data/out/country_details_with_pics.json frontend/public/data/country_details_with_pics.json
