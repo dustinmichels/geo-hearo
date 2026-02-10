@@ -1,3 +1,6 @@
+# old code
+frontend-old/
+
 # Dependencies
 frontend/node_modules/
 frontend-old/node_modules/
@@ -21,4 +24,4 @@ data-prep/uv.lock
 
 # Misc
 .DS_Store
-*.log
+\*.log

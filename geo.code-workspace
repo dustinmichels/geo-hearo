@@ -2,24 +2,24 @@
   "folders": [
     {
       "name": "[root]",
-      "path": "."
+      "path": ".",
     },
     {
       "name": "frontend",
-      "path": "frontend"
+      "path": "frontend",
     },
     {
       "name": "frontend-old",
-      "path": "frontend-old"
+      "path": "frontend-old",
     },
     {
       "name": "data-prep",
-      "path": "data-prep"
+      "path": "data-prep",
     },
     {
       "name": "data-prep/crawl",
-      "path": "data-prep/crawl"
-    }
+      "path": "data-prep/crawl",
+    },
   ],
   "settings": {
     "cSpell.words": [
@@ -30,7 +30,7 @@
       "pbar",
       "quantiles",
       "radiogarden",
-      "tqdm"
-    ]
-  }
+      "tqdm",
+    ],
+  },
 }
