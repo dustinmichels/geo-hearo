@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { RotateCcw } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
-import CountryDetails from '../components/CountryDetails.vue'
+import GameHistoryList from '../components/GameHistoryList.vue'
 import Footer from '../components/Footer.vue'
 import GameResultModal from '../components/GameResultModal.vue'
 import GuessPanel from '../components/GuessPanel.vue'
@@ -144,12 +144,6 @@ const activeStation = computed(() => {
           v-if="gameStage === 'listening'"
           class="relative z-10 flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto"
         >
-          <!-- Country Details -->
-          <CountryDetails
-            :country-name="secretCountry"
-            class="!p-1 !gap-2 shrink-0"
-          />
-
           <!-- Station Details -->
           <div id="station-details-panel" class="shrink-0">
             <StationDetails
@@ -171,6 +165,9 @@ const activeStation = computed(() => {
               New Game
             </span>
           </button>
+
+          <!-- Game History -->
+          <GameHistoryList :history="gameHistory" />
         </div>
 
         <!-- Guess Panel Card -->
@@ -201,7 +198,6 @@ const activeStation = computed(() => {
       :results-grid="modalConfig.resultsGrid"
       :secret-country="modalConfig.secretCountry"
       :daily-challenge-number="modalConfig.dailyChallengeNumber"
-      :history="gameHistory"
       @confirm="handleModalConfirm"
       @close="handleModalClose"
     />

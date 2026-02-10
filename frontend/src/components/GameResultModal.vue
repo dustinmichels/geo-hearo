@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ArrowRight, Check, Share, X } from 'lucide-vue-next'
 import { ref } from 'vue'
-import type { GameHistoryItem } from '../types/geo'
-import GameHistoryList from './GameHistoryList.vue'
+import CountryDetails from './CountryDetails.vue'
 
 const props = defineProps<{
   show: boolean
@@ -11,7 +10,6 @@ const props = defineProps<{
   shareText?: string
   resultsGrid?: string
   dailyChallengeNumber?: number
-  history?: GameHistoryItem[]
 }>()
 
 const emit = defineEmits<{
@@ -51,7 +49,7 @@ const handleShare = async () => {
 
       <!-- Modal Card -->
       <div
-        class="relative bg-paper-white w-full max-w-sm rounded-[2rem] border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] p-8 text-center animate-bounce-in"
+        class="relative bg-paper-white w-full max-w-sm max-h-[85vh] overflow-y-auto rounded-[2rem] border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] p-8 text-center animate-bounce-in"
       >
         <!-- Close (X) Button -->
         <button
@@ -82,20 +80,20 @@ const handleShare = async () => {
           }}</strong>
         </p>
 
-        <!-- Emoji Grid & Share Combined -->
-        <button
-          v-if="resultsGrid && dailyChallengeNumber && shareText"
-          @click="handleShare"
-          class="w-full mb-6 bg-paper-white/50 hover:bg-paper-white/80 active:scale-[0.98] transition-all rounded-xl p-4 border-2 border-pencil-lead/10 group cursor-pointer"
-        >
+        <!-- Emoji Grid -->
+        <div v-if="resultsGrid" class="mb-6 rounded-xl p-4 border-2 border-pencil-lead/10">
           <div
-            class="font-mono text-2xl tracking-widest leading-relaxed whitespace-pre font-bold text-center mb-3"
+            class="font-mono text-2xl tracking-widest leading-relaxed whitespace-pre font-bold text-center"
+            :class="{ 'mb-3': dailyChallengeNumber && shareText }"
           >
             {{ resultsGrid }}
           </div>
 
-          <div
-            class="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-pencil-lead/60 group-hover:text-pencil-lead transition-colors"
+          <!-- Share Button (daily challenge only) -->
+          <button
+            v-if="dailyChallengeNumber && shareText"
+            @click="handleShare"
+            class="w-full flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-pencil-lead/60 hover:text-pencil-lead transition-colors cursor-pointer"
           >
             <Check
               v-if="copyButtonText === 'Copied!'"
@@ -105,11 +103,11 @@ const handleShare = async () => {
             <span :class="{ 'text-mint-shake': copyButtonText === 'Copied!' }">
               {{ copyButtonText }}
             </span>
-          </div>
-        </button>
+          </button>
+        </div>
 
-        <!-- History Section -->
-        <GameHistoryList v-if="!dailyChallengeNumber" :history="history" />
+        <!-- Country Details -->
+        <CountryDetails v-if="secretCountry" :country-name="secretCountry" :show-name="false" class="mb-6 text-left" />
 
         <!-- Close Button -->
         <button

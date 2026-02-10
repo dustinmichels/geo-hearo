@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 
-const props = defineProps<{
-  countryName: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    countryName: string
+    showName?: boolean
+  }>(),
+  { showName: true }
+)
 
 interface PexelsData {
   url: string
@@ -64,30 +68,11 @@ watch(imageUrl, () => {
 
 <template>
   <div class="p-4 flex flex-col items-center gap-4 text-center">
-    <h2 class="text-2xl font-heading text-pencil-lead tracking-wide">
+    <h2 v-if="showName" class="text-2xl font-heading text-pencil-lead tracking-wide">
       {{ countryName }}
     </h2>
 
     <div v-if="currentCountry" class="flex flex-col items-center gap-4 w-full">
-      <!-- Languages -->
-      <div class="text-sm text-pencil-lead/80 flex flex-col gap-1">
-        <div v-if="currentCountry.official_languages">
-          <span
-            class="font-bold uppercase text-xs tracking-wider text-eraser-grey"
-            >Official:</span
-          >
-          {{ currentCountry.official_languages }}
-        </div>
-
-        <div v-if="currentCountry.minority_languages">
-          <span
-            class="font-bold uppercase text-xs tracking-wider text-eraser-grey"
-            >Minority:</span
-          >
-          {{ currentCountry.minority_languages }}
-        </div>
-      </div>
-
       <!-- Image from Pexels -->
       <a
         v-if="currentCountry.pexels_data"
@@ -125,6 +110,25 @@ watch(imageUrl, () => {
           Photo by {{ currentCountry.pexels_data.photographer }} on Pexels
         </div>
       </a>
+
+      <!-- Languages -->
+      <div class="text-sm text-pencil-lead/80 flex flex-col gap-1">
+        <div v-if="currentCountry.official_languages">
+          <span
+            class="font-bold uppercase text-xs tracking-wider text-eraser-grey"
+            >Official Languages:</span
+          >
+          {{ currentCountry.official_languages }}
+        </div>
+
+        <div v-if="currentCountry.minority_languages">
+          <span
+            class="font-bold uppercase text-xs tracking-wider text-eraser-grey"
+            >Minority Languages:</span
+          >
+          {{ currentCountry.minority_languages }}
+        </div>
+      </div>
     </div>
 
     <!-- Fallback if no country data -->

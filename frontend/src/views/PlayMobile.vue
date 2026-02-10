@@ -2,7 +2,7 @@
 import { FloatingPanel as VanFloatingPanel } from 'vant'
 import { computed, ref, watch } from 'vue'
 import AnimatedClose from '../components/AnimatedClose.vue'
-import CountryDetails from '../components/CountryDetails.vue'
+import GameHistoryList from '../components/GameHistoryList.vue'
 import GameResultModal from '../components/GameResultModal.vue'
 import GuessPanel from '../components/GuessPanel.vue'
 import HamburgerMenu from '../components/HamburgerMenu.vue'
@@ -223,7 +223,7 @@ const activeStation = computed(() => {
         <ResultsPanel :station="activeStation" @new-game="handleNewGame" />
       </div>
       <div class="border-t border-pencil-lead/20 overflow-y-auto">
-        <CountryDetails :country-name="secretCountry" />
+        <GameHistoryList :history="gameHistory" />
       </div>
     </van-floating-panel>
 
@@ -256,7 +256,6 @@ const activeStation = computed(() => {
       :results-grid="modalConfig.resultsGrid"
       :secret-country="modalConfig.secretCountry"
       :daily-challenge-number="modalConfig.dailyChallengeNumber"
-      :history="gameHistory"
       @confirm="handleModalConfirm"
       @close="handleModalClose"
     />
