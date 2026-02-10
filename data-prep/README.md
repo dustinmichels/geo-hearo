@@ -27,6 +27,14 @@ Matches filtered radio stations to Natural Earth country records by name. Drops 
 
 Converts the enriched radio JSON into a fixed-width JSONL file (`data/out/public/data/stations.jsonl`) where every line is padded to the same byte length. Builds a compact index (`data/out/public/data/index.json`) mapping each country to a byte offset and station count, enabling O(1) HTTP range-request lookups by the frontend.
 
+### country-details/scrape.py
+
+Scrapes the Wikipedia "List of official languages by country and territory" page and cross-references it with the Natural Earth 110m country dataset. Matches countries by name, producing a JSON file (`data/out/country_details.json`) with each country's official, regional, and minority languages plus ISO A3 code.
+
+### country-details/get_pics.py
+
+Fetches a representative landscape photo for each country from the Pexels API. Reads the country details JSON, searches Pexels for `"{country} landscape"`, downloads a medium-resolution JPEG, and writes an enriched JSON (`data/out/country_details_with_pics.json`) with Pexels metadata and local image paths. Requires a `PEXELS_API_KEY` environment variable.
+
 ## Output
 
 The final output in `data/out/public/data/` consists of two files:

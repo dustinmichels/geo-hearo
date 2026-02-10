@@ -8,7 +8,7 @@
 >
 > 1. Stream five live, random radio stations from a mystery country
 > 1. Make a guess, get a hint, repeat
-> 1. Tomrrow will bring a new daily challenge
+> 1. Tomorrow will bring a new daily challenge
 >
 > Do you have what it takes to be... the Geo Hearo? :superhero:
 

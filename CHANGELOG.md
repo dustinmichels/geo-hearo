@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-02-09
+
+### Country details, hamburger menu, and PWA support
+
+- **Country details page**: Added a `CountryDetails` component that displays country information (official/regional/minority languages, photo) after a round ends. Data sourced from a new `country_details_with_pics.json` file in `public/data/`.
+- **Country details data pipeline**: Added two new data-prep scripts (`scrape.py` and `get_pics.py`) that scrape Wikipedia for language data and fetch country photos from Pexels, producing the `country_details_with_pics.json` dataset and `country-pics/` images.
+- **Hamburger menu**: Added a slide-out navigation drawer with links to Home, Play, and About pages, replacing inline navigation.
+- **PWA support**: Converted the app into an installable Progressive Web App with a web manifest, service worker via `vite-plugin-pwa`, and an install prompt composable (`usePwaInstall`).
+- **Skip tour repositioned**: Moved the skip tour button position for better visibility.
+- **Symlinks**: Added `.aiexclude` and `.gemini-instructions` as symlinks to `.claudeignore` and `claude.md`.
+- **Misc**: Increased radio stream loading timeout. Added `.claudeignore` files for frontend and root.
+
 ## 2026-02-08
 
 ### Scoring, modal, map, and onboarding improvements

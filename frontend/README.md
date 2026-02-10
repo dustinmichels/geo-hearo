@@ -31,6 +31,7 @@ ln -s claude.md .gemini-instructions
 - **Animation:** CSS transitions
 - **Testing:** Vitest
 - **Analytics:** Plausible
+- **PWA:** vite-plugin-pwa
 
 ## How It Works
 
@@ -81,10 +82,10 @@ Transitions: `guessing → seeResults` (win or 5th guess) → `seeResults → li
 
 ```
 src/
-├── components/      # UI components (Map, RadioPlayer, GuessPanel, GameResultModal, GameHistoryList, etc.)
+├── components/      # UI components (Map, RadioPlayer, GuessPanel, GameResultModal, GameHistoryList, CountryDetails, HamburgerMenu, etc.)
 ├── views/           # Route pages (Home, Play, PlayDesktop, PlayMobile, About)
 ├── stores/          # Pinia stores (game.ts)
-├── composables/     # Domain logic & shared state (useRadio, useGamePlay, useCountryData, useOnboarding, etc.)
+├── composables/     # Domain logic & shared state (useRadio, useGamePlay, useCountryData, useOnboarding, usePwaInstall, etc.)
 ├── types/           # Shared TypeScript interfaces (geo.ts)
 ├── utils/           # Pure functions (geography, colors, audio static)
 ├── router/          # Vue Router config
