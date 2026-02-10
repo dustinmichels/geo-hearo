@@ -17,3 +17,7 @@ cp data-prep/data/out/index.json frontend/public/data/index.json
 
 # country details
 cp data-prep/data/out/country_details_with_pics.json frontend/public/data/country_details_with_pics.json
+
+# copy country pics
+rm -rf frontend/public/country-pics
+cp -r data-prep/data/out/country-pics frontend/public/country-pics

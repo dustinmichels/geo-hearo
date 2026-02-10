@@ -2,9 +2,10 @@
   {
     "country": "Afghanistan",
     "iso_a3": "AFG",
-    "official_languages": "Persian (Dari) Pashto",
-    "regional_languages": "Uzbek Turkmen Pashayi Nuristani Balochi Pamiri",
+    "official_languages": "Persian, Pashto",
+    "regional_languages": "Uzbek, Turkmen, Pashayi, Nuristani, Balochi, Pamiri",
     "minority_languages": "",
+    "local_image_path": "country-pics/afghanistan.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/aerial-view-of-kabul-cityscape-in-afghanistan-31093705/",
       "photographer": "Faruk Tokluoğlu",
@@ -22,7 +23,8 @@
     "iso_a3": "ALB",
     "official_languages": "Albanian",
     "regional_languages": "",
-    "minority_languages": "Greek Macedonian Aromanian",
+    "minority_languages": "Greek, Macedonian, Aromanian",
+    "local_image_path": "country-pics/albania.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/national-flag-of-albania-6068048/",
       "photographer": "Petrit Nikolli",
@@ -38,9 +40,10 @@
   {
     "country": "Algeria",
     "iso_a3": "DZA",
-    "official_languages": "Arabic Berber",
+    "official_languages": "Arabic, Berber",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/algeria.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/the-national-flag-of-algeria-15652228/",
       "photographer": "Engin Akyurt",
@@ -59,6 +62,7 @@
     "official_languages": "Portuguese",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/angola.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/mausoleum-of-neto-in-luanda-18451005/",
       "photographer": "Jonathan Quiúma",
@@ -74,9 +78,10 @@
   {
     "country": "Argentina",
     "iso_a3": "ARG",
-    "official_languages": "None at federal level (Spanish has de facto status) Argentine Sign Language",
-    "regional_languages": "Spanish (in Corrientes and Chaco) Guaraní (in Corrientes) Kom (in Chaco) Moquoit (in Chaco) Wichi (in Chaco)",
+    "official_languages": "None at federal level, Argentine Sign Language",
+    "regional_languages": "Spanish, Guaraní, Kom, Moquoit, Wichi",
     "minority_languages": "",
+    "local_image_path": "country-pics/argentina.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/colorful-storefront-in-la-boca-buenos-aires-30828707/",
       "photographer": "Maggy López",
@@ -95,6 +100,7 @@
     "official_languages": "Armenian",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/armenia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/mother-armenia-sculpture-in-yerevan-17220619/",
       "photographer": "alexander ermakov",
@@ -110,9 +116,10 @@
   {
     "country": "Australia",
     "iso_a3": "AUS",
-    "official_languages": "None (English has de facto status)",
-    "regional_languages": "English (on Norfolk Island) Norfuk (on Norfolk Island)",
+    "official_languages": "None",
+    "regional_languages": "English, Norfuk",
     "minority_languages": "",
+    "local_image_path": "country-pics/australia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/selective-focus-photo-of-sydney-opera-house-australia-635615/",
       "photographer": "David Dibert",
@@ -129,8 +136,9 @@
     "country": "Austria",
     "iso_a3": "AUT",
     "official_languages": "German",
-    "regional_languages": "Burgenland Croatian (parts of Burgenland) Hungarian (parts of Burgenland) Slovene (parts of Carinthia)",
-    "minority_languages": "Slovene Czech Hungarian Slovak Romani Serbian",
+    "regional_languages": "Burgenland Croatian, Hungarian, Slovene",
+    "minority_languages": "Slovene, Czech, Hungarian, Slovak, Romani, Serbian",
+    "local_image_path": "country-pics/austria.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/vienna-state-opera-during-daytime-5435000/",
       "photographer": "Jorge Urosa",
@@ -149,6 +157,7 @@
     "official_languages": "Azerbaijani",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/azerbaijan.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/modern-architecture-at-night-heydar-aliyev-center-29232857/",
       "photographer": "Emrecan Algül",
@@ -167,6 +176,7 @@
     "official_languages": "English",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/the_bahamas.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/atlantis-nassau-28443535/",
       "photographer": "ACkats Films",
@@ -183,8 +193,9 @@
     "country": "Bangladesh",
     "iso_a3": "BGD",
     "official_languages": "Bengali",
-    "regional_languages": "Sylheti (parts of Sylhet Division) Chittagonian (parts of Chittagong Division) Rangpuri/Kamtapuri (parts of Rangpur Division)",
-    "minority_languages": "Chakma Marma Rakhine Hajong Santali Tripuri Manipuri",
+    "regional_languages": "Sylheti, Chittagonian, Rangpuri/Kamtapuri",
+    "minority_languages": "Chakma, Marma, Rakhine, Hajong, Santali, Tripuri, Manipuri",
+    "local_image_path": "country-pics/bangladesh.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/aerial-view-of-harding-bridge-in-bangladesh-33626639/",
       "photographer": "Sarowar Hussain",
@@ -200,9 +211,10 @@
   {
     "country": "Belarus",
     "iso_a3": "BLR",
-    "official_languages": "Belarusian Russian",
+    "official_languages": "Belarusian, Russian",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/belarus.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/the-national-library-of-the-republic-of-belarus-13086824/",
       "photographer": "Sarazh  Izmailov",
@@ -218,9 +230,10 @@
   {
     "country": "Belgium",
     "iso_a3": "BEL",
-    "official_languages": "Dutch French German",
-    "regional_languages": "Dutch (Flanders, Brussels) French (Brussels, Wallonia) German (German-speaking community)",
+    "official_languages": "Dutch, French, German",
+    "regional_languages": "Dutch, French, German",
     "minority_languages": "",
+    "local_image_path": "country-pics/belgium.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/atomium-landmark-17068974/",
       "photographer": "Jakub Zerdzicki",
@@ -239,6 +252,7 @@
     "official_languages": "English",
     "regional_languages": "",
     "minority_languages": "Garifuna",
+    "local_image_path": "country-pics/belize.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/morningway-15382269/",
       "photographer": "Chechil Orifa",
@@ -257,6 +271,7 @@
     "official_languages": "French",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/benin.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/houses-in-african-venice-in-birds-eye-view-8655016/",
       "photographer": "Iwaria",
@@ -275,6 +290,7 @@
     "official_languages": "Dzongkha",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/bhutan.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/gold-statue-in-close-up-shot-7786832/",
       "photographer": "Pema Gyamtsho",
@@ -290,9 +306,10 @@
   {
     "country": "Bolivia",
     "iso_a3": "BOL",
-    "official_languages": "Castilian (Spanish) Aymara Araona Baure Bésiro (Chiquitano) Canichana Cavineña Cayubaba Chácobo Chimán Ese Ejja Guaraní Guarasu'we Guarayu Itonama Leco Machajuyai-Kallawaya Machineri Maropa Mojeño-Ignaciano Mojeño-Trinitario Moré Mosetén Movima Pacawara Puquina Quechua Sirionó Tacana Tapieté Toromona Uru-Chipaya Weenhayek Yaminawa Yuki Yuracaré Zamuco",
+    "official_languages": "Castilian, Aymara, Araona, Baure, Bésiro, Canichana, Cavineña, Cayubaba, Chácobo, Chimán, Ese Ejja, Guaraní, Guarasu'we, Guarayu, Itonama, Leco, Machajuyai-Kallawaya, Machineri, Maropa, Mojeño-Ignaciano, Mojeño-Trinitario, Moré, Mosetén, Movima, Pacawara, Puquina, Quechua, Sirionó, Tacana, Tapieté, Toromona, Uru-Chipaya, Weenhayek, Yaminawa, Yuki, Yuracaré, Zamuco",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/bolivia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/flags-on-snow-12774059/",
       "photographer": "Kristina Schultheiß",
@@ -308,9 +325,10 @@
   {
     "country": "Bosnia and Herzegovina",
     "iso_a3": "BIH",
-    "official_languages": "None (Bosnian, Croatian and Serbian all have de facto status)",
+    "official_languages": "None",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/bosnia_and_herzegovina.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/historic-stari-most-bridge-in-mostar-bosnia-28945328/",
       "photographer": "Osman Demirkıran",
@@ -329,6 +347,7 @@
     "official_languages": "English",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/botswana.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/lilac-breasted-roller-in-natural-habitat-33112943/",
       "photographer": "Derek Keats",
@@ -347,6 +366,7 @@
     "official_languages": "Portuguese",
     "regional_languages": "95 municipalities and 3 Brazilian states have co-official languages, with 61 co-officialized languages. The list can be seen at Languages of Brazil.",
     "minority_languages": "",
+    "local_image_path": "country-pics/brazil.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/christ-the-redeemer-statue-in-clear-sky-29142032/",
       "photographer": "Cristiano Junior",
@@ -365,6 +385,7 @@
     "official_languages": "Malay",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/brunei.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/facade-of-a-building-under-the-blue-sky-12587133/",
       "photographer": "vitalina",
@@ -383,6 +404,7 @@
     "official_languages": "Bulgarian",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/bulgaria.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/a-cathedral-under-dark-clouds-6161921/",
       "photographer": "Valentin",
@@ -398,9 +420,10 @@
   {
     "country": "Burkina Faso",
     "iso_a3": "BFA",
-    "official_languages": "Mooré Bissa Dyula Fula",
+    "official_languages": "Mooré, Bissa, Dyula, Fula",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/burkina_faso.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/close-up-of-a-lizard-15051742/",
       "photographer": "Ole Dahl Rasmussen",
@@ -416,9 +439,10 @@
   {
     "country": "Burundi",
     "iso_a3": "BDI",
-    "official_languages": "French Kirundi English",
+    "official_languages": "French, Kirundi, English",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/burundi.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/portrait-tribute-on-sand-in-bujumbura-burundi-32810667/",
       "photographer": "Chris wade NTEZICIMPA",
@@ -437,6 +461,7 @@
     "official_languages": "Khmer",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/cambodia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/a-couple-in-traditional-attire-standing-in-front-of-an-elephant-19153799/",
       "photographer": "HANUMAN PHOTO STUDIO🏕️📸",
@@ -452,9 +477,10 @@
   {
     "country": "Cameroon",
     "iso_a3": "CMR",
-    "official_languages": "English French",
+    "official_languages": "English, French",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/cameroon.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/people-in-costumes-during-a-traditional-tribal-ceremony-12241231/",
       "photographer": "Xavier Messina",
@@ -470,9 +496,10 @@
   {
     "country": "Canada",
     "iso_a3": "CAN",
-    "official_languages": "English (Federal) French (Federal)",
-    "regional_languages": "Chipewyan (Northwest Territories) Cree (Northwest Territories) Gwich'in (Northwest Territories) Inuinnaqtun (Northwest Territories and Nunavut) Inuktitut (Northwest Territories and Nunavut) Inuvialuktun (Northwest Territories) Mi'kmaq (Nova Scotia) North Slavey (Northwest Territories) South Slavey (Northwest Territories) Tłı̨chǫ (Northwest Territories)",
-    "minority_languages": "Chipewyan Cree Gwich'in Inuinnaqtun Inuktitut Inuvialuktun Mi'kmaq North Slavey South Slavey Tłı̨chǫ",
+    "official_languages": "English, French",
+    "regional_languages": "Chipewyan, Cree, Gwich'in, Inuinnaqtun, Inuktitut, Inuvialuktun, Mi'kmaq, North Slavey, South Slavey, Tłı̨chǫ",
+    "minority_languages": "Chipewyan, Cree, Gwich'in, Inuinnaqtun, Inuktitut, Inuvialuktun, Mi'kmaq, North Slavey, South Slavey, Tłı̨chǫ",
+    "local_image_path": "country-pics/canada.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/niagara-falls-ontario-canada-14436969/",
       "photographer": "Hashim Gaad",
@@ -488,9 +515,10 @@
   {
     "country": "Central African Republic",
     "iso_a3": "CAF",
-    "official_languages": "French Sango",
+    "official_languages": "French, Sango",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/central_african_republic.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/fountain-in-the-center-of-prague-27960504/",
       "photographer": "Kristina Paul",
@@ -506,9 +534,10 @@
   {
     "country": "Chad",
     "iso_a3": "TCD",
-    "official_languages": "Arabic French",
+    "official_languages": "Arabic, French",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/chad.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/camair-co-airplane-on-tarmac-at-tchad-airport-33474677/",
       "photographer": "Mecit Yssf",
@@ -527,6 +556,7 @@
     "official_languages": "Spanish",
     "regional_languages": "Languages of ethnic groups are official in their territories",
     "minority_languages": "",
+    "local_image_path": "country-pics/chile.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/scenic-view-of-atacama-desert-and-andes-mountains-30807403/",
       "photographer": "Willian Justen de Vasconcellos",
@@ -543,8 +573,9 @@
     "country": "China",
     "iso_a3": "CHN",
     "official_languages": "Standard Chinese",
-    "regional_languages": "English (Hong Kong) Portuguese (Macau)",
-    "minority_languages": "Mongolian Uyghur Tibetan Zhuang Kazakh Korean",
+    "regional_languages": "English, Portuguese",
+    "minority_languages": "Mongolian, Uyghur, Tibetan, Zhuang, Kazakh, Korean",
+    "local_image_path": "country-pics/china.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/great-wall-of-china-3262994/",
       "photographer": "Boris Ulzibat",
@@ -563,6 +594,7 @@
     "official_languages": "Spanish",
     "regional_languages": "Languages of ethnic groups are official in their territories",
     "minority_languages": "",
+    "local_image_path": "country-pics/colombia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/statue-of-jesus-6041972/",
       "photographer": "Dogo  Zambrano",
@@ -581,6 +613,7 @@
     "official_languages": "French",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/democratic_republic_of_the_congo.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/scenic-view-of-bukavu-cityscape-across-lake-kivu-30184936/",
       "photographer": "Edouard MIHIGO",
@@ -598,7 +631,8 @@
     "iso_a3": "COG",
     "official_languages": "French",
     "regional_languages": "",
-    "minority_languages": "Lingala Munukutuba",
+    "minority_languages": "Lingala, Munukutuba",
+    "local_image_path": "country-pics/republic_of_the_congo.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/a-man-in-a-suit-looking-sideways-6426811/",
       "photographer": "Rimiscky Tayuna",
@@ -616,7 +650,8 @@
     "iso_a3": "CRI",
     "official_languages": "Spanish",
     "regional_languages": "",
-    "minority_languages": "Indigenous languages Limonese Creole",
+    "minority_languages": "Indigenous languages, Limonese Creole",
+    "local_image_path": "country-pics/costa_rica.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/yellow-throated-tanager-perched-on-a-tropical-branch-32847246/",
       "photographer": "Veronika Andrews",
@@ -633,8 +668,9 @@
     "country": "Croatia",
     "iso_a3": "HRV",
     "official_languages": "Croatian",
-    "regional_languages": "Serbian Hungarian Czech Slovak Pannonian Rusyn",
+    "regional_languages": "Serbian, Hungarian, Czech, Slovak, Pannonian Rusyn",
     "minority_languages": "",
+    "local_image_path": "country-pics/croatia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/an-aerial-shot-of-the-bell-tower-in-dubrovnik-304785/",
       "photographer": "Marko Obrvan",
@@ -653,6 +689,7 @@
     "official_languages": "Spanish",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/cuba.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/white-concrete-building-under-blue-sky-1637122/",
       "photographer": "Yuting Gao",
@@ -668,9 +705,10 @@
   {
     "country": "Cyprus",
     "iso_a3": "CYP",
-    "official_languages": "Greek Turkish",
+    "official_languages": "Greek, Turkish",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/cyprus.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/the-edro-iii-shipwreck-on-cyprus-25315874/",
       "photographer": "Ivan Dražić",
@@ -688,7 +726,8 @@
     "iso_a3": "CZE",
     "official_languages": "Czech",
     "regional_languages": "",
-    "minority_languages": "Belarusian Bulgarian Croatian German Greek Hungarian Polish Romani Russian Rusyn Serbian Ukrainian Vietnamese",
+    "minority_languages": "Belarusian, Bulgarian, Croatian, German, Greek, Hungarian, Polish, Romani, Russian, Rusyn, Serbian, Ukrainian, Vietnamese",
+    "local_image_path": "country-pics/czechia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/architecture-bridge-building-structures-castle-126292/",
       "photographer": "JÉSHOOTS",
@@ -705,8 +744,9 @@
     "country": "Denmark",
     "iso_a3": "DNK",
     "official_languages": "Danish",
-    "regional_languages": "Faroese (in the Faroe Islands) Kalaallisut (in Greenland)",
-    "minority_languages": "German (in Southern Jutland)",
+    "regional_languages": "Faroese, Kalaallisut",
+    "minority_languages": "German",
+    "local_image_path": "country-pics/denmark.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/a-lighthouse-on-a-seashore-26600775/",
       "photographer": "Susanne Jutzeler, suju-foto",
@@ -722,9 +762,10 @@
   {
     "country": "Djibouti",
     "iso_a3": "DJI",
-    "official_languages": "Arabic French",
+    "official_languages": "Arabic, French",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/djibouti.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/animals-walking-on-a-field-4154222/",
       "photographer": "Ruslan Aizatulin",
@@ -743,6 +784,7 @@
     "official_languages": "Spanish",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/dominican_republic.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/facade-of-old-building-with-flag-of-dominican-republic-5273055/",
       "photographer": "Julia Volk",
@@ -758,9 +800,10 @@
   {
     "country": "East Timor",
     "iso_a3": "TLS",
-    "official_languages": "Portuguese Tetum",
+    "official_languages": "Portuguese, Tetum",
     "regional_languages": "",
     "minority_languages": "Indonesian",
+    "local_image_path": "country-pics/east_timor.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/a-close-up-shot-of-an-alligator-7174486/",
       "photographer": "Niccolò Chiamori",
@@ -778,7 +821,8 @@
     "iso_a3": "ECU",
     "official_languages": "Spanish",
     "regional_languages": "Languages of ethnic groups are official in their territories",
-    "minority_languages": "Spanish Kichwa Shuar",
+    "minority_languages": "Spanish, Kichwa, Shuar",
+    "local_image_path": "country-pics/ecuador.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/parked-classic-volkswagen-beetle-cars-5085636/",
       "photographer": "Claudio Ruiz",
@@ -797,6 +841,7 @@
     "official_languages": "Arabic",
     "regional_languages": "",
     "minority_languages": "Coptic",
+    "local_image_path": "country-pics/egypt.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/close-up-of-pyramids-15272084/",
       "photographer": "Denitsa Kireva",
@@ -815,6 +860,7 @@
     "official_languages": "Spanish",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/el_salvador.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/historic-cinema-building-in-san-salvador-33192995/",
       "photographer": "EduRaW Pro",
@@ -830,9 +876,10 @@
   {
     "country": "Equatorial Guinea",
     "iso_a3": "GNQ",
-    "official_languages": "French Portuguese Spanish",
+    "official_languages": "French, Portuguese, Spanish",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/equatorial_guinea.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/colorful-collection-of-vintage-postage-stamps-35680717/",
       "photographer": "Tolga deniz Aran",
@@ -851,6 +898,7 @@
     "official_languages": "Tigrinya",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/eritrea.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/wooden-puzzle-pieces-of-a-world-map-4493205/",
       "photographer": "Anthony Beck",
@@ -869,6 +917,7 @@
     "official_languages": "Estonian",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/estonia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/majestic-estonian-lighthouse-by-the-sea-34155519/",
       "photographer": "Evelin Magnus",
@@ -884,9 +933,10 @@
   {
     "country": "eSwatini",
     "iso_a3": "SWZ",
-    "official_languages": "English Swazi",
+    "official_languages": "English, Swazi",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/eswatini.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/urban-landscape-of-mbabane-city-skyline-at-dusk-34040096/",
       "photographer": "Khaya Motsa",
@@ -902,9 +952,10 @@
   {
     "country": "Ethiopia",
     "iso_a3": "ETH",
-    "official_languages": "Afar Amharic Oromo Somali Tigrinya",
+    "official_languages": "Afar, Amharic, Oromo, Somali, Tigrinya",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/ethiopia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/drone-shot-of-lake-7166594/",
       "photographer": "Daggy J Ali",
@@ -920,9 +971,10 @@
   {
     "country": "Fiji",
     "iso_a3": "FJI",
-    "official_languages": "English Fijian Fiji Hindi",
+    "official_languages": "English, Fijian, Fiji Hindi",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/fiji.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/tranquil-beach-at-sunrise-with-boats-in-fiji-33732029/",
       "photographer": "Mark Direen",
@@ -938,9 +990,10 @@
   {
     "country": "Finland",
     "iso_a3": "FIN",
-    "official_languages": "Finnish Swedish",
+    "official_languages": "Finnish, Swedish",
     "regional_languages": "",
-    "minority_languages": "Sami (in Enontekiö, Inari, Sodankylä, Utsjoki)",
+    "minority_languages": "Sami",
+    "local_image_path": "country-pics/finland.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/person-sitting-on-dock-1409047/",
       "photographer": "Huy Phan",
@@ -958,7 +1011,8 @@
     "iso_a3": "-99",
     "official_languages": "French",
     "regional_languages": "",
-    "minority_languages": "Corsican language Basque language Breton language",
+    "minority_languages": "Corsican language, Basque language, Breton language",
+    "local_image_path": "country-pics/france.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/moulin-pouge-shop-facade-587840/",
       "photographer": "Martijn Adegeest",
@@ -977,6 +1031,7 @@
     "official_languages": "French",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/gabon.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/colorful-collection-of-international-stamps-and-coins-29917031/",
       "photographer": "Q L",
@@ -995,6 +1050,7 @@
     "official_languages": "English",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/gambia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/view-of-sunset-at-the-beach-12633306/",
       "photographer": "Timon Cornelissen",
@@ -1013,6 +1069,7 @@
     "official_languages": "Georgian",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/georgia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/painting-of-jesus-on-wall-15158974/",
       "photographer": "Genadi Yakovlev",
@@ -1029,8 +1086,9 @@
     "country": "Germany",
     "iso_a3": "DEU",
     "official_languages": "German",
-    "regional_languages": "Danish (in Schleswig-Holstein) Lower Sorbian (in Brandenburg) North Frisian (in Schleswig-Holstein) Saterland Frisian (in Lower Saxony) Upper Sorbian (in Saxony) German Sign Language Low German",
-    "minority_languages": "Danish Lower Sorbian North Frisian Romani Upper Sorbian",
+    "regional_languages": "Danish, Lower Sorbian, North Frisian, Saterland Frisian, Upper Sorbian, German Sign Language, Low German",
+    "minority_languages": "Danish, Lower Sorbian, North Frisian, Romani, Upper Sorbian",
+    "local_image_path": "country-pics/germany.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/view-of-castle-tower-248207/",
       "photographer": "Pixabay",
@@ -1047,8 +1105,9 @@
     "country": "Ghana",
     "iso_a3": "GHA",
     "official_languages": "English",
-    "regional_languages": "Fante Asante Twi Akuapem Twi Adangme (in Greater Accra) Dagaare (in the Upper West Region) Dagbani (in the Northern Region) Ewe (in the Volta Region) Ga (in Greater Accra) Gonja (in the Northern Region) Kasem (in the Upper East Region) Nzema (in the Western Region)",
+    "regional_languages": "Fante, Asante Twi, Akuapem Twi, Adangme, Dagaare, Dagbani, Ewe, Ga, Gonja, Kasem, Nzema",
     "minority_languages": "",
+    "local_image_path": "country-pics/ghana.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/elderly-man-holding-wooden-cane-in-low-light-36049039/",
       "photographer": "Abdullatif Mirza",
@@ -1067,6 +1126,7 @@
     "official_languages": "Greek",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/greece.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/historic-parthenon-temple-at-acropolis-athens-33590031/",
       "photographer": "Irina Nesterenko",
@@ -1085,6 +1145,7 @@
     "official_languages": "Spanish",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/guatemala.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/front-view-of-a-dodge-challenger-10876549/",
       "photographer": "Jonathan  Modderman",
@@ -1103,6 +1164,7 @@
     "official_languages": "French",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/guinea.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/a-close-up-shot-of-guinea-pigs-14070138/",
       "photographer": "Vladimir Srajber",
@@ -1121,6 +1183,7 @@
     "official_languages": "Portuguese",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/guinea_bissau.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/colorful-collection-of-international-stamps-and-coins-29917031/",
       "photographer": "Q L",
@@ -1139,6 +1202,7 @@
     "official_languages": "English",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/guyana.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/aerial-view-of-parika-waterfront-dock-in-guyana-33202816/",
       "photographer": "Saliem Moeslan",
@@ -1154,9 +1218,10 @@
   {
     "country": "Haiti",
     "iso_a3": "HTI",
-    "official_languages": "French Haitian Creole",
+    "official_languages": "French, Haitian Creole",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/haiti.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/a-beautiful-resort-on-an-island-4637299/",
       "photographer": "Junior Ceranor Nelson",
@@ -1175,6 +1240,7 @@
     "official_languages": "Spanish",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/honduras.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/monochrome-photo-of-monkey-looking-upwards-2678404/",
       "photographer": "Samson Bush",
@@ -1192,7 +1258,8 @@
     "iso_a3": "HUN",
     "official_languages": "Hungarian",
     "regional_languages": "",
-    "minority_languages": "Croatian German Romanian Serbian Slovak Slovene",
+    "minority_languages": "Croatian, German, Romanian, Serbian, Slovak, Slovene",
+    "local_image_path": "country-pics/hungary.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/time-lapse-photography-of-lighted-suspension-bridge-3166732/",
       "photographer": "Nikolett Emmert",
@@ -1208,9 +1275,10 @@
   {
     "country": "Iceland",
     "iso_a3": "ISL",
-    "official_languages": "Icelandic Icelandic Sign Language",
+    "official_languages": "Icelandic, Icelandic Sign Language",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/iceland.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/waterfall-in-icelandic-green-landscape-10399171/",
       "photographer": "Tomáš Malík",
@@ -1226,9 +1294,10 @@
   {
     "country": "India",
     "iso_a3": "IND",
-    "official_languages": "Hindi English",
-    "regional_languages": "22 official languages: Assamese Bengali Bodo Dogri Gujarati Hindi Kannada Kashmiri Konkani Maithili Malayalam Meitei (Manipuri) Marathi Nepali Odia (Oriya), Punjabi Sanskrit Santali Sindhi Tamil Telugu Urdu",
+    "official_languages": "Hindi, English",
+    "regional_languages": "Assamese, Bengali, Bodo, Dogri, Gujarati, Hindi, Kannada, Kashmiri, Konkani, Maithili, Malayalam, Meitei, Marathi, Nepali, Odia, Punjabi, Sanskrit, Santali, Sindhi, Tamil, Telugu, Urdu",
     "minority_languages": "",
+    "local_image_path": "country-pics/india.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/close-up-view-of-the-amazing-taj-mahal-7800311/",
       "photographer": "Kirandeep Singh Walia",
@@ -1245,8 +1314,9 @@
     "country": "Indonesia",
     "iso_a3": "IDN",
     "official_languages": "Indonesian",
-    "regional_languages": "Javanese (in Yogyakarta)",
+    "regional_languages": "Javanese",
     "minority_languages": "",
+    "local_image_path": "country-pics/indonesia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/grand-mosque-in-bandung-with-modern-architecture-34033868/",
       "photographer": "el journey",
@@ -1264,7 +1334,8 @@
     "iso_a3": "IRN",
     "official_languages": "Persian",
     "regional_languages": "",
-    "minority_languages": "Azerbaijani Kurdish Luri Gilaki Mazanderani Balochi Arabic Qashqai Tati Turkmeni",
+    "minority_languages": "Azerbaijani, Kurdish, Luri, Gilaki, Mazanderani, Balochi, Arabic, Qashqai, Tati, Turkmeni",
+    "local_image_path": "country-pics/iran.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/photo-of-green-grass-near-the-azadi-tower-12618199/",
       "photographer": "Reza Tavakoli",
@@ -1280,9 +1351,10 @@
   {
     "country": "Iraq",
     "iso_a3": "IRQ",
-    "official_languages": "Arabic Kurdish",
-    "regional_languages": "Armenian recognized Assyrian Neo-Aramaic (in Assyrian areas) Iraqi Turkmen (in Turkmen areas)",
+    "official_languages": "Arabic, Kurdish",
+    "regional_languages": "Armenianrecognized, Assyrian Neo-Aramaic, Iraqi Turkmen",
     "minority_languages": "",
+    "local_image_path": "country-pics/iraq.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/historical-site-on-a-hill-10431289/",
       "photographer": "Ali  Gabr",
@@ -1298,9 +1370,10 @@
   {
     "country": "Ireland",
     "iso_a3": "IRL",
-    "official_languages": "Irish English",
+    "official_languages": "Irish, English",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/ireland.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/king-john-s-castle-in-ireand-15153790/",
       "photographer": "Liudmyla Shalimova",
@@ -1319,6 +1392,7 @@
     "official_languages": "Hebrew",
     "regional_languages": "Arabic",
     "minority_languages": "English",
+    "local_image_path": "country-pics/israel.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/close-up-of-the-flag-of-israel-4033852/",
       "photographer": "cottonbro studio",
@@ -1335,8 +1409,9 @@
     "country": "Italy",
     "iso_a3": "ITA",
     "official_languages": "Italian",
-    "regional_languages": "French (in Aosta Valley) Franco-Provençal (in Aosta Valley) German (in South Tyrol) Ladin (in South Tyrol) Friulian (in Friuli-Venezia Giulia) Sardinian (in Sardinia) Corsican (in northern Sardinia)",
-    "minority_languages": "Catalan (in Sardinia) Slovene (in Friuli-Venezia Giulia) Occitan (in Piedmont's Occitan valleys) Albanian (in Sicily and Calabria) Greek (in Calabria and Puglia)",
+    "regional_languages": "French, Franco-Provençal, German, Ladin, Friulian, Sardinian, Corsican",
+    "minority_languages": "Catalan, Slovene, Occitan, Albanian, Greek",
+    "local_image_path": "country-pics/italy.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/historical-gothic-cathedral-against-sky-15880868/",
       "photographer": "Andy Song",
@@ -1355,6 +1430,7 @@
     "official_languages": "French",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/ivory_coast.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/building-with-dome-on-plains-6322450/",
       "photographer": "Silvere Meya",
@@ -1373,6 +1449,7 @@
     "official_languages": "English",
     "regional_languages": "Jamaican Patois",
     "minority_languages": "",
+    "local_image_path": "country-pics/jamaica.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/flags-of-different-countries-next-to-the-temple-of-solomon-in-sao-paulo-brazil-15965249/",
       "photographer": "Thgusstavo Santana",
@@ -1388,9 +1465,10 @@
   {
     "country": "Japan",
     "iso_a3": "JPN",
-    "official_languages": "None (Japanese has de facto status)",
+    "official_languages": "None",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/japan.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/illuminated-tokyo-tower-amidst-tokyo-skyline-at-night-30301026/",
       "photographer": "Javey Du",
@@ -1408,7 +1486,8 @@
     "iso_a3": "JOR",
     "official_languages": "Arabic",
     "regional_languages": "",
-    "minority_languages": "Circassian Chechen Armenian",
+    "minority_languages": "Circassian, Chechen, Armenian",
+    "local_image_path": "country-pics/jordan.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/rubber-shoe-on-a-shelf-9986256/",
       "photographer": "saad alawi",
@@ -1424,9 +1503,10 @@
   {
     "country": "Kazakhstan",
     "iso_a3": "KAZ",
-    "official_languages": "Kazakh Russian",
+    "official_languages": "Kazakh, Russian",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/kazakhstan.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/photograph-of-a-white-mosque-with-minarets-18555245/",
       "photographer": "Aibek Skakov",
@@ -1442,9 +1522,10 @@
   {
     "country": "Kenya",
     "iso_a3": "KEN",
-    "official_languages": "English Swahili",
+    "official_languages": "English, Swahili",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/kenya.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/man-wearing-purple-hat-and-black-leather-jacket-865580/",
       "photographer": "Nahashon Diaz",
@@ -1463,6 +1544,7 @@
     "official_languages": "Korean",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/north_korea.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/scenic-view-of-heaven-lake-in-changbai-mountains-34252392/",
       "photographer": "tianc Tang",
@@ -1478,9 +1560,10 @@
   {
     "country": "South Korea",
     "iso_a3": "KOR",
-    "official_languages": "Korean Korean Sign Language",
+    "official_languages": "Korean, Korean Sign Language",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/south_korea.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/buildings-and-body-of-water-during-golden-hour-237211/",
       "photographer": "Pixabay",
@@ -1496,9 +1579,10 @@
   {
     "country": "Kosovo",
     "iso_a3": "-99",
-    "official_languages": "Albanian Serbian",
+    "official_languages": "Albanian, Serbian",
     "regional_languages": "Turkish",
     "minority_languages": "",
+    "local_image_path": "country-pics/kosovo.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/snow-around-stream-in-countryside-in-winter-20425480/",
       "photographer": "Kujtim Shabani",
@@ -1517,6 +1601,7 @@
     "official_languages": "Arabic",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/kuwait.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/a-black-sports-car-on-the-road-6374830/",
       "photographer": "Abdulwahab Alawadhi",
@@ -1532,9 +1617,10 @@
   {
     "country": "Kyrgyzstan",
     "iso_a3": "KGZ",
-    "official_languages": "Kyrgyz Russian",
+    "official_languages": "Kyrgyz, Russian",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/kyrgyzstan.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/man-in-blue-and-white-checked-quarter-sleeved-shirt-holding-black-camera-standing-on-rock-840666/",
       "photographer": "Oziel Gómez",
@@ -1553,6 +1639,7 @@
     "official_languages": "Lao",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/laos.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/vibrant-asian-festival-in-vientiane-laos-34293555/",
       "photographer": "Ian Taylor",
@@ -1571,6 +1658,7 @@
     "official_languages": "Latvian",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/latvia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/a-concrete-building-10644217/",
       "photographer": "Alex Does Pictures",
@@ -1589,6 +1677,7 @@
     "official_languages": "Arabic",
     "regional_languages": "Arabic",
     "minority_languages": "Armenian",
+    "local_image_path": "country-pics/lebanon.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/concrete-sculpture-under-the-sky-5522719/",
       "photographer": "Jo Kassis",
@@ -1604,9 +1693,10 @@
   {
     "country": "Lesotho",
     "iso_a3": "LSO",
-    "official_languages": "Sesotho English",
+    "official_languages": "Sesotho, English",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/lesotho.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/scenic-horseback-ride-through-semonkong-lesotho-28451781/",
       "photographer": "Mareike Mgwelo",
@@ -1625,6 +1715,7 @@
     "official_languages": "English",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/liberia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/street-drummer-performing-in-monrovia-liberia-31948231/",
       "photographer": "B. Aristotlè Guweh Jr",
@@ -1643,6 +1734,7 @@
     "official_languages": "Arabic",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/libya.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/classic-bmw-cars-lined-up-in-benghazi-showroom-29883937/",
       "photographer": "abdo alshreef",
@@ -1661,6 +1753,7 @@
     "official_languages": "Lithuanian",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/lithuania.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/aerial-view-of-birzai-castle-bridge-in-summer-32348206/",
       "photographer": "Vycka Biržai",
@@ -1676,9 +1769,10 @@
   {
     "country": "Luxembourg",
     "iso_a3": "LUX",
-    "official_languages": "French German Luxembourgish",
+    "official_languages": "French, German, Luxembourgish",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/luxembourg.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/man-sitting-on-palace-courtyard-and-reading-book-25211987/",
       "photographer": "Alina Chernii",
@@ -1694,9 +1788,10 @@
   {
     "country": "Madagascar",
     "iso_a3": "MDG",
-    "official_languages": "French Malagasy",
+    "official_languages": "French, Malagasy",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/madagascar.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/close-up-of-a-ring-tailed-lemur-in-autumn-setting-32981738/",
       "photographer": "L'oeil à deux Vanessa et cédric",
@@ -1715,6 +1810,7 @@
     "official_languages": "English",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/malawi.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/mantis-on-leaves-14435174/",
       "photographer": "Ravi Rajapaksha",
@@ -1733,6 +1829,7 @@
     "official_languages": "Malay",
     "regional_languages": "Regional/State dialects",
     "minority_languages": "",
+    "local_image_path": "country-pics/malaysia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/twin-towers-at-night-67559/",
       "photographer": "Pixabay",
@@ -1748,9 +1845,10 @@
   {
     "country": "Mali",
     "iso_a3": "MLI",
-    "official_languages": "Bambara Bobo Bozo Dogon Fula Hassaniya Kassonke Maninke Minyanka Senufo Songhay languages Soninke Tamasheq",
+    "official_languages": "Bambara, Bobo, Bozo, Dogon, Fula, Hassaniya, Kassonke, Maninke, Minyanka, Senufo, Songhay languages, Soninke, Tamasheq",
     "regional_languages": "",
     "minority_languages": "French",
+    "local_image_path": "country-pics/mali.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/green-grass-field-beside-lake-under-blue-sky-5710778/",
       "photographer": "Lera Nekrashevich",
@@ -1769,6 +1867,7 @@
     "official_languages": "Arabic",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/mauritania.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/photo-of-mauritania-flag-and-seychelles-flag-7362501/",
       "photographer": "Leonid Altman",
@@ -1784,9 +1883,10 @@
   {
     "country": "Mexico",
     "iso_a3": "MEX",
-    "official_languages": "None (Spanish has de facto status)",
+    "official_languages": "None",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/mexico.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/aerial-shot-of-palace-and-town-square-at-sunset-12630077/",
       "photographer": "Julio Maciel",
@@ -1803,8 +1903,9 @@
     "country": "Moldova",
     "iso_a3": "MDA",
     "official_languages": "Romanian",
-    "regional_languages": "Gagauz Russian Ukrainian",
+    "regional_languages": "Gagauz, Russian, Ukrainian",
     "minority_languages": "",
+    "local_image_path": "country-pics/moldova.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/bendery-fortress-under-blue-cloudy-sky-10883424/",
       "photographer": "Наталья Котенко",
@@ -1823,6 +1924,7 @@
     "official_languages": "Mongolian",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/mongolia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/genghis-khan-statue-in-close-up-photography-6466768/",
       "photographer": "MBVisign",
@@ -1841,6 +1943,7 @@
     "official_languages": "Montenegrin",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/montenegro.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/the-swiss-alps-an-extremely-beautiful-nature-14778164/",
       "photographer": "Igor Meghega",
@@ -1856,9 +1959,10 @@
   {
     "country": "Morocco",
     "iso_a3": "MAR",
-    "official_languages": "Arabic Berber",
+    "official_languages": "Arabic, Berber",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/morocco.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/people-at-the-plaza-3049885/",
       "photographer": "Mark Neal",
@@ -1877,6 +1981,7 @@
     "official_languages": "Portuguese",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/mozambique.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/aerial-view-of-maputo-cityscape-with-bridge-30188147/",
       "photographer": "SINAL Multimédia",
@@ -1890,11 +1995,31 @@
     }
   },
   {
+    "country": "Myanmar",
+    "iso_a3": "MMR",
+    "official_languages": "Burmese",
+    "regional_languages": "Chin, Kachin, Karen, Karenni, Mon, Rakhine, Shan",
+    "minority_languages": "",
+    "local_image_path": "country-pics/myanmar.jpg",
+    "pexels_data": {
+      "url": "https://www.pexels.com/photo/shwedagon-pagoda-in-yangon-18783419/",
+      "photographer": "Zaonar Saizainalin",
+      "photographer_url": "https://www.pexels.com/@zaonar-saizainalin-547935324",
+      "src": {
+        "large": "https://images.pexels.com/photos/18783419/pexels-photo-18783419.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+        "medium": "https://images.pexels.com/photos/18783419/pexels-photo-18783419.jpeg?auto=compress&cs=tinysrgb&h=350",
+        "small": "https://images.pexels.com/photos/18783419/pexels-photo-18783419.jpeg?auto=compress&cs=tinysrgb&h=130"
+      },
+      "alt": "Explore the stunning Shwedagon Pagoda in Yangon, Myanmar, a symbol of spirituality and culture."
+    }
+  },
+  {
     "country": "Namibia",
     "iso_a3": "NAM",
     "official_languages": "English",
-    "regional_languages": "German Oshiwambo",
+    "regional_languages": "German, Oshiwambo",
     "minority_languages": "",
+    "local_image_path": "country-pics/namibia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/dunes-of-desert-10260009/",
       "photographer": "Wendy R",
@@ -1913,6 +2038,7 @@
     "official_languages": "Nepali",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/nepal.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/majestic-moonrise-over-the-high-tatras-peaks-34631502/",
       "photographer": "Michal Petráš",
@@ -1929,8 +2055,9 @@
     "country": "Netherlands",
     "iso_a3": "NLD",
     "official_languages": "Dutch",
-    "regional_languages": "Frisian (in the province of Friesland) English (in Sint Maarten, Sint Eustatius, Saba) Papiamento (in Aruba, Curaçao, Bonaire)",
-    "minority_languages": "Dutch Low Saxon Dutch Sign Language Limburgish Sinte Romani Yiddish",
+    "regional_languages": "Frisian, English, Papiamento",
+    "minority_languages": "Dutch Low Saxon, Dutch Sign Language, Limburgish, Sinte Romani, Yiddish",
+    "local_image_path": "country-pics/netherlands.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/vintage-black-windmill-during-sunset-952632/",
       "photographer": "Tom Swinnen",
@@ -1946,9 +2073,10 @@
   {
     "country": "New Zealand",
     "iso_a3": "NZL",
-    "official_languages": "Māori language New Zealand Sign Language (English has de facto status)",
+    "official_languages": "Māori language, New Zealand Sign Language",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/new_zealand.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/stunning-new-zealand-mountain-landscape-scenery-35364665/",
       "photographer": "Chris Brown",
@@ -1965,8 +2093,9 @@
     "country": "Nicaragua",
     "iso_a3": "NIC",
     "official_languages": "Spanish",
-    "regional_languages": "In Autonomous Regions: Creole Garifuna Mayangna Miskito Rama Sumo",
+    "regional_languages": "Creole, Garifuna, Mayangna, Miskito, Rama, Sumo",
     "minority_languages": "",
+    "local_image_path": "country-pics/nicaragua.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/mountain-under-white-cloudy-sky-3470872/",
       "photographer": "Fabian Wiktor",
@@ -1985,6 +2114,7 @@
     "official_languages": "Hausa",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/niger.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/a-woman-wearing-a-hat-13851584/",
       "photographer": "André",
@@ -2003,6 +2133,7 @@
     "official_languages": "English",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/nigeria.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/zuma-rock-on-a-clear-day-in-abuja-nigeria-31487832/",
       "photographer": "Fatima Yusuf",
@@ -2018,9 +2149,10 @@
   {
     "country": "North Macedonia",
     "iso_a3": "MKD",
-    "official_languages": "Macedonian Albanian",
+    "official_languages": "Macedonian, Albanian",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/north_macedonia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/flag-of-north-macedonia-15483583/",
       "photographer": "Engin Akyurt",
@@ -2039,6 +2171,7 @@
     "official_languages": "Turkish",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/northern_cyprus.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/the-national-flag-of-northern-cyprus-15652231/",
       "photographer": "Engin Akyurt",
@@ -2054,9 +2187,10 @@
   {
     "country": "Norway",
     "iso_a3": "-99",
-    "official_languages": "Norwegian Sami languages",
-    "regional_languages": "Northern Sami Lule Sami Southern Sámi Kven",
-    "minority_languages": "Kven Scandoromani",
+    "official_languages": "Norwegian, Sami languages",
+    "regional_languages": "Northern Sami, Lule Sami, Southern Sámi, Kven",
+    "minority_languages": "Kven, Scandoromani",
+    "local_image_path": "country-pics/norway.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/rooftop-of-the-arctic-cathedral-in-tromso-17667647/",
       "photographer": "越过山丘",
@@ -2075,6 +2209,7 @@
     "official_languages": "Arabic",
     "regional_languages": "",
     "minority_languages": "Shehri",
+    "local_image_path": "country-pics/oman.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/al-alam-palace-in-muscat-oman-under-a-clear-sky-30052191/",
       "photographer": "Mauricio  Krupka Buendia",
@@ -2090,9 +2225,10 @@
   {
     "country": "Pakistan",
     "iso_a3": "PAK",
-    "official_languages": "Urdu English",
+    "official_languages": "Urdu, English",
     "regional_languages": "Sindhi",
     "minority_languages": "",
+    "local_image_path": "country-pics/pakistan.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/white-concrete-tower-surrounded-by-green-grass-field-13239874/",
       "photographer": "Aatik Ali Makani",
@@ -2111,6 +2247,7 @@
     "official_languages": "Arabic",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/palestine.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/palestinian-solidarity-bag-at-street-protest-32689867/",
       "photographer": "Özlem K",
@@ -2129,6 +2266,7 @@
     "official_languages": "Spanish",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/panama.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/a-revolution-tower-at-night-10550636/",
       "photographer": "Esdras Jaimes",
@@ -2144,9 +2282,10 @@
   {
     "country": "Papua New Guinea",
     "iso_a3": "PNG",
-    "official_languages": "English Hiri Motu PNG Sign Language Tok Pisin",
+    "official_languages": "English, Hiri Motu, PNG Sign Language, Tok Pisin",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/papua_new_guinea.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/colorful-traditional-clothing-display-in-papua-new-guinea-33317387/",
       "photographer": "kyli katja",
@@ -2162,9 +2301,10 @@
   {
     "country": "Paraguay",
     "iso_a3": "PRY",
-    "official_languages": "Spanish Guaraní",
+    "official_languages": "Spanish, Guaraní",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/paraguay.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/metropolitan-cathedral-of-our-lady-of-the-assumption-in-paraguay-8469339/",
       "photographer": "Tom D'Arby",
@@ -2183,6 +2323,7 @@
     "official_languages": "Spanish",
     "regional_languages": "Quechua, Aymara and other native languages are official wherever they predominate.",
     "minority_languages": "",
+    "local_image_path": "country-pics/peru.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/photo-of-machu-picchu-2929906/",
       "photographer": "Chelsea Cook",
@@ -2198,9 +2339,10 @@
   {
     "country": "Philippines",
     "iso_a3": "PHL",
-    "official_languages": "Filipino English",
-    "regional_languages": "Aklanon (in the Visayas) Bikol (in Luzon) Cebuano (in the Visayas and Mindanao) Chavacano (in Mindanao) Hiligaynon (in the Visayas) Ibanag (in Luzon) Ilocano (in Luzon, official in La Union) Ivatan (in Luzon) Kapampangan (in Luzon) Kinaray-a (in the Visayas) Maguindanao (in Mindanao) Maranao (in Mindanao) Pangasinan (in Luzon) Sambal (in Luzon) Tagalog (in Luzon) Tausug (in Mindanao) Waray (in the Visayas) Yakan (in Mindanao)",
-    "minority_languages": "Arabic (optional language) Spanish (optional language) Over 100 more minority languages",
+    "official_languages": "Filipino, English",
+    "regional_languages": "Aklanon, Bikol, Cebuano, Chavacano, Hiligaynon, Ibanag, Ilocano, Ivatan, Kapampangan, Kinaray-a, Maguindanao, Maranao, Pangasinan, Sambal, Tagalog, Tausug, Waray, Yakan",
+    "minority_languages": "Arabic, Spanish, Over 100 more minority languages",
+    "local_image_path": "country-pics/philippines.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/scenic-view-of-hills-surrounded-by-trees-757430/",
       "photographer": "NIC LAW",
@@ -2217,8 +2359,9 @@
     "country": "Poland",
     "iso_a3": "POL",
     "official_languages": "Polish",
-    "regional_languages": "Kashubian (Pomeranian Voivodeship) German (Opole Voivodeship) Lithuanian (Puńsk commune) Belarusian (Podlaskie Voivodseship)",
-    "minority_languages": "Lemko Karaim Tatar Ukrainian",
+    "regional_languages": "Kashubian, German, Lithuanian, Belarusian",
+    "minority_languages": "Lemko, Karaim, Tatar, Ukrainian",
+    "local_image_path": "country-pics/poland.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/worm-s-eye-view-of-concrete-building-179757/",
       "photographer": "Caio",
@@ -2235,8 +2378,9 @@
     "country": "Portugal",
     "iso_a3": "PRT",
     "official_languages": "Portuguese",
-    "regional_languages": "Mirandese (Terra de Miranda)",
+    "regional_languages": "Mirandese",
     "minority_languages": "",
+    "local_image_path": "country-pics/portugal.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/red-motor-scooter-near-wall-1045535/",
       "photographer": "Cátia Matos",
@@ -2255,6 +2399,7 @@
     "official_languages": "Arabic",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/qatar.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/palm-trees-outside-national-museum-of-qatar-11696998/",
       "photographer": "Akbar Nemati",
@@ -2272,7 +2417,8 @@
     "iso_a3": "ROU",
     "official_languages": "Romanian",
     "regional_languages": "",
-    "minority_languages": "Armenian German Hungarian Romani Russian Serbian Slovak Tatar Turkish Ukrainian",
+    "minority_languages": "Armenian, German, Hungarian, Romani, Russian, Serbian, Slovak, Tatar, Turkish, Ukrainian",
+    "local_image_path": "country-pics/romania.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/architectural-grandeur-of-the-palace-of-the-parliament-28898472/",
       "photographer": "Uiliam Nörnberg",
@@ -2289,8 +2435,9 @@
     "country": "Russia",
     "iso_a3": "RUS",
     "official_languages": "Russian",
-    "regional_languages": "Ossetic Ukrainian Belarusian Buryat Kalmyk Chechen Ingush Abaza Adyghe Tsakhur Lezgian Cherkess Kabardian Altai Bashkir Chuvash Crimean Tatar Karachay-Balkar Khakas Nogai Tatar Tuvan Yakut Erzya Komi Hill Mari Meadow Mari Karelian Moksha Veps Ingrian Ludian Udmurt",
+    "regional_languages": "Ossetic, Ukrainian, Belarusian, Buryat, Kalmyk, Chechen, Ingush, Abaza, Adyghe, Tsakhur, Lezgian, Cherkess, Kabardian, Altai, Bashkir, Chuvash, Crimean Tatar, Karachay-Balkar, Khakas, Nogai, Tatar, Tuvan, Yakut, Erzya, Komi, Hill Mari, Meadow Mari, Karelian, Moksha, Veps, Ingrian, Ludian, Udmurt",
     "minority_languages": "",
+    "local_image_path": "country-pics/russia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/gold-statues-on-water-fountain-5999276/",
       "photographer": "Tom D'Arby",
@@ -2306,9 +2453,10 @@
   {
     "country": "Rwanda",
     "iso_a3": "RWA",
-    "official_languages": "English French Kinyarwanda Swahili",
+    "official_languages": "English, French, Kinyarwanda, Swahili",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/rwanda.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/bronze-statue-of-religious-figure-with-flags-32915850/",
       "photographer": "finix photographer",
@@ -2326,7 +2474,8 @@
     "iso_a3": "SAU",
     "official_languages": "Arabic",
     "regional_languages": "",
-    "minority_languages": "Faifi Razihi Mehri",
+    "minority_languages": "Faifi, Razihi, Mehri",
+    "local_image_path": "country-pics/saudi_arabia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/flag-of-saudi-arabia-15483696/",
       "photographer": "Engin Akyurt",
@@ -2345,6 +2494,7 @@
     "official_languages": "French",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/senegal.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/flag-on-a-boat-deck-14434228/",
       "photographer": "Papa birame  Faye",
@@ -2362,7 +2512,8 @@
     "iso_a3": "SRB",
     "official_languages": "Serbian",
     "regional_languages": "",
-    "minority_languages": "(15 languages)",
+    "minority_languages": "",
+    "local_image_path": "country-pics/republic_of_serbia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/sun-shining-on-mountain-peak-above-clouds-15347043/",
       "photographer": "Radarsky 1984",
@@ -2381,6 +2532,7 @@
     "official_languages": "English",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/sierra_leone.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/chimpanzees-in-a-cage-7327389/",
       "photographer": "José Carlos Alexandre",
@@ -2398,7 +2550,8 @@
     "iso_a3": "SVK",
     "official_languages": "Slovak",
     "regional_languages": "",
-    "minority_languages": "Bulgarian Czech German Hungarian Polish Romani Rusyn Serbian Ukrainian",
+    "minority_languages": "Bulgarian, Czech, German, Hungarian, Polish, Romani, Rusyn, Serbian, Ukrainian",
+    "local_image_path": "country-pics/slovakia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/trees-and-church-tower-12148610/",
       "photographer": "Pham Ngoc Anh",
@@ -2416,7 +2569,8 @@
     "iso_a3": "SVN",
     "official_languages": "Slovene",
     "regional_languages": "",
-    "minority_languages": "Hungarian (Dobrovnik, Hodoš, Lendava) Italian (Izola, Koper, Piran) Croatian (Metlika, Brežice)",
+    "minority_languages": "Hungarian, Italian, Croatian",
+    "local_image_path": "country-pics/slovenia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/lots-of-love-locks-on-the-railing-of-the-bridge-over-the-canal-8640391/",
       "photographer": "Volker Meyer",
@@ -2435,6 +2589,7 @@
     "official_languages": "English",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/solomon_islands.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/serene-beach-in-gizo-solomon-islands-29643273/",
       "photographer": "Joel Orea",
@@ -2450,9 +2605,10 @@
   {
     "country": "Somalia",
     "iso_a3": "SOM",
-    "official_languages": "Somali Arabic",
+    "official_languages": "Somali, Arabic",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/somalia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/blue-and-white-star-painted-hand-in-peace-sign-gesture-344738/",
       "photographer": "David  Peterson",
@@ -2468,9 +2624,10 @@
   {
     "country": "Somaliland",
     "iso_a3": "-99",
-    "official_languages": "Arabic English Somali",
+    "official_languages": "Arabic, English, Somali",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/somaliland.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/military-officer-communicating-on-street-in-hargeisa-28492987/",
       "photographer": "Abdulkadir Hiraabe",
@@ -2486,9 +2643,10 @@
   {
     "country": "South Africa",
     "iso_a3": "ZAF",
-    "official_languages": "Afrikaans English Southern Ndebele Sotho Northern Sotho Swazi Tsonga Tswana Venda Xhosa Zulu SA Sign Language",
+    "official_languages": "Afrikaans, English, Southern Ndebele, Sotho, Northern Sotho, Swazi, Tsonga, Tswana, Venda, Xhosa, Zulu, SA Sign Language",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/south_africa.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/the-statue-of-nelson-mandela-on-the-union-buildings-grounds-pretoria-gauteng-south-africa-10527763/",
       "photographer": "Clayton",
@@ -2507,6 +2665,7 @@
     "official_languages": "English",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/south_sudan.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/women-posing-beside-each-other-6921052/",
       "photographer": "CG ARTWORK, INC.",
@@ -2523,8 +2682,9 @@
     "country": "Spain",
     "iso_a3": "ESP",
     "official_languages": "Spanish",
-    "regional_languages": "Catalan (Balearic Islands, Catalonia, Valencian Community) Galician (Galicia) Occitan (Catalonia) Basque (Basque Country, Navarra)",
-    "minority_languages": "Astur-Leonese (Asturias, León, Zamora, Salamanca, Cáceres) Aragonese (Aragon) Fala (Province of Cáceres) Portuguese Galician (Asturias, León, Zamora) Catalan (Aragon, Carche)",
+    "regional_languages": "Catalan, Galician, Occitan, Basque",
+    "minority_languages": "Astur-Leonese, Aragonese, Fala, Portuguese, Galician, Catalan",
+    "local_image_path": "country-pics/spain.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/ceiling-of-sagrada-familia-3340899/",
       "photographer": "Manuel Torres Garcia",
@@ -2540,9 +2700,10 @@
   {
     "country": "Sri Lanka",
     "iso_a3": "LKA",
-    "official_languages": "Sinhala Tamil",
+    "official_languages": "Sinhala, Tamil",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/sri_lanka.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/buddhist-temple-in-unawatuna-sri-lanka-33404650/",
       "photographer": "Ruwan  Lakmal",
@@ -2558,9 +2719,10 @@
   {
     "country": "Sudan",
     "iso_a3": "SDN",
-    "official_languages": "Arabic English",
+    "official_languages": "Arabic, English",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/sudan.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/people-walking-on-sand-toward-the-pyramids-10970368/",
       "photographer": "Muneeb Yassir",
@@ -2579,6 +2741,7 @@
     "official_languages": "Dutch",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/suriname.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/person-pointing-at-brazilian-state-of-roraima-on-a-map-15031991/",
       "photographer": "Levy Marchetto",
@@ -2596,7 +2759,8 @@
     "iso_a3": "SWE",
     "official_languages": "Swedish",
     "regional_languages": "",
-    "minority_languages": "Finnish (Gällivare, Haparanda, Kiruna, Pajala, Övertorneå) Meänkieli (Gällivare, Haparanda, Kiruna, Pajala, Övertorneå) Sami (Arjeplog, Gällivare, Jokkmokk, Kiruna) Yiddish Romani",
+    "minority_languages": "Finnish, Meänkieli, Sami, Yiddish, Romani",
+    "local_image_path": "country-pics/sweden.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/a-red-cup-with-swedish-pattern-15785185/",
       "photographer": "Efrem  Efre",
@@ -2612,9 +2776,10 @@
   {
     "country": "Switzerland",
     "iso_a3": "CHE",
-    "official_languages": "French (Bern, Fribourg, Geneva, Jura, Neuchâtel, Valais, Vaud) German (Aargau, Appenzell Ausserrhoden, Appenzell Innerrhoden, Basel-Landschaft, Basel-Stadt, Bern, Fribourg, Glarus, Graubünden, Lucerne, Nidwalden, Obwalden, Saint Gallen, Schaffhausen, Schwyz, Solothurn, Thurgau, Uri, Valais, Zug, Zürich) Italian (Ticino, Graubünden) Romansh (Graubünden)",
+    "official_languages": "French, German, Italian, Romansh",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/switzerland.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/stunning-snowy-matterhorn-mountain-peak-in-switzerland-29510136/",
       "photographer": "Eclipse Chasers",
@@ -2632,7 +2797,8 @@
     "iso_a3": "SYR",
     "official_languages": "Arabic",
     "regional_languages": "Kurdish",
-    "minority_languages": "Assyrian Western Neo-Aramaic Armenian",
+    "minority_languages": "Assyrian, Western Neo-Aramaic, Armenian",
+    "local_image_path": "country-pics/syria.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/stunning-view-of-umayyad-mosque-courtyard-in-damascus-34632854/",
       "photographer": "Halid Elosman",
@@ -2648,9 +2814,10 @@
   {
     "country": "Taiwan",
     "iso_a3": "TWN",
-    "official_languages": "None (Mandarin Chinese has de facto status)",
+    "official_languages": "None",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/taiwan.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/skyscrapers-in-modern-city-downtown-17164750/",
       "photographer": "Jimmy Liao",
@@ -2669,6 +2836,7 @@
     "official_languages": "Tajik",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/tajikistan.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/highland-valley-with-dry-mountains-in-day-7773853/",
       "photographer": "Alexey Demidov",
@@ -2684,9 +2852,10 @@
   {
     "country": "United Republic of Tanzania",
     "iso_a3": "TZA",
-    "official_languages": "Swahili English",
+    "official_languages": "Swahili, English",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/united_republic_of_tanzania.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/aerial-view-of-river-in-tarangire-national-park-30678630/",
       "photographer": "Dirk Pothen",
@@ -2703,8 +2872,9 @@
     "country": "Thailand",
     "iso_a3": "THA",
     "official_languages": "Thai",
-    "regional_languages": "Central Thai Isan Northern Thai Southern Thai",
+    "regional_languages": "Central Thai, Isan, Northern Thai, Southern Thai",
     "minority_languages": "Sixty-two 'domestic' languages are officially recognized",
+    "local_image_path": "country-pics/thailand.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/photo-of-golden-gautama-buddha-937465/",
       "photographer": "Suraphat Nuea-on",
@@ -2723,6 +2893,7 @@
     "official_languages": "French",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/togo.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/photo-of-togo-flag-6029530/",
       "photographer": "Clément  GADO",
@@ -2741,6 +2912,7 @@
     "official_languages": "English",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/trinidad_and_tobago.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/colorful-caribbean-souvenir-display-in-tobago-30826584/",
       "photographer": "Dominik Gryzbon",
@@ -2759,6 +2931,7 @@
     "official_languages": "Arabic",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/tunisia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/white-and-red-lighthouse-near-green-grass-field-under-blue-sky-6451332/",
       "photographer": "Amine Mayoufi",
@@ -2777,6 +2950,7 @@
     "official_languages": "Turkish",
     "regional_languages": "",
     "minority_languages": "Kurdish",
+    "local_image_path": "country-pics/turkey.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/turkish-flag-fluttering-against-the-blue-sky-22754352/",
       "photographer": "Zeki Okur",
@@ -2795,6 +2969,7 @@
     "official_languages": "Turkmen",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/turkmenistan.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/pins-on-iran-map-8828455/",
       "photographer": "Lara Jameson",
@@ -2810,9 +2985,10 @@
   {
     "country": "Uganda",
     "iso_a3": "UGA",
-    "official_languages": "English Swahili",
+    "official_languages": "English, Swahili",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/uganda.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/elephant-in-grass-5416736/",
       "photographer": "Harvey Sapir",
@@ -2829,8 +3005,9 @@
     "country": "Ukraine",
     "iso_a3": "UKR",
     "official_languages": "Ukrainian",
-    "regional_languages": "Russian (Autonomous Republic of Crimea) Crimean Tatar (Autonomous Republic of Crimea)",
+    "regional_languages": "Russian, Crimean Tatar",
     "minority_languages": "",
+    "local_image_path": "country-pics/ukraine.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/aerial-view-of-motherland-monument-and-daniparo-river-in-kyiv-9955097/",
       "photographer": "Petkevich Evgeniy",
@@ -2849,6 +3026,7 @@
     "official_languages": "Arabic",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/united_arab_emirates.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/top-of-burj-al-arab-building-in-dubai-uae-17865575/",
       "photographer": "Mo Eid",
@@ -2864,9 +3042,10 @@
   {
     "country": "United States of America",
     "iso_a3": "USA",
-    "official_languages": "None (English has de facto status)",
-    "regional_languages": "(28 languages)",
+    "official_languages": "None",
+    "regional_languages": "",
     "minority_languages": "indigenous languages of recognized federal tribes",
+    "local_image_path": "country-pics/united_states_of_america.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/rainbow-bridge-on-lake-natoma-in-folsom-in-autumn-19206721/",
       "photographer": "Vitaliy Haiduk",
@@ -2882,9 +3061,10 @@
   {
     "country": "Uruguay",
     "iso_a3": "URY",
-    "official_languages": "Uruguayan Sign Language (Spanish has de facto status)",
+    "official_languages": "Uruguayan Sign Language",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/uruguay.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/palacio-salvo-in-montevideo-uruguay-34965647/",
       "photographer": "Nikolai Kolosov",
@@ -2902,7 +3082,8 @@
     "iso_a3": "UZB",
     "official_languages": "Uzbek",
     "regional_languages": "",
-    "minority_languages": "Uzbek Karakalpak and Uzbek in Karakalpakstan",
+    "minority_languages": "Uzbek, Karakalpakand Uzbek inKarakalpakstan",
+    "local_image_path": "country-pics/uzbekistan.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/illuminated-tilya-kori-madrasah-19439196/",
       "photographer": "AXP Photography",
@@ -2918,9 +3099,10 @@
   {
     "country": "Vanuatu",
     "iso_a3": "VUT",
-    "official_languages": "English French Bislama",
+    "official_languages": "English, French, Bislama",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/vanuatu.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/close-up-view-of-shell-on-seabed-4719664/",
       "photographer": "wads sdfg",
@@ -2939,6 +3121,7 @@
     "official_languages": "Spanish",
     "regional_languages": "",
     "minority_languages": "Native languages are official for indigenous peoples",
+    "local_image_path": "country-pics/venezuela.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/glass-building-under-the-blue-sky-4618003/",
       "photographer": "Javier Martinez",
@@ -2956,7 +3139,8 @@
     "iso_a3": "VNM",
     "official_languages": "Vietnamese",
     "regional_languages": "",
-    "minority_languages": "Cantonese Cham Hmong Khmer Lao Muong Rade Tay Thai Vietnamese sign languages",
+    "minority_languages": "Cantonese, Cham, Hmong, Khmer, Lao, Muong, Rade, Tay, Thai, Vietnamese sign languages",
+    "local_image_path": "country-pics/vietnam.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/statue-of-jesus-christ-on-nui-nho-mountain-33586878/",
       "photographer": "Houwng Nguyen",
@@ -2974,7 +3158,8 @@
     "iso_a3": "YEM",
     "official_languages": "Arabic",
     "regional_languages": "",
-    "minority_languages": "Mehri Soqotri",
+    "minority_languages": "Mehri, Soqotri",
+    "local_image_path": "country-pics/yemen.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/palm-trees-and-buildings-in-yemen-11201283/",
       "photographer": "Mohammad Hadi",
@@ -2993,6 +3178,7 @@
     "official_languages": "English",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/zambia.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/flag-of-zambia-on-wind-16241810/",
       "photographer": "Kelly",
@@ -3008,9 +3194,10 @@
   {
     "country": "Zimbabwe",
     "iso_a3": "ZWE",
-    "official_languages": "Chewa Chibarwe English Kalanga Khoisan Nambya Ndau Ndebele Shangani Shona Sign language Sotho Tonga Tswana Venda Xhosa",
+    "official_languages": "Chewa, Chibarwe, English, Kalanga, Khoisan, Nambya, Ndau, Ndebele, Shangani, Shona, Sign language, Sotho, Tonga, Tswana, Venda, Xhosa",
     "regional_languages": "",
     "minority_languages": "",
+    "local_image_path": "country-pics/zimbabwe.jpg",
     "pexels_data": {
       "url": "https://www.pexels.com/photo/modern-hospital-building-in-harare-zimbabwe-36000439/",
       "photographer": "Joel Muzhira",

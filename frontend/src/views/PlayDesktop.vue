@@ -93,7 +93,7 @@ const activeStation = computed(() => {
       </div>
 
       <!-- Right: Sidebar -->
-      <div class="w-[400px] flex flex-col gap-4 relative z-10 shrink-0">
+      <div class="w-[400px] flex flex-col gap-2 relative z-10 shrink-0 min-h-0">
         <!-- Header & Player Card -->
         <div
           class="bg-paper-white rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] p-4 overflow-hidden"
@@ -142,24 +142,27 @@ const activeStation = computed(() => {
         <!-- Results Panel -->
         <div
           v-if="gameStage === 'listening'"
-          class="relative z-10 flex flex-col gap-4"
+          class="relative z-10 flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto"
         >
+          <!-- Country Details -->
+          <CountryDetails
+            :country-name="secretCountry"
+            class="!p-1 !gap-2 shrink-0"
+          />
+
           <!-- Station Details -->
-          <div id="station-details-panel">
+          <div id="station-details-panel" class="shrink-0">
             <StationDetails
               :station="activeStation"
               layout="desktop"
-              class="!shadow-[0_4px_0_0_#334155] w-full !max-w-none"
+              class="!shadow-[0_4px_0_0_#334155] w-full !max-w-none !p-2 !mb-0"
             />
           </div>
-
-          <!-- Country Details -->
-          <CountryDetails :country-name="secretCountry" />
 
           <!-- New Game Button -->
           <button
             id="new-game-btn"
-            class="w-full h-14 bg-yuzu-yellow text-pencil-lead rounded-2xl border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] active:translate-y-1 active:shadow-none transition-all duration-100 flex items-center justify-center gap-2 hover:brightness-110"
+            class="w-full h-12 bg-yuzu-yellow text-pencil-lead rounded-2xl border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] active:translate-y-1 active:shadow-none transition-all duration-100 flex items-center justify-center gap-2 hover:brightness-110 shrink-0"
             @click="handleNewGame"
             title="New Game"
           >

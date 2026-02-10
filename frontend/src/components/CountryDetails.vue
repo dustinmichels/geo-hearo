@@ -23,6 +23,7 @@ interface CountryDetail {
   official_languages: string
   regional_languages: string
   minority_languages: string
+  local_image_path?: string
   pexels_data: PexelsData
 }
 
@@ -47,7 +48,13 @@ const currentCountry = computed(() => {
   )
 })
 
-const imageUrl = computed(() => currentCountry.value?.pexels_data?.src?.medium ?? null)
+const imageUrl = computed(() => {
+  if (!currentCountry.value) return null
+  if (currentCountry.value.local_image_path) {
+    return '/' + currentCountry.value.local_image_path
+  }
+  return currentCountry.value.pexels_data?.src?.medium ?? null
+})
 
 // Reset error state when URL changes
 watch(imageUrl, () => {
@@ -71,13 +78,7 @@ watch(imageUrl, () => {
           >
           {{ currentCountry.official_languages }}
         </div>
-        <div v-if="currentCountry.regional_languages">
-          <span
-            class="font-bold uppercase text-xs tracking-wider text-eraser-grey"
-            >Regional:</span
-          >
-          {{ currentCountry.regional_languages }}
-        </div>
+
         <div v-if="currentCountry.minority_languages">
           <span
             class="font-bold uppercase text-xs tracking-wider text-eraser-grey"
@@ -100,8 +101,13 @@ watch(imageUrl, () => {
           v-if="imageUrl && !imageError"
           :src="imageUrl"
           :alt="currentCountry.pexels_data.alt"
-          referrerpolicy="origin"
-          @error="(e: Event) => { console.error('Pexels image failed to load:', imageUrl, e); imageError = true }"
+          referrerpolicy="no-referrer"
+          @error="
+            (e: Event) => {
+              console.error('Pexels image failed to load:', imageUrl, e)
+              imageError = true
+            }
+          "
           class="w-full h-full object-cover"
         />
 
@@ -119,23 +125,6 @@ watch(imageUrl, () => {
           Photo by {{ currentCountry.pexels_data.photographer }} on Pexels
         </div>
       </a>
-
-      <!-- Attribution below image -->
-      <div
-        v-if="currentCountry.pexels_data"
-        class="text-[10px] text-eraser-grey"
-      >
-        Photo by
-        <a
-          :href="currentCountry.pexels_data.photographer_url"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="underline font-bold hover:text-pencil-lead"
-        >
-          {{ currentCountry.pexels_data.photographer }}
-        </a>
-        on Pexels
-      </div>
     </div>
 
     <!-- Fallback if no country data -->

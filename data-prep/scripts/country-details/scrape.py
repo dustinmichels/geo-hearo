@@ -11,6 +11,7 @@ import re
 import geopandas as gpd
 import pandas as pd
 import requests
+from bs4 import BeautifulSoup
 from rich.console import Console
 from rich.table import Table
 
@@ -26,20 +27,54 @@ WIKI_URL = (
 )
 
 
-def clean_text(text):
+def clean_cell_content(cell):
     """
-    Removes Wikipedia footnotes/citations like [1], [a], [10][b], etc.
-    Also strips leading/trailing whitespace and handles nulls.
+    Parses a BeautifulSoup table cell to extract languages.
+    If the cell contains a list (ul/li), it joins them with commas.
+    Otherwise, it falls back to standard text cleaning.
     """
-    if pd.isna(text) or text is None:
+    if cell is None:
         return ""
 
-    # Regex explanation:
-    # \[      : Matches literal opening bracket
-    # [^\]]+  : Matches one or more characters that are NOT a closing bracket
-    # \]      : Matches literal closing bracket
-    cleaned = re.sub(r"\[[^\]]+\]", "", str(text))
-    return cleaned.strip()
+    # Check for list items first (Wikipedia usually uses <ul><li> for multiple languages)
+    list_items = cell.find_all("li")
+    if list_items:
+        languages = []
+        for li in list_items:
+            # Clean individual list item text
+            text = li.get_text(strip=True)
+            text = clean_string(text)
+            if text:
+                languages.append(text)
+        return ", ".join(languages)
+
+    # Fallback: handle plain text or <br> separated lines
+    # We replace <br> with a unique separator to split correctly later
+    for br in cell.find_all("br"):
+        br.replace_with("\n")
+
+    return clean_string(cell.get_text())
+
+
+def clean_string(text):
+    """
+    Removes Wikipedia footnotes/citations and parenthetical details from a string.
+    """
+    if not text:
+        return ""
+
+    # 1. Remove Wikipedia footnotes/citations like [1], [a], [10][b]
+    text = re.sub(r"\[[^\]]+\]", "", text)
+
+    # 2. Remove content in parentheses (e.g., specific regions or notes)
+    text = re.sub(r"\([^)]*\)", "", text)
+
+    # 3. Clean up whitespace and handle newline separation
+    # Split by common separators if not already comma-separated
+    parts = [p.strip() for p in re.split(r"[\n\r,]+", text) if p.strip()]
+
+    # Filter out empty or purely symbolic parts
+    return ", ".join(parts)
 
 
 def main():
@@ -54,47 +89,64 @@ def main():
         response = requests.get(WIKI_URL, headers=headers)
         response.raise_for_status()
 
-        # Use io.StringIO to avoid the BeautifulSoup/Pandas FutureWarning
-        html_data = io.StringIO(response.text)
-        tables = pd.read_html(html_data)
+        soup = BeautifulSoup(response.text, "html.parser")
 
-        df = None
-        for t in tables:
-            cols_str = " ".join([str(c) for c in t.columns])
-            if "Official language" in cols_str:
-                df = t
-                break
-
-        if df is None:
+        # Find the main table (usually the one with 'wikitable' class)
+        table = soup.find("table", {"class": "wikitable"})
+        if not table:
             console.print(
                 "[red]Error: Could not find the languages table on the page.[/red]"
             )
             return
 
-        col_mapping = {
-            "Country/Region": "country",
-            "Official language(s)": "official_languages",
-            "Regional language(s)": "regional_languages",
-            "Minority language(s)": "minority_languages",
-        }
-
-        final_cols = {}
-        for c in df.columns:
-            column_name = str(c)
-            for key, val in col_mapping.items():
-                if key.lower() in column_name.lower():
-                    final_cols[c] = val
-
-        df = df.rename(columns=final_cols)
-
-        target_cols = [
-            "country",
-            "official_languages",
-            "regional_languages",
-            "minority_languages",
+        # Identify column indices
+        headers_row = table.find("tr")
+        header_cols = [
+            th.get_text(strip=True).lower() for th in headers_row.find_all(["th", "td"])
         ]
-        existing_target_cols = [c for c in target_cols if c in df.columns]
-        df = df[existing_target_cols]
+
+        idx_map = {"country": -1, "official": -1, "regional": -1, "minority": -1}
+
+        for i, h in enumerate(header_cols):
+            if "country" in h:
+                idx_map["country"] = i
+            elif "official" in h:
+                idx_map["official"] = i
+            elif "regional" in h:
+                idx_map["regional"] = i
+            elif "minority" in h:
+                idx_map["minority"] = i
+
+        wiki_data = []
+        # Skip header row
+        rows = table.find_all("tr")[1:]
+
+        for row in rows:
+            tds = row.find_all(["td", "th"])
+            if len(tds) < max(idx_map.values()):
+                continue
+
+            # Use the specialized clean_cell_content function for each column
+            country_raw = (
+                tds[idx_map["country"]].get_text(strip=True)
+                if idx_map["country"] != -1
+                else ""
+            )
+
+            entry = {
+                "country_raw": country_raw,
+                "country_clean": clean_string(country_raw),
+                "official_languages": clean_cell_content(tds[idx_map["official"]])
+                if idx_map["official"] != -1
+                else "",
+                "regional_languages": clean_cell_content(tds[idx_map["regional"]])
+                if idx_map["regional"] != -1
+                else "",
+                "minority_languages": clean_cell_content(tds[idx_map["minority"]])
+                if idx_map["minority"] != -1
+                else "",
+            }
+            wiki_data.append(entry)
 
     except Exception as e:
         console.print(f"[red]Failed to scrape Wikipedia:[/red] {e}")
@@ -130,32 +182,26 @@ def main():
     matched_data = []
     unmatched_countries = []
 
-    for _, row in df.iterrows():
-        raw_wiki_country = str(row["country"]).strip()
-
-        # Clean country name for lookup (e.g., "Argentina[a]" -> "Argentina")
-        clean_name_search = clean_text(raw_wiki_country)
-        lookup_key = clean_name_search.lower()
+    for row in wiki_data:
+        lookup_key = row["country_clean"].lower()
 
         if lookup_key in lookup:
             ne_idx = lookup[lookup_key]
             ne_row = ne.iloc[ne_idx]
 
-            # Use ADMIN name from Natural Earth for consistency
-            ne_admin_name = str(ne_row.get("ADMIN", clean_name_search))
+            ne_admin_name = str(ne_row.get("ADMIN", row["country_clean"]))
             iso_code = ne_row.get("ISO_A3", "N/A")
 
-            # Apply clean_text to all language fields
             entry = {
                 "country": ne_admin_name,
                 "iso_a3": iso_code,
-                "official_languages": clean_text(row.get("official_languages")),
-                "regional_languages": clean_text(row.get("regional_languages")),
-                "minority_languages": clean_text(row.get("minority_languages")),
+                "official_languages": row["official_languages"],
+                "regional_languages": row["regional_languages"],
+                "minority_languages": row["minority_languages"],
             }
             matched_data.append(entry)
         else:
-            unmatched_countries.append(raw_wiki_country)
+            unmatched_countries.append(row["country_raw"])
 
     # 5. Reporting
     if unmatched_countries:
