@@ -65,9 +65,12 @@ const handleShare = async () => {
 <template>
   <div
     v-if="history && history.length > 0"
-    class="text-left border-t-2 border-pencil-lead/10 pt-4 flex flex-col flex-1 min-h-0"
+    class="text-left pt-4 flex flex-col flex-1 min-h-0"
   >
     <!-- Header -->
+    <div class="text-sm text-center text-pencil-lead mb-1 shrink-0 font-bold">
+      Game History
+    </div>
     <div class="text-sm text-center lowercase text-pencil-lead mb-3 shrink-0">
       Avg Score Today: {{ averageScore }}
       <span class="text-eraser-grey">/ 10</span>
@@ -97,7 +100,9 @@ const handleShare = async () => {
       class="mt-3 p-3 rounded-xl border-2 border-[#B45309] bg-orange-50/50 shrink-0 cursor-pointer hover:bg-orange-50 transition-colors"
       @click="handleShare"
     >
-      <div class="text-xs font-bold uppercase tracking-wider text-[#B45309] mb-2 text-center">
+      <div
+        class="text-xs font-bold uppercase tracking-wider text-[#B45309] mb-2 text-center"
+      >
         Daily Challenge
       </div>
       <div
