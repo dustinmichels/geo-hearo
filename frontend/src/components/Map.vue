@@ -295,8 +295,6 @@ const initMap = () => {
 
     map.value.on('load', () => {
       if (!map.value) return
-      loaded.value = true
-      if (loadingTimeout) clearTimeout(loadingTimeout)
 
       // Add source for countries
       map.value.addSource('countries', {
@@ -304,6 +302,16 @@ const initMap = () => {
         data: '/data/ne_countries.geojson',
         promoteId: 'ADMIN', // Use ADMIN as ID
       })
+
+      // Wait for GeoJSON to actually load before hiding the spinner
+      const onSourceData = (e: maplibregl.MapSourceDataEvent) => {
+        if (e.sourceId === 'countries' && e.isSourceLoaded) {
+          loaded.value = true
+          if (loadingTimeout) clearTimeout(loadingTimeout)
+          map.value?.off('sourcedata', onSourceData)
+        }
+      }
+      map.value.on('sourcedata', onSourceData)
 
       setupLayers()
       setupInteractions()
