@@ -38,14 +38,14 @@ const gardenUrl = computed(() => {
   >
     <div
       class="font-heading leading-tight mb-1 text-pencil-lead truncate"
-      :class="layout === 'desktop' ? 'text-2xl' : 'text-lg'"
+      :class="layout === 'desktop' ? 'text-lg' : 'text-lg'"
     >
       {{ station.channel_name }}
     </div>
 
     <div
       class="font-bold text-eraser-grey uppercase tracking-wide mb-2 truncate text-sm"
-      :class="layout === 'desktop' ? 'text-lg' : 'text-sm'"
+      :class="layout === 'desktop' ? 'text-xs' : 'text-sm'"
     >
       {{ formattedLocation }}
     </div>
@@ -56,7 +56,7 @@ const gardenUrl = computed(() => {
         target="_blank"
         rel="noopener noreferrer"
         class="inline-flex items-center justify-center gap-1.5 font-bold text-gumball-blue hover:underline text-xs"
-        :class="layout === 'desktop' ? 'text-base' : 'text-xs'"
+        :class="layout === 'desktop' ? 'text-xs' : 'text-xs'"
       >
         Listen on radio.garden
         <ExternalLink :class="layout === 'desktop' ? 'w-4 h-4' : 'w-3 h-3'" />

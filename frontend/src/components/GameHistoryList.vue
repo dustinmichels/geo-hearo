@@ -68,7 +68,7 @@ const handleShare = async () => {
     class="text-left pt-4 flex flex-col flex-1 min-h-0"
   >
     <!-- Header -->
-    <div class="text-sm text-center text-pencil-lead mb-1 shrink-0 font-bold">
+    <div class="text-m text-center text-pencil-lead mb-1 shrink-0 font-bold">
       Game History
     </div>
     <div class="text-sm text-center lowercase text-pencil-lead mb-3 shrink-0">

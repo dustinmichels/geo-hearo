@@ -1,6 +1,6 @@
 """
 USAGE:
-    uv run scripts/country_details/scrape.py
+    uv run scripts/country_details/01_scrape.py
 """
 
 import io

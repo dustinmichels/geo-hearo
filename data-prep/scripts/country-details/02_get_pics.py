@@ -1,12 +1,13 @@
 """
 USAGE:
     export PEXELS_API_KEY="your_key_here"
-    uv run scripts/country_details/get_pics.py
+    uv run scripts/country_details/02_get_pics.py
 """
 
 import json
 import os
 import re
+import shutil
 import time
 
 import requests
@@ -75,7 +76,16 @@ def main():
         countries = countries[:SAMPLE_N]
 
     # 3. Setup output directories
+    # Ensure the parent directory for the JSON exists
     os.makedirs(os.path.dirname(OUTPUT_JSON), exist_ok=True)
+
+    # Clean and recreate the image directory
+    if os.path.exists(IMAGE_DIR):
+        console.print(
+            f"[yellow]Cleaning existing image directory: {IMAGE_DIR}[/yellow]"
+        )
+        shutil.rmtree(IMAGE_DIR)
+
     os.makedirs(IMAGE_DIR, exist_ok=True)
 
     headers = {"Authorization": api_key}
@@ -101,7 +111,7 @@ def main():
             try:
                 # Search Pexels
                 params = {
-                    "query": f"{country_name} iconic",
+                    "query": f"{country_name} famous classic scenic landscape",
                     "per_page": 1,
                     "orientation": "landscape",
                 }

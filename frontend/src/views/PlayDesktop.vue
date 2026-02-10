@@ -94,49 +94,44 @@ const activeStation = computed(() => {
 
       <!-- Right: Sidebar -->
       <div class="w-[400px] flex flex-col gap-2 relative z-10 shrink-0 min-h-0">
-        <!-- Header & Player Card -->
-        <div
-          class="bg-paper-white rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] p-4 overflow-hidden"
-        >
-          <!-- Title -->
-          <div class="flex justify-center mb-3">
-            <div class="relative z-10">
-              <h1
-                class="text-center text-pencil-lead text-[1.6rem] font-heading tracking-wider"
-              >
-                GeoHearo
-              </h1>
-              <div
-                class="text-center text-sm uppercase tracking-widest font-bold mb-1"
-                :class="
-                  isDailyChallengeMode ? 'text-[#B45309]' : 'text-eraser-grey'
-                "
-              >
-                <template v-if="isDailyChallengeMode">
-                  Daily Challenge! 📣
-                </template>
-                <template v-else> Free play mode </template>
-              </div>
-              <img
-                src="/emoji.png"
-                class="absolute left-full bottom-0 h-12 ml-4 z-[-1] transition-transform duration-700 ease-out"
-                style="will-change: transform"
-                :class="isPlaying ? 'translate-y-4' : 'translate-y-16'"
-              />
+        <!-- Title -->
+        <div class="flex justify-center">
+          <div class="relative z-10">
+            <h1
+              class="text-center text-pencil-lead text-[1.6rem] font-heading tracking-wider"
+            >
+              GeoHearo
+            </h1>
+            <div
+              class="text-center text-sm uppercase tracking-widest font-bold mb-1"
+              :class="
+                isDailyChallengeMode ? 'text-[#B45309]' : 'text-eraser-grey'
+              "
+            >
+              <template v-if="isDailyChallengeMode">
+                Daily Challenge! 📣
+              </template>
+              <template v-else> Free play mode </template>
             </div>
-          </div>
-
-          <!-- Radio Player -->
-          <div class="relative z-30">
-            <RadioPlayer
-              :is-playing="isPlaying"
-              :current-station="currentStation"
-              :station-url="currentStationUrl"
-              @play-pause="handlePlayPause"
-              @previous="handlePrevious"
-              @next="handleNext"
+            <img
+              src="/emoji.png"
+              class="absolute left-full bottom-0 h-12 ml-4 z-[-1] transition-transform duration-700 ease-out"
+              style="will-change: transform"
+              :class="isPlaying ? 'translate-y-4' : 'translate-y-16'"
             />
           </div>
+        </div>
+
+        <!-- Radio Player -->
+        <div class="relative z-30">
+          <RadioPlayer
+            :is-playing="isPlaying"
+            :current-station="currentStation"
+            :station-url="currentStationUrl"
+            @play-pause="handlePlayPause"
+            @previous="handlePrevious"
+            @next="handleNext"
+          />
         </div>
 
         <!-- Results Panel -->
@@ -144,27 +139,28 @@ const activeStation = computed(() => {
           v-if="gameStage === 'listening'"
           class="relative z-10 flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto"
         >
-          <!-- Station Details -->
-          <div id="station-details-panel" class="shrink-0">
-            <StationDetails
-              :station="activeStation"
-              layout="desktop"
-              class="!shadow-[0_4px_0_0_#334155] w-full !max-w-none !p-2 !mb-0"
-            />
-          </div>
+          <!-- Station Details + New Game Button -->
+          <div class="flex gap-2 shrink-0">
+            <div id="station-details-panel" class="flex-1 min-w-0">
+              <StationDetails
+                :station="activeStation"
+                layout="desktop"
+                class="!shadow-[0_4px_0_0_#334155] w-full !max-w-none !p-2 !mb-0"
+              />
+            </div>
 
-          <!-- New Game Button -->
-          <button
-            id="new-game-btn"
-            class="w-full h-12 bg-yuzu-yellow text-pencil-lead rounded-2xl border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] active:translate-y-1 active:shadow-none transition-all duration-100 flex items-center justify-center gap-2 hover:brightness-110 shrink-0"
-            @click="handleNewGame"
-            title="New Game"
-          >
-            <RotateCcw class="w-4 h-4" />
-            <span class="font-bold uppercase tracking-wider text-sm">
-              New Game
-            </span>
-          </button>
+            <button
+              id="new-game-btn"
+              class="h-auto bg-yuzu-yellow text-pencil-lead rounded-2xl border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] active:translate-y-1 active:shadow-none transition-all duration-100 flex items-center justify-center gap-1.5 hover:brightness-110 shrink-0 px-6 flex-col"
+              @click="handleNewGame"
+              title="New Game"
+            >
+              <RotateCcw class="w-5 h-5" />
+              <span class="font-bold uppercase tracking-wider text-xs">
+                New Game
+              </span>
+            </button>
+          </div>
 
           <!-- Game History -->
           <GameHistoryList :history="gameHistory" />

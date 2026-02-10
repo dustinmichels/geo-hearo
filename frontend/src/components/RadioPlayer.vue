@@ -148,7 +148,7 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="bg-paper-white rounded-2xl border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] w-full max-w-sm mx-auto relative p-3"
+    class="bg-paper-white rounded-2xl border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] w-full relative p-3"
   >
     <!-- Live Indicator -->
     <div
