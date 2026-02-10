@@ -65,24 +65,36 @@ const handleShare = async () => {
 <template>
   <div
     v-if="history && history.length > 0"
-    class="mb-6 text-left max-h-48 overflow-y-auto custom-scrollbar border-t-2 border-pencil-lead/10 pt-4"
+    class="text-left border-t-2 border-pencil-lead/10 pt-4 flex flex-col flex-1 min-h-0"
   >
-    <h3
-      class="text-sm font-heading text-pencil-lead/60 mb-3 text-center uppercase tracking-wider"
-    >
-      <span
-        v-if="history && history.length > 0"
-        class="block text-sm mt-1 lowercase text-pencil-lead"
-      >
-        Avg Score Today: {{ averageScore }}
-        <span class="text-eraser-grey">/ 10</span>
-      </span>
-    </h3>
+    <!-- Header -->
+    <div class="text-sm text-center lowercase text-pencil-lead mb-3 shrink-0">
+      Avg Score Today: {{ averageScore }}
+      <span class="text-eraser-grey">/ 10</span>
+    </div>
 
-    <!-- Daily Challenge Card -->
+    <!-- Scrollable Free Play Items -->
+    <div class="space-y-2 overflow-y-auto custom-scrollbar min-h-0 flex-1">
+      <div
+        v-for="(item, idx) in history
+          .slice()
+          .reverse()
+          .filter((i) => i.mode !== 'daily')"
+        :key="idx"
+        class="grid grid-cols-[1fr_auto_auto] gap-3 items-center text-sm p-2 rounded-lg border transition-colors bg-paper-white/50 text-pencil-lead border-pencil-lead/5"
+      >
+        <span class="font-bold truncate">{{ item.country }}</span>
+        <span class="tracking-widest">{{ item.score }}</span>
+        <span class="font-mono font-bold text-pencil-lead/70 w-6 text-right">{{
+          getScore(item)
+        }}</span>
+      </div>
+    </div>
+
+    <!-- Daily Challenge Card (pinned to bottom) -->
     <div
       v-if="dailyItem"
-      class="mb-3 p-3 rounded-xl border-2 border-[#B45309] bg-orange-50/50"
+      class="mt-3 p-3 rounded-xl border-2 border-[#B45309] bg-orange-50/50 shrink-0"
     >
       <div class="text-xs font-bold uppercase tracking-wider text-[#B45309] mb-2 text-center">
         Daily Challenge
@@ -109,24 +121,6 @@ const handleShare = async () => {
           {{ copyButtonText }}
         </span>
       </button>
-    </div>
-
-    <!-- Free Play Items -->
-    <div class="space-y-2">
-      <div
-        v-for="(item, idx) in history
-          .slice()
-          .reverse()
-          .filter((i) => i.mode !== 'daily')"
-        :key="idx"
-        class="grid grid-cols-[1fr_auto_auto] gap-3 items-center text-sm p-2 rounded-lg border transition-colors bg-paper-white/50 text-pencil-lead border-pencil-lead/5"
-      >
-        <span class="font-bold truncate">{{ item.country }}</span>
-        <span class="tracking-widest">{{ item.score }}</span>
-        <span class="font-mono font-bold text-pencil-lead/70 w-6 text-right">{{
-          getScore(item)
-        }}</span>
-      </div>
     </div>
   </div>
 </template>

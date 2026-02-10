@@ -220,6 +220,7 @@ export function useGamePlay(options: GamePlayOptions) {
       const resultsGrid = generateEmojiString()
       let shareText: string | undefined
       let dayNumber: number | undefined
+      const gameMode = isDailyChallengeMode.value ? 'daily' : 'free'
 
       if (isDailyChallengeMode.value) {
         dayNumber = dailyChallengeNumber.value || 0
@@ -243,7 +244,7 @@ export function useGamePlay(options: GamePlayOptions) {
         score: resultsGrid,
         numericScore: numericScore,
         date: new Date().toISOString(),
-        mode: isDailyChallengeMode.value ? 'daily' : 'free',
+        mode: gameMode,
       })
 
       // clearState() <-- REMOVED
@@ -275,6 +276,7 @@ export function useGamePlay(options: GamePlayOptions) {
       const resultsGrid = generateEmojiString()
       let shareText: string | undefined
       let dayNumber: number | undefined
+      const gameMode = isDailyChallengeMode.value ? 'daily' : 'free'
 
       if (isDailyChallengeMode.value) {
         dayNumber = dailyChallengeNumber.value || 0
@@ -298,7 +300,7 @@ export function useGamePlay(options: GamePlayOptions) {
         score: resultsGrid,
         numericScore: numericScore, // 0 for a loss
         date: new Date().toISOString(),
-        mode: isDailyChallengeMode.value ? 'daily' : 'free',
+        mode: gameMode,
       })
 
       // clearState() <-- REMOVED
