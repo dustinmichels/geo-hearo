@@ -94,9 +94,10 @@ const isPanelFullHeight = computed(() => {
 })
 
 const overlayOpacity = computed(() => {
-  const min = anchors[0]
-  const max = anchors[1]
-  const current = panelHeight.value
+  const isListening = gameStage.value === 'listening'
+  const min = isListening ? resultsAnchors[0] : anchors[0]
+  const max = isListening ? resultsAnchors[1] : anchors[1]
+  const current = isListening ? resultsPanelHeight.value : panelHeight.value
 
   if (
     typeof min === 'undefined' ||

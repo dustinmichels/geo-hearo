@@ -6,6 +6,7 @@ import {
   Loader2,
   Map as MapIcon,
   RefreshCw,
+  ZoomIn,
   ZoomOut,
 } from 'lucide-vue-next'
 import maplibregl, { type SkySpecification } from 'maplibre-gl'
@@ -736,9 +737,10 @@ onUnmounted(() => {
       <button
         @click="resetView"
         class="p-2 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm"
-        title="Zoom out"
+        :title="gameStage === 'listening' ? 'Zoom to stations' : 'Zoom out'"
       >
-        <ZoomOut class="w-5 h-5" />
+        <ZoomIn v-if="gameStage === 'listening'" class="w-5 h-5" />
+        <ZoomOut v-else class="w-5 h-5" />
       </button>
     </div>
   </div>
