@@ -180,7 +180,6 @@ const activeStation = computed(() => {
           :is-playing="isPlaying"
           :current-station="currentStation"
           :station-url="currentStationUrl"
-          :compact="true"
           @play-pause="handlePlayPause"
           @previous="handlePrevious"
           @next="handleNext"
@@ -256,6 +255,7 @@ const activeStation = computed(() => {
       :results-grid="modalConfig.resultsGrid"
       :secret-country="modalConfig.secretCountry"
       :daily-challenge-number="modalConfig.dailyChallengeNumber"
+      :numeric-score="modalConfig.numericScore"
       @confirm="handleModalConfirm"
       @close="handleModalClose"
     />

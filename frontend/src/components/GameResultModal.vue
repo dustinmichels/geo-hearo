@@ -10,6 +10,7 @@ const props = defineProps<{
   shareText?: string
   resultsGrid?: string
   dailyChallengeNumber?: number
+  numericScore?: number
 }>()
 
 const emit = defineEmits<{
@@ -49,44 +50,50 @@ const handleShare = async () => {
 
       <!-- Modal Card -->
       <div
-        class="relative bg-paper-white w-full max-w-sm max-h-[85vh] overflow-y-auto rounded-[2rem] border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] p-8 text-center animate-bounce-in"
+        class="relative bg-paper-white w-full max-w-sm max-h-[85vh] overflow-y-auto rounded-[2rem] border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] p-6 text-center animate-bounce-in"
       >
         <!-- Close (X) Button -->
         <button
           @click="emit('close')"
-          class="absolute top-4 right-4 p-2 text-pencil-lead/50 hover:text-pencil-lead transition-colors"
+          class="absolute top-3 right-3 p-1.5 text-pencil-lead/50 hover:text-pencil-lead transition-colors"
         >
-          <X class="w-6 h-6" />
+          <X class="w-5 h-5" />
         </button>
 
-        <!-- Icon/Emoji -->
-        <div class="text-6xl mb-4">
-          {{ isWin ? '🎉' : '🤔' }}
+        <!-- Icon/Emoji + Header -->
+        <div class="mb-3">
+          <span class="text-5xl">{{ isWin ? '🎉' : '🤔' }}</span>
+          <h2
+            class="text-2xl font-heading mt-2 tracking-wide"
+            :class="isWin ? 'text-mint-shake' : 'text-berry-oops'"
+          >
+            {{ isWin ? 'Nice work!' : 'Game Over!' }}
+          </h2>
         </div>
 
-        <!-- Header -->
-        <h2
-          class="text-3xl font-heading mb-4 tracking-wide"
-          :class="isWin ? 'text-mint-shake' : 'text-berry-oops'"
-        >
-          {{ isWin ? 'Nice work!' : 'Game Over!' }}
-        </h2>
-
         <!-- Secret Country -->
-        <p class="text-lg text-pencil-lead/80 mb-6 leading-relaxed">
+        <p class="text-base text-pencil-lead/80 mb-4 leading-relaxed">
           The country was:
           <strong class="text-pencil-lead font-bold">{{
             secretCountry || 'Unknown'
           }}</strong>
         </p>
 
-        <!-- Emoji Grid -->
-        <div v-if="resultsGrid" class="mb-6 rounded-xl p-4 border-2 border-pencil-lead/10">
+        <!-- Emoji Grid + Score -->
+        <div v-if="resultsGrid" class="mb-4 rounded-xl p-3 border-2 border-pencil-lead/10">
           <div
-            class="font-mono text-2xl tracking-widest leading-relaxed whitespace-pre font-bold text-center"
-            :class="{ 'mb-3': dailyChallengeNumber && shareText }"
+            class="flex items-center justify-center gap-3"
+            :class="{ 'mb-2.5': dailyChallengeNumber && shareText }"
           >
-            {{ resultsGrid }}
+            <span class="font-mono text-2xl tracking-widest leading-relaxed whitespace-pre font-bold">
+              {{ resultsGrid }}
+            </span>
+            <span
+              v-if="numericScore != null"
+              class="text-lg font-heading text-pencil-lead/70"
+            >
+              {{ numericScore.toFixed(1) }}/10
+            </span>
           </div>
 
           <!-- Share Button (daily challenge only) -->
@@ -107,14 +114,14 @@ const handleShare = async () => {
         </div>
 
         <!-- Country Details -->
-        <CountryDetails v-if="secretCountry" :country-name="secretCountry" :show-name="false" class="mb-6 text-left" />
+        <CountryDetails v-if="secretCountry" :country-name="secretCountry" :show-name="false" class="mb-4 text-left" />
 
         <!-- Close Button -->
         <button
           @click="emit('close')"
-          class="w-full btn-pressable bg-yuzu-yellow h-[56px] rounded-xl font-heading text-xl text-pencil-lead uppercase tracking-wider border-2 border-pencil-lead shadow-[4px_4px_0_0_#334155] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all flex items-center justify-center gap-2"
+          class="w-full btn-pressable bg-yuzu-yellow h-[48px] rounded-xl font-heading text-lg text-pencil-lead uppercase tracking-wider border-2 border-pencil-lead shadow-[4px_4px_0_0_#334155] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all flex items-center justify-center gap-2"
         >
-          See the stations <ArrowRight class="w-6 h-6" />
+          See the stations <ArrowRight class="w-5 h-5" />
         </button>
       </div>
     </div>

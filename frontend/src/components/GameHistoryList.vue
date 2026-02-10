@@ -94,7 +94,8 @@ const handleShare = async () => {
     <!-- Daily Challenge Card (pinned to bottom) -->
     <div
       v-if="dailyItem"
-      class="mt-3 p-3 rounded-xl border-2 border-[#B45309] bg-orange-50/50 shrink-0"
+      class="mt-3 p-3 rounded-xl border-2 border-[#B45309] bg-orange-50/50 shrink-0 cursor-pointer hover:bg-orange-50 transition-colors"
+      @click="handleShare"
     >
       <div class="text-xs font-bold uppercase tracking-wider text-[#B45309] mb-2 text-center">
         Daily Challenge
@@ -108,9 +109,8 @@ const handleShare = async () => {
           getScore(dailyItem)
         }}</span>
       </div>
-      <button
-        @click="handleShare"
-        class="mt-2 w-full flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-[#B45309]/60 hover:text-[#B45309] transition-colors cursor-pointer"
+      <div
+        class="mt-2 w-full flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-[#B45309]/60 transition-colors"
       >
         <Check
           v-if="copyButtonText === 'Copied!'"
@@ -120,7 +120,7 @@ const handleShare = async () => {
         <span :class="{ 'text-mint-shake': copyButtonText === 'Copied!' }">
           {{ copyButtonText }}
         </span>
-      </button>
+      </div>
     </div>
   </div>
 </template>

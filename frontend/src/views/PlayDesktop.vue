@@ -198,6 +198,7 @@ const activeStation = computed(() => {
       :results-grid="modalConfig.resultsGrid"
       :secret-country="modalConfig.secretCountry"
       :daily-challenge-number="modalConfig.dailyChallengeNumber"
+      :numeric-score="modalConfig.numericScore"
       @confirm="handleModalConfirm"
       @close="handleModalClose"
     />

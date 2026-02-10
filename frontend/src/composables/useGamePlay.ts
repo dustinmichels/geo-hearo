@@ -77,6 +77,7 @@ export function useGamePlay(options: GamePlayOptions) {
     resultsGrid: undefined as string | undefined,
     secretCountry: undefined as string | undefined,
     dailyChallengeNumber: undefined as number | undefined,
+    numericScore: undefined as number | undefined,
   })
 
   // State
@@ -228,16 +229,17 @@ export function useGamePlay(options: GamePlayOptions) {
         shareText = generateShareText(dayNumber)
       }
 
+      const attempts = getScoreLevels()
+      const numericScore = parseFloat(calculateScore(attempts))
+
       modalConfig.value = {
         isWin: true,
         shareText,
         resultsGrid,
         secretCountry: secretCountry.value,
         dailyChallengeNumber: dayNumber,
+        numericScore,
       }
-
-      const attempts = getScoreLevels()
-      const numericScore = parseFloat(calculateScore(attempts))
 
       addToHistory({
         country: secretCountry.value || 'Unknown',
@@ -284,16 +286,17 @@ export function useGamePlay(options: GamePlayOptions) {
         shareText = generateShareText(dayNumber)
       }
 
+      const attempts = getScoreLevels()
+      const numericScore = parseFloat(calculateScore(attempts))
+
       modalConfig.value = {
         isWin: false,
         shareText,
         resultsGrid,
         secretCountry: secretCountry.value,
         dailyChallengeNumber: dayNumber,
+        numericScore,
       }
-
-      const attempts = getScoreLevels()
-      const numericScore = parseFloat(calculateScore(attempts))
 
       addToHistory({
         country: secretCountry.value || 'Unknown',
@@ -382,6 +385,7 @@ export function useGamePlay(options: GamePlayOptions) {
           resultsGrid: undefined,
           secretCountry: secretCountry.value,
           dailyChallengeNumber: undefined,
+          numericScore: undefined,
         }
         store.setGameStage(debugStage)
       } else if (isDailyChallengeMode.value) {
@@ -402,6 +406,7 @@ export function useGamePlay(options: GamePlayOptions) {
               resultsGrid: undefined,
               secretCountry: secretCountry.value,
               dailyChallengeNumber: dailyChallengeNumber.value,
+              numericScore: undefined,
             }
           }
         } else {
@@ -425,6 +430,7 @@ export function useGamePlay(options: GamePlayOptions) {
               resultsGrid: undefined,
               secretCountry: secretCountry.value,
               dailyChallengeNumber: undefined,
+              numericScore: undefined,
             }
           }
         } else {
@@ -479,6 +485,7 @@ export function useGamePlay(options: GamePlayOptions) {
             resultsGrid: undefined,
             secretCountry: secretCountry.value,
             dailyChallengeNumber: undefined,
+            numericScore: undefined,
           }
           store.setGameStage(debugStage)
         }

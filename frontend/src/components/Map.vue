@@ -312,6 +312,17 @@ const initMap = () => {
       if (props.stations && props.stations.length > 0) {
         updateStationsLayer()
       }
+
+      // If restored into a non-guessing stage, apply tilt
+      if (gameStage.value !== 'guessing') {
+        stopSpinning()
+        map.value.easeTo({
+          center: [0, 20],
+          zoom: 1.5,
+          pitch: 50,
+          duration: 800,
+        })
+      }
     })
 
     map.value.on('error', (e) => {

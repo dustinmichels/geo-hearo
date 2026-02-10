@@ -7,17 +7,11 @@ import { playRadioStatic } from '../utils/audio'
 
 const store = useGameStore()
 
-const props = withDefaults(
-  defineProps<{
-    isPlaying: boolean
-    currentStation: number
-    stationUrl?: string
-    compact?: boolean
-  }>(),
-  {
-    compact: false,
-  }
-)
+const props = defineProps<{
+  isPlaying: boolean
+  currentStation: number
+  stationUrl?: string
+}>()
 
 const emit = defineEmits<{
   (e: 'playPause'): void
@@ -154,8 +148,7 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="bg-paper-white rounded-2xl border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] w-full max-w-sm mx-auto relative"
-    :class="compact ? 'p-3' : 'p-6'"
+    class="bg-paper-white rounded-2xl border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] w-full max-w-sm mx-auto relative p-3"
   >
     <!-- Live Indicator -->
     <div
@@ -178,8 +171,7 @@ onUnmounted(() => {
 
     <!-- Controls -->
     <div
-      class="flex items-center justify-center"
-      :class="compact ? 'gap-4 mb-3' : 'gap-6 mb-6'"
+      class="flex items-center justify-center gap-4 mb-3"
     >
       <div class="relative">
         <div
@@ -192,13 +184,11 @@ onUnmounted(() => {
         <van-button
           id="tour-skip-back-btn"
           plain
-          class="relative z-10 !p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead"
-          :class="compact ? '!h-10 !w-10' : '!h-12 !w-12'"
+          class="relative z-10 !p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead !h-10 !w-10"
           @click="onPrevious"
         >
           <SkipBack
-            class="text-pencil-lead"
-            :class="compact ? 'h-5 w-5' : 'h-6 w-6'"
+            class="text-pencil-lead h-5 w-5"
           />
         </van-button>
       </div>
@@ -212,24 +202,20 @@ onUnmounted(() => {
           id="tour-play-btn"
           type="primary"
           round
-          class="relative z-10 !p-0 !border-3 !border-pencil-lead shadow-[0_4px_0_0_#334155] active:translate-y-1 active:shadow-none transition-all duration-100 bg-gumball-blue"
-          :class="compact ? '!h-14 !w-14' : '!h-16 !w-16'"
+          class="relative z-10 !p-0 !border-3 !border-pencil-lead shadow-[0_4px_0_0_#334155] active:translate-y-1 active:shadow-none transition-all duration-100 bg-gumball-blue !h-14 !w-14"
           @click="emit('playPause')"
         >
           <Loader2
             v-if="isLoading"
-            class="animate-spin text-white"
-            :class="compact ? 'h-6 w-6' : 'h-8 w-8'"
+            class="animate-spin text-white h-6 w-6"
           />
           <Pause
             v-else-if="isPlaying"
-            class="text-white fill-current"
-            :class="compact ? 'h-6 w-6' : 'h-8 w-8'"
+            class="text-white fill-current h-6 w-6"
           />
           <Play
             v-else
-            class="ml-1 text-white fill-current"
-            :class="compact ? 'h-6 w-6' : 'h-8 w-8'"
+            class="ml-1 text-white fill-current h-6 w-6"
           />
         </van-button>
       </div>
@@ -245,13 +231,11 @@ onUnmounted(() => {
         <van-button
           id="tour-skip-forward-btn"
           plain
-          class="relative z-10 !p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead"
-          :class="compact ? '!h-10 !w-10' : '!h-12 !w-12'"
+          class="relative z-10 !p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead !h-10 !w-10"
           @click="onNext"
         >
           <SkipForward
-            class="text-pencil-lead"
-            :class="compact ? 'h-5 w-5' : 'h-6 w-6'"
+            class="text-pencil-lead h-5 w-5"
           />
         </van-button>
       </div>
