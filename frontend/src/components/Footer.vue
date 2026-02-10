@@ -19,6 +19,12 @@ const { canInstall, installApp } = usePwaInstall()
     >
       About
     </RouterLink>
+    <RouterLink
+      to="/privacy"
+      class="font-heading text-eraser-grey hover:text-bubblegum-pop transition-colors"
+    >
+      Privacy
+    </RouterLink>
     <button
       v-if="canInstall"
       class="font-heading text-eraser-grey hover:text-bubblegum-pop transition-colors cursor-pointer"
