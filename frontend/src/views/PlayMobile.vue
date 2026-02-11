@@ -29,7 +29,7 @@ const panelHeight = ref(anchors[0])
 // Results floating panel setup
 const resultsAnchors = [
   160, // Collapsed: station details + new game button visible
-  Math.round(window.innerHeight * 0.7), // Expanded: country details visible
+  Math.round(window.innerHeight * 0.9), // Expanded: country details visible
 ]
 const resultsPanelHeight = ref(resultsAnchors[0])
 
@@ -84,6 +84,10 @@ const handleArrowClick = () => {
   panelHeight.value = anchors[0]
 }
 
+const handleResultsArrowClick = () => {
+  resultsPanelHeight.value = resultsAnchors[0]
+}
+
 const isPanelFullHeight = computed(() => {
   const fullHeight = anchors[1]
   if (
@@ -92,6 +96,16 @@ const isPanelFullHeight = computed(() => {
   )
     return false
   return panelHeight.value >= fullHeight - 10
+})
+
+const isResultsPanelFullHeight = computed(() => {
+  const fullHeight = resultsAnchors[1]
+  if (
+    typeof fullHeight === 'undefined' ||
+    typeof resultsPanelHeight.value === 'undefined'
+  )
+    return false
+  return resultsPanelHeight.value >= fullHeight - 10
 })
 
 const overlayOpacity = computed(() => {
@@ -140,8 +154,8 @@ const dailyItem = computed(() => {
     </div>
 
     <!-- Animated Arrows Hint -->
-    <div class="relative z-[60]" v-show="isPanelFullHeight">
-      <AnimatedClose class="!top-16" @click="handleArrowClick" />
+    <div class="relative z-[60]" v-show="isPanelFullHeight || isResultsPanelFullHeight">
+      <AnimatedClose class="!top-16" @click="isPanelFullHeight ? handleArrowClick() : handleResultsArrowClick()" />
     </div>
 
     <!-- Fixed content area -->
