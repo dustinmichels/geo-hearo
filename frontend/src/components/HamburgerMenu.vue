@@ -175,7 +175,7 @@ const closeMenu = () => {
               <div
                 class="absolute inset-0 flex items-center justify-center text-pencil-lead/50 font-heading text-sm"
               >
-                Become the GeoHearo
+                Be the GeoHearo 🦸
               </div>
             </div>
           </div>

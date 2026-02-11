@@ -3,7 +3,7 @@
     class="min-h-screen w-screen no-scroll-container flex flex-col items-center justify-center p-6 md:p-12 overflow-x-hidden relative"
   >
     <!-- Hamburger Menu (Mobile Only) -->
-    <div class="fixed top-4 left-4 z-[9999] lg:hidden">
+    <div class="fixed top-4 left-4 z-[9999]">
       <HamburgerMenu />
     </div>
 
@@ -138,22 +138,8 @@
     </main>
 
     <!-- Footer -->
-    <div
-      class="absolute bottom-4 w-full text-center text-eraser-grey text-sm font-heading z-20 pointer-events-auto"
-    >
-      <router-link
-        :to="{ name: 'About' }"
-        class="hover:text-bubblegum-pop transition-colors underline decoration-2 decoration-bubblegum-pop/30 underline-offset-2"
-        >About</router-link
-      >
-      &bull; Created by
-      <a
-        href="https://dustinmichels.com/"
-        target="_blank"
-        class="hover:text-bubblegum-pop transition-colors underline decoration-2 decoration-bubblegum-pop/30 underline-offset-2"
-        >Dustin Michels</a
-      >
-      © 2026
+    <div class="absolute bottom-2 w-full z-20 pointer-events-auto">
+      <Footer class="!py-0 text-sm" />
     </div>
   </div>
 </template>
@@ -161,6 +147,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import Footer from '../components/Footer.vue'
 import HamburgerMenu from '../components/HamburgerMenu.vue'
 
 const router = useRouter()

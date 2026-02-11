@@ -3,7 +3,7 @@
     class="min-h-screen w-screen flex flex-col items-center justify-center p-6 md:p-12 overflow-x-hidden relative"
   >
     <!-- Hamburger Menu (Mobile Only) -->
-    <div class="fixed top-4 left-4 z-[9999] lg:hidden">
+    <div class="fixed top-4 left-4 z-[9999]">
       <HamburgerMenu />
     </div>
     <!-- Decorative Background Shapes -->

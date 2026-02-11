@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import HamburgerMenu from '../components/HamburgerMenu.vue'
 import { RotateCcw } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import GameHistoryList from '../components/GameHistoryList.vue'
@@ -60,6 +61,11 @@ const activeStation = computed(() => {
   <div
     class="h-screen w-full overflow-hidden bg-cloud-white relative text-pencil-lead font-body px-6 pt-3 pb-2 flex flex-col gap-3"
   >
+    <!-- Hamburger Menu -->
+    <div class="fixed top-4 left-4 z-[9999]">
+      <HamburgerMenu />
+    </div>
+
     <!-- Decorative Background Shapes -->
     <div
       class="animate-blob1 absolute top-10 right-[-5%] w-64 h-64 bg-bubblegum-pop/5 rounded-full blur-3xl pointer-events-none"
@@ -73,7 +79,7 @@ const activeStation = computed(() => {
       <!-- Left: Map Area -->
       <div
         id="tour-map-container"
-        class="flex-1 bg-sea-blue/10 rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] overflow-hidden relative z-10"
+        class="flex-1 ml-12 bg-sea-blue/10 rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] overflow-hidden relative z-10"
       >
         <Map
           ref="mapRef"

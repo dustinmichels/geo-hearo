@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { usePwaInstall } from '@/composables/usePwaInstall'
 
-const version = import.meta.env.VITE_GIT_HASH || 'dev'
 const { canInstall, installApp } = usePwaInstall()
 </script>
 
@@ -25,6 +24,17 @@ const { canInstall, installApp } = usePwaInstall()
     >
       Privacy
     </RouterLink>
+    <span class="text-eraser-grey">&bull;</span>
+    <span class="font-heading text-eraser-grey">
+      Created by
+      <a
+        href="https://dustinmichels.com/"
+        target="_blank"
+        class="hover:text-bubblegum-pop transition-colors underline decoration-1 decoration-bubblegum-pop/30 underline-offset-2"
+        >Dustin Michels</a
+      >
+      © 2026
+    </span>
     <button
       v-if="canInstall"
       class="font-heading text-eraser-grey hover:text-bubblegum-pop transition-colors cursor-pointer"
@@ -32,6 +42,5 @@ const { canInstall, installApp } = usePwaInstall()
     >
       Install App
     </button>
-    <div class="text-[10px] text-eraser-grey">Hash #{{ version }}</div>
   </div>
 </template>
