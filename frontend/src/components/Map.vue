@@ -178,6 +178,10 @@ const setTilesVisibility = (visible: boolean) => {
 
   // Hide base country fill
   setLayerVisibility('countries-fill', !visible)
+  // Ensure fill-opacity is correct (may have been initialized to 0 during session restore)
+  if (map.value?.getLayer('countries-fill')) {
+    map.value.setPaintProperty('countries-fill', 'fill-opacity', visible ? 0 : 1)
+  }
 
   // Hide global country borders
   setLayerVisibility('countries-border', !visible)
@@ -309,6 +313,7 @@ const initMap = () => {
           loaded.value = true
           if (loadingTimeout) clearTimeout(loadingTimeout)
           map.value?.off('sourcedata', onSourceData)
+          map.value?.triggerRepaint()
         }
       }
       map.value.on('sourcedata', onSourceData)
