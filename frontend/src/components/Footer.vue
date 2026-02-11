@@ -6,7 +6,7 @@ const { canInstall, installApp } = usePwaInstall()
 </script>
 
 <template>
-  <div class="mt-auto py-4 flex items-center justify-center gap-4">
+  <div class="mt-auto py-4 flex items-center justify-center gap-4 text-[11px] sm:text-xs">
     <RouterLink
       to="/"
       class="font-heading text-eraser-grey hover:text-bubblegum-pop transition-colors"
@@ -27,7 +27,6 @@ const { canInstall, installApp } = usePwaInstall()
     </RouterLink>
     <span class="text-eraser-grey">&bull;</span>
     <span class="font-heading text-eraser-grey">
-      Created by
       <a
         href="https://dustinmichels.com/"
         target="_blank"
