@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { ArrowRight, X } from 'lucide-vue-next'
-import { computed } from 'vue'
 import type { GameHistoryItem } from '../types/geo'
-import DailyChallengeCard from './DailyChallengeCard.vue'
 import GameHistoryList from './GameHistoryList.vue'
 
 const props = defineProps<{
@@ -17,12 +15,6 @@ const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
-const latestItem = computed(() => {
-  if (!props.history || props.history.length === 0) return undefined
-  return props.history[props.history.length - 1]
-})
-
-const isDaily = computed(() => latestItem.value?.mode === 'daily')
 </script>
 
 <template>
@@ -68,16 +60,10 @@ const isDaily = computed(() => latestItem.value?.mode === 'daily')
           </p>
         </div>
 
-        <!-- Daily Challenge Card (if current game is daily) -->
-        <div v-if="isDaily && latestItem" class="shrink-0 px-6 pt-4">
-          <DailyChallengeCard :item="latestItem" />
-        </div>
-
-        <!-- Game History (if current game is free play) -->
+        <!-- Game History -->
         <GameHistoryList
-          v-else-if="history && history.length > 0"
+          v-if="history && history.length > 0"
           :history="history"
-          hide-daily-card
           class="flex-1 min-h-0 px-6"
         />
 

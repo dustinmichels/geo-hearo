@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { GameHistoryItem } from '../types/geo'
-import DailyChallengeCard from './DailyChallengeCard.vue'
-
 const props = defineProps<{
   history?: GameHistoryItem[]
-  hideDailyCard?: boolean
 }>()
 
 const getScore = (item: GameHistoryItem): number => {
@@ -28,9 +25,6 @@ const averageScore = computed(() => {
   return (total / props.history.length).toFixed(1)
 })
 
-const dailyItem = computed(() => {
-  return props.history?.find((item) => item.mode === 'daily')
-})
 </script>
 
 <template>
@@ -49,8 +43,7 @@ const dailyItem = computed(() => {
       <div
         v-for="(item, idx) in history
           .slice()
-          .reverse()
-          .filter((i) => i.mode !== 'daily')"
+          .reverse()"
         :key="idx"
         class="grid grid-cols-[1fr_auto_auto] gap-3 items-center text-sm p-2 rounded-lg border-2 transition-colors bg-paper-white/50 text-pencil-lead"
         :class="idx === 0 ? (item.score.includes('🟢') ? 'border-mint-shake' : 'border-berry-oops') : 'border-pencil-lead/5'"
@@ -63,7 +56,5 @@ const dailyItem = computed(() => {
       </div>
     </div>
 
-    <!-- Daily Challenge Card (pinned to bottom) -->
-    <DailyChallengeCard v-if="dailyItem && !hideDailyCard" :item="dailyItem" class="mt-3 shrink-0" />
   </div>
 </template>
