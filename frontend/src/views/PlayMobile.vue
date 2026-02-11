@@ -62,6 +62,7 @@ const {
   onNewGame: () => {
     mapRef.value?.resetView()
     panelHeight.value = anchors[0]
+    resultsPanelHeight.value = resultsAnchors[0]
   },
   onModalClose: () => {
     mapRef.value?.zoomToStations()
