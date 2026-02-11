@@ -111,7 +111,7 @@ def main():
             try:
                 # Search Pexels
                 params = {
-                    "query": f"{country_name} famous classic scenic landscape",
+                    "query": f"{country_name} famous scenic landscape",
                     "per_page": 1,
                     "orientation": "landscape",
                 }
