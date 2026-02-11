@@ -2,7 +2,8 @@
 import HamburgerMenu from '../components/HamburgerMenu.vue'
 import { RotateCcw } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
-import GameHistoryList from '../components/GameHistoryList.vue'
+import CountryDetails from '../components/CountryDetails.vue'
+import DailyChallengeCard from '../components/DailyChallengeCard.vue'
 import Footer from '../components/Footer.vue'
 import GameResultModal from '../components/GameResultModal.vue'
 import GuessPanel from '../components/GuessPanel.vue'
@@ -54,6 +55,10 @@ const {
 const activeStation = computed(() => {
   if (!currentStations.value || !currentStations.value.length) return undefined
   return currentStations.value[currentStation.value - 1]
+})
+
+const dailyItem = computed(() => {
+  return gameHistory.value?.find((item) => item.mode === 'daily')
 })
 </script>
 
@@ -168,8 +173,11 @@ const activeStation = computed(() => {
             </button>
           </div>
 
-          <!-- Game History -->
-          <GameHistoryList :history="gameHistory" />
+          <!-- Country Details -->
+          <CountryDetails v-if="secretCountry" :country-name="secretCountry" class="text-left" />
+
+          <!-- Daily Challenge Card -->
+          <DailyChallengeCard v-if="dailyItem" :item="dailyItem" />
         </div>
 
         <!-- Guess Panel Card -->
@@ -196,11 +204,8 @@ const activeStation = computed(() => {
     <GameResultModal
       :show="showModal"
       :is-win="modalConfig.isWin"
-      :share-text="modalConfig.shareText"
-      :results-grid="modalConfig.resultsGrid"
       :secret-country="modalConfig.secretCountry"
-      :daily-challenge-number="modalConfig.dailyChallengeNumber"
-      :numeric-score="modalConfig.numericScore"
+      :history="gameHistory"
       @confirm="handleModalConfirm"
       @close="handleModalClose"
     />

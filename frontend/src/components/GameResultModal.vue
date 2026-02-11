@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import { ArrowRight, Check, Share, X } from 'lucide-vue-next'
-import { ref } from 'vue'
-import CountryDetails from './CountryDetails.vue'
+import { ArrowRight, X } from 'lucide-vue-next'
+import { computed } from 'vue'
+import type { GameHistoryItem } from '../types/geo'
+import DailyChallengeCard from './DailyChallengeCard.vue'
+import GameHistoryList from './GameHistoryList.vue'
 
 const props = defineProps<{
   show: boolean
   isWin?: boolean
   secretCountry?: string
-  shareText?: string
-  resultsGrid?: string
-  dailyChallengeNumber?: number
-  numericScore?: number
+  history?: GameHistoryItem[]
 }>()
 
 const emit = defineEmits<{
@@ -18,22 +17,12 @@ const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
-const copyButtonText = ref('Click to copy your shareable score')
+const latestItem = computed(() => {
+  if (!props.history || props.history.length === 0) return undefined
+  return props.history[props.history.length - 1]
+})
 
-const handleShare = async () => {
-  if (props.shareText) {
-    try {
-      await navigator.clipboard.writeText(props.shareText)
-      copyButtonText.value = 'Copied!'
-      setTimeout(() => {
-        copyButtonText.value = 'Click to copy your shareable score'
-      }, 2000)
-    } catch (err) {
-      console.error('Failed to copy text: ', err)
-      copyButtonText.value = 'Failed'
-    }
-  }
-}
+const isDaily = computed(() => latestItem.value?.mode === 'daily')
 </script>
 
 <template>
@@ -60,10 +49,9 @@ const handleShare = async () => {
           <X class="w-5 h-5" />
         </button>
 
-        <!-- Scrollable content -->
-        <div class="overflow-y-auto p-6 pb-0 min-h-0">
-          <!-- Icon/Emoji + Header -->
-          <div class="mb-3">
+        <!-- Fixed top: Country name -->
+        <div class="shrink-0 px-6 pt-6">
+          <div class="mb-2">
             <span class="text-5xl">{{ isWin ? '🎉' : '🤔' }}</span>
             <h2
               class="text-2xl font-heading mt-2 tracking-wide"
@@ -72,52 +60,26 @@ const handleShare = async () => {
               {{ isWin ? 'Nice work!' : 'Game Over!' }}
             </h2>
           </div>
-
-          <!-- Secret Country -->
-          <p class="text-base text-pencil-lead/80 mb-4 leading-relaxed">
+          <p class="text-base text-pencil-lead/80 leading-relaxed">
             The country was:
             <strong class="text-pencil-lead font-bold">{{
               secretCountry || 'Unknown'
             }}</strong>
           </p>
-
-          <!-- Emoji Grid + Score -->
-          <div v-if="resultsGrid" class="mb-4 rounded-xl p-3 border-2 border-pencil-lead/10">
-            <div
-              class="flex items-center justify-center gap-3"
-              :class="{ 'mb-2.5': dailyChallengeNumber && shareText }"
-            >
-              <span class="font-mono text-2xl tracking-widest leading-relaxed whitespace-pre font-bold">
-                {{ resultsGrid }}
-              </span>
-              <span
-                v-if="numericScore != null"
-                class="text-lg font-heading text-pencil-lead/70"
-              >
-                {{ numericScore.toFixed(1) }}/10
-              </span>
-            </div>
-
-            <!-- Share Button (daily challenge only) -->
-            <button
-              v-if="dailyChallengeNumber && shareText"
-              @click="handleShare"
-              class="w-full flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-pencil-lead/60 hover:text-pencil-lead transition-colors cursor-pointer"
-            >
-              <Check
-                v-if="copyButtonText === 'Copied!'"
-                class="w-5 h-5 text-mint-shake"
-              />
-              <Share v-else class="w-5 h-5" />
-              <span :class="{ 'text-mint-shake': copyButtonText === 'Copied!' }">
-                {{ copyButtonText }}
-              </span>
-            </button>
-          </div>
-
-          <!-- Country Details -->
-          <CountryDetails v-if="secretCountry" :country-name="secretCountry" :show-name="false" class="mb-4 text-left" />
         </div>
+
+        <!-- Daily Challenge Card (if current game is daily) -->
+        <div v-if="isDaily && latestItem" class="shrink-0 px-6 pt-4">
+          <DailyChallengeCard :item="latestItem" />
+        </div>
+
+        <!-- Game History (if current game is free play) -->
+        <GameHistoryList
+          v-else-if="history && history.length > 0"
+          :history="history"
+          hide-daily-card
+          class="flex-1 min-h-0 px-6"
+        />
 
         <!-- Fixed bottom button -->
         <div class="shrink-0 p-6 pt-3">

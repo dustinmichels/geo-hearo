@@ -81,11 +81,15 @@
         </button>
       </div>
     </main>
+
+    <!-- Footer -->
+    <Footer class="text-sm" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import Footer from '../components/Footer.vue'
 import HamburgerMenu from '../components/HamburgerMenu.vue'
 
 const router = useRouter()
@@ -120,16 +124,6 @@ const sections = [
       'Stations can be weird! It\'s not always a bug. Sometimes you get a Lebanese station in Germany, because there really is a Lebanese station in Germany. The world is complicated! The "show stations" feature is provided so you can find out more about the stations you hear.',
       'Sometimes a radio stream gives you commercials localized to your location, which is confusing and unfortunate.',
       'Sometimes a station is just being weird, which is why I give you five to choose from!',
-    ],
-  },
-  {
-    emoji: '🤨',
-    title: 'Technical Notes',
-    content: [
-      'I have streaming links for over 30,000 stations. They are stored in a jsonl file, where each line is a fixed number of bytes.',
-      'I have an index file that lists the countries available and the locations of their stations in the mega jsonl file.',
-      'When a new round begins, I randomly select a country and five stations, and load the relevant lines from the jsonl file using ranged Fetch requests.',
-      'For the daily challenge, I use the date as a random seed so all players get the same mystery country.',
     ],
   },
 ]

@@ -7,14 +7,21 @@ import json
 import os
 import re
 
-import geopandas as gpd
-import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-from rich.console import Console
-from rich.table import Table
 
-console = Console()
+# Note: Keeping the console/table logic for your reporting preference
+try:
+    from rich.console import Console
+    from rich.table import Table
+
+    console = Console()
+except ImportError:
+    # Fallback if rich is not installed
+    class MockConsole:
+        print = print
+
+    console = MockConsole()
 
 # ==============================================================================
 # CONFIGURATION
@@ -25,179 +32,172 @@ WPR_URL = "https://worldpopulationreview.com/country-rankings/languages-by-count
 
 
 def clean_string(text):
-    """
-    Cleans strings by removing extra whitespace and common delimiters.
-    """
     if not text:
         return ""
-
-    # Remove extra whitespace and newlines
     text = text.strip().replace("\n", " ").replace("\r", "")
-    # Remove multiple spaces
     text = re.sub(r"\s+", " ", text)
-
     return text
 
 
 def main():
-    # 1. Scrape World Population Review Data
     console.print(f"[bold blue]Scraping World Population Review:[/bold blue] {WPR_URL}")
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
     }
 
+    scraped_data = []
+
     try:
         response = requests.get(WPR_URL, headers=headers)
         response.raise_for_status()
-
         soup = BeautifulSoup(response.text, "html.parser")
 
-        # WPR usually uses a standard table inside a div with specific classes
         table = soup.find("table")
         if not table:
-            console.print(
-                "[red]Error: Could not find the data table on the page.[/red]"
-            )
+            console.print("[red]Error: Could not find the data table.[/red]")
             return
 
-        # Identify column indices
+        # 1. Precise Column Mapping
         thead = table.find("thead")
-        if not thead:
-            console.print("[red]Error: Table has no header (thead).[/red]")
-            return
-
         header_cols = [th.get_text(strip=True).lower() for th in thead.find_all("th")]
 
-        # WPR Column mapping
-        idx_map = {"country": -1, "official": -1}
+        # We need to map specifically based on the WPR headers
+        idx_map = {"country": -1, "official": -1, "minority": -1, "other": -1}
 
         for i, h in enumerate(header_cols):
             if "country" in h:
                 idx_map["country"] = i
-            elif "official" in h or "language" in h:
+            elif "official" in h or "national" in h:
                 idx_map["official"] = i
+            elif "minority" in h:
+                idx_map["minority"] = i
+            elif "other" in h or "widely spoken" in h:
+                idx_map["other"] = i
 
-        if idx_map["country"] == -1 or idx_map["official"] == -1:
-            console.print(
-                f"[red]Error: Could not map columns. Found: {header_cols}[/red]"
-            )
-            return
-
-        scraped_data = []
-        # Find the tbody and iterate rows
+        # 2. Iterate Rows
         tbody = table.find("tbody")
         rows = tbody.find_all("tr") if tbody else table.find_all("tr")[1:]
 
         for row in rows:
             tds = row.find_all("td")
-            if len(tds) <= max(idx_map.values()):
+            if len(tds) <= idx_map["country"]:
                 continue
 
-            country_raw = tds[idx_map["country"]].get_text(strip=True)
-            official_raw = tds[idx_map["official"]].get_text(strip=True)
+            # Extract Country Name (handling the <a> tag inside)
+            country_td = tds[idx_map["country"]]
+            country_link = country_td.find("a")
+            country_raw = (
+                country_link.get_text(strip=True)
+                if country_link
+                else country_td.get_text(strip=True)
+            )
 
-            entry = {
-                "country_raw": country_raw,
-                "country_clean": clean_string(country_raw),
-                "official_languages": clean_string(official_raw),
-                "regional_languages": "",  # WPR doesn't consistently provide these in this table
-                "minority_languages": "",  # WPR doesn't consistently provide these in this table
-            }
-            scraped_data.append(entry)
+            # Extract Languages based on mapped indices
+            official = (
+                tds[idx_map["official"]].get_text(strip=True)
+                if idx_map["official"] != -1
+                else ""
+            )
+            minority = (
+                tds[idx_map["minority"]].get_text(strip=True)
+                if idx_map["minority"] != -1
+                else ""
+            )
+            other = (
+                tds[idx_map["other"]].get_text(strip=True)
+                if idx_map["other"] != -1
+                else ""
+            )
+
+            scraped_data.append(
+                {
+                    "country_raw": country_raw,
+                    "country_clean": clean_string(country_raw),
+                    "official_languages": clean_string(official),
+                    "minority_languages": clean_string(minority),
+                    "regional_languages": clean_string(other),
+                }
+            )
 
     except Exception as e:
         console.print(f"[red]Failed to scrape WPR:[/red] {e}")
         return
 
-    # 2. Load Natural Earth Data
-    if not os.path.exists(NE_INPUT):
-        console.print(
-            f"[yellow]Warning: Natural Earth file not found at {NE_INPUT}. Skipping matching logic and saving raw data.[/yellow]"
-        )
-        # Save raw data if GeoJSON is missing
-        os.makedirs(os.path.dirname(OUTPUT), exist_ok=True)
-        with open(OUTPUT, "w", encoding="utf-8") as f:
-            json.dump(scraped_data, f, ensure_ascii=False, indent=2)
-        return
+    # 3. Matching with Natural Earth (GeoPandas)
+    # This section handles the ISO mapping. Note: France usually has ISO_A3 'FRA'.
+    # If your GeoJSON shows '-99', it might be a property of that specific file version.
+    try:
+        import geopandas as gpd
+        import pandas as pd
 
-    console.print(f"[bold blue]Loading Natural Earth data...[/bold blue]")
-    ne = gpd.read_file(NE_INPUT)
+        if os.path.exists(NE_INPUT):
+            console.print(f"[bold blue]Loading Natural Earth data...[/bold blue]")
+            ne = gpd.read_file(NE_INPUT)
 
-    # 3. Matching Logic
-    name_cols = [col for col in ne.columns if "NAME" in col.upper()]
-    lookup = {}
+            # Build lookup
+            lookup = {}
+            for idx, row in ne.iterrows():
+                # Add various name fields to lookup
+                names = [
+                    row.get("ADMIN"),
+                    row.get("NAME"),
+                    row.get("NAME_LONG"),
+                    row.get("BRK_NAME"),
+                ]
+                for name in names:
+                    if name:
+                        lookup[str(name).strip().lower()] = idx
 
-    def populate_lookup(column_name):
-        if column_name not in ne.columns:
-            return
-        for idx, val in ne[column_name].items():
-            if pd.isna(val) or val is None:
-                continue
-            key = str(val).strip().lower()
-            if key not in lookup:
-                lookup[key] = idx
+            matched_data = []
+            for item in scraped_data:
+                key = item["country_clean"].lower()
 
-    populate_lookup("ADMIN")
-    for col in name_cols:
-        populate_lookup(col)
+                # Manual fixes for common discrepancies
+                manual_map = {
+                    "united states": "united states of america",
+                    "dr congo": "democratic republic of the congo",
+                    "ivory coast": "côte d'ivoire",
+                    "czechia": "czech republic",
+                }
+                if key in manual_map:
+                    key = manual_map[key]
 
-    # 4. Perform Matching
-    matched_data = []
-    unmatched_countries = []
+                if key in lookup:
+                    ne_row = ne.iloc[lookup[key]]
+                    # Use ISO_A3, but fallback to ADM0_A3 if ISO is -99
+                    iso = str(ne_row.get("ISO_A3", "N/A"))
+                    if iso == "-99":
+                        iso = str(
+                            ne_row.get("ADM0_A3", "FRA" if key == "france" else "N/A")
+                        )
 
-    for row in scraped_data:
-        lookup_key = row["country_clean"].lower()
+                    matched_data.append(
+                        {
+                            "country": ne_row.get("ADMIN", item["country_clean"]),
+                            "iso_a3": iso,
+                            "official_languages": item["official_languages"],
+                            "minority_languages": item["minority_languages"],
+                            "regional_languages": item["regional_languages"],
+                        }
+                    )
 
-        # Handle common naming mismatches
-        manual_fixes = {
-            "united states": "United States of America",
-            "dr congo": "Democratic Republic of the Congo",
-            "congo": "Republic of the Congo",
-        }
-
-        if lookup_key in manual_fixes:
-            lookup_key = manual_fixes[lookup_key].lower()
-
-        if lookup_key in lookup:
-            ne_idx = lookup[lookup_key]
-            ne_row = ne.iloc[ne_idx]
-
-            ne_admin_name = str(ne_row.get("ADMIN", row["country_clean"]))
-            iso_code = ne_row.get("ISO_A3", "N/A")
-
-            entry = {
-                "country": ne_admin_name,
-                "iso_a3": iso_code,
-                "official_languages": row["official_languages"],
-                "regional_languages": row["regional_languages"],
-                "minority_languages": row["minority_languages"],
-            }
-            matched_data.append(entry)
+            final_output = matched_data
+            console.print(f"[green]Matched {len(matched_data)} countries.[/green]")
         else:
-            unmatched_countries.append(row["country_raw"])
+            final_output = scraped_data
+            console.print(
+                "[yellow]Natural Earth file missing, saving raw scraped data.[/yellow]"
+            )
 
-    # 5. Reporting
-    if unmatched_countries:
-        console.print(
-            f"\n[bold yellow]{len(unmatched_countries)} WPR entries could not be matched:[/bold yellow]"
-        )
-        table_rep = Table(show_header=True, header_style="bold magenta")
-        table_rep.add_column("Dropped Country")
-        for c in unmatched_countries[:10]:
-            table_rep.add_row(c)
-        if len(unmatched_countries) > 10:
-            table_rep.add_row(f"... and {len(unmatched_countries) - 10} more")
-        console.print(table_rep)
+    except ImportError:
+        final_output = scraped_data
+        console.print("[yellow]Geopandas not found, saving raw scraped data.[/yellow]")
 
-    console.print(
-        f"\n[green]Successfully matched {len(matched_data)} countries.[/green]"
-    )
-
-    # 6. Save to JSON
+    # 4. Save to JSON
     os.makedirs(os.path.dirname(OUTPUT), exist_ok=True)
     with open(OUTPUT, "w", encoding="utf-8") as f:
-        json.dump(matched_data, f, ensure_ascii=False, indent=2)
+        json.dump(final_output, f, ensure_ascii=False, indent=2)
 
     console.print(f"[bold green]Data saved to {OUTPUT}[/bold green]")
 

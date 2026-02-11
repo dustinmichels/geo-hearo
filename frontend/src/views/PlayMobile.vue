@@ -2,7 +2,8 @@
 import { FloatingPanel as VanFloatingPanel } from 'vant'
 import { computed, ref, watch } from 'vue'
 import AnimatedClose from '../components/AnimatedClose.vue'
-import GameHistoryList from '../components/GameHistoryList.vue'
+import CountryDetails from '../components/CountryDetails.vue'
+import DailyChallengeCard from '../components/DailyChallengeCard.vue'
 import GameResultModal from '../components/GameResultModal.vue'
 import GuessPanel from '../components/GuessPanel.vue'
 import HamburgerMenu from '../components/HamburgerMenu.vue'
@@ -116,6 +117,10 @@ const activeStation = computed(() => {
   if (!currentStations.value || !currentStations.value.length) return undefined
   return currentStations.value[currentStation.value - 1]
 })
+
+const dailyItem = computed(() => {
+  return gameHistory.value?.find((item) => item.mode === 'daily')
+})
 </script>
 
 <template>
@@ -218,11 +223,16 @@ const activeStation = computed(() => {
       :content-class="'bg-paper-white rounded-t-[24px] border-t-3 border-l-3 border-r-3 border-pencil-lead shadow-[0_-4px_0_0_#334155] flex flex-col'"
       style="z-index: 50"
     >
-      <div class="px-4 pt-2 pb-4">
+      <div class="px-4 pt-2 pb-4 shrink-0">
         <ResultsPanel :station="activeStation" @new-game="handleNewGame" />
       </div>
-      <div class="border-t border-pencil-lead/20 overflow-y-auto">
-        <GameHistoryList :history="gameHistory" />
+      <div
+        class="border-t border-pencil-lead/20 overflow-y-auto flex-1 min-h-0"
+      >
+        <div class="max-w-md mx-auto px-4 py-4 space-y-4">
+          <CountryDetails v-if="secretCountry" :country-name="secretCountry" />
+          <DailyChallengeCard v-if="dailyItem" :item="dailyItem" />
+        </div>
       </div>
     </van-floating-panel>
 
@@ -251,11 +261,8 @@ const activeStation = computed(() => {
     <GameResultModal
       :show="showModal"
       :is-win="modalConfig.isWin"
-      :share-text="modalConfig.shareText"
-      :results-grid="modalConfig.resultsGrid"
       :secret-country="modalConfig.secretCountry"
-      :daily-challenge-number="modalConfig.dailyChallengeNumber"
-      :numeric-score="modalConfig.numericScore"
+      :history="gameHistory"
       @confirm="handleModalConfirm"
       @close="handleModalClose"
     />

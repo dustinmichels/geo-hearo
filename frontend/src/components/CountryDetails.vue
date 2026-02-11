@@ -26,7 +26,6 @@ interface CountryDetail {
   iso_a3: string
   official_languages: string
   regional_languages: string
-  minority_languages: string
   local_image_path?: string
   pexels_data: PexelsData
 }
@@ -68,7 +67,7 @@ watch(imageUrl, () => {
 
 <template>
   <div class="p-4 flex flex-col items-center gap-4 text-center">
-    <h2 v-if="showName" class="text-2xl font-heading text-pencil-lead tracking-wide">
+    <h2 v-if="showName" class="text-base font-heading text-pencil-lead tracking-wide">
       {{ countryName }}
     </h2>
 
@@ -121,12 +120,12 @@ watch(imageUrl, () => {
           {{ currentCountry.official_languages }}
         </div>
 
-        <div v-if="currentCountry.minority_languages">
+        <div v-if="currentCountry.regional_languages">
           <span
             class="font-bold uppercase text-xs tracking-wider text-eraser-grey"
-            >Minority Languages:</span
+            >Regional Languages:</span
           >
-          {{ currentCountry.minority_languages }}
+          {{ currentCountry.regional_languages }}
         </div>
       </div>
     </div>

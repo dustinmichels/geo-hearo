@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { usePwaInstall } from '@/composables/usePwaInstall'
 
+const version = import.meta.env.VITE_GIT_HASH || 'dev'
 const { canInstall, installApp } = usePwaInstall()
 </script>
 
@@ -42,5 +43,6 @@ const { canInstall, installApp } = usePwaInstall()
     >
       Install App
     </button>
+    <div class="text-[10px] text-eraser-grey">#{{ version }}</div>
   </div>
 </template>
