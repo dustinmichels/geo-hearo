@@ -112,7 +112,7 @@ watch(imageUrl, () => {
 
       <!-- Languages -->
       <div class="text-sm text-pencil-lead/80 flex flex-col gap-1">
-        <div v-if="currentCountry.official_languages">
+        <div v-if="currentCountry.official_languages" class="line-clamp-2">
           <span
             class="font-bold uppercase text-xs tracking-wider text-eraser-grey"
             >Official Languages:</span
@@ -120,7 +120,7 @@ watch(imageUrl, () => {
           {{ currentCountry.official_languages }}
         </div>
 
-        <div v-if="currentCountry.regional_languages">
+        <div v-if="currentCountry.regional_languages" class="line-clamp-2">
           <span
             class="font-bold uppercase text-xs tracking-wider text-eraser-grey"
             >Regional Languages:</span
