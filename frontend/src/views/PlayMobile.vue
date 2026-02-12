@@ -27,9 +27,10 @@ const anchors = [
 const panelHeight = ref(anchors[0])
 
 // Results floating panel setup
+// Results floating panel setup
 const resultsAnchors = [
   160, // Collapsed: station details + new game button visible
-  Math.round(window.innerHeight * 0.9), // Expanded: country details visible
+  window.innerHeight - 130, // Expanded: leave room for X buttons at top
 ]
 const resultsPanelHeight = ref(resultsAnchors[0])
 
@@ -251,7 +252,7 @@ const dailyItem = computed(() => {
       <div
         class="border-t border-pencil-lead/20 overflow-y-auto flex-1 min-h-0"
       >
-        <div class="max-w-md mx-auto px-4 py-4 space-y-4">
+        <div class="max-w-md mx-auto px-4 pt-4 pb-12 space-y-4">
           <CountryDetails v-if="secretCountry" :country-name="secretCountry" />
           <DailyChallengeCard v-if="dailyItem" :item="dailyItem" />
         </div>
