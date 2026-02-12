@@ -253,7 +253,12 @@ const dailyItem = computed(() => {
         class="border-t border-pencil-lead/20 overflow-y-auto flex-1 min-h-0"
       >
         <div class="max-w-md mx-auto px-4 pt-4 pb-12 space-y-4">
-          <CountryDetails v-if="secretCountry" :country-name="secretCountry" />
+          <CountryDetails
+            v-if="secretCountry"
+            :country-name="secretCountry"
+            :show-name="false"
+            :small-image="true"
+          />
           <DailyChallengeCard v-if="dailyItem" :item="dailyItem" />
         </div>
       </div>

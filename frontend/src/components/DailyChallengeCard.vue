@@ -16,16 +16,6 @@ const getDailyChallengeNumber = (): number => {
   return diffDays + 1
 }
 
-const getScore = (item: GameHistoryItem): number => {
-  if (typeof item.numericScore === 'number') return item.numericScore
-  const emojis = [...(item.score || '')]
-  const hasWon = emojis.includes('🟢')
-  if (hasWon) {
-    return 6 - emojis.length
-  }
-  return 0
-}
-
 const copyButtonText = ref('Copy shareable score')
 
 const handleShare = async (item: GameHistoryItem) => {
@@ -38,7 +28,7 @@ const handleShare = async (item: GameHistoryItem) => {
     await navigator.clipboard.writeText(text)
     copyButtonText.value = 'Copied!'
     setTimeout(() => {
-      copyButtonText.value = 'Share score'
+      copyButtonText.value = 'Copy shareable score'
     }, 2000)
   } catch (err) {
     console.error('Failed to copy text: ', err)
@@ -59,9 +49,6 @@ const handleShare = async (item: GameHistoryItem) => {
     </div>
     <div class="flex items-center justify-center gap-3 text-sm text-[#B45309]">
       <span class="tracking-widest">{{ item.score }}</span>
-      <span class="font-mono font-bold text-[#B45309]/70">{{
-        getScore(item)
-      }}</span>
     </div>
     <div
       class="mt-2 w-full flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-[#B45309]/60 transition-colors"

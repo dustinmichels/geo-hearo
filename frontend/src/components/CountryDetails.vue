@@ -5,8 +5,9 @@ const props = withDefaults(
   defineProps<{
     countryName: string
     showName?: boolean
+    smallImage?: boolean
   }>(),
-  { showName: true }
+  { showName: true, smallImage: false }
 )
 
 interface PexelsData {
@@ -67,7 +68,10 @@ watch(imageUrl, () => {
 
 <template>
   <div class="p-4 flex flex-col items-center gap-4 text-center">
-    <h2 v-if="showName" class="text-base font-heading text-pencil-lead tracking-wide">
+    <h2
+      v-if="showName"
+      class="text-base font-heading text-pencil-lead tracking-wide"
+    >
       {{ countryName }}
     </h2>
 
@@ -78,7 +82,8 @@ watch(imageUrl, () => {
         :href="currentCountry.pexels_data.url"
         target="_blank"
         rel="noopener noreferrer"
-        class="block w-full max-w-xs aspect-video rounded-2xl border-3 border-pencil-lead overflow-hidden shadow-sm hover:opacity-95 transition-opacity relative group bg-sea-blue/10"
+        class="block w-full aspect-video rounded-2xl border-3 border-pencil-lead overflow-hidden shadow-sm hover:opacity-95 transition-opacity relative group bg-sea-blue/10"
+        :class="smallImage ? 'max-w-[200px]' : 'max-w-xs'"
       >
         <!-- Image -->
         <img
@@ -133,7 +138,8 @@ watch(imageUrl, () => {
     <!-- Fallback if no country data -->
     <div
       v-else
-      class="w-full max-w-xs aspect-video rounded-2xl border-3 border-pencil-lead bg-sea-blue/10 flex items-center justify-center"
+      class="w-full aspect-video rounded-2xl border-3 border-pencil-lead bg-sea-blue/10 flex items-center justify-center"
+      :class="smallImage ? 'max-w-[200px]' : 'max-w-xs'"
     >
       <span class="text-eraser-grey text-sm font-bold uppercase tracking-wider">
         Image coming soon
