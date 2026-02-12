@@ -78,6 +78,7 @@ export function useGamePlay(options: GamePlayOptions) {
     secretCountry: undefined as string | undefined,
     dailyChallengeNumber: undefined as number | undefined,
     numericScore: undefined as number | undefined,
+    isDailyChallenge: false,
   })
 
   // State
@@ -223,7 +224,9 @@ export function useGamePlay(options: GamePlayOptions) {
       let dayNumber: number | undefined
       const gameMode = isDailyChallengeMode.value ? 'daily' : 'free'
 
-      if (isDailyChallengeMode.value) {
+      const isDaily = isDailyChallengeMode.value
+
+      if (isDaily) {
         dayNumber = dailyChallengeNumber.value || 0
         completeDailyChallenge() // Mark as done for today
         shareText = generateShareText(dayNumber)
@@ -239,6 +242,7 @@ export function useGamePlay(options: GamePlayOptions) {
         secretCountry: secretCountry.value,
         dailyChallengeNumber: dayNumber,
         numericScore,
+        isDailyChallenge: isDaily,
       }
 
       addToHistory({
@@ -280,7 +284,9 @@ export function useGamePlay(options: GamePlayOptions) {
       let dayNumber: number | undefined
       const gameMode = isDailyChallengeMode.value ? 'daily' : 'free'
 
-      if (isDailyChallengeMode.value) {
+      const isDaily = isDailyChallengeMode.value
+
+      if (isDaily) {
         dayNumber = dailyChallengeNumber.value || 0
         completeDailyChallenge()
         shareText = generateShareText(dayNumber)
@@ -296,6 +302,7 @@ export function useGamePlay(options: GamePlayOptions) {
         secretCountry: secretCountry.value,
         dailyChallengeNumber: dayNumber,
         numericScore,
+        isDailyChallenge: isDaily,
       }
 
       addToHistory({
@@ -386,6 +393,7 @@ export function useGamePlay(options: GamePlayOptions) {
           secretCountry: secretCountry.value,
           dailyChallengeNumber: undefined,
           numericScore: undefined,
+          isDailyChallenge: false,
         }
         store.setGameStage(debugStage)
       } else if (isDailyChallengeMode.value) {
@@ -407,6 +415,7 @@ export function useGamePlay(options: GamePlayOptions) {
               secretCountry: secretCountry.value,
               dailyChallengeNumber: dailyChallengeNumber.value,
               numericScore: undefined,
+              isDailyChallenge: true,
             }
           }
         } else {
@@ -420,6 +429,9 @@ export function useGamePlay(options: GamePlayOptions) {
           populateGuessColors()
           // Re-populate modal config if we're restoring into seeResults
           if (gameStage.value === 'seeResults') {
+            const lastHistory = gameHistory.value[gameHistory.value.length - 1]
+            const isDailyHistory = lastHistory?.mode === 'daily'
+
             modalConfig.value = {
               isWin:
                 roundFinished.value &&
@@ -431,6 +443,7 @@ export function useGamePlay(options: GamePlayOptions) {
               secretCountry: secretCountry.value,
               dailyChallengeNumber: undefined,
               numericScore: undefined,
+              isDailyChallenge: isDailyHistory,
             }
           }
         } else {
@@ -486,6 +499,7 @@ export function useGamePlay(options: GamePlayOptions) {
             secretCountry: secretCountry.value,
             dailyChallengeNumber: undefined,
             numericScore: undefined,
+            isDailyChallenge: false,
           }
           store.setGameStage(debugStage)
         }

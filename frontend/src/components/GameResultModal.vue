@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ArrowRight, X } from 'lucide-vue-next'
 import type { GameHistoryItem } from '../types/geo'
+import DailyChallengeCard from './DailyChallengeCard.vue'
 import GameHistoryList from './GameHistoryList.vue'
 
 const props = defineProps<{
@@ -8,6 +9,8 @@ const props = defineProps<{
   isWin?: boolean
   secretCountry?: string
   history?: GameHistoryItem[]
+  isDailyChallenge?: boolean
+  dailyChallengeNumber?: number
 }>()
 
 const emit = defineEmits<{
@@ -15,6 +18,13 @@ const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
+import { computed } from 'vue'
+
+const latestItem = computed(() => {
+  if (!props.history || props.history.length === 0) return null
+  // Assuming history is array where new items are pushed to end
+  return props.history[props.history.length - 1]
+})
 </script>
 
 <template>
@@ -60,9 +70,17 @@ const emit = defineEmits<{
           </p>
         </div>
 
-        <!-- Game History -->
+        <!-- Game History or Share View -->
+        <!-- Game History or Share View -->
+        <div
+          v-if="isDailyChallenge && latestItem"
+          class="flex-1 min-h-0 px-6 flex flex-col justify-center"
+        >
+          <DailyChallengeCard :item="latestItem" />
+        </div>
+
         <GameHistoryList
-          v-if="history && history.length > 0"
+          v-else-if="history && history.length > 0"
           :history="history"
           class="flex-1 min-h-0 px-6"
         />

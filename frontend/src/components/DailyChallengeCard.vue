@@ -26,7 +26,7 @@ const getScore = (item: GameHistoryItem): number => {
   return 0
 }
 
-const copyButtonText = ref('Share score')
+const copyButtonText = ref('Copy shareable score')
 
 const handleShare = async (item: GameHistoryItem) => {
   const text = [
@@ -57,9 +57,7 @@ const handleShare = async (item: GameHistoryItem) => {
     >
       Daily Challenge
     </div>
-    <div
-      class="flex items-center justify-center gap-3 text-sm text-[#B45309]"
-    >
+    <div class="flex items-center justify-center gap-3 text-sm text-[#B45309]">
       <span class="tracking-widest">{{ item.score }}</span>
       <span class="font-mono font-bold text-[#B45309]/70">{{
         getScore(item)

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import HamburgerMenu from '../components/HamburgerMenu.vue'
 import { RotateCcw } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import CountryDetails from '../components/CountryDetails.vue'
@@ -7,6 +6,7 @@ import DailyChallengeCard from '../components/DailyChallengeCard.vue'
 import Footer from '../components/Footer.vue'
 import GameResultModal from '../components/GameResultModal.vue'
 import GuessPanel from '../components/GuessPanel.vue'
+import HamburgerMenu from '../components/HamburgerMenu.vue'
 import Map from '../components/Map.vue'
 import RadioPlayer from '../components/RadioPlayer.vue'
 import StationDetails from '../components/StationDetails.vue'
@@ -174,7 +174,11 @@ const dailyItem = computed(() => {
           </div>
 
           <!-- Country Details -->
-          <CountryDetails v-if="secretCountry" :country-name="secretCountry" class="text-left" />
+          <CountryDetails
+            v-if="secretCountry"
+            :country-name="secretCountry"
+            class="text-left"
+          />
 
           <!-- Daily Challenge Card -->
           <DailyChallengeCard v-if="dailyItem" :item="dailyItem" />
@@ -206,6 +210,8 @@ const dailyItem = computed(() => {
       :is-win="modalConfig.isWin"
       :secret-country="modalConfig.secretCountry"
       :history="gameHistory"
+      :is-daily-challenge="modalConfig.isDailyChallenge"
+      :daily-challenge-number="modalConfig.dailyChallengeNumber"
       @confirm="handleModalConfirm"
       @close="handleModalClose"
     />

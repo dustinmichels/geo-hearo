@@ -155,8 +155,16 @@ const dailyItem = computed(() => {
     </div>
 
     <!-- Animated Arrows Hint -->
-    <div class="relative z-[60]" v-show="isPanelFullHeight || isResultsPanelFullHeight">
-      <AnimatedClose class="!top-16" @click="isPanelFullHeight ? handleArrowClick() : handleResultsArrowClick()" />
+    <div
+      class="relative z-[60]"
+      v-show="isPanelFullHeight || isResultsPanelFullHeight"
+    >
+      <AnimatedClose
+        class="!top-16"
+        @click="
+          isPanelFullHeight ? handleArrowClick() : handleResultsArrowClick()
+        "
+      />
     </div>
 
     <!-- Fixed content area -->
@@ -227,7 +235,6 @@ const dailyItem = computed(() => {
           default-projection="globe"
         />
       </div>
-
     </div>
 
     <!-- Results Floating Panel (listening stage) -->
@@ -278,6 +285,8 @@ const dailyItem = computed(() => {
       :is-win="modalConfig.isWin"
       :secret-country="modalConfig.secretCountry"
       :history="gameHistory"
+      :is-daily-challenge="modalConfig.isDailyChallenge"
+      :daily-challenge-number="modalConfig.dailyChallengeNumber"
       @confirm="handleModalConfirm"
       @close="handleModalClose"
     />
