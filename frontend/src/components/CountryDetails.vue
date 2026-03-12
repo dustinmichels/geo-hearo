@@ -1,77 +1,74 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from "vue";
 
 const props = withDefaults(
   defineProps<{
-    countryName: string
-    showName?: boolean
-    smallImage?: boolean
+    countryName: string;
+    showName?: boolean;
+    smallImage?: boolean;
   }>(),
-  { showName: true, smallImage: false }
-)
+  { showName: true, smallImage: false },
+);
 
 interface PexelsData {
-  url: string
-  photographer: string
-  photographer_url: string
+  url: string;
+  photographer: string;
+  photographer_url: string;
   src: {
-    large: string
-    medium: string
-    small: string
-  }
-  alt: string
+    large: string;
+    medium: string;
+    small: string;
+  };
+  alt: string;
 }
 
 interface CountryDetail {
-  country: string
-  iso_a3: string
-  official_languages: string
-  regional_languages: string
-  local_image_path?: string
-  pexels_data: PexelsData
+  country: string;
+  iso_a3: string;
+  official_languages: string;
+  regional_languages: string;
+  local_image_path?: string;
+  pexels_data: PexelsData;
 }
 
-const allCountryDetails = ref<CountryDetail[]>([])
-const imageError = ref(false)
+const allCountryDetails = ref<CountryDetail[]>([]);
+const imageError = ref(false);
 
 onMounted(async () => {
   try {
-    const response = await fetch('/data/country_details_with_pics.json')
+    const response = await fetch("/data/country_details_with_pics.json");
     if (response.ok) {
-      allCountryDetails.value = await response.json()
+      allCountryDetails.value = await response.json();
     }
   } catch (e) {
-    console.error('Failed to load country details', e)
+    console.error("Failed to load country details", e);
   }
-})
+});
 
 const currentCountry = computed(() => {
-  if (!allCountryDetails.value.length) return null
+  if (!allCountryDetails.value.length) return null;
   return allCountryDetails.value.find(
-    (c) => c.country.toLowerCase() === props.countryName.toLowerCase()
-  )
-})
+    (c) => c.country.toLowerCase() === props.countryName.toLowerCase(),
+  );
+});
 
 const imageUrl = computed(() => {
-  if (!currentCountry.value) return null
+  if (!currentCountry.value) return null;
   if (currentCountry.value.local_image_path) {
-    return '/' + currentCountry.value.local_image_path
+    return "/" + currentCountry.value.local_image_path;
   }
-  return currentCountry.value.pexels_data?.src?.medium ?? null
-})
+  return currentCountry.value.pexels_data?.src?.medium ?? null;
+});
 
 // Reset error state when URL changes
 watch(imageUrl, () => {
-  imageError.value = false
-})
+  imageError.value = false;
+});
 </script>
 
 <template>
   <div class="p-4 flex flex-col items-center gap-4 text-center">
-    <h2
-      v-if="showName"
-      class="text-base font-heading text-pencil-lead tracking-wide"
-    >
+    <h2 v-if="showName" class="text-base font-heading text-pencil-lead tracking-wide">
       {{ countryName }}
     </h2>
 
@@ -93,8 +90,8 @@ watch(imageUrl, () => {
           referrerpolicy="no-referrer"
           @error="
             (e: Event) => {
-              console.error('Pexels image failed to load:', imageUrl, e)
-              imageError = true
+              console.error('Pexels image failed to load:', imageUrl, e);
+              imageError = true;
             }
           "
           class="w-full h-full object-cover"
@@ -118,16 +115,14 @@ watch(imageUrl, () => {
       <!-- Languages -->
       <div class="text-sm text-pencil-lead/80 flex flex-col gap-1">
         <div v-if="currentCountry.official_languages" class="line-clamp-2">
-          <span
-            class="font-bold uppercase text-xs tracking-wider text-eraser-grey"
+          <span class="font-bold uppercase text-xs tracking-wider text-eraser-grey"
             >Official Languages:</span
           >
           {{ currentCountry.official_languages }}
         </div>
 
         <div v-if="currentCountry.regional_languages" class="line-clamp-2">
-          <span
-            class="font-bold uppercase text-xs tracking-wider text-eraser-grey"
+          <span class="font-bold uppercase text-xs tracking-wider text-eraser-grey"
             >Regional Languages:</span
           >
           {{ currentCountry.regional_languages }}

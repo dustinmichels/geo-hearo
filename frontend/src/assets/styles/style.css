@@ -5,10 +5,10 @@
  */
 
 /* Import Google Fonts - Must come first */
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@400;700&display=swap");
 
 /* Import Tailwind */
-@import 'tailwindcss';
+@import "tailwindcss";
 
 /* Tailwind v4 Theme Configuration */
 @theme {
@@ -24,9 +24,9 @@
   --color-eraser-grey: #94a3b8;
 
   /* Fonts */
-  --font-heading: 'Fredoka', ui-sans-serif, system-ui, sans-serif;
-  --font-body: 'Nunito', ui-sans-serif, system-ui, sans-serif;
-  --font-sans: 'Fredoka', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Fredoka", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Nunito", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Fredoka", ui-sans-serif, system-ui, sans-serif;
 
   /* Border widths */
   --border-2: 2px;
@@ -42,22 +42,22 @@
 body {
   background-color: #fff9f5;
   color: #334155;
-  font-family: 'Nunito', sans-serif;
+  font-family: "Nunito", sans-serif;
 }
 
 h1,
 h2,
 h3,
 .btn-text {
-  font-family: 'Fredoka', sans-serif;
+  font-family: "Fredoka", sans-serif;
 }
 
 .font-heading {
-  font-family: 'Fredoka', sans-serif;
+  font-family: "Fredoka", sans-serif;
 }
 
 .font-body {
-  font-family: 'Nunito', sans-serif;
+  font-family: "Nunito", sans-serif;
 }
 
 :root {

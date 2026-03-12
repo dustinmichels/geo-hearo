@@ -37,17 +37,14 @@
             <span class="text-3xl md:text-4xl">🔒</span>
             Analytics
           </h2>
-          <div
-            class="text-base md:text-lg text-pencil-lead/90 font-body leading-relaxed"
-          >
+          <div class="text-base md:text-lg text-pencil-lead/90 font-body leading-relaxed">
             I do some simple, privacy-preserving analytics through
             <a
               href="https://plausible.io"
               target="_blank"
               class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors"
               >Plausible.io</a
-            >. No effort is made to track users around the web (as with Google
-            Analytics). <br />
+            >. No effort is made to track users around the web (as with Google Analytics). <br />
             <br />
             You can see what I see in the analytics dashboard here:
             <a
@@ -62,9 +59,7 @@
       </div>
 
       <!-- Action Buttons -->
-      <div
-        class="flex flex-col md:flex-row justify-center items-center gap-6 pt-6 pb-6"
-      >
+      <div class="flex flex-col md:flex-row justify-center items-center gap-6 pt-6 pb-6">
         <button
           class="btn-pressable bg-mint-shake px-8 md:px-12 py-4 md:py-5 rounded-[22px] text-xl md:text-2xl btn-text uppercase tracking-widest text-pencil-lead animate-pop-in-delayed hover-scale"
           @click="handlePlay"
@@ -85,18 +80,18 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
-import HamburgerMenu from '../components/HamburgerMenu.vue'
+import { useRouter } from "vue-router";
+import HamburgerMenu from "../components/HamburgerMenu.vue";
 
-const router = useRouter()
+const router = useRouter();
 
 const handleBackHome = () => {
-  router.push({ name: 'Home' })
-}
+  router.push({ name: "Home" });
+};
 
 const handlePlay = () => {
-  router.push({ name: 'Play' })
-}
+  router.push({ name: "Play" });
+};
 </script>
 
 <style scoped>

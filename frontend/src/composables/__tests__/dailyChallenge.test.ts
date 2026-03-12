@@ -3,10 +3,10 @@
  * npm test -- dailyChallenge
  */
 
-import { readFileSync } from 'fs'
-import { resolve } from 'path'
-import { describe, expect, it } from 'vitest'
-import { SeededRandom } from '../useRadio'
+import { readFileSync } from "fs";
+import { resolve } from "path";
+import { describe, expect, it } from "vitest";
+import { SeededRandom } from "../useRadio";
 
 /**
  * Snapshot test for the daily challenge country selection algorithm.
@@ -20,8 +20,8 @@ import { SeededRandom } from '../useRadio'
  */
 
 interface IndexStructure {
-  config: { line_length: number }
-  countries: Record<string, { start: number; count: number }>
+  config: { line_length: number };
+  countries: Record<string, { start: number; count: number }>;
 }
 
 /**
@@ -31,109 +31,96 @@ interface IndexStructure {
 function selectCountryAndStations(
   seed: number,
   sortedCountryNames: string[],
-  countries: IndexStructure['countries']
+  countries: IndexStructure["countries"],
 ): { country: string; stationIndices: number[] } {
-  const rng = new SeededRandom(seed)
-  const countryIdx = rng.nextInt(sortedCountryNames.length)
-  const country = sortedCountryNames[countryIdx]
-  if (!country) throw new Error('Selected country is undefined')
+  const rng = new SeededRandom(seed);
+  const countryIdx = rng.nextInt(sortedCountryNames.length);
+  const country = sortedCountryNames[countryIdx];
+  if (!country) throw new Error("Selected country is undefined");
 
-  const countryData = countries[country]
-  if (!countryData) throw new Error(`Country data not found for ${country}`)
-  const { count } = countryData
-  const targetCount = Math.min(5, count)
-  const pool = Array.from({ length: count }, (_, i) => i)
-  const stationIndices: number[] = []
+  const countryData = countries[country];
+  if (!countryData) throw new Error(`Country data not found for ${country}`);
+  const { count } = countryData;
+  const targetCount = Math.min(5, count);
+  const pool = Array.from({ length: count }, (_, i) => i);
+  const stationIndices: number[] = [];
 
   for (let i = 0; i < targetCount; i++) {
-    const poolIdx = rng.nextInt(pool.length)
-    const selectedIndex = pool.splice(poolIdx, 1)[0]
+    const poolIdx = rng.nextInt(pool.length);
+    const selectedIndex = pool.splice(poolIdx, 1)[0];
     if (selectedIndex !== undefined) {
-      stationIndices.push(selectedIndex)
+      stationIndices.push(selectedIndex);
     }
   }
 
-  return { country, stationIndices }
+  return { country, stationIndices };
 }
 
-describe('daily challenge country selection', () => {
-  const indexPath = resolve(__dirname, '../../../public/data/index.json')
-  const indexData: IndexStructure = JSON.parse(readFileSync(indexPath, 'utf-8'))
-  const sortedNames = Object.keys(indexData.countries).sort()
+describe("daily challenge country selection", () => {
+  const indexPath = resolve(__dirname, "../../../public/data/index.json");
+  const indexData: IndexStructure = JSON.parse(readFileSync(indexPath, "utf-8"));
+  const sortedNames = Object.keys(indexData.countries).sort();
 
   // Expected countries for Dec 1-15, 2025.
   // These were computed from the current algorithm and locked in.
   const expectedCountries: Record<string, string> = {
-    '20251201': 'United States of America',
-    '20251202': 'Slovenia',
-    '20251203': 'Turkey',
-    '20251204': 'Russia',
-    '20251205': 'Tajikistan',
-    '20251206': 'Poland',
-    '20251207': 'Sudan',
-    '20251208': 'Palestine',
-    '20251209': 'Slovakia',
-    '20251210': 'Nicaragua',
-    '20251211': 'Romania',
-    '20251212': 'Morocco',
-    '20251213': 'Philippines',
-    '20251214': 'Malaysia',
-    '20251215': 'Hungary',
-  }
+    "20251201": "United States of America",
+    "20251202": "Slovenia",
+    "20251203": "Turkey",
+    "20251204": "Russia",
+    "20251205": "Tajikistan",
+    "20251206": "Poland",
+    "20251207": "Sudan",
+    "20251208": "Palestine",
+    "20251209": "Slovakia",
+    "20251210": "Nicaragua",
+    "20251211": "Romania",
+    "20251212": "Morocco",
+    "20251213": "Philippines",
+    "20251214": "Malaysia",
+    "20251215": "Hungary",
+  };
 
   it.each(
     Object.entries(expectedCountries).map(([seedStr, expectedCountry]) => {
-      const seed = parseInt(seedStr, 10)
-      const day = seed % 100
-      return { seed, day, expectedCountry }
-    })
-  )(
-    'Dec $day, 2025 (seed=$seed) selects $expectedCountry',
-    ({ seed, expectedCountry }) => {
-      const { country, stationIndices } = selectCountryAndStations(
-        seed,
-        sortedNames,
-        indexData.countries
-      )
+      const seed = parseInt(seedStr, 10);
+      const day = seed % 100;
+      return { seed, day, expectedCountry };
+    }),
+  )("Dec $day, 2025 (seed=$seed) selects $expectedCountry", ({ seed, expectedCountry }) => {
+    const { country, stationIndices } = selectCountryAndStations(
+      seed,
+      sortedNames,
+      indexData.countries,
+    );
 
-      // Print station indices for visibility (not asserted)
-      console.log(
-        `  seed=${seed} -> ${country} | station indices: ${stationIndices.join(', ')}`
-      )
+    // Print station indices for visibility (not asserted)
+    console.log(`  seed=${seed} -> ${country} | station indices: ${stationIndices.join(", ")}`);
 
-      expect(country).toBe(expectedCountry)
-    }
-  )
+    expect(country).toBe(expectedCountry);
+  });
 
-  it('SeededRandom produces consistent sequence for a given seed', () => {
-    const rng = new SeededRandom(20251201)
-    const values = Array.from({ length: 10 }, () => rng.nextInt(1000))
+  it("SeededRandom produces consistent sequence for a given seed", () => {
+    const rng = new SeededRandom(20251201);
+    const values = Array.from({ length: 10 }, () => rng.nextInt(1000));
 
     // Lock in the first 10 values to detect any LCG changes
-    expect(values).toEqual([478, 607, 100, 61, 50, 875, 488, 1, 742, 87])
-  })
+    expect(values).toEqual([478, 607, 100, 61, 50, 875, 488, 1, 742, 87]);
+  });
 
-  it('same seed produces same country and station indices', () => {
+  it("same seed produces same country and station indices", () => {
     for (const seed of [9999999, 20260207, 42]) {
-      const result1 = selectCountryAndStations(
-        seed,
-        sortedNames,
-        indexData.countries
-      )
-      const result2 = selectCountryAndStations(
-        seed,
-        sortedNames,
-        indexData.countries
-      )
+      const result1 = selectCountryAndStations(seed, sortedNames, indexData.countries);
+      const result2 = selectCountryAndStations(seed, sortedNames, indexData.countries);
 
-      expect(result1.country).toBe(result2.country)
-      expect(result1.stationIndices).toEqual(result2.stationIndices)
+      expect(result1.country).toBe(result2.country);
+      expect(result1.stationIndices).toEqual(result2.stationIndices);
     }
-  })
+  });
 
-  it('country list has expected length', () => {
+  it("country list has expected length", () => {
     // If countries are added/removed from index.json, country selection
     // indices will shift. This test catches that.
-    expect(sortedNames.length).toBe(142)
-  })
-})
+    expect(sortedNames.length).toBe(142);
+  });
+});

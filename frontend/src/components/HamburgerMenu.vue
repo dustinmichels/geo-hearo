@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { CirclePlay, Home, Info, Menu, X } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
-import { RouterLink, useRoute } from 'vue-router'
+import { CirclePlay, Home, Info, Menu, X } from "lucide-vue-next";
+import { computed, ref } from "vue";
+import { RouterLink, useRoute } from "vue-router";
 
-const route = useRoute()
-const isOpen = ref(false)
+const route = useRoute();
+const isOpen = ref(false);
 
-const currentRouteName = computed(() => route.name)
+const currentRouteName = computed(() => route.name);
 
 const toggleMenu = () => {
-  isOpen.value = !isOpen.value
-}
+  isOpen.value = !isOpen.value;
+};
 
 const closeMenu = () => {
-  isOpen.value = false
-}
+  isOpen.value = false;
+};
 </script>
 
 <template>

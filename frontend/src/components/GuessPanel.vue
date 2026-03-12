@@ -1,41 +1,41 @@
 <script setup lang="ts">
-import { Field as VanField } from 'vant'
-import { ref } from 'vue'
-import PanelFooter from './Footer.vue'
-import GuessDisplay from './GuessDisplay.vue'
+import { Field as VanField } from "vant";
+import { ref } from "vue";
+import PanelFooter from "./Footer.vue";
+import GuessDisplay from "./GuessDisplay.vue";
 
 const props = withDefaults(
   defineProps<{
-    modelValue: string
-    guesses: string[]
-    withFooter?: boolean
-    disabled?: boolean
+    modelValue: string;
+    guesses: string[];
+    withFooter?: boolean;
+    disabled?: boolean;
   }>(),
   {
     withFooter: true,
     disabled: false,
-  }
-)
+  },
+);
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: string): void
-  (e: 'add-guess'): void
-}>()
+  (e: "update:modelValue", value: string): void;
+  (e: "add-guess"): void;
+}>();
 
-const isShaking = ref(false)
+const isShaking = ref(false);
 
 const handleGuess = () => {
   // Trigger shake animation
-  isShaking.value = true
+  isShaking.value = true;
   setTimeout(() => {
-    isShaking.value = false
-  }, 500)
+    isShaking.value = false;
+  }, 500);
 
   if (navigator.vibrate) {
-    navigator.vibrate(200)
+    navigator.vibrate(200);
   }
-  emit('add-guess')
-}
+  emit("add-guess");
+};
 </script>
 
 <template>
@@ -64,9 +64,7 @@ const handleGuess = () => {
           class="btn-pressable bg-yuzu-yellow h-[52px] px-3 rounded-xl font-heading text-lg text-pencil-lead uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
         >
           Guess
-          <span class="text-sm ml-1 lowercase"
-            >({{ 5 - guesses.length }} left)</span
-          >
+          <span class="text-sm ml-1 lowercase">({{ 5 - guesses.length }} left)</span>
         </button>
       </div>
 

@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import { RotateCcw } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
-import CountryDetails from '../components/CountryDetails.vue'
-import DailyChallengeCard from '../components/DailyChallengeCard.vue'
-import Footer from '../components/Footer.vue'
-import GameResultModal from '../components/GameResultModal.vue'
-import GuessPanel from '../components/GuessPanel.vue'
-import HamburgerMenu from '../components/HamburgerMenu.vue'
-import Map from '../components/Map.vue'
-import RadioPlayer from '../components/RadioPlayer.vue'
-import StationDetails from '../components/StationDetails.vue'
-import { useGamePlay } from '../composables/useGamePlay'
-import { useOnboarding } from '../composables/useOnboarding'
-import { useRadio } from '../composables/useRadio'
+import { RotateCcw } from "lucide-vue-next";
+import { computed, ref } from "vue";
+import CountryDetails from "../components/CountryDetails.vue";
+import DailyChallengeCard from "../components/DailyChallengeCard.vue";
+import Footer from "../components/Footer.vue";
+import GameResultModal from "../components/GameResultModal.vue";
+import GuessPanel from "../components/GuessPanel.vue";
+import HamburgerMenu from "../components/HamburgerMenu.vue";
+import Map from "../components/Map.vue";
+import RadioPlayer from "../components/RadioPlayer.vue";
+import StationDetails from "../components/StationDetails.vue";
+import { useGamePlay } from "../composables/useGamePlay";
+import { useOnboarding } from "../composables/useOnboarding";
+import { useRadio } from "../composables/useRadio";
 
-const mapRef = ref<InstanceType<typeof Map> | null>(null)
+const mapRef = ref<InstanceType<typeof Map> | null>(null);
 
-const { isDailyChallengeMode } = useRadio()
-const { startResultsTour } = useOnboarding()
+const { isDailyChallengeMode } = useRadio();
+const { startResultsTour } = useOnboarding();
 
 const {
   isPlaying,
@@ -45,21 +45,21 @@ const {
   setupKeyboardShortcuts: true,
   onNewGame: () => mapRef.value?.resetView(),
   onModalClose: () => {
-    mapRef.value?.zoomToStations()
+    mapRef.value?.zoomToStations();
     setTimeout(() => {
-      startResultsTour()
-    }, 500)
+      startResultsTour();
+    }, 500);
   },
-})
+});
 
 const activeStation = computed(() => {
-  if (!currentStations.value || !currentStations.value.length) return undefined
-  return currentStations.value[currentStation.value - 1]
-})
+  if (!currentStations.value || !currentStations.value.length) return undefined;
+  return currentStations.value[currentStation.value - 1];
+});
 
 const dailyItem = computed(() => {
-  return gameHistory.value?.find((item) => item.mode === 'daily')
-})
+  return gameHistory.value?.find((item) => item.mode === "daily");
+});
 </script>
 
 <template>
@@ -92,9 +92,7 @@ const dailyItem = computed(() => {
           :guessed-countries="guesses"
           :guess-colors="guessColors"
           :selected-country="guessInput"
-          :secret-country="
-            gameStage !== 'guessing' ? secretCountry : debugCountry
-          "
+          :secret-country="gameStage !== 'guessing' ? secretCountry : debugCountry"
           :stations="currentStations"
           :active-station-id="activeStation?.channel_id"
           :are-stations-visible="gameStage === 'listening'"
@@ -108,20 +106,14 @@ const dailyItem = computed(() => {
         <!-- Title -->
         <div class="flex justify-center">
           <div class="relative z-10">
-            <h1
-              class="text-center text-pencil-lead text-[1.6rem] font-heading tracking-wider"
-            >
+            <h1 class="text-center text-pencil-lead text-[1.6rem] font-heading tracking-wider">
               GeoHearo
             </h1>
             <div
               class="text-center text-sm uppercase tracking-widest font-bold mb-1"
-              :class="
-                isDailyChallengeMode ? 'text-[#B45309]' : 'text-eraser-grey'
-              "
+              :class="isDailyChallengeMode ? 'text-[#B45309]' : 'text-eraser-grey'"
             >
-              <template v-if="isDailyChallengeMode">
-                Daily Challenge! 📣
-              </template>
+              <template v-if="isDailyChallengeMode"> Daily Challenge! 📣 </template>
               <template v-else> Free play mode </template>
             </div>
             <img
@@ -167,18 +159,12 @@ const dailyItem = computed(() => {
               title="New Game"
             >
               <RotateCcw class="w-5 h-5" />
-              <span class="font-bold uppercase tracking-wider text-xs">
-                New Game
-              </span>
+              <span class="font-bold uppercase tracking-wider text-xs"> New Game </span>
             </button>
           </div>
 
           <!-- Country Details -->
-          <CountryDetails
-            v-if="secretCountry"
-            :country-name="secretCountry"
-            class="text-left"
-          />
+          <CountryDetails v-if="secretCountry" :country-name="secretCountry" class="text-left" />
 
           <!-- Daily Challenge Card -->
           <DailyChallengeCard v-if="dailyItem" :item="dailyItem" />

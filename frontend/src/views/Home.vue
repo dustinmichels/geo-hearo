@@ -16,13 +16,9 @@
     ></div>
 
     <!-- Main Content Container -->
-    <main
-      class="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-16 items-center"
-    >
+    <main class="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-16 items-center">
       <!-- Globe Section: Top on Mobile, Right on Desktop -->
-      <div
-        class="order-1 lg:order-2 flex justify-center items-center py-2 lg:py-0"
-      >
+      <div class="order-1 lg:order-2 flex justify-center items-center py-2 lg:py-0">
         <div class="relative scale-100 sm:scale-100 animate-fade-in-delayed">
           <!-- Squishy Background Glow -->
           <div
@@ -58,12 +54,8 @@
               @click="handleTuneIn"
             >
               <div class="magic-container">
-                <div
-                  class="magic-wave wave-1 rounded-[30px] sm:rounded-[36px]"
-                ></div>
-                <div
-                  class="magic-wave wave-2 rounded-[30px] sm:rounded-[36px]"
-                ></div>
+                <div class="magic-wave wave-1 rounded-[30px] sm:rounded-[36px]"></div>
+                <div class="magic-wave wave-2 rounded-[30px] sm:rounded-[36px]"></div>
               </div>
               <button
                 class="btn-pressable bg-yuzu-yellow px-12 sm:px-16 py-6 sm:py-8 rounded-[30px] sm:rounded-[36px] text-4xl sm:text-6xl btn-text uppercase tracking-widest text-pencil-lead relative z-10 block transition-transform duration-200"
@@ -76,18 +68,13 @@
       </div>
 
       <!-- Copy Section: Bottom on Mobile, Left on Desktop -->
-      <div
-        class="space-y-4 sm:space-y-6 order-2 lg:order-1 text-center lg:text-left"
-      >
+      <div class="space-y-4 sm:space-y-6 order-2 lg:order-1 text-center lg:text-left">
         <div class="space-y-6 lg:space-y-10">
           <h1
             class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-[1.1] tracking-tight text-pencil-lead animate-slide-up"
           >
-            <span class="text-gumball-blue">GeoHearo</span> is the geo-guessing
-            game where you
-            <span class="text-gumball-blue inline-block italic"
-              >win with your ears.</span
-            >
+            <span class="text-gumball-blue">GeoHearo</span> is the geo-guessing game where you
+            <span class="text-gumball-blue inline-block italic">win with your ears.</span>
           </h1>
 
           <div
@@ -119,12 +106,8 @@
               @click="handleTuneIn"
             >
               <div class="magic-container">
-                <div
-                  class="magic-wave wave-1 rounded-[30px] sm:rounded-[36px]"
-                ></div>
-                <div
-                  class="magic-wave wave-2 rounded-[30px] sm:rounded-[36px]"
-                ></div>
+                <div class="magic-wave wave-1 rounded-[30px] sm:rounded-[36px]"></div>
+                <div class="magic-wave wave-2 rounded-[30px] sm:rounded-[36px]"></div>
               </div>
               <button
                 class="btn-pressable bg-yuzu-yellow px-12 sm:px-16 py-6 sm:py-8 rounded-[30px] sm:rounded-[36px] text-4xl sm:text-6xl btn-text uppercase tracking-widest text-pencil-lead relative z-10 block transition-transform duration-200"
@@ -145,39 +128,39 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import Footer from '../components/Footer.vue'
-import HamburgerMenu from '../components/HamburgerMenu.vue'
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import Footer from "../components/Footer.vue";
+import HamburgerMenu from "../components/HamburgerMenu.vue";
 
-const router = useRouter()
-const globeImage = ref('/globe.png')
+const router = useRouter();
+const globeImage = ref("/globe.png");
 
 const steps = [
   {
-    text: 'Stream five live, random radio stations from a mystery country',
-    colorClass: 'bg-gumball-blue',
+    text: "Stream five live, random radio stations from a mystery country",
+    colorClass: "bg-gumball-blue",
   },
   {
-    text: 'Make a guess, get a hint, repeat',
-    colorClass: 'bg-bubblegum-pop',
+    text: "Make a guess, get a hint, repeat",
+    colorClass: "bg-bubblegum-pop",
   },
   {
-    text: 'Tomorrow will bring a new daily challenge',
-    colorClass: 'bg-mint-shake',
+    text: "Tomorrow will bring a new daily challenge",
+    colorClass: "bg-mint-shake",
   },
-]
+];
 
 const handleImageError = (event: Event) => {
-  const img = event.target as HTMLImageElement
-  img.src = 'https://via.placeholder.com/400?text=< '
-}
+  const img = event.target as HTMLImageElement;
+  img.src = "https://via.placeholder.com/400?text=< ";
+};
 
 const handleTuneIn = (_event: Event) => {
   // Simple click animation feedback handled by :active CSS or small JS delay if critical
   // For now, just navigate immediately as CSS active state provides feedback
-  router.push({ name: 'Play' })
-}
+  router.push({ name: "Play" });
+};
 </script>
 
 <style scoped>
@@ -213,7 +196,7 @@ const handleTuneIn = (_event: Event) => {
   flex-shrink: 0;
   border: 3px solid #334155;
   border-radius: 10px;
-  font-family: 'Fredoka', sans-serif;
+  font-family: "Fredoka", sans-serif;
   font-weight: 700;
   font-size: 1.1rem;
   color: white;

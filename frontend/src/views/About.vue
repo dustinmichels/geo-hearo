@@ -46,9 +46,7 @@
                 :key="i"
                 class="flex items-start gap-3 text-base md:text-lg text-pencil-lead/90 font-body leading-relaxed"
               >
-                <span class="text-gumball-blue shrink-0 mt-[6px] text-sm"
-                  >⟡</span
-                >
+                <span class="text-gumball-blue shrink-0 mt-[6px] text-sm">⟡</span>
                 <span v-html="item"></span>
               </li>
             </ul>
@@ -62,9 +60,7 @@
       </div>
 
       <!-- Action Buttons -->
-      <div
-        class="flex flex-col md:flex-row justify-center items-center gap-6 pt-6 pb-6"
-      >
+      <div class="flex flex-col md:flex-row justify-center items-center gap-6 pt-6 pb-6">
         <button
           class="btn-pressable bg-mint-shake px-8 md:px-12 py-4 md:py-5 rounded-[22px] text-xl md:text-2xl btn-text uppercase tracking-widest text-pencil-lead animate-pop-in-delayed hover-scale"
           @click="handlePlay"
@@ -88,53 +84,53 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
-import Footer from '../components/Footer.vue'
-import HamburgerMenu from '../components/HamburgerMenu.vue'
+import { useRouter } from "vue-router";
+import Footer from "../components/Footer.vue";
+import HamburgerMenu from "../components/HamburgerMenu.vue";
 
-const router = useRouter()
+const router = useRouter();
 
 const sections = [
   {
-    emoji: '🌍',
-    title: 'What is GeoHearo?',
+    emoji: "🌍",
+    title: "What is GeoHearo?",
     content:
       'GeoHearo is a passion project of a solo developer, <a href="https://dustinmichels.com" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Dustin Michels</a>. It\'s free and <a href="https://github.com/dustinmichels/geo-hearo" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">open-source</a>. There is no business model.',
   },
   {
-    emoji: '💾',
-    title: 'Data Sources',
+    emoji: "💾",
+    title: "Data Sources",
     content: [
       'The country polygons are from <a href="https://www.naturalearthdata.com/" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Natural Earth</a>. They are the ones that decide what counts as a country.',
       'The underlying radio data is borrowed, gratefully, from <a href="https://radio.garden/" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Radio.Garden</a>. There are over 30,000 stations to choose from when you start a game.',
     ],
   },
   {
-    emoji: '📏',
-    title: 'Distance Considerations',
+    emoji: "📏",
+    title: "Distance Considerations",
     content: [
-      'The clue you get is based on the distance between countries, from border to border.',
+      "The clue you get is based on the distance between countries, from border to border.",
       "I filter out polygons that makeup &lt; 20% of the country's land mass, so as to exclude overseas territories but include major islands. The idea is to direct the player towards the main borders of the country.",
     ],
   },
   {
-    emoji: '📡',
-    title: 'Radio Considerations',
+    emoji: "📡",
+    title: "Radio Considerations",
     content: [
       'Stations can be weird! It\'s not always a bug. Sometimes you get a Lebanese station in Germany, because there really is a Lebanese station in Germany. The world is complicated! The "show stations" feature is provided so you can find out more about the stations you hear.',
-      'Sometimes a radio stream gives you commercials localized to your location, which is confusing and unfortunate.',
-      'Sometimes a station is just being weird, which is why I give you five to choose from!',
+      "Sometimes a radio stream gives you commercials localized to your location, which is confusing and unfortunate.",
+      "Sometimes a station is just being weird, which is why I give you five to choose from!",
     ],
   },
-]
+];
 
 const handleBackHome = () => {
-  router.push({ name: 'Home' })
-}
+  router.push({ name: "Home" });
+};
 
 const handlePlay = () => {
-  router.push({ name: 'Play' })
-}
+  router.push({ name: "Play" });
+};
 </script>
 
 <style scoped>

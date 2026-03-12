@@ -1,149 +1,149 @@
 <script setup lang="ts">
-import { useGameStore } from '@/stores/game'
-import { Loader2, Pause, Play, SkipBack, SkipForward } from 'lucide-vue-next'
-import { Button as VanButton } from 'vant'
-import { onUnmounted, ref, watch } from 'vue'
-import { playRadioStatic } from '../utils/audio'
+import { useGameStore } from "@/stores/game";
+import { Loader2, Pause, Play, SkipBack, SkipForward } from "lucide-vue-next";
+import { Button as VanButton } from "vant";
+import { onUnmounted, ref, watch } from "vue";
+import { playRadioStatic } from "../utils/audio";
 
-const store = useGameStore()
+const store = useGameStore();
 
 const props = defineProps<{
-  isPlaying: boolean
-  currentStation: number
-  stationUrl?: string
-}>()
+  isPlaying: boolean;
+  currentStation: number;
+  stationUrl?: string;
+}>();
 
 const emit = defineEmits<{
-  (e: 'playPause'): void
-  (e: 'previous'): void
-  (e: 'next'): void
-}>()
+  (e: "playPause"): void;
+  (e: "previous"): void;
+  (e: "next"): void;
+}>();
 
-const audioPlayer = ref<HTMLAudioElement | null>(null)
-const currentStaticSource = ref<AudioBufferSourceNode | null>(null) // Store the source node
-const isLoading = ref(false)
-let loadingTimeout: ReturnType<typeof setTimeout> | undefined
+const audioPlayer = ref<HTMLAudioElement | null>(null);
+const currentStaticSource = ref<AudioBufferSourceNode | null>(null); // Store the source node
+const isLoading = ref(false);
+let loadingTimeout: ReturnType<typeof setTimeout> | undefined;
 
 const stopStatic = () => {
   if (currentStaticSource.value) {
     try {
-      currentStaticSource.value.stop()
+      currentStaticSource.value.stop();
     } catch (e) {
       // ignore
     }
-    currentStaticSource.value = null
+    currentStaticSource.value = null;
   }
-}
+};
 
 const playStatic = () => {
-  stopStatic()
-  const source = playRadioStatic()
+  stopStatic();
+  const source = playRadioStatic();
   if (source) {
-    currentStaticSource.value = source
+    currentStaticSource.value = source;
   }
-}
+};
 
 const onAudioPlaying = () => {
-  isLoading.value = false
-  stopStatic()
-}
+  isLoading.value = false;
+  stopStatic();
+};
 
 watch(
   () => props.isPlaying,
   (playing) => {
-    if (!audioPlayer.value) return
+    if (!audioPlayer.value) return;
     if (playing) {
-      isLoading.value = true
-      playStatic()
+      isLoading.value = true;
+      playStatic();
       audioPlayer.value.play().catch((e) => {
-        if (e.name === 'AbortError') return
-        isLoading.value = false
-        stopStatic()
-        console.error('Playback failed', e)
-      })
+        if (e.name === "AbortError") return;
+        isLoading.value = false;
+        stopStatic();
+        console.error("Playback failed", e);
+      });
     } else {
-      isLoading.value = false
-      audioPlayer.value.pause()
-      stopStatic()
+      isLoading.value = false;
+      audioPlayer.value.pause();
+      stopStatic();
     }
-  }
-)
+  },
+);
 
 watch(
   () => props.stationUrl,
   (newUrl) => {
-    if (!audioPlayer.value) return
+    if (!audioPlayer.value) return;
     if (newUrl) {
-      audioPlayer.value.src = newUrl
+      audioPlayer.value.src = newUrl;
       if (props.isPlaying) {
-        isLoading.value = true
+        isLoading.value = true;
         // Manually trigger timer reset since isLoading might not change
-        if (loadingTimeout) clearTimeout(loadingTimeout)
+        if (loadingTimeout) clearTimeout(loadingTimeout);
         loadingTimeout = setTimeout(() => {
           if (isLoading.value) {
-            console.log('Loading timed out, skipping to next station')
-            isLoading.value = false // Stop loading state locally
-            onNext()
+            console.log("Loading timed out, skipping to next station");
+            isLoading.value = false; // Stop loading state locally
+            onNext();
           }
-        }, 5000)
+        }, 5000);
 
-        playStatic()
+        playStatic();
         audioPlayer.value.play().catch((e) => {
-          if (e.name === 'AbortError') return
-          isLoading.value = false
-          stopStatic()
-          console.error('Playback failed', e)
-        })
+          if (e.name === "AbortError") return;
+          isLoading.value = false;
+          stopStatic();
+          console.error("Playback failed", e);
+        });
       }
     }
-  }
-)
+  },
+);
 
 watch(isLoading, (loading) => {
   if (loading) {
     // Clear any existing timeout just in case
-    if (loadingTimeout) clearTimeout(loadingTimeout)
+    if (loadingTimeout) clearTimeout(loadingTimeout);
     // Set new timeout
     loadingTimeout = setTimeout(() => {
       if (isLoading.value) {
-        console.log('Loading timed out, skipping to next station')
-        isLoading.value = false // Stop loading state locally
-        onNext()
+        console.log("Loading timed out, skipping to next station");
+        isLoading.value = false; // Stop loading state locally
+        onNext();
       }
-    }, 5000)
+    }, 5000);
   } else {
     // Clear timeout if loading stops
     if (loadingTimeout) {
-      clearTimeout(loadingTimeout)
-      loadingTimeout = undefined
+      clearTimeout(loadingTimeout);
+      loadingTimeout = undefined;
     }
   }
-})
+});
 
 watch(
   () => props.isPlaying,
   (playing) => {
     if (playing) {
-      store.hasPlayedRadio = true
+      store.hasPlayedRadio = true;
     }
   },
-  { immediate: true }
-)
+  { immediate: true },
+);
 
 const onPrevious = () => {
-  store.hasSkippedStation = true
-  emit('previous')
-}
+  store.hasSkippedStation = true;
+  emit("previous");
+};
 
 const onNext = () => {
-  store.hasSkippedStation = true
-  emit('next')
-}
+  store.hasSkippedStation = true;
+  emit("next");
+};
 
 onUnmounted(() => {
-  if (loadingTimeout) clearTimeout(loadingTimeout)
-  stopStatic()
-})
+  if (loadingTimeout) clearTimeout(loadingTimeout);
+  stopStatic();
+});
 </script>
 
 <template>
@@ -151,9 +151,7 @@ onUnmounted(() => {
     class="bg-paper-white rounded-2xl border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] w-full relative p-3"
   >
     <!-- Live Indicator -->
-    <div
-      class="absolute top-3 right-4 flex items-center gap-1.5 pointer-events-none"
-    >
+    <div class="absolute top-3 right-4 flex items-center gap-1.5 pointer-events-none">
       <div
         class="w-2.5 h-2.5 rounded-full border border-pencil-lead transition-colors duration-300"
         :class="
@@ -170,14 +168,9 @@ onUnmounted(() => {
     </div>
 
     <!-- Controls -->
-    <div
-      class="flex items-center justify-center gap-4 mb-3"
-    >
+    <div class="flex items-center justify-center gap-4 mb-3">
       <div class="relative">
-        <div
-          v-if="store.hasPlayedRadio && !store.hasSkippedStation"
-          class="magic-container"
-        >
+        <div v-if="store.hasPlayedRadio && !store.hasSkippedStation" class="magic-container">
           <div class="magic-wave wave-1"></div>
           <div class="magic-wave wave-2"></div>
         </div>
@@ -187,9 +180,7 @@ onUnmounted(() => {
           class="relative z-10 !p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead !h-10 !w-10"
           @click="onPrevious"
         >
-          <SkipBack
-            class="text-pencil-lead h-5 w-5"
-          />
+          <SkipBack class="text-pencil-lead h-5 w-5" />
         </van-button>
       </div>
 
@@ -205,26 +196,14 @@ onUnmounted(() => {
           class="relative z-10 !p-0 !border-3 !border-pencil-lead shadow-[0_4px_0_0_#334155] active:translate-y-1 active:shadow-none transition-all duration-100 bg-gumball-blue !h-14 !w-14"
           @click="emit('playPause')"
         >
-          <Loader2
-            v-if="isLoading"
-            class="animate-spin text-white h-6 w-6"
-          />
-          <Pause
-            v-else-if="isPlaying"
-            class="text-white fill-current h-6 w-6"
-          />
-          <Play
-            v-else
-            class="ml-1 text-white fill-current h-6 w-6"
-          />
+          <Loader2 v-if="isLoading" class="animate-spin text-white h-6 w-6" />
+          <Pause v-else-if="isPlaying" class="text-white fill-current h-6 w-6" />
+          <Play v-else class="ml-1 text-white fill-current h-6 w-6" />
         </van-button>
       </div>
 
       <div class="relative">
-        <div
-          v-if="store.hasPlayedRadio && !store.hasSkippedStation"
-          class="magic-container"
-        >
+        <div v-if="store.hasPlayedRadio && !store.hasSkippedStation" class="magic-container">
           <div class="magic-wave wave-1"></div>
           <div class="magic-wave wave-2"></div>
         </div>
@@ -234,9 +213,7 @@ onUnmounted(() => {
           class="relative z-10 !p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead !h-10 !w-10"
           @click="onNext"
         >
-          <SkipForward
-            class="text-pencil-lead h-5 w-5"
-          />
+          <SkipForward class="text-pencil-lead h-5 w-5" />
         </van-button>
       </div>
     </div>
@@ -247,9 +224,7 @@ onUnmounted(() => {
         v-for="station in 5"
         :key="station"
         class="h-3 rounded-full transition-all border-2 border-pencil-lead"
-        :class="
-          currentStation === station ? 'bg-bubblegum-pop w-8' : 'bg-white w-3'
-        "
+        :class="currentStation === station ? 'bg-bubblegum-pop w-8' : 'bg-white w-3'"
       />
     </div>
 

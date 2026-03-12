@@ -1,50 +1,50 @@
-import { storeToRefs } from 'pinia'
-import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { useGameStore } from '../stores/game'
-import type { GamePhase } from '../types/geo'
-import { getColorForDistanceLevel } from '../utils/colors'
-import { getDistanceHint } from '../utils/geography'
-import { useCountryData } from './useCountryData'
-import { useRadio } from './useRadio'
+import { storeToRefs } from "pinia";
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import { useGameStore } from "../stores/game";
+import type { GamePhase } from "../types/geo";
+import { getColorForDistanceLevel } from "../utils/colors";
+import { getDistanceHint } from "../utils/geography";
+import { useCountryData } from "./useCountryData";
+import { useRadio } from "./useRadio";
 
 interface GamePlayOptions {
-  onGuessAdded?: () => void
-  onNewGame?: () => void
-  onModalClose?: () => void
-  setupKeyboardShortcuts?: boolean
+  onGuessAdded?: () => void;
+  onNewGame?: () => void;
+  onModalClose?: () => void;
+  setupKeyboardShortcuts?: boolean;
 }
 
 const calculateScore = (attempts: number[]) => {
-  if (!attempts || attempts.length === 0) return (0).toFixed(2)
+  if (!attempts || attempts.length === 0) return (0).toFixed(2);
 
-  const winIndex = attempts.findIndex((lvl) => lvl === 0)
-  const isWin = winIndex !== -1
-  const maxAttempts = 5
-  const actualAttempts = attempts.slice(0, maxAttempts)
+  const winIndex = attempts.findIndex((lvl) => lvl === 0);
+  const isWin = winIndex !== -1;
+  const maxAttempts = 5;
+  const actualAttempts = attempts.slice(0, maxAttempts);
 
   if (isWin) {
     // WIN SCORING (Range 5.0 - 10.0)
     // 1. Base 5.0 for winning.
     // 2. Speed bonus: up to 4.0 points (Earlier win = more points).
-    const speedBonus = ((maxAttempts - winIndex) / maxAttempts) * 4.0
+    const speedBonus = ((maxAttempts - winIndex) / maxAttempts) * 4.0;
 
     // 3. Quality bonus: up to 1.0 point (Closeness of previous guesses).
-    let qualitySum = 0
+    let qualitySum = 0;
     if (winIndex > 0) {
-      const prevGuesses = attempts.slice(0, winIndex)
+      const prevGuesses = attempts.slice(0, winIndex);
       // Normalized: Level 1 (🤏) is best (1.0). Level 4 (🔴) is least (0.2).
       const qualityScore =
         prevGuesses.reduce((acc, lvl) => {
-          const val = lvl === 1 ? 1.0 : lvl === 2 ? 0.7 : lvl === 3 ? 0.4 : 0.1
-          return acc + val
-        }, 0) / winIndex
-      qualitySum = qualityScore * 1.0
+          const val = lvl === 1 ? 1.0 : lvl === 2 ? 0.7 : lvl === 3 ? 0.4 : 0.1;
+          return acc + val;
+        }, 0) / winIndex;
+      qualitySum = qualityScore * 1.0;
     } else {
       // Instant win gets full quality bonus
-      qualitySum = 1.0
+      qualitySum = 1.0;
     }
 
-    return Math.min(10, 5.0 + speedBonus + qualitySum).toFixed(2)
+    return Math.min(10, 5.0 + speedBonus + qualitySum).toFixed(2);
   } else {
     // FAIL SCORING (Range 0.0 - 4.99)
     // Weighted partial credit for proximity.
@@ -53,23 +53,20 @@ const calculateScore = (attempts: number[]) => {
       2: 0.6, // 🟡 Medium credit
       3: 0.2, // 🟠 Low credit
       4: 0.0, // 🔴 No credit
-    }
+    };
 
-    const totalWeight = actualAttempts.reduce(
-      (acc, lvl) => acc + (weightMap[lvl] || 0),
-      0
-    )
-    const maxPossibleWeightForFail = 5.0 // Five 🤏s
-    const score = (totalWeight / maxPossibleWeightForFail) * 4.99
+    const totalWeight = actualAttempts.reduce((acc, lvl) => acc + (weightMap[lvl] || 0), 0);
+    const maxPossibleWeightForFail = 5.0; // Five 🤏s
+    const score = (totalWeight / maxPossibleWeightForFail) * 4.99;
 
-    return score.toFixed(2)
+    return score.toFixed(2);
   }
-}
+};
 
 export function useGamePlay(options: GamePlayOptions) {
-  const isPlaying = ref(false)
-  const guessInput = ref('')
-  const guessColors = ref<Record<string, string>>({})
+  const isPlaying = ref(false);
+  const guessInput = ref("");
+  const guessColors = ref<Record<string, string>>({});
 
   const modalConfig = ref({
     isWin: false,
@@ -79,14 +76,14 @@ export function useGamePlay(options: GamePlayOptions) {
     dailyChallengeNumber: undefined as number | undefined,
     numericScore: undefined as number | undefined,
     isDailyChallenge: false,
-  })
+  });
 
   // State
-  const store = useGameStore()
-  const { roundFinished, gameHistory, gameStage } = storeToRefs(store)
-  const { addToHistory, loadHistory } = store
+  const store = useGameStore();
+  const { roundFinished, gameHistory, gameStage } = storeToRefs(store);
+  const { addToHistory, loadHistory } = store;
 
-  const showModal = computed(() => gameStage.value === 'seeResults')
+  const showModal = computed(() => gameStage.value === "seeResults");
 
   // Hooking up radio logic
   const {
@@ -108,132 +105,128 @@ export function useGamePlay(options: GamePlayOptions) {
     completeDailyChallenge,
     getDailyChallengeSeed,
     dailyChallengeNumber,
-  } = useRadio()
+  } = useRadio();
 
   // Hooking up country data
-  const { loadCountryData, getFeature } = useCountryData()
+  const { loadCountryData, getFeature } = useCountryData();
 
   const currentStationUrl = computed(() => {
-    return currentStations.value[currentStation.value - 1]?.channel_resolved_url
-  })
+    return currentStations.value[currentStation.value - 1]?.channel_resolved_url;
+  });
 
   const debugCountry = computed(() => {
-    return import.meta.env.VITE_DEBUG_MODE === 'true'
-      ? secretCountry.value
-      : undefined
-  })
+    return import.meta.env.VITE_DEBUG_MODE === "true" ? secretCountry.value : undefined;
+  });
 
   const handlePlayPause = () => {
-    isPlaying.value = !isPlaying.value
-  }
+    isPlaying.value = !isPlaying.value;
+  };
 
   const handlePrevious = () => {
-    currentStation.value =
-      currentStation.value > 1 ? currentStation.value - 1 : 5
-    saveState()
-  }
+    currentStation.value = currentStation.value > 1 ? currentStation.value - 1 : 5;
+    saveState();
+  };
 
   const handleNext = () => {
-    currentStation.value =
-      currentStation.value < 5 ? currentStation.value + 1 : 1
-    saveState()
-  }
+    currentStation.value = currentStation.value < 5 ? currentStation.value + 1 : 1;
+    saveState();
+  };
 
   const populateGuessColors = () => {
     guesses.value.forEach((guess) => {
-      if (guessColors.value[guess]) return
+      if (guessColors.value[guess]) return;
 
       // Explicit check for exact match (Win) -> Green
       if (guess.toLowerCase() === secretCountry.value?.toLowerCase()) {
-        guessColors.value[guess] = '#4ade80' // Green-400
-        return
+        guessColors.value[guess] = "#4ade80"; // Green-400
+        return;
       }
 
-      const secretFeature = getFeature(secretCountry.value)
-      const guessFeature = getFeature(guess)
+      const secretFeature = getFeature(secretCountry.value);
+      const guessFeature = getFeature(guess);
 
       if (secretFeature && guessFeature) {
-        const { level } = getDistanceHint(guessFeature, secretFeature)
-        const color = getColorForDistanceLevel(level)
-        guessColors.value[guess] = color
+        const { level } = getDistanceHint(guessFeature, secretFeature);
+        const color = getColorForDistanceLevel(level);
+        guessColors.value[guess] = color;
       } else {
-        guessColors.value[guess] = '#FB923C'
+        guessColors.value[guess] = "#FB923C";
       }
-    })
-  }
+    });
+  };
 
   const generateEmojiString = () => {
     // Clone guesses to avoid modifying the reactive array during this operation if needed
-    const currentGuesses = [...guesses.value]
+    const currentGuesses = [...guesses.value];
 
-    let emojiLine = ''
+    let emojiLine = "";
     currentGuesses.forEach((guess) => {
       // Check for win
       if (guess.toLowerCase() === secretCountry.value?.toLowerCase()) {
-        emojiLine += '🟢'
-        return
+        emojiLine += "🟢";
+        return;
       }
 
-      const secretFeature = getFeature(secretCountry.value)
-      const guessFeature = getFeature(guess)
+      const secretFeature = getFeature(secretCountry.value);
+      const guessFeature = getFeature(guess);
 
       if (secretFeature && guessFeature) {
-        const { emoji } = getDistanceHint(guessFeature, secretFeature)
-        emojiLine += emoji
+        const { emoji } = getDistanceHint(guessFeature, secretFeature);
+        emojiLine += emoji;
       } else {
-        emojiLine += '⬜' // Fallback
+        emojiLine += "⬜"; // Fallback
       }
-    })
-    return emojiLine
-  }
+    });
+    return emojiLine;
+  };
 
   const generateShareText = (dayNumber: number) => {
-    const lines = [`GeoHearo #${dayNumber}`, 'https://geohearo.com/']
+    const lines = [`GeoHearo #${dayNumber}`, "https://geohearo.com/"];
 
-    const emojiLine = generateEmojiString()
-    lines.push(emojiLine)
-    return lines.join('\n')
-  }
+    const emojiLine = generateEmojiString();
+    lines.push(emojiLine);
+    return lines.join("\n");
+  };
 
   const getScoreLevels = (): number[] => {
     return guesses.value.map((g) => {
-      if (g.toLowerCase() === secretCountry.value?.toLowerCase()) return 0
-      const sFeature = getFeature(secretCountry.value)
-      const gFeature = getFeature(g)
+      if (g.toLowerCase() === secretCountry.value?.toLowerCase()) return 0;
+      const sFeature = getFeature(secretCountry.value);
+      const gFeature = getFeature(g);
       if (sFeature && gFeature) {
-        const { level } = getDistanceHint(gFeature, sFeature)
+        const { level } = getDistanceHint(gFeature, sFeature);
         // Map 1-6 to user's 1-4 scale
-        if (level === 1) return 1
-        if (level === 2) return 2
-        if (level === 3 || level === 4) return 3
-        return 4
+        if (level === 1) return 1;
+        if (level === 2) return 2;
+        if (level === 3 || level === 4) return 3;
+        return 4;
       }
-      return 4
-    })
-  }
+      return 4;
+    });
+  };
 
   const handleAddGuess = () => {
-    const guess = guessInput.value.trim()
-    if (!guess || guesses.value.length >= 5) return
+    const guess = guessInput.value.trim();
+    if (!guess || guesses.value.length >= 5) return;
 
     if (checkGuess(guess)) {
-      addGuess(guess) // Ensure winning guess is added to state
+      addGuess(guess); // Ensure winning guess is added to state
 
-      const resultsGrid = generateEmojiString()
-      let shareText: string | undefined
-      let dayNumber: number | undefined
-      const gameMode = isDailyChallengeMode.value ? 'daily' : 'free'
+      const resultsGrid = generateEmojiString();
+      let shareText: string | undefined;
+      let dayNumber: number | undefined;
+      const gameMode = isDailyChallengeMode.value ? "daily" : "free";
 
-      const isDaily = isDailyChallengeMode.value
+      const isDaily = isDailyChallengeMode.value;
 
       if (isDaily) {
-        dayNumber = dailyChallengeNumber.value || 0
-        completeDailyChallenge() // Mark as done for today
-        shareText = generateShareText(dayNumber)
+        dayNumber = dailyChallengeNumber.value || 0;
+        completeDailyChallenge(); // Mark as done for today
+        shareText = generateShareText(dayNumber);
       }
 
-      const attempts = getScoreLevels()
-      const numericScore = parseFloat(calculateScore(attempts))
+      const attempts = getScoreLevels();
+      const numericScore = parseFloat(calculateScore(attempts));
 
       modalConfig.value = {
         isWin: true,
@@ -243,57 +236,57 @@ export function useGamePlay(options: GamePlayOptions) {
         dailyChallengeNumber: dayNumber,
         numericScore,
         isDailyChallenge: isDaily,
-      }
+      };
 
       addToHistory({
-        country: secretCountry.value || 'Unknown',
+        country: secretCountry.value || "Unknown",
         score: resultsGrid,
         numericScore: numericScore,
         date: new Date().toISOString(),
         mode: gameMode,
-      })
+      });
 
       // clearState() <-- REMOVED
-      store.setGameStage('seeResults')
-      saveState()
-      return
+      store.setGameStage("seeResults");
+      saveState();
+      return;
     }
 
-    const secretFeature = getFeature(secretCountry.value)
-    const guessFeature = getFeature(guess)
+    const secretFeature = getFeature(secretCountry.value);
+    const guessFeature = getFeature(guess);
 
     // Check for exact match first (Win condition color)
     if (guess.toLowerCase() === secretCountry.value?.toLowerCase()) {
-      guessColors.value[guess] = '#4ade80'
+      guessColors.value[guess] = "#4ade80";
     } else if (secretFeature && guessFeature) {
-      const { level } = getDistanceHint(guessFeature, secretFeature)
-      const color = getColorForDistanceLevel(level)
-      guessColors.value[guess] = color
+      const { level } = getDistanceHint(guessFeature, secretFeature);
+      const color = getColorForDistanceLevel(level);
+      guessColors.value[guess] = color;
     } else {
-      guessColors.value[guess] = '#FB923C'
+      guessColors.value[guess] = "#FB923C";
     }
 
-    addGuess(guess)
-    guessInput.value = ''
+    addGuess(guess);
+    guessInput.value = "";
 
-    options.onGuessAdded?.()
+    options.onGuessAdded?.();
 
     if (guesses.value.length >= 5) {
-      const resultsGrid = generateEmojiString()
-      let shareText: string | undefined
-      let dayNumber: number | undefined
-      const gameMode = isDailyChallengeMode.value ? 'daily' : 'free'
+      const resultsGrid = generateEmojiString();
+      let shareText: string | undefined;
+      let dayNumber: number | undefined;
+      const gameMode = isDailyChallengeMode.value ? "daily" : "free";
 
-      const isDaily = isDailyChallengeMode.value
+      const isDaily = isDailyChallengeMode.value;
 
       if (isDaily) {
-        dayNumber = dailyChallengeNumber.value || 0
-        completeDailyChallenge()
-        shareText = generateShareText(dayNumber)
+        dayNumber = dailyChallengeNumber.value || 0;
+        completeDailyChallenge();
+        shareText = generateShareText(dayNumber);
       }
 
-      const attempts = getScoreLevels()
-      const numericScore = parseFloat(calculateScore(attempts))
+      const attempts = getScoreLevels();
+      const numericScore = parseFloat(calculateScore(attempts));
 
       modalConfig.value = {
         isWin: false,
@@ -303,87 +296,85 @@ export function useGamePlay(options: GamePlayOptions) {
         dailyChallengeNumber: dayNumber,
         numericScore,
         isDailyChallenge: isDaily,
-      }
+      };
 
       addToHistory({
-        country: secretCountry.value || 'Unknown',
+        country: secretCountry.value || "Unknown",
         score: resultsGrid,
         numericScore: numericScore, // 0 for a loss
         date: new Date().toISOString(),
         mode: gameMode,
-      })
+      });
 
       // clearState() <-- REMOVED
-      store.setGameStage('seeResults')
-      saveState()
+      store.setGameStage("seeResults");
+      saveState();
     }
-  }
+  };
 
   const handleModalClose = () => {
-    store.setGameStage('listening')
-    saveState()
-    options.onModalClose?.()
-  }
+    store.setGameStage("listening");
+    saveState();
+    options.onModalClose?.();
+  };
 
   const handleModalConfirm = () => {
-    clearState()
-    guessInput.value = ''
-    guessColors.value = {}
-    isPlaying.value = false
-    options.onNewGame?.()
-    selectRandomCountry()
-  }
+    clearState();
+    guessInput.value = "";
+    guessColors.value = {};
+    isPlaying.value = false;
+    options.onNewGame?.();
+    selectRandomCountry();
+  };
 
   const handleCountrySelect = (name: string) => {
-    guessInput.value = name
-  }
+    guessInput.value = name;
+  };
 
   const handleKeydown = (e: KeyboardEvent) => {
-    const target = e.target as HTMLElement
-    if (['INPUT', 'TEXTAREA'].includes(target.tagName)) return
+    const target = e.target as HTMLElement;
+    if (["INPUT", "TEXTAREA"].includes(target.tagName)) return;
 
     switch (e.code) {
-      case 'Space':
-        e.preventDefault()
-        handlePlayPause()
-        break
-      case 'ArrowLeft':
-        e.preventDefault()
-        handlePrevious()
-        break
-      case 'ArrowRight':
-        e.preventDefault()
-        handleNext()
-        break
-      case 'Enter':
-        e.preventDefault()
-        handleAddGuess()
-        break
+      case "Space":
+        e.preventDefault();
+        handlePlayPause();
+        break;
+      case "ArrowLeft":
+        e.preventDefault();
+        handlePrevious();
+        break;
+      case "ArrowRight":
+        e.preventDefault();
+        handleNext();
+        break;
+      case "Enter":
+        e.preventDefault();
+        handleAddGuess();
+        break;
     }
-  }
+  };
 
   onMounted(() => {
     if (options.setupKeyboardShortcuts) {
-      window.addEventListener('keydown', handleKeydown)
+      window.addEventListener("keydown", handleKeydown);
     }
 
-    loadHistory()
+    loadHistory();
 
     // Load both stations (for audio) and country data (for map/distance)
     Promise.all([loadStations(), loadCountryData()]).then(async () => {
       // Initialize Daily Challenge Logic
-      initDailyChallenge()
+      initDailyChallenge();
 
-      const debugStage = import.meta.env.VITE_GAME_STAGE as
-        | GamePhase
-        | undefined
-      if (debugStage === 'seeResults' || debugStage === 'listening') {
+      const debugStage = import.meta.env.VITE_GAME_STAGE as GamePhase | undefined;
+      if (debugStage === "seeResults" || debugStage === "listening") {
         // Debug mode: Skip to specified stage
 
         // Try to restore existing session state first so refreshing doesn't change the country
-        const restored = await restoreState()
+        const restored = await restoreState();
         if (!restored) {
-          await selectRandomCountry()
+          await selectRandomCountry();
         }
 
         modalConfig.value = {
@@ -394,70 +385,66 @@ export function useGamePlay(options: GamePlayOptions) {
           dailyChallengeNumber: undefined,
           numericScore: undefined,
           isDailyChallenge: false,
-        }
-        store.setGameStage(debugStage)
+        };
+        store.setGameStage(debugStage);
       } else if (isDailyChallengeMode.value) {
-        const dailySeed = getDailyChallengeSeed()
+        const dailySeed = getDailyChallengeSeed();
         // Try restoring session state, but only keep it if it matches today's seed
-        const restored = await restoreState()
+        const restored = await restoreState();
         if (restored && currentSeed.value === dailySeed) {
-          populateGuessColors()
+          populateGuessColors();
           // Re-populate modal config if we're restoring into seeResults
-          if (gameStage.value === 'seeResults') {
+          if (gameStage.value === "seeResults") {
             modalConfig.value = {
               isWin:
                 roundFinished.value &&
-                guesses.value.some(
-                  (g) => g.toLowerCase() === secretCountry.value?.toLowerCase()
-                ),
+                guesses.value.some((g) => g.toLowerCase() === secretCountry.value?.toLowerCase()),
               shareText: undefined,
               resultsGrid: undefined,
               secretCountry: secretCountry.value,
               dailyChallengeNumber: dailyChallengeNumber.value,
               numericScore: undefined,
               isDailyChallenge: true,
-            }
+            };
           }
         } else {
-          clearState()
-          selectRandomCountry(dailySeed)
+          clearState();
+          selectRandomCountry(dailySeed);
         }
       } else {
         // Free play or already completed daily challenge
-        const restored = await restoreState()
+        const restored = await restoreState();
         if (restored && secretCountry.value) {
-          populateGuessColors()
+          populateGuessColors();
           // Re-populate modal config if we're restoring into seeResults
-          if (gameStage.value === 'seeResults') {
-            const lastHistory = gameHistory.value[gameHistory.value.length - 1]
-            const isDailyHistory = lastHistory?.mode === 'daily'
+          if (gameStage.value === "seeResults") {
+            const lastHistory = gameHistory.value[gameHistory.value.length - 1];
+            const isDailyHistory = lastHistory?.mode === "daily";
 
             modalConfig.value = {
               isWin:
                 roundFinished.value &&
-                guesses.value.some(
-                  (g) => g.toLowerCase() === secretCountry.value?.toLowerCase()
-                ),
+                guesses.value.some((g) => g.toLowerCase() === secretCountry.value?.toLowerCase()),
               shareText: undefined,
               resultsGrid: undefined,
               secretCountry: secretCountry.value,
               dailyChallengeNumber: undefined,
               numericScore: undefined,
               isDailyChallenge: isDailyHistory,
-            }
+            };
           }
         } else {
-          selectRandomCountry()
+          selectRandomCountry();
         }
       }
-    })
-  })
+    });
+  });
 
   onUnmounted(() => {
     if (options.setupKeyboardShortcuts) {
-      window.removeEventListener('keydown', handleKeydown)
+      window.removeEventListener("keydown", handleKeydown);
     }
-  })
+  });
 
   return {
     isPlaying,
@@ -481,17 +468,15 @@ export function useGamePlay(options: GamePlayOptions) {
     handleModalConfirm,
     handleCountrySelect,
     handleNewGame: () => {
-      clearState()
-      guessInput.value = ''
-      guessColors.value = {}
-      isPlaying.value = false
-      options.onNewGame?.()
+      clearState();
+      guessInput.value = "";
+      guessColors.value = {};
+      isPlaying.value = false;
+      options.onNewGame?.();
       selectRandomCountry().then(() => {
         // Debug override: Skip to specified stage on new game
-        const debugStage = import.meta.env.VITE_GAME_STAGE as
-          | GamePhase
-          | undefined
-        if (debugStage === 'seeResults' || debugStage === 'listening') {
+        const debugStage = import.meta.env.VITE_GAME_STAGE as GamePhase | undefined;
+        if (debugStage === "seeResults" || debugStage === "listening") {
           modalConfig.value = {
             isWin: false,
             shareText: undefined,
@@ -500,19 +485,19 @@ export function useGamePlay(options: GamePlayOptions) {
             dailyChallengeNumber: undefined,
             numericScore: undefined,
             isDailyChallenge: false,
-          }
-          store.setGameStage(debugStage)
+          };
+          store.setGameStage(debugStage);
         }
-      })
+      });
     },
     handleShare: async () => {
-      const text = generateShareText(dailyChallengeNumber.value || 0)
+      const text = generateShareText(dailyChallengeNumber.value || 0);
       try {
-        await navigator.clipboard.writeText(text)
+        await navigator.clipboard.writeText(text);
         // Could add toast notification here
       } catch (err) {
-        console.error('Failed to copy results', err)
+        console.error("Failed to copy results", err);
       }
     },
-  }
+  };
 }

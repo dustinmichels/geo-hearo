@@ -1,43 +1,37 @@
 <script setup lang="ts">
-import { ArrowRight, X } from 'lucide-vue-next'
-import type { GameHistoryItem } from '../types/geo'
-import DailyChallengeCard from './DailyChallengeCard.vue'
-import GameHistoryList from './GameHistoryList.vue'
+import { ArrowRight, X } from "lucide-vue-next";
+import type { GameHistoryItem } from "../types/geo";
+import DailyChallengeCard from "./DailyChallengeCard.vue";
+import GameHistoryList from "./GameHistoryList.vue";
 
 const props = defineProps<{
-  show: boolean
-  isWin?: boolean
-  secretCountry?: string
-  history?: GameHistoryItem[]
-  isDailyChallenge?: boolean
-  dailyChallengeNumber?: number
-}>()
+  show: boolean;
+  isWin?: boolean;
+  secretCountry?: string;
+  history?: GameHistoryItem[];
+  isDailyChallenge?: boolean;
+  dailyChallengeNumber?: number;
+}>();
 
 const emit = defineEmits<{
-  (e: 'confirm'): void
-  (e: 'close'): void
-}>()
+  (e: "confirm"): void;
+  (e: "close"): void;
+}>();
 
-import { computed } from 'vue'
+import { computed } from "vue";
 
 const latestItem = computed(() => {
-  if (!props.history || props.history.length === 0) return null
+  if (!props.history || props.history.length === 0) return null;
   // Assuming history is array where new items are pushed to end
-  return props.history[props.history.length - 1]
-})
+  return props.history[props.history.length - 1];
+});
 </script>
 
 <template>
   <Teleport to="body">
-    <div
-      v-if="show"
-      class="fixed inset-0 z-[9999] flex items-center justify-center px-6"
-    >
+    <div v-if="show" class="fixed inset-0 z-[9999] flex items-center justify-center px-6">
       <!-- Backdrop -->
-      <div
-        class="absolute inset-0 bg-pencil-lead/20 backdrop-blur-sm"
-        @click.stop
-      ></div>
+      <div class="absolute inset-0 bg-pencil-lead/20 backdrop-blur-sm" @click.stop></div>
 
       <!-- Modal Card -->
       <div
@@ -54,19 +48,17 @@ const latestItem = computed(() => {
         <!-- Fixed top: Country name -->
         <div class="shrink-0 px-6 pt-6">
           <div class="mb-2">
-            <span class="text-5xl">{{ isWin ? '🎉' : '🤔' }}</span>
+            <span class="text-5xl">{{ isWin ? "🎉" : "🤔" }}</span>
             <h2
               class="text-2xl font-heading mt-2 tracking-wide"
               :class="isWin ? 'text-mint-shake' : 'text-berry-oops'"
             >
-              {{ isWin ? 'Nice work!' : 'Game Over!' }}
+              {{ isWin ? "Nice work!" : "Game Over!" }}
             </h2>
           </div>
           <p class="text-base text-pencil-lead/80 leading-relaxed">
             The country was:
-            <strong class="text-pencil-lead font-bold">{{
-              secretCountry || 'Unknown'
-            }}</strong>
+            <strong class="text-pencil-lead font-bold">{{ secretCountry || "Unknown" }}</strong>
           </p>
         </div>
 

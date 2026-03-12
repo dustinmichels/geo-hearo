@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { RotateCcw } from 'lucide-vue-next'
-import type { RadioStation } from '../types/geo'
-import StationDetails from './StationDetails.vue'
+import { RotateCcw } from "lucide-vue-next";
+import type { RadioStation } from "../types/geo";
+import StationDetails from "./StationDetails.vue";
 
 withDefaults(
   defineProps<{
-    station?: RadioStation
-    layout?: 'default' | 'desktop'
+    station?: RadioStation;
+    layout?: "default" | "desktop";
   }>(),
   {
-    layout: 'default',
-  }
-)
+    layout: "default",
+  },
+);
 
 defineEmits<{
-  (e: 'newGame'): void
-}>()
+  (e: "newGame"): void;
+}>();
 </script>
 
 <template>
@@ -35,9 +35,7 @@ defineEmits<{
     <!-- Right: Action Buttons -->
     <div
       class="flex shrink-0 w-24"
-      :class="
-        layout === 'desktop' ? 'flex-row w-full h-16' : 'flex-col w-24 h-auto'
-      "
+      :class="layout === 'desktop' ? 'flex-row w-full h-16' : 'flex-col w-24 h-auto'"
     >
       <!-- New Game -->
       <button

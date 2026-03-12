@@ -1,34 +1,32 @@
 <script setup lang="ts">
-import { ExternalLink } from 'lucide-vue-next'
-import { computed } from 'vue'
-import type { RadioStation } from '../types/geo'
+import { ExternalLink } from "lucide-vue-next";
+import { computed } from "vue";
+import type { RadioStation } from "../types/geo";
 
 const props = withDefaults(
   defineProps<{
-    station?: RadioStation
-    layout?: 'default' | 'desktop'
+    station?: RadioStation;
+    layout?: "default" | "desktop";
   }>(),
   {
-    layout: 'default',
-  }
-)
+    layout: "default",
+  },
+);
 
 const formattedLocation = computed(() => {
-  if (!props.station) return ''
-  return [props.station.place_name, props.station.country]
-    .filter(Boolean)
-    .join(', ')
-})
+  if (!props.station) return "";
+  return [props.station.place_name, props.station.country].filter(Boolean).join(", ");
+});
 
 const gardenUrl = computed(() => {
-  if (!props.station?.channel_url) return ''
+  if (!props.station?.channel_url) return "";
   // Ensure we don't double slash if channel_url starts with /
-  const path = props.station.channel_url.startsWith('/')
+  const path = props.station.channel_url.startsWith("/")
     ? props.station.channel_url
-    : `/${props.station.channel_url}`
+    : `/${props.station.channel_url}`;
 
-  return `https://radio.garden${path}`
-})
+  return `https://radio.garden${path}`;
+});
 </script>
 
 <template>
