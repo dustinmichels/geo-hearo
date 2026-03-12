@@ -1,6 +1,6 @@
 let audioCtx: AudioContext | null = null;
 
-export function playRadioStatic(duration = 2) {
+export async function playRadioStatic(duration = 2): Promise<AudioBufferSourceNode | undefined> {
   // Initialize AudioContext lazily to handle browser policies
   if (!audioCtx) {
     const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
@@ -14,7 +14,7 @@ export function playRadioStatic(duration = 2) {
 
   // Ensure context is running (it might be suspended if created before user interaction)
   if (audioCtx.state === "suspended") {
-    audioCtx.resume();
+    await audioCtx.resume();
   }
 
   const bufferSize = audioCtx.sampleRate * duration;

@@ -35,9 +35,9 @@ const stopStatic = () => {
   }
 };
 
-const playStatic = () => {
+const playStatic = async () => {
   stopStatic();
-  const source = playRadioStatic();
+  const source = await playRadioStatic();
   if (source) {
     currentStaticSource.value = source;
   }
@@ -50,17 +50,19 @@ const onAudioPlaying = () => {
 
 watch(
   () => props.isPlaying,
-  (playing) => {
+  async (playing) => {
     if (!audioPlayer.value) return;
     if (playing) {
       isLoading.value = true;
-      playStatic();
-      audioPlayer.value.play().catch((e) => {
-        if (e.name === "AbortError") return;
-        isLoading.value = false;
-        stopStatic();
-        console.error("Playback failed", e);
-      });
+      await playStatic();
+      if (props.stationUrl) {
+        audioPlayer.value.play().catch((e) => {
+          if (e.name === "AbortError") return;
+          isLoading.value = false;
+          stopStatic();
+          console.error("Playback failed", e);
+        });
+      }
     } else {
       isLoading.value = false;
       audioPlayer.value.pause();
@@ -71,7 +73,7 @@ watch(
 
 watch(
   () => props.stationUrl,
-  (newUrl) => {
+  async (newUrl) => {
     if (!audioPlayer.value) return;
     if (newUrl) {
       audioPlayer.value.src = newUrl;
@@ -87,7 +89,7 @@ watch(
           }
         }, 5000);
 
-        playStatic();
+        await playStatic();
         audioPlayer.value.play().catch((e) => {
           if (e.name === "AbortError") return;
           isLoading.value = false;
