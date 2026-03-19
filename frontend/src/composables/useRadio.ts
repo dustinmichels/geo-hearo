@@ -284,14 +284,14 @@ export function useRadio() {
   // Refactor note: we use local '2026-02-02' construction in getDailyChallengeNumber directly.
 
   /**
-   * Calculates the Day # based on user's LOCAL time relative to Feb 2, 2026.
+   * Calculates the Day # based on UTC time relative to Feb 2, 2026.
    * Day 1 is Feb 2, 2026.
    */
   const getDailyChallengeNumber = (): number => {
     const now = new Date();
-    // Reset hours to compare dates only
-    const current = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const start = new Date(2026, 1, 2); // Month is 0-indexed: 1 = Feb
+    // Compare UTC dates only
+    const current = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const start = new Date(Date.UTC(2026, 1, 2)); // Feb 2, 2026 UTC
 
     const diffTime = current.getTime() - start.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -302,12 +302,17 @@ export function useRadio() {
 
   const getDailyChallengeSeed = (): number => {
     const now = new Date();
-    // Create a unique integer from YYYYMMDD
-    return now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+    // Create a unique integer from YYYYMMDD in UTC
+    return now.getUTCFullYear() * 10000 + (now.getUTCMonth() + 1) * 100 + now.getUTCDate();
+  };
+
+  const getUTCDateString = (): string => {
+    const now = new Date();
+    return `${now.getUTCFullYear()}-${now.getUTCMonth() + 1}-${now.getUTCDate()}`;
   };
 
   const initDailyChallenge = () => {
-    const todayStr = new Date().toDateString();
+    const todayStr = getUTCDateString();
     const lastCompleted = localStorage.getItem(STORAGE_KEY_DAILY_DATE);
 
     if (lastCompleted === todayStr) {
@@ -320,7 +325,7 @@ export function useRadio() {
   };
 
   const completeDailyChallenge = () => {
-    localStorage.setItem(STORAGE_KEY_DAILY_DATE, new Date().toDateString());
+    localStorage.setItem(STORAGE_KEY_DAILY_DATE, getUTCDateString());
     store.setDailyChallengeMode(false);
   };
 

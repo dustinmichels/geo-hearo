@@ -6,7 +6,7 @@
 
 > GeoHearo is the geo-guessing game where you win with your ears.
 >
-> 1. Stream five live, random radio stations from a mystery country
+> 1. Stream five live, random radio stations from one mystery country
 > 1. Make a guess, get a hint, repeat
 > 1. Tomorrow will bring a new daily challenge
 >

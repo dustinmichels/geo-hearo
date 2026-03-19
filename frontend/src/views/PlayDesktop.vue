@@ -37,10 +37,12 @@ const {
   handleModalConfirm,
   handleCountrySelect,
   handleModalClose,
+  handleShowStats,
   handleNewGame,
   gameStage,
   secretCountry,
   gameHistory,
+  isStatsView,
 } = useGamePlay({
   setupKeyboardShortcuts: true,
   onNewGame: () => mapRef.value?.resetView(),
@@ -167,7 +169,7 @@ const dailyItem = computed(() => {
           <CountryDetails v-if="secretCountry" :country-name="secretCountry" class="text-left" />
 
           <!-- Daily Challenge Card -->
-          <DailyChallengeCard v-if="dailyItem" :item="dailyItem" />
+          <DailyChallengeCard v-if="dailyItem" :item="dailyItem" :show-stats-button="true" @show-stats="handleShowStats" />
         </div>
 
         <!-- Guess Panel Card -->
@@ -198,6 +200,8 @@ const dailyItem = computed(() => {
       :history="gameHistory"
       :is-daily-challenge="modalConfig.isDailyChallenge"
       :daily-challenge-number="modalConfig.dailyChallengeNumber"
+      :challenge-date="modalConfig.challengeDate"
+      :stats-view="isStatsView"
       @confirm="handleModalConfirm"
       @close="handleModalClose"
     />

@@ -87,7 +87,7 @@
                 v-for="(step, index) in steps"
                 :key="index"
                 class="flex items-center gap-4 sm:gap-6 animate-slide-in-right hover-step"
-                :style="{ animationDelay: `${0.6 + index * 0.2}s` }"
+                :style="{ animationDelay: `${0.35 + index * 0.12}s` }"
               >
                 <div :class="['step-badge', step.colorClass]">
                   {{ index + 1 }}
@@ -138,7 +138,7 @@ const globeImage = ref("/globe.png");
 
 const steps = [
   {
-    text: "Stream five live, random radio stations from a mystery country",
+    text: "Stream five live, random radio stations from one mystery country",
     colorClass: "bg-gumball-blue",
   },
   {
@@ -323,12 +323,12 @@ const handleTuneIn = (_event: Event) => {
 }
 
 .animate-slide-up {
-  animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-slide-in-right {
   opacity: 0; /* Starts hidden */
-  animation: slideInRight 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  animation: slideInRight 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 .animate-fade-in-delayed {
@@ -338,12 +338,12 @@ const handleTuneIn = (_event: Event) => {
 
 .animate-pop-in-delayed {
   opacity: 0;
-  animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1s forwards;
+  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.6s forwards;
 }
 
 .animate-pop-in-late {
   opacity: 0;
-  animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.2s forwards;
+  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.75s forwards;
 }
 
 /* Floating / Continuous Animations */
@@ -373,8 +373,7 @@ const handleTuneIn = (_event: Event) => {
   }
 }
 .animate-float-sticker1 {
-  /* Starting rotation was 12deg in HTML class, animation will override, so baked into keyframes */
-  animation: floatSticker1 5s ease-in-out infinite 0.5s;
+  animation: floatSticker1 5s ease-in-out 0.5s infinite normal backwards;
 }
 
 /* Sticker 2 Float */
@@ -388,7 +387,7 @@ const handleTuneIn = (_event: Event) => {
   }
 }
 .animate-float-sticker2 {
-  animation: floatSticker2 7s ease-in-out infinite 1s;
+  animation: floatSticker2 7s ease-in-out 1s infinite normal backwards;
 }
 
 /* Blobs */

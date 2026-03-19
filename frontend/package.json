@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@plausible-analytics/tracker": "^0.4.4",
+    "@supabase/supabase-js": "^2.99.3",
     "@turf/area": "^7.3.3",
     "@turf/boolean-intersects": "^7.3.3",
     "@turf/distance": "^7.3.3",

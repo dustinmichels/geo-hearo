@@ -52,10 +52,12 @@ const {
   handleModalConfirm,
   handleCountrySelect,
   handleModalClose,
+  handleShowStats,
   handleNewGame,
   gameStage,
   secretCountry,
   gameHistory,
+  isStatsView,
 } = useGamePlay({
   onGuessAdded: () => {
     panelHeight.value = anchors[1];
@@ -233,7 +235,7 @@ const dailyItem = computed(() => {
             :show-name="false"
             :small-image="true"
           />
-          <DailyChallengeCard v-if="dailyItem" :item="dailyItem" />
+          <DailyChallengeCard v-if="dailyItem" :item="dailyItem" :show-stats-button="true" @show-stats="handleShowStats" />
         </div>
       </div>
     </van-floating-panel>
@@ -263,6 +265,8 @@ const dailyItem = computed(() => {
       :history="gameHistory"
       :is-daily-challenge="modalConfig.isDailyChallenge"
       :daily-challenge-number="modalConfig.dailyChallengeNumber"
+      :challenge-date="modalConfig.challengeDate"
+      :stats-view="isStatsView"
       @confirm="handleModalConfirm"
       @close="handleModalClose"
     />

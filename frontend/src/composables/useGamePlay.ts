@@ -1,7 +1,8 @@
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref } from "vue";
+import { trackDailyResult } from "../lib/supabase";
 import { useGameStore } from "../stores/game";
-import type { GamePhase } from "../types/geo";
+import type { GameHistoryItem, GamePhase } from "../types/geo";
 import { getColorForDistanceLevel } from "../utils/colors";
 import { getDistanceHint } from "../utils/geography";
 import { useCountryData } from "./useCountryData";
@@ -76,6 +77,7 @@ export function useGamePlay(options: GamePlayOptions) {
     dailyChallengeNumber: undefined as number | undefined,
     numericScore: undefined as number | undefined,
     isDailyChallenge: false,
+    challengeDate: undefined as string | undefined,
   });
 
   // State
@@ -83,7 +85,8 @@ export function useGamePlay(options: GamePlayOptions) {
   const { roundFinished, gameHistory, gameStage } = storeToRefs(store);
   const { addToHistory, loadHistory } = store;
 
-  const showModal = computed(() => gameStage.value === "seeResults");
+  const showStatsOverride = ref(false);
+  const showModal = computed(() => gameStage.value === "seeResults" || showStatsOverride.value);
 
   // Hooking up radio logic
   const {
@@ -205,6 +208,12 @@ export function useGamePlay(options: GamePlayOptions) {
     });
   };
 
+  // currentSeed is YYYYMMDD as a number (e.g. 20260319) — convert to "2026-03-19"
+  const getChallengeDate = (): string => {
+    const s = (currentSeed.value ?? 0).toString();
+    return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
+  };
+
   const handleAddGuess = () => {
     const guess = guessInput.value.trim();
     if (!guess || guesses.value.length >= 5) return;
@@ -223,6 +232,7 @@ export function useGamePlay(options: GamePlayOptions) {
         dayNumber = dailyChallengeNumber.value || 0;
         completeDailyChallenge(); // Mark as done for today
         shareText = generateShareText(dayNumber);
+        trackDailyResult(getChallengeDate(), guesses.value.length);
       }
 
       const attempts = getScoreLevels();
@@ -236,6 +246,7 @@ export function useGamePlay(options: GamePlayOptions) {
         dailyChallengeNumber: dayNumber,
         numericScore,
         isDailyChallenge: isDaily,
+        challengeDate: isDaily ? getChallengeDate() : undefined,
       };
 
       addToHistory({
@@ -283,6 +294,7 @@ export function useGamePlay(options: GamePlayOptions) {
         dayNumber = dailyChallengeNumber.value || 0;
         completeDailyChallenge();
         shareText = generateShareText(dayNumber);
+        trackDailyResult(getChallengeDate(), 6); // 6 = loss sentinel
       }
 
       const attempts = getScoreLevels();
@@ -296,6 +308,7 @@ export function useGamePlay(options: GamePlayOptions) {
         dailyChallengeNumber: dayNumber,
         numericScore,
         isDailyChallenge: isDaily,
+        challengeDate: isDaily ? getChallengeDate() : undefined,
       };
 
       addToHistory({
@@ -312,7 +325,34 @@ export function useGamePlay(options: GamePlayOptions) {
     }
   };
 
+  const handleShowStats = () => {
+    const dailyItem = gameHistory.value.find((item) => item.mode === "daily");
+    if (!dailyItem) return;
+
+    const challengeDate = dailyItem.date.slice(0, 10); // "YYYY-MM-DD"
+    const start = new Date(2026, 1, 2); // Feb 2, 2026
+    const date = new Date(challengeDate);
+    const diffDays = Math.ceil((date.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+    const dayNumber = diffDays + 1;
+
+    modalConfig.value = {
+      isWin: dailyItem.score.includes("🟢"),
+      shareText: `GeoHearo #${dayNumber}\nhttps://geohearo.com/\n${dailyItem.score}`,
+      resultsGrid: dailyItem.score,
+      secretCountry: dailyItem.country,
+      dailyChallengeNumber: dayNumber,
+      numericScore: dailyItem.numericScore,
+      isDailyChallenge: true,
+      challengeDate,
+    };
+    showStatsOverride.value = true;
+  };
+
   const handleModalClose = () => {
+    if (showStatsOverride.value) {
+      showStatsOverride.value = false;
+      return;
+    }
     store.setGameStage("listening");
     saveState();
     options.onModalClose?.();
@@ -385,6 +425,7 @@ export function useGamePlay(options: GamePlayOptions) {
           dailyChallengeNumber: undefined,
           numericScore: undefined,
           isDailyChallenge: false,
+          challengeDate: undefined,
         };
         store.setGameStage(debugStage);
       } else if (isDailyChallengeMode.value) {
@@ -405,6 +446,7 @@ export function useGamePlay(options: GamePlayOptions) {
               dailyChallengeNumber: dailyChallengeNumber.value,
               numericScore: undefined,
               isDailyChallenge: true,
+              challengeDate: getChallengeDate(),
             };
           }
         } else {
@@ -431,6 +473,7 @@ export function useGamePlay(options: GamePlayOptions) {
               dailyChallengeNumber: undefined,
               numericScore: undefined,
               isDailyChallenge: isDailyHistory,
+              challengeDate: isDailyHistory ? getChallengeDate() : undefined,
             };
           }
         } else {
@@ -465,6 +508,7 @@ export function useGamePlay(options: GamePlayOptions) {
     handleNext,
     handleAddGuess,
     handleModalClose,
+    handleShowStats,
     handleModalConfirm,
     handleCountrySelect,
     handleNewGame: () => {
@@ -485,11 +529,13 @@ export function useGamePlay(options: GamePlayOptions) {
             dailyChallengeNumber: undefined,
             numericScore: undefined,
             isDailyChallenge: false,
+            challengeDate: undefined,
           };
           store.setGameStage(debugStage);
         }
       });
     },
+    isStatsView: showStatsOverride,
     handleShare: async () => {
       const text = generateShareText(dailyChallengeNumber.value || 0);
       try {
