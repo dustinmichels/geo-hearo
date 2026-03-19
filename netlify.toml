@@ -1,6 +1,6 @@
 [build]
   base = "frontend"
-  command = "npm run build"
+  command = "bun run build"
   publish = "dist"
 
 [[redirects]]

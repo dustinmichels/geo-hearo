@@ -2,7 +2,7 @@ import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { trackDailyResult } from "../lib/supabase";
 import { useGameStore } from "../stores/game";
-import type { GameHistoryItem, GamePhase } from "../types/geo";
+import type { GamePhase } from "../types/geo";
 import { getColorForDistanceLevel } from "../utils/colors";
 import { getDistanceHint } from "../utils/geography";
 import { useCountryData } from "./useCountryData";

@@ -5,11 +5,11 @@ A geography guessing game where players identify countries by listening to live 
 ## Quick Start
 
 ```bash
-npm install
-npm run dev       # Start dev server
-npm test          # Run tests
-npm run build     # Production build (output: dist/)
-npm run format    # Format code
+bun install
+bun run dev       # Start dev server
+bun test          # Run tests
+bun run build     # Production build (output: dist/)
+bun run fmt       # Format code
 ```
 
 ## Symlinked Files
