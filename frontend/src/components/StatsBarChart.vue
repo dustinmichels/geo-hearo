@@ -5,6 +5,7 @@ import { fetchDailyStats } from "../lib/supabase";
 const props = defineProps<{
   challengeDate: string;
   playerNumGuesses?: number;
+  trackedPromise?: Promise<boolean>;
 }>();
 
 interface Row {
@@ -18,16 +19,19 @@ const totalPlayers = ref(0);
 const loaded = ref(false);
 
 onMounted(async () => {
-  const data = await fetchDailyStats(props.challengeDate);
+  const [data, tracked] = await Promise.all([
+    fetchDailyStats(props.challengeDate),
+    props.trackedPromise ?? Promise.resolve(false),
+  ]);
 
   const countMap: Record<number, number> = {};
   for (const d of data) {
     countMap[d.num_guesses] = d.count;
   }
 
-  // Always inject the player's own result so it appears even if the RPC
-  // hasn't landed yet (race on first play) or wasn't re-fired on refresh.
-  if (props.playerNumGuesses !== undefined) {
+  // Only inject the player's own result if the RPC hasn't confirmed success —
+  // avoids double-counting when the DB has already been incremented.
+  if (props.playerNumGuesses !== undefined && !tracked) {
     countMap[props.playerNumGuesses] = (countMap[props.playerNumGuesses] ?? 0) + 1;
   }
 

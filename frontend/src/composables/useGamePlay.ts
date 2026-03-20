@@ -78,6 +78,7 @@ export function useGamePlay(options: GamePlayOptions) {
     numericScore: undefined as number | undefined,
     isDailyChallenge: false,
     challengeDate: undefined as string | undefined,
+    trackedPromise: undefined as Promise<boolean> | undefined,
   });
 
   // State
@@ -228,11 +229,12 @@ export function useGamePlay(options: GamePlayOptions) {
 
       const isDaily = isDailyChallengeMode.value;
 
+      let trackedPromise: Promise<boolean> | undefined;
       if (isDaily) {
         dayNumber = dailyChallengeNumber.value || 0;
         completeDailyChallenge(); // Mark as done for today
         shareText = generateShareText(dayNumber);
-        trackDailyResult(getChallengeDate(), guesses.value.length);
+        trackedPromise = trackDailyResult(getChallengeDate(), guesses.value.length);
       }
 
       const attempts = getScoreLevels();
@@ -247,6 +249,7 @@ export function useGamePlay(options: GamePlayOptions) {
         numericScore,
         isDailyChallenge: isDaily,
         challengeDate: isDaily ? getChallengeDate() : undefined,
+        trackedPromise,
       };
 
       addToHistory({
@@ -290,11 +293,12 @@ export function useGamePlay(options: GamePlayOptions) {
 
       const isDaily = isDailyChallengeMode.value;
 
+      let trackedPromise: Promise<boolean> | undefined;
       if (isDaily) {
         dayNumber = dailyChallengeNumber.value || 0;
         completeDailyChallenge();
         shareText = generateShareText(dayNumber);
-        trackDailyResult(getChallengeDate(), 6); // 6 = loss sentinel
+        trackedPromise = trackDailyResult(getChallengeDate(), 6); // 6 = loss sentinel
       }
 
       const attempts = getScoreLevels();
@@ -309,6 +313,7 @@ export function useGamePlay(options: GamePlayOptions) {
         numericScore,
         isDailyChallenge: isDaily,
         challengeDate: isDaily ? getChallengeDate() : undefined,
+        trackedPromise,
       };
 
       addToHistory({
@@ -447,6 +452,7 @@ export function useGamePlay(options: GamePlayOptions) {
               numericScore: undefined,
               isDailyChallenge: true,
               challengeDate: getChallengeDate(),
+              trackedPromise: Promise.resolve(true),
             };
           }
         } else {
@@ -474,6 +480,7 @@ export function useGamePlay(options: GamePlayOptions) {
               numericScore: undefined,
               isDailyChallenge: isDailyHistory,
               challengeDate: isDailyHistory ? getChallengeDate() : undefined,
+              trackedPromise: isDailyHistory ? Promise.resolve(true) : undefined,
             };
           }
         } else {

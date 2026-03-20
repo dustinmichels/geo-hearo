@@ -34,15 +34,20 @@ export async function fetchDailyStats(
   }
 }
 
-export async function trackDailyResult(challengeDate: string, numGuesses: number): Promise<void> {
-  if (!supabase) return;
+export async function trackDailyResult(challengeDate: string, numGuesses: number): Promise<boolean> {
+  if (!supabase) return false;
   try {
     const { error } = await supabase.rpc("increment_daily_stats", {
       p_date: challengeDate,
       p_num_guesses: numGuesses,
     });
-    if (error) console.warn("[analytics] trackDailyResult failed:", error.message);
+    if (error) {
+      console.warn("[analytics] trackDailyResult failed:", error.message);
+      return false;
+    }
+    return true;
   } catch (err) {
     console.warn("[analytics] trackDailyResult exception:", err);
+    return false;
   }
 }

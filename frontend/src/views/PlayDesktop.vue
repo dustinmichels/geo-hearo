@@ -202,6 +202,7 @@ const dailyItem = computed(() => {
       :daily-challenge-number="modalConfig.dailyChallengeNumber"
       :challenge-date="modalConfig.challengeDate"
       :stats-view="isStatsView"
+      :tracked-promise="modalConfig.trackedPromise"
       @confirm="handleModalConfirm"
       @close="handleModalClose"
     />

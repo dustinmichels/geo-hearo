@@ -14,6 +14,7 @@ const props = defineProps<{
   dailyChallengeNumber?: number;
   challengeDate?: string;
   statsView?: boolean;
+  trackedPromise?: Promise<boolean>;
 }>();
 
 const emit = defineEmits<{
@@ -97,6 +98,7 @@ const playerNumGuesses = computed(() => {
             v-if="challengeDate"
             :challenge-date="challengeDate"
             :player-num-guesses="playerNumGuesses"
+            :tracked-promise="trackedPromise"
             class="mt-3"
           />
         </div>
