@@ -91,7 +91,7 @@ const playerNumGuesses = computed(() => {
         <!-- Game History or Share View -->
         <div
           v-if="isDailyChallenge && displayItem"
-          class="flex-1 min-h-0 px-6 flex flex-col justify-center"
+          class="flex-1 min-h-0 px-6 overflow-y-auto flex flex-col justify-center"
         >
           <DailyChallengeCard :item="displayItem" />
           <StatsBarChart
@@ -106,7 +106,7 @@ const playerNumGuesses = computed(() => {
         <GameHistoryList
           v-else-if="history && history.length > 0"
           :history="history"
-          class="flex-1 min-h-0 px-6"
+          class="flex-1 min-h-0 px-6 overflow-y-auto"
         />
 
         <!-- Fixed bottom button -->
