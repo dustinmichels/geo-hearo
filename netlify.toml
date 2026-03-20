@@ -1,9 +1,13 @@
 [build]
-  base = "frontend"
-  command = "bun run build"
-  publish = "dist"
+base = "frontend"
+command = "bun run build"
+publish = "dist"
+
+[build.environment]
+VITE_SUPABASE_URL = "https://hxxfyqgcnukpravehjqz.supabase.co"
+VITE_SUPABASE_ANON_KEY = "sb_publishable_RJwfAkOncFJeAGkvi9Z0oQ_8OTbcrbJ"
 
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+from = "/*"
+to = "/index.html"
+status = 200
