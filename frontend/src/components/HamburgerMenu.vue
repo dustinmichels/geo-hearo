@@ -2,8 +2,10 @@
 import { CirclePlay, Home, Info, Menu, Shield, X } from "lucide-vue-next";
 import { computed, ref } from "vue";
 import { RouterLink, useRoute } from "vue-router";
+import { useGameStore } from "../stores/game";
 
 const route = useRoute();
+const store = useGameStore();
 const isOpen = ref(false);
 
 const currentRouteName = computed(() => route.name);
@@ -209,7 +211,7 @@ const closeMenu = () => {
               <div
                 class="absolute inset-0 flex items-center justify-center text-pencil-lead/50 font-heading text-sm"
               >
-                Be the GeoHearo 🦸
+                Be the GeoHearo <span v-if="store.hasEverPlayed">🦸</span>
               </div>
             </div>
           </div>

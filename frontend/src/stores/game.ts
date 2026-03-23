@@ -12,6 +12,7 @@ export const useGameStore = defineStore("game", () => {
   const currentSeed = ref<number | null>(null);
   const currentStationIndex = ref(3);
   const hasPlayedRadio = ref(false);
+  const hasEverPlayed = ref(false);
   const hasSkippedStation = ref(false);
   const gameStage = ref<GamePhase>("guessing");
   const gameHistory = ref<GameHistoryItem[]>([]);
@@ -105,6 +106,7 @@ export const useGameStore = defineStore("game", () => {
     currentSeed,
     currentStationIndex,
     hasPlayedRadio,
+    hasEverPlayed,
     hasSkippedStation,
     gameStage,
     gameHistory,

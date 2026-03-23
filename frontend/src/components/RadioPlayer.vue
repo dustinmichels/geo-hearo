@@ -127,6 +127,7 @@ watch(
   (playing) => {
     if (playing) {
       store.hasPlayedRadio = true;
+      store.hasEverPlayed = true;
     }
   },
   { immediate: true },
