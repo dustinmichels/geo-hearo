@@ -15,53 +15,11 @@ interface GamePlayOptions {
   setupKeyboardShortcuts?: boolean;
 }
 
-const calculateScore = (attempts: number[]) => {
-  if (!attempts || attempts.length === 0) return (0).toFixed(2);
-
+// Returns number of guesses used (1-5) for a win, or 6 for a loss.
+const calculateScore = (attempts: number[]): number => {
+  if (!attempts || attempts.length === 0) return 6;
   const winIndex = attempts.findIndex((lvl) => lvl === 0);
-  const isWin = winIndex !== -1;
-  const maxAttempts = 5;
-  const actualAttempts = attempts.slice(0, maxAttempts);
-
-  if (isWin) {
-    // WIN SCORING (Range 5.0 - 10.0)
-    // 1. Base 5.0 for winning.
-    // 2. Speed bonus: up to 4.0 points (Earlier win = more points).
-    const speedBonus = ((maxAttempts - winIndex) / maxAttempts) * 4.0;
-
-    // 3. Quality bonus: up to 1.0 point (Closeness of previous guesses).
-    let qualitySum = 0;
-    if (winIndex > 0) {
-      const prevGuesses = attempts.slice(0, winIndex);
-      // Normalized: Level 1 (🤏) is best (1.0). Level 4 (🔴) is least (0.2).
-      const qualityScore =
-        prevGuesses.reduce((acc, lvl) => {
-          const val = lvl === 1 ? 1.0 : lvl === 2 ? 0.7 : lvl === 3 ? 0.4 : 0.1;
-          return acc + val;
-        }, 0) / winIndex;
-      qualitySum = qualityScore * 1.0;
-    } else {
-      // Instant win gets full quality bonus
-      qualitySum = 1.0;
-    }
-
-    return Math.min(10, 5.0 + speedBonus + qualitySum).toFixed(2);
-  } else {
-    // FAIL SCORING (Range 0.0 - 4.99)
-    // Weighted partial credit for proximity.
-    const weightMap: Record<number, number> = {
-      1: 1.0, // 🤏 Highest credit
-      2: 0.6, // 🟡 Medium credit
-      3: 0.2, // 🟠 Low credit
-      4: 0.0, // 🔴 No credit
-    };
-
-    const totalWeight = actualAttempts.reduce((acc, lvl) => acc + (weightMap[lvl] || 0), 0);
-    const maxPossibleWeightForFail = 5.0; // Five 🤏s
-    const score = (totalWeight / maxPossibleWeightForFail) * 4.99;
-
-    return score.toFixed(2);
-  }
+  return winIndex !== -1 ? winIndex + 1 : 6;
 };
 
 export function useGamePlay(options: GamePlayOptions) {
@@ -238,7 +196,7 @@ export function useGamePlay(options: GamePlayOptions) {
       }
 
       const attempts = getScoreLevels();
-      const numericScore = parseFloat(calculateScore(attempts));
+      const numericScore = calculateScore(attempts);
 
       modalConfig.value = {
         isWin: true,
@@ -302,7 +260,7 @@ export function useGamePlay(options: GamePlayOptions) {
       }
 
       const attempts = getScoreLevels();
-      const numericScore = parseFloat(calculateScore(attempts));
+      const numericScore = calculateScore(attempts);
 
       modalConfig.value = {
         isWin: false,

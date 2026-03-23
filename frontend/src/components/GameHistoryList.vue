@@ -10,12 +10,7 @@ const getScore = (item: GameHistoryItem): number => {
 
   // Fallback: Compute from emoji string
   const emojis = [...(item.score || "")];
-  const hasWon = emojis.includes("🟢");
-
-  if (hasWon) {
-    return 6 - emojis.length;
-  }
-  return 0; // Loss
+  return emojis.includes("🟢") ? emojis.length : 6;
 };
 
 const averageScore = computed(() => {
@@ -30,8 +25,8 @@ const averageScore = computed(() => {
   <div v-if="history && history.length > 0" class="text-left pt-4 flex flex-col flex-1 min-h-0">
     <!-- Header -->
     <div class="text-sm text-center lowercase text-pencil-lead mb-3 shrink-0">
-      Avg Score Today: {{ averageScore }}
-      <span class="text-eraser-grey">/ 10</span>
+      Avg Guesses Today: {{ averageScore }}
+      <span class="text-eraser-grey">/ 6</span>
     </div>
 
     <!-- Scrollable Free Play Items -->
