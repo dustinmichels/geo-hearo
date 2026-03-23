@@ -307,6 +307,7 @@ export function useGamePlay(options: GamePlayOptions) {
       numericScore: dailyItem.numericScore,
       isDailyChallenge: true,
       challengeDate,
+      trackedPromise: undefined,
     };
     showStatsOverride.value = true;
   };
@@ -389,6 +390,7 @@ export function useGamePlay(options: GamePlayOptions) {
           numericScore: undefined,
           isDailyChallenge: false,
           challengeDate: undefined,
+          trackedPromise: undefined,
         };
         store.setGameStage(debugStage);
       } else if (isDailyChallengeMode.value) {
@@ -495,6 +497,7 @@ export function useGamePlay(options: GamePlayOptions) {
             numericScore: undefined,
             isDailyChallenge: false,
             challengeDate: undefined,
+            trackedPromise: undefined,
           };
           store.setGameStage(debugStage);
         }
