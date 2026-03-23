@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Trophy } from "lucide-vue-next";
 import { FloatingPanel as VanFloatingPanel } from "vant";
 import { computed, ref, watch } from "vue";
 import AnimatedClose from "../components/AnimatedClose.vue";
@@ -140,8 +141,17 @@ const dailyItem = computed(() => {
       class="animate-blob2 absolute bottom-10 left-[-5%] w-80 h-80 bg-gumball-blue/5 rounded-full blur-3xl pointer-events-none"
     ></div>
 
-    <div class="fixed top-4 left-4 z-[9999]">
+    <div class="fixed top-4 left-4 z-[9999] flex gap-2">
       <HamburgerMenu />
+      <button
+        v-if="dailyItem"
+        class="bg-paper-white/90 backdrop-blur-sm text-[#B45309] rounded-lg p-2 hover:bg-paper-white transition-colors duration-200 cursor-pointer flex items-center justify-center shadow-sm"
+        aria-label="View daily challenge stats"
+        title="View daily challenge stats"
+        @click="handleShowStats"
+      >
+        <Trophy :size="20" :stroke-width="2.5" />
+      </button>
     </div>
 
     <!-- Animated Arrows Hint -->
@@ -235,7 +245,7 @@ const dailyItem = computed(() => {
             :show-name="false"
             :small-image="true"
           />
-          <DailyChallengeCard v-if="dailyItem" :item="dailyItem" :show-stats-button="true" @show-stats="handleShowStats" />
+          <DailyChallengeCard v-if="dailyItem" @show-stats="handleShowStats" />
         </div>
       </div>
     </van-floating-panel>

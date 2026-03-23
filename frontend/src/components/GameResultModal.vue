@@ -22,13 +22,34 @@ const emit = defineEmits<{
   (e: "close"): void;
 }>();
 
-import { computed, onMounted, onUnmounted } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 
 function onKeydown(e: KeyboardEvent) {
   if (e.key === "Escape" && props.show) emit("close");
 }
-onMounted(() => window.addEventListener("keydown", onKeydown));
-onUnmounted(() => window.removeEventListener("keydown", onKeydown));
+
+const timeUntilReset = ref("");
+let countdownTimer: ReturnType<typeof setInterval>;
+
+const updateCountdown = () => {
+  const now = new Date();
+  const midnight = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
+  const diff = midnight.getTime() - now.getTime();
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  timeUntilReset.value = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+};
+
+onMounted(() => {
+  window.addEventListener("keydown", onKeydown);
+  updateCountdown();
+  countdownTimer = setInterval(updateCountdown, 1000);
+});
+onUnmounted(() => {
+  window.removeEventListener("keydown", onKeydown);
+  clearInterval(countdownTimer);
+});
 
 const displayItem = computed(() => {
   if (props.statsView) {
@@ -58,7 +79,7 @@ const playerNumGuesses = computed(() => {
         <!-- Close (X) Button -->
         <button
           @click="emit('close')"
-          class="absolute top-3 right-3 z-10 p-1.5 text-pencil-lead/50 hover:text-pencil-lead transition-colors"
+          class="absolute top-3 right-3 z-10 p-1.5 text-pencil-lead/50 bg-pencil-lead/10 hover:text-white hover:bg-berry-oops rounded-full transition-colors"
         >
           <X class="w-5 h-5" />
         </button>
@@ -66,9 +87,10 @@ const playerNumGuesses = computed(() => {
         <!-- Fixed top: Country name -->
         <div class="shrink-0 px-6 pt-6">
           <div class="mb-2">
-            <template v-if="statsView">
+            <template v-if="isDailyChallenge">
+              <span v-if="!statsView" class="text-5xl">{{ isWin ? "🎉" : "🤔" }}</span>
               <h2 class="text-2xl font-heading mt-2 tracking-wide text-pencil-lead">
-                Daily Challenge
+                Daily Challenge{{ dailyChallengeNumber ? ` #${dailyChallengeNumber}` : "" }}
               </h2>
             </template>
             <template v-else>
@@ -85,6 +107,9 @@ const playerNumGuesses = computed(() => {
             The country was:
             <strong class="text-pencil-lead font-bold">{{ secretCountry || "Unknown" }}</strong>
           </p>
+          <p v-if="isDailyChallenge" class="text-xs text-pencil-lead/50 mt-1 tracking-wide">
+            Next challenge in <span class="font-mono font-semibold">{{ timeUntilReset }}</span>
+          </p>
         </div>
 
         <!-- Game History or Share View -->
@@ -93,7 +118,7 @@ const playerNumGuesses = computed(() => {
           v-if="isDailyChallenge && displayItem"
           class="flex-1 min-h-0 px-6 overflow-y-auto flex flex-col justify-center"
         >
-          <DailyChallengeCard :item="displayItem" />
+          <DailyChallengeCard :item="displayItem" class="mt-3" />
           <StatsBarChart
             v-if="challengeDate"
             :challenge-date="challengeDate"

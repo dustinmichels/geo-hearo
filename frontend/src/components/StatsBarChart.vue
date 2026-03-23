@@ -70,7 +70,7 @@ onMounted(async () => {
   <!-- Data -->
   <div
     v-else-if="loaded && totalPlayers > 0"
-    class="rounded-2xl border-2 border-[#B45309] bg-orange-50/50 px-4 py-3"
+    class="rounded-2xl border-2 border-pencil-lead/10 bg-pencil-lead/5 px-4 py-3"
   >
     <p class="text-xs font-bold uppercase tracking-widest text-[#B45309] mb-2">
       Today's Results · {{ totalPlayers }} {{ totalPlayers === 1 ? "player" : "players" }}

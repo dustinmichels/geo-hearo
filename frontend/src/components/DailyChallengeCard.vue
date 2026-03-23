@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { Check, Share, TrendingUp } from "lucide-vue-next";
+import { Check, Share, Trophy } from "lucide-vue-next";
 import { ref } from "vue";
 import type { GameHistoryItem } from "../types/geo";
 
 defineProps<{
-  item: GameHistoryItem;
-  showStatsButton?: boolean;
+  item?: GameHistoryItem;
 }>();
 
 const emit = defineEmits<{
@@ -41,38 +40,34 @@ const handleShare = async (item: GameHistoryItem) => {
 </script>
 
 <template>
-  <div class="flex gap-2 items-stretch">
-    <!-- Copy card -->
-    <div
-      class="flex-1 p-3 rounded-xl border-2 border-[#B45309] bg-orange-50/50 cursor-pointer hover:bg-orange-50 transition-colors"
-      @click="handleShare(item)"
-    >
-      <div class="text-xs font-bold uppercase tracking-wider text-[#B45309] mb-2 text-center">
-        Daily Challenge
-      </div>
-      <div class="flex items-center justify-center gap-3 text-sm text-[#B45309]">
-        <span class="tracking-widest">{{ item.score }}</span>
-      </div>
-      <div
-        class="mt-2 w-full flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-[#B45309]/60 transition-colors"
-      >
-        <Check v-if="copyButtonText === 'Copied!'" class="w-4 h-4 text-mint-shake" />
-        <Share v-else class="w-4 h-4" />
-        <span :class="{ 'text-mint-shake': copyButtonText === 'Copied!' }">
-          {{ copyButtonText }}
-        </span>
-      </div>
+  <!-- Copy card (modal) -->
+  <div
+    v-if="item"
+    class="p-3 rounded-xl border-2 border-[#B45309] bg-orange-50/50 cursor-pointer hover:bg-orange-50 transition-colors"
+    @click="handleShare(item)"
+  >
+    <div class="flex items-center justify-center gap-3 text-sm text-[#B45309]">
+      <span class="tracking-widest">{{ item.score }}</span>
     </div>
-
-    <!-- Stats button -->
-    <button
-      v-if="showStatsButton"
-      class="shrink-0 px-3 py-2 rounded-xl border-2 border-[#B45309] bg-orange-50/50 hover:bg-orange-50 transition-colors flex flex-col items-center justify-center gap-1"
-      @click="emit('showStats')"
-      title="View stats"
+    <div
+      class="mt-4 w-full flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-[#B45309]/60 transition-colors"
     >
-      <TrendingUp class="w-5 h-5 text-[#B45309]" />
-      <span class="text-xs font-bold uppercase tracking-wider text-[#B45309]/60">View Stats</span>
-    </button>
+      <Check v-if="copyButtonText === 'Copied!'" class="w-4 h-4 text-mint-shake" />
+      <Share v-else class="w-4 h-4" />
+      <span :class="{ 'text-mint-shake': copyButtonText === 'Copied!' }">
+        {{ copyButtonText }}
+      </span>
+    </div>
   </div>
+
+  <!-- Revisit button (results panel) -->
+  <button
+    v-else
+    class="w-full px-4 py-3 rounded-xl border-2 border-[#B45309] bg-orange-50/50 hover:bg-orange-50 transition-colors flex items-center justify-center gap-2"
+    @click="emit('showStats')"
+    title="Revisit Daily Challenge"
+  >
+    <Trophy class="w-5 h-5 text-[#B45309]" />
+    <span class="text-sm font-bold uppercase tracking-wider text-[#B45309]/60">Revisit Daily Challenge</span>
+  </button>
 </template>

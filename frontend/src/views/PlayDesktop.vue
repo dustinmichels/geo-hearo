@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RotateCcw } from "lucide-vue-next";
+import { RotateCcw, Trophy } from "lucide-vue-next";
 import { computed, ref } from "vue";
 import CountryDetails from "../components/CountryDetails.vue";
 import DailyChallengeCard from "../components/DailyChallengeCard.vue";
@@ -108,6 +108,15 @@ const dailyItem = computed(() => {
         <!-- Title -->
         <div class="flex justify-center">
           <div class="relative z-10">
+          <button
+            v-if="dailyItem"
+            class="absolute right-full mr-3 inset-y-0 bg-paper-white/90 backdrop-blur-sm text-[#B45309] rounded-lg px-2.5 hover:bg-paper-white transition-colors duration-200 cursor-pointer flex items-center justify-center shadow-sm"
+            aria-label="View daily challenge stats"
+            title="View daily challenge stats"
+            @click="handleShowStats"
+          >
+            <Trophy :size="22" :stroke-width="2.5" />
+          </button>
             <h1 class="text-center text-pencil-lead text-[1.6rem] font-heading tracking-wider">
               GeoHearo
             </h1>
@@ -169,7 +178,7 @@ const dailyItem = computed(() => {
           <CountryDetails v-if="secretCountry" :country-name="secretCountry" class="text-left" />
 
           <!-- Daily Challenge Card -->
-          <DailyChallengeCard v-if="dailyItem" :item="dailyItem" :show-stats-button="true" @show-stats="handleShowStats" />
+          <DailyChallengeCard v-if="dailyItem" @show-stats="handleShowStats" />
         </div>
 
         <!-- Guess Panel Card -->

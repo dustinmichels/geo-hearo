@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CirclePlay, Home, Info, Menu, X } from "lucide-vue-next";
+import { CirclePlay, Home, Info, Menu, Shield, X } from "lucide-vue-next";
 import { computed, ref } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 
@@ -155,6 +155,40 @@ const closeMenu = () => {
                 <!-- Scribble Underline -->
                 <div
                   v-if="currentRouteName === 'About'"
+                  class="absolute -bottom-2 -left-1 -right-1 h-3 bg-scribble bg-no-repeat bg-center bg-contain opacity-100"
+                ></div>
+              </div>
+            </RouterLink>
+
+            <RouterLink
+              to="/privacy"
+              class="group relative flex items-center gap-4 p-3 rounded-xl border-2 border-transparent hover:border-pencil-lead hover:bg-cloud-white transition-all duration-200"
+              :class="{
+                'pointer-events-none': currentRouteName === 'Privacy',
+              }"
+              @click="closeMenu"
+            >
+              <div
+                class="w-10 h-10 rounded-full bg-bubblegum-pop/20 text-bubblegum-pop flex items-center justify-center border-2 border-bubblegum-pop group-hover:scale-110 transition-transform"
+                :class="{
+                  'opacity-50 grayscale': currentRouteName === 'Privacy',
+                }"
+              >
+                <Shield :size="20" :stroke-width="2.5" />
+              </div>
+
+              <div class="relative">
+                <span
+                  class="font-heading text-lg text-pencil-lead"
+                  :class="{
+                    'opacity-50 grayscale': currentRouteName === 'Privacy',
+                  }"
+                >
+                  Privacy
+                </span>
+                <!-- Scribble Underline -->
+                <div
+                  v-if="currentRouteName === 'Privacy'"
                   class="absolute -bottom-2 -left-1 -right-1 h-3 bg-scribble bg-no-repeat bg-center bg-contain opacity-100"
                 ></div>
               </div>
