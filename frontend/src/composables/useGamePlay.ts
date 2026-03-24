@@ -307,7 +307,7 @@ export function useGamePlay(options: GamePlayOptions) {
       numericScore: dailyItem.numericScore,
       isDailyChallenge: true,
       challengeDate,
-      trackedPromise: undefined,
+      trackedPromise: Promise.resolve(true),
     };
     showStatsOverride.value = true;
   };
