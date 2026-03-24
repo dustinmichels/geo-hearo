@@ -19,10 +19,10 @@ const totalPlayers = ref(0);
 const loaded = ref(false);
 
 onMounted(async () => {
-  const [data, tracked] = await Promise.all([
-    fetchDailyStats(props.challengeDate),
-    props.trackedPromise ?? Promise.resolve(false),
-  ]);
+  // Wait for tracking to complete before fetching stats, so the DB increment
+  // is committed before we read the counts (avoids stale-read race condition).
+  const tracked = await (props.trackedPromise ?? Promise.resolve(false));
+  const data = await fetchDailyStats(props.challengeDate);
 
   const countMap: Record<number, number> = {};
   for (const d of data) {
