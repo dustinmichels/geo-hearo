@@ -51,10 +51,7 @@ onMounted(async () => {
 
 <template>
   <!-- Skeleton -->
-  <div
-    v-if="!loaded"
-    class="rounded-2xl border-2 border-pencil-lead/10 bg-pencil-lead/5 px-4 py-3"
-  >
+  <div v-if="!loaded" class="rounded-2xl border-2 border-pencil-lead/10 bg-pencil-lead/5 px-4 py-3">
     <div class="h-3 w-32 rounded bg-pencil-lead/10 mb-3 shimmer" />
     <div class="space-y-1.5">
       <div v-for="i in 6" :key="i" class="flex items-center gap-2">
@@ -102,7 +99,8 @@ onMounted(async () => {
           <span
             v-if="row.num === playerNumGuesses"
             class="ml-1.5 text-[10px] font-bold text-[#B45309] shrink-0"
-          >← you</span>
+            >← you</span
+          >
         </div>
       </div>
     </div>

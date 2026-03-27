@@ -68,6 +68,8 @@ const handleShare = async (item: GameHistoryItem) => {
     title="Revisit Daily Challenge"
   >
     <Trophy class="w-5 h-5 text-[#B45309]" />
-    <span class="text-sm font-bold uppercase tracking-wider text-[#B45309]/60">Revisit Daily Challenge</span>
+    <span class="text-sm font-bold uppercase tracking-wider text-[#B45309]/60"
+      >Revisit Daily Challenge</span
+    >
   </button>
 </template>

@@ -3,8 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
-const supabase =
-  supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
+const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
 /**
  * Atomically increments the daily challenge result counter.
@@ -14,7 +13,7 @@ const supabase =
  * @param numGuesses     1–5 for a win, 6 for a loss
  */
 export async function fetchDailyStats(
-  date: string
+  date: string,
 ): Promise<{ num_guesses: number; count: number }[]> {
   if (!supabase) return [];
   try {
@@ -34,7 +33,10 @@ export async function fetchDailyStats(
   }
 }
 
-export async function trackDailyResult(challengeDate: string, numGuesses: number): Promise<boolean> {
+export async function trackDailyResult(
+  challengeDate: string,
+  numGuesses: number,
+): Promise<boolean> {
   if (!supabase) return false;
   try {
     const { error } = await supabase.rpc("increment_daily_stats", {

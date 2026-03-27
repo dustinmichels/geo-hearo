@@ -38,10 +38,10 @@ const disconnectIcy = () => {
 const connectIcy = (url: string) => {
   disconnectIcy();
   if (!url) return;
-  
+
   const wsEndpoint = import.meta.env.VITE_ICY_URL || "ws://localhost:8080/ws";
   const w = new WebSocket(`${wsEndpoint}?url=${encodeURIComponent(url)}`);
-  
+
   w.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
@@ -50,7 +50,7 @@ const connectIcy = (url: string) => {
       // ignore
     }
   };
-  
+
   ws.value = w;
 };
 
@@ -277,8 +277,8 @@ onUnmounted(() => {
 
     <!-- Song Info -->
     <div
-      class="bg-white border-2 border-pencil-lead rounded-[9px] py-1.5 px-3 overflow-x-auto whitespace-nowrap flex auto flex-nowrap items-center justify-center font-heading text-xs font-semibold tracking-wide text-pencil-lead hide-scroll"
-      style="scrollbar-width: none; -ms-overflow-style: none;"
+      class="overflow-x-auto whitespace-nowrap flex auto flex-nowrap items-center justify-center font-heading text-xs font-semibold tracking-wide text-pencil-lead hide-scroll"
+      style="scrollbar-width: none; -ms-overflow-style: none"
     >
       <span class="inline-block">{{ displaySong }}</span>
     </div>
