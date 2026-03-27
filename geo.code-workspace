@@ -17,6 +17,10 @@
       "path": "data-prep",
     },
     {
+      "name": "icy",
+      "path": "icy",
+    },
+    {
       "name": "data-prep/crawl",
       "path": "data-prep/crawl",
     },

@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ICY · TEST</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap");
+
+      :root {
+        --bg: #0a0c0a;
+        --surface: #0f120f;
+        --border: #1e2a1e;
+        --dim: #2a3a2a;
+        --muted: #4a6a4a;
+        --green: #39ff6a;
+        --green-dk: #1a8a3a;
+        --amber: #ffb830;
+        --red: #ff4444;
+        --text: #c8e8c8;
+        --font: "IBM Plex Mono", monospace;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font);
+        font-size: 13px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+
+      /* scanline overlay */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 0, 0, 0.08) 2px,
+          rgba(0, 0, 0, 0.08) 4px
+        );
+        pointer-events: none;
+        z-index: 100;
+      }
+
+      .card {
+        width: 100%;
+        max-width: 560px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+
+      /* --- title bar --- */
+      .titlebar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px;
+        background: var(--dim);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .titlebar-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .badge-test {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        color: var(--bg);
+        background: var(--amber);
+        padding: 2px 6px;
+        border-radius: 2px;
+        animation: blink-badge 2s step-end infinite;
+      }
+
+      @keyframes blink-badge {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.55;
+        }
+      }
+
+      .titlebar-name {
+        color: var(--muted);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+      }
+
+      .dot-row {
+        display: flex;
+        gap: 6px;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--dim);
+        border: 1px solid var(--border);
+      }
+
+      /* --- body --- */
+      .body {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      label {
+        display: block;
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+        margin-bottom: 5px;
+      }
+
+      .url-row {
+        display: flex;
+        gap: 8px;
+      }
+
+      input[type="text"] {
+        flex: 1;
+        background: var(--bg);
+        border: 1px solid var(--dim);
+        border-radius: 2px;
+        color: var(--text);
+        font-family: var(--font);
+        font-size: 12px;
+        padding: 8px 10px;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      input[type="text"]:focus {
+        border-color: var(--green-dk);
+      }
+
+      .btn-play {
+        background: transparent;
+        border: 1px solid var(--green-dk);
+        border-radius: 2px;
+        color: var(--green);
+        font-family: var(--font);
+        font-size: 13px;
+        font-weight: 700;
+        padding: 0 16px;
+        cursor: pointer;
+        letter-spacing: 0.05em;
+        transition:
+          background 0.1s,
+          color 0.1s;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .btn-play:hover {
+        background: var(--green-dk);
+        color: var(--bg);
+      }
+      .btn-play.playing {
+        border-color: var(--red);
+        color: var(--red);
+      }
+      .btn-play.playing:hover {
+        background: var(--red);
+        color: #fff;
+      }
+
+      .btn-icon {
+        font-size: 11px;
+      }
+
+      /* --- status bar --- */
+      .status-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 10px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 2px;
+        font-size: 11px;
+        color: var(--muted);
+        min-height: 34px;
+      }
+
+      .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        background: var(--dim);
+        transition: background 0.2s;
+      }
+      .status-dot.connecting {
+        background: var(--amber);
+        animation: pulse 1s ease-in-out infinite;
+      }
+      .status-dot.connected {
+        background: var(--green);
+      }
+      .status-dot.error {
+        background: var(--red);
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+
+      .status-text {
+        color: var(--text);
+      }
+
+      /* --- metadata panel --- */
+      .meta-panel {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 2px;
+        padding: 14px;
+        min-height: 76px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 6px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .meta-panel::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, transparent 60%, rgba(57, 255, 106, 0.03) 100%);
+        pointer-events: none;
+      }
+
+      .meta-empty {
+        color: var(--dim);
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        text-align: center;
+      }
+
+      .meta-artist {
+        font-size: 11px;
+        color: var(--green-dk);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        font-weight: 500;
+      }
+
+      .meta-title {
+        font-size: 15px;
+        color: var(--green);
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        line-height: 1.3;
+        word-break: break-word;
+      }
+
+      .meta-raw {
+        font-size: 10px;
+        color: var(--dim);
+        margin-top: 4px;
+        word-break: break-all;
+      }
+
+      /* --- log --- */
+      .log-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .log {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 2px;
+        height: 100px;
+        overflow-y: auto;
+        padding: 8px 10px;
+        font-size: 11px;
+        line-height: 1.7;
+        scrollbar-width: thin;
+        scrollbar-color: var(--dim) transparent;
+      }
+
+      .log-entry {
+        color: var(--muted);
+      }
+      .log-entry .ts {
+        color: var(--dim);
+        user-select: none;
+      }
+      .log-entry.event .msg {
+        color: var(--text);
+      }
+      .log-entry.meta .msg {
+        color: var(--green);
+      }
+      .log-entry.err .msg {
+        color: var(--red);
+      }
+
+      /* --- footer --- */
+      .footer {
+        padding: 8px 12px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--dim);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+      }
+      .footer span {
+        opacity: 0.7;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="titlebar">
+        <div class="titlebar-left">
+          <span class="badge-test">TESTING</span>
+          <span class="titlebar-name">icy-ws · metadata inspector</span>
+        </div>
+        <div class="dot-row">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+
+      <div class="body">
+        <div>
+          <label>STREAM URL</label>
+          <div class="url-row">
+            <input
+              type="text"
+              id="urlInput"
+              value="https://ibizasonica.streaming-pro.com:8001/bluemarlin"
+              spellcheck="false"
+              autocomplete="off"
+            />
+            <button class="btn-play" id="playBtn" onclick="toggle()">
+              <span class="btn-icon" id="btnIcon">▶</span>
+              <span id="btnLabel">PLAY</span>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label>WEBSOCKET STATUS</label>
+          <div class="status-bar">
+            <div class="status-dot" id="statusDot"></div>
+            <span class="status-text" id="statusText">idle</span>
+          </div>
+        </div>
+
+        <div>
+          <label>NOW PLAYING</label>
+          <div class="meta-panel" id="metaPanel">
+            <span class="meta-empty">— waiting for metadata —</span>
+          </div>
+        </div>
+
+        <div class="log-wrap">
+          <label>EVENT LOG</label>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <span>ws://localhost:8080/ws</span>
+        <span id="msgCount">0 messages</span>
+      </div>
+    </div>
+
+    <audio id="audio" preload="none"></audio>
+
+    <script>
+      const audio = document.getElementById("audio");
+      const urlInput = document.getElementById("urlInput");
+      const playBtn = document.getElementById("playBtn");
+      const btnIcon = document.getElementById("btnIcon");
+      const btnLabel = document.getElementById("btnLabel");
+      const statusDot = document.getElementById("statusDot");
+      const statusText = document.getElementById("statusText");
+      const metaPanel = document.getElementById("metaPanel");
+      const logEl = document.getElementById("log");
+      const msgCount = document.getElementById("msgCount");
+
+      let ws = null;
+      let playing = false;
+      let count = 0;
+
+      function ts() {
+        return new Date().toLocaleTimeString("en-US", { hour12: false });
+      }
+
+      function addLog(msg, type = "event") {
+        const line = document.createElement("div");
+        line.className = `log-entry ${type}`;
+        line.innerHTML = `<span class="ts">${ts()}</span>  <span class="msg">${msg}</span>`;
+        logEl.appendChild(line);
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+
+      function setStatus(state, text) {
+        statusDot.className = `status-dot ${state}`;
+        statusText.textContent = text;
+      }
+
+      function showMeta(msg) {
+        const artist = msg.artist || "";
+        const title = msg.title || msg.raw || "(unknown)";
+        const raw = msg.raw || "";
+        metaPanel.innerHTML = `
+      ${artist ? `<div class="meta-artist">${esc(artist)}</div>` : ""}
+      <div class="meta-title">${esc(title)}</div>
+      <div class="meta-raw">${esc(raw)}</div>
+    `;
+      }
+
+      function esc(s) {
+        return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      }
+
+      function connectWS(url) {
+        const wsURL = `ws://localhost:8080/ws?url=${encodeURIComponent(url)}`;
+        addLog(`connecting → ${wsURL}`);
+        setStatus("connecting", "connecting…");
+
+        ws = new WebSocket(wsURL);
+
+        ws.onopen = () => {
+          setStatus("connected", "connected");
+          addLog("websocket open", "event");
+        };
+
+        ws.onmessage = (e) => {
+          count++;
+          msgCount.textContent = `${count} message${count !== 1 ? "s" : ""}`;
+          try {
+            const msg = JSON.parse(e.data);
+            showMeta(msg);
+            const label = [msg.artist, msg.title].filter(Boolean).join(" — ") || msg.raw;
+            addLog(`♪  ${label}`, "meta");
+          } catch {
+            addLog(`raw: ${e.data}`, "event");
+          }
+        };
+
+        ws.onerror = () => {
+          setStatus("error", "error");
+          addLog("websocket error — is the server running on :8080?", "err");
+        };
+
+        ws.onclose = (e) => {
+          setStatus("", "disconnected");
+          addLog(`websocket closed (code ${e.code})`, "event");
+          ws = null;
+        };
+      }
+
+      function disconnectWS() {
+        if (ws) {
+          ws.close();
+          ws = null;
+        }
+      }
+
+      function toggle() {
+        const url = urlInput.value.trim();
+        if (!url) return;
+
+        if (!playing) {
+          // Start
+          playing = true;
+          playBtn.classList.add("playing");
+          btnIcon.textContent = "■";
+          btnLabel.textContent = "STOP";
+          urlInput.disabled = true;
+
+          audio.src = url;
+          audio.play().catch((err) => addLog(`audio error: ${err.message}`, "err"));
+          connectWS(url);
+        } else {
+          // Stop
+          playing = false;
+          playBtn.classList.remove("playing");
+          btnIcon.textContent = "▶";
+          btnLabel.textContent = "PLAY";
+          urlInput.disabled = false;
+
+          audio.pause();
+          audio.src = "";
+          disconnectWS();
+          setStatus("", "idle");
+        }
+      }
+
+      audio.onerror = () => {
+        addLog(`audio stream error (code ${audio.error?.code})`, "err");
+      };
+
+      // Allow Enter key in URL input
+      urlInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !playing) toggle();
+      });
+    </script>
+  </body>
+</html>
