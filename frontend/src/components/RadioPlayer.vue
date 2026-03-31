@@ -2,7 +2,7 @@
 import { useGameStore } from "@/stores/game";
 import { Loader2, Pause, Play, SkipBack, SkipForward } from "lucide-vue-next";
 import { Button as VanButton } from "vant";
-import { computed, onUnmounted, ref, watch } from "vue";
+import { onUnmounted, ref, watch } from "vue";
 import { playRadioStatic } from "../utils/audio";
 
 const store = useGameStore();
@@ -24,35 +24,6 @@ const currentStaticSource = ref<AudioBufferSourceNode | null>(null); // Store th
 const isLoading = ref(false);
 let loadingTimeout: ReturnType<typeof setTimeout> | undefined;
 
-const icyData = ref<{ title?: string; artist?: string; raw?: string } | null>(null);
-const ws = ref<WebSocket | null>(null);
-
-const disconnectIcy = () => {
-  if (ws.value) {
-    ws.value.close();
-    ws.value = null;
-  }
-  icyData.value = null;
-};
-
-const connectIcy = (url: string) => {
-  disconnectIcy();
-  if (!url) return;
-
-  const wsEndpoint = import.meta.env.VITE_ICY_URL || "ws://localhost:8080/ws";
-  const w = new WebSocket(`${wsEndpoint}?url=${encodeURIComponent(url)}`);
-
-  w.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data);
-      icyData.value = data;
-    } catch (e) {
-      // ignore
-    }
-  };
-
-  ws.value = w;
-};
 
 const stopStatic = () => {
   if (currentStaticSource.value) {
@@ -86,7 +57,6 @@ watch(
       isLoading.value = true;
       await playStatic();
       if (props.stationUrl) {
-        connectIcy(props.stationUrl);
         audioPlayer.value.play().catch((e) => {
           if (e.name === "AbortError") return;
           isLoading.value = false;
@@ -98,7 +68,6 @@ watch(
       isLoading.value = false;
       audioPlayer.value.pause();
       stopStatic();
-      disconnectIcy();
     }
   },
 );
@@ -110,7 +79,6 @@ watch(
     if (newUrl) {
       audioPlayer.value.src = newUrl;
       if (props.isPlaying) {
-        connectIcy(newUrl);
         isLoading.value = true;
         // Manually trigger timer reset since isLoading might not change
         if (loadingTimeout) clearTimeout(loadingTimeout);
@@ -176,20 +144,9 @@ const onNext = () => {
   emit("next");
 };
 
-const displaySong = computed(() => {
-  if (!icyData.value) {
-    return "♪ Tuning in...";
-  }
-  if (icyData.value.artist && icyData.value.title) {
-    return `♪ ${icyData.value.artist} — ${icyData.value.title}`;
-  }
-  return "♪♪♪";
-});
-
 onUnmounted(() => {
   if (loadingTimeout) clearTimeout(loadingTimeout);
   stopStatic();
-  disconnectIcy();
 });
 </script>
 
@@ -275,24 +232,12 @@ onUnmounted(() => {
       />
     </div>
 
-    <!-- Song Info -->
-    <div
-      class="overflow-x-auto whitespace-nowrap flex auto flex-nowrap items-center justify-center font-heading text-xs font-semibold tracking-wide text-pencil-lead hide-scroll"
-      style="scrollbar-width: none; -ms-overflow-style: none"
-    >
-      <span class="inline-block">{{ displaySong }}</span>
-    </div>
-
     <!-- Audio Element -->
     <audio ref="audioPlayer" class="hidden" @playing="onAudioPlaying" />
   </div>
 </template>
 
 <style scoped>
-.hide-scroll::-webkit-scrollbar {
-  display: none;
-}
-
 @keyframes blink {
   0%,
   100% {
