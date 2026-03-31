@@ -23,6 +23,7 @@ USAGE:
 """
 
 import json
+import re
 
 import geopandas as gpd
 import pandas as pd
@@ -40,6 +41,13 @@ NE_INPUT = "data/ne/ne_110m_admin_0_countries.geojson"
 OUTPUT = "data/out/all_radio_with_countries.json"
 
 MIN_STATIONS = 5
+
+# Manual country name overrides applied after lowercasing and "the" stripping.
+# Keys and values should both be lowercase.
+COUNTRY_NAME_OVERRIDES = {
+    "united kingdom of great britain and northern ireland": "united kingdom",
+    "islamic republic of iran": "iran",
+}
 
 SELECTED_NE_COLS = [
     "ADMIN",
@@ -96,7 +104,7 @@ def main():
         for idx, val in ne[column_name].items():
             if pd.isna(val):
                 continue
-            key = str(val).strip().lower()
+            key = re.sub(r"^the\s+", "", str(val).strip().lower())
             if key not in lookup:
                 lookup[key] = idx
 
@@ -110,7 +118,14 @@ def main():
     console.print(f"Lookup table built with {len(lookup):,} unique name variations")
 
     # Map radio stations to NE indices
-    radio["ne_idx"] = radio["country"].str.strip().str.lower().map(lookup)
+    radio["ne_idx"] = (
+        radio["country"]
+        .str.strip()
+        .str.lower()
+        .str.replace(r"^the\s+", "", regex=True)
+        .map(lambda name: COUNTRY_NAME_OVERRIDES.get(name, name))
+        .map(lookup)
+    )
 
     # Identify unmatched countries BEFORE filtering
     unmatched_mask = radio["ne_idx"].isna()

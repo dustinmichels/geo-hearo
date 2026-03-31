@@ -6,8 +6,7 @@ to remove stations with missing or insecure stream URLs.
 
 METHODOLOGY:
 - Removes stations without resolved stream URLs
-- Removes stations with insecure (non-HTTPS) channels
-- Drops unnecessary columns from the dataset
+- Removes stations whose stream URL is not HTTPS
 
 INPUT:
 - CSV file of crawled radio station data (crawl/out/output.csv)
@@ -33,12 +32,6 @@ console = Console()
 
 RADIO_INPUT = "crawl/out/output.csv"
 OUTPUT = "data/out/all_radio_filtered.json"
-
-DROP_COLS = [
-    "channel_stream",
-    "channel_secure",
-    "boost",
-]
 
 
 # ==============================================================================
@@ -82,13 +75,12 @@ def main():
         "Removing stations without 'resolved' URLs",
     )
 
-    # Filter: insecure channels
+    # Filter: insecure stream URLs
     radio = filter_with_report(
-        radio, radio["channel_secure"], "Removing stations with insecure channels"
+        radio,
+        radio["channel_resolved_url"].str.startswith("https://"),
+        "Removing stations with non-HTTPS stream URLs",
     )
-
-    # Drop unwanted columns
-    radio = radio.drop(columns=DROP_COLS)
 
     # Save output
     console.print(f"\n[bold cyan]Saving to {OUTPUT}...[/bold cyan]")
