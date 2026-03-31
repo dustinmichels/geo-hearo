@@ -5,8 +5,17 @@ Scrapes radio station data from multiple sources. Running all scrapers together 
 ## Build
 
 ```sh
-go build -o crawl .
+go build -o crawl . 
 go build -o merge ./merge/
+```
+
+## Radio Garden: User-Agent
+
+The Radio Garden scraper sends a Chrome User-Agent by default. To override it:
+
+```sh
+export RG_USER_AGENT="Mozilla/5.0 ..."
+./crawl --scrapers=radiogarden
 ```
 
 ## Typical workflow

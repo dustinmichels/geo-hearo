@@ -17,15 +17,19 @@ type Place struct {
 	Country string    `json:"country"`
 }
 
-func GetPlaces() ([]Place, error) {
+func GetPlaces(client *http.Client) ([]Place, error) {
+	req, err := http.NewRequest("GET", "https://radio.garden/api/ara/content/places", nil)
+	if err != nil {
+		return nil, fmt.Errorf("GetPlaces: build request: %w", err)
+	}
+	req.Header.Set("User-Agent", userAgent())
 
-	url := "https://radio.garden/api/ara/content/places"
-	resp, err := http.Get(url)
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("GetPlaces: GET error: %w", err)
 	}
-
 	defer resp.Body.Close()
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("GetPlaces: could not read body: %w", err)

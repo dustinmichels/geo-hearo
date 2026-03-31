@@ -28,9 +28,11 @@ type Scraper struct{}
 func (s *Scraper) Name() string { return "radiogarden" }
 
 func (s *Scraper) Scrape(_ context.Context, threads int) ([]*Station, error) {
+	client := newClient()
+
 	log.Println("[radiogarden] GET Places")
 
-	places, err := GetPlaces()
+	places, err := GetPlaces(client)
 	if err != nil {
 		return nil, fmt.Errorf("GetPlaces: %w", err)
 	}
@@ -54,7 +56,7 @@ func (s *Scraper) Scrape(_ context.Context, threads int) ([]*Station, error) {
 			place := places[i]
 			log.Printf("[radiogarden] GET [%d] - %s\n", i, place.Title)
 
-			placeChannels, err := GetPlaceChannels(place.ID)
+			placeChannels, err := GetPlaceChannels(client, place.ID)
 			if err != nil {
 				log.Printf("[radiogarden] ERROR [%d] - %s: %s\n", i, place.Title, err)
 				mu.Lock()
@@ -77,7 +79,7 @@ func (s *Scraper) Scrape(_ context.Context, threads int) ([]*Station, error) {
 					Homepage:    channel.Page.Website,
 				}
 
-				resolved, err := GetStreamURL(channelID)
+				resolved, err := GetStreamURL(client, channelID)
 				if err != nil {
 					log.Printf("[radiogarden] WARN: could not resolve stream for %s: %s\n", channelID, err)
 				} else {

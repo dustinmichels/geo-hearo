@@ -26,15 +26,20 @@ type Channel struct {
 	} `json:"page"`
 }
 
-func GetPlaceChannels(placeId string) ([]Channel, error) {
-
+func GetPlaceChannels(client *http.Client, placeId string) ([]Channel, error) {
 	url := fmt.Sprintf("https://radio.garden/api/ara/content/page/%s/channels", placeId)
-	resp, err := http.Get(url)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("GetPlaceChannels: build request: %w", err)
+	}
+	req.Header.Set("User-Agent", userAgent())
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("GetPlaceChannels: GET error: %w", err)
 	}
-
 	defer resp.Body.Close()
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("GetPlaceChannels: could not read body: %w", err)
@@ -50,7 +55,6 @@ func GetPlaceChannels(placeId string) ([]Channel, error) {
 	}
 
 	return placeChannelsResponse.Data.Content[0].Items, nil
-
 }
 
 type getPlaceChannelsResponse struct {
