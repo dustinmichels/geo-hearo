@@ -27,11 +27,7 @@ interface IndexStructure {
 /**
  * Fetches a single record from the JSONL file using a byte range
  */
-async function fetchStationAt(
-  url: string,
-  startByte: number,
-  lineLength: number,
-): Promise<any> {
+async function fetchStationAt(url: string, startByte: number, lineLength: number): Promise<any> {
   const endByte = startByte + lineLength - 1;
 
   const response = await fetch(url, {
@@ -47,11 +43,7 @@ async function fetchStationAt(
   return JSON.parse(text.trim());
 }
 
-async function runSelectionForDate(
-  dateStr: string,
-  index: IndexStructure,
-  dataUrl: string,
-) {
+async function runSelectionForDate(dateStr: string, index: IndexStructure, dataUrl: string) {
   const rng = new SeededRandom(parseInt(dateStr, 10));
   const { config, countries } = index;
   const lineLength = config.line_length;
@@ -83,12 +75,7 @@ async function runSelectionForDate(
     }),
   );
 
-  console.table(selectedStations, [
-    "channel_name",
-    "place_name",
-    "country",
-    "channel_id",
-  ]);
+  console.table(selectedStations, ["channel_name", "place_name", "country", "channel_id"]);
 }
 
 async function main() {

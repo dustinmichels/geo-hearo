@@ -16,6 +16,7 @@ type Channel struct {
 			Title string `json:"title"`
 		} `json:"place"`
 		Title   string `json:"title"`
+		Website string `json:"website"`
 		Secure  bool   `json:"secure"`
 		Country struct {
 			ID    string `json:"id"`
