@@ -14,6 +14,7 @@ export interface RadioStation {
   geo_lat: number;
   geo_lon: number;
   channel_resolved_url: string;
+  homepage?: string;
   ADMIN: string; // The linking key
   ISO_A3: string;
   CONTINENT: string;
@@ -23,7 +24,7 @@ export interface IndexStructure {
   config: {
     line_length: number;
   };
-  countries: Record<string, { start: number; count: number }>;
+  countries: Record<string, { file: number; start: number; count: number }>;
 }
 
 export type GamePhase = "guessing" | "seeResults" | "listening";

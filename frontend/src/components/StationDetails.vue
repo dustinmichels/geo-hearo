@@ -18,15 +18,7 @@ const formattedLocation = computed(() => {
   return [props.station.place_name, props.station.country].filter(Boolean).join(", ");
 });
 
-const gardenUrl = computed(() => {
-  if (!props.station?.channel_url) return "";
-  // Ensure we don't double slash if channel_url starts with /
-  const path = props.station.channel_url.startsWith("/")
-    ? props.station.channel_url
-    : `/${props.station.channel_url}`;
-
-  return `https://radio.garden${path}`;
-});
+const websiteUrl = computed(() => props.station?.homepage ?? "");
 </script>
 
 <template>
@@ -50,13 +42,14 @@ const gardenUrl = computed(() => {
 
     <div class="flex flex-col gap-2 items-center justify-center">
       <a
-        :href="gardenUrl"
+        v-if="websiteUrl"
+        :href="websiteUrl"
         target="_blank"
         rel="noopener noreferrer"
         class="inline-flex items-center justify-center gap-1.5 font-bold text-gumball-blue hover:underline text-xs"
         :class="layout === 'desktop' ? 'text-xs' : 'text-xs'"
       >
-        Listen on radio.garden
+        Visit website
         <ExternalLink :class="layout === 'desktop' ? 'w-4 h-4' : 'w-3 h-3'" />
       </a>
     </div>

@@ -12,12 +12,14 @@ mkdir -p frontend/public/data
 cp data-prep/data/ne/ne_110m_admin_only.geojson frontend/public/data/ne_countries.geojson
 
 # radio
-cp data-prep/data/out/stations.jsonl frontend/public/data/stations.jsonl
+for f in data-prep/data/out/stations_*.jsonl; do
+  cp "$f" frontend/public/data/
+done
 cp data-prep/data/out/index.json frontend/public/data/index.json
 
 # country details
-cp data-prep/data/out/country_details_with_pics.json frontend/public/data/country_details_with_pics.json
+# cp data-prep/data/out/country_details_with_pics.json frontend/public/data/country_details_with_pics.json
 
 # copy country pics
-rm -rf frontend/public/country-pics
-cp -r data-prep/data/out/country-pics frontend/public/country-pics
+# rm -rf frontend/public/country-pics
+# cp -r data-prep/data/out/country-pics frontend/public/country-pics

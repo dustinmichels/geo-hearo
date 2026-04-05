@@ -12,4 +12,4 @@ cd ..
 [ ! -d ".venv" ] && uv venv
 
 # Run using uv (no activation needed)
-uv run main.py
+# uv run main.py

@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/dustinmichels/geo-hearo/crawl/crawldata"
 	"github.com/dustinmichels/geo-hearo/crawl/radiobrowser"
@@ -26,7 +27,7 @@ func (a *radiogardenAdapter) Scrape(ctx context.Context, threads int) ([]*Statio
 	out := make([]*Station, 0, len(rows))
 	for _, r := range rows {
 		out = append(out, &Station{
-			Source:      "radiogarden",
+			Source:      "RG",
 			ChannelID:   r.ChannelID,
 			ChannelName: r.ChannelName,
 			StreamURL:   r.StreamURL,
@@ -51,7 +52,7 @@ func (a *radiobrowserAdapter) Scrape(ctx context.Context, threads int) ([]*Stati
 	out := make([]*Station, 0, len(rows))
 	for _, r := range rows {
 		out = append(out, &Station{
-			Source:      "radiobrowser",
+			Source:      "RB",
 			ChannelID:   r.ChannelID,
 			ChannelName: r.ChannelName,
 			StreamURL:   r.StreamURL,
@@ -83,11 +84,13 @@ func main() {
 	scrapers := selectScrapers(*scraperNames)
 
 	createDirIfNotExist("./out")
+	createDirIfNotExist("./out/backup")
+	date := time.Now().Format("2006-01-02")
 	for _, s := range scrapers {
-		backupFile("out/output_"+s.Name()+".csv", "out/output_"+s.Name()+"_previous.csv")
+		backupFile("out/output_"+s.Name()+".csv", "out/backup/output_"+s.Name()+"_"+date+".csv")
 	}
 	if runAll {
-		backupFile("out/output.csv", "out/output_previous.csv")
+		backupFile("out/output.csv", "out/backup/output_"+date+".csv")
 	}
 
 	log.Println("**** Starting crawl ****")

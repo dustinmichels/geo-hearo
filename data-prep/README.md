@@ -43,3 +43,10 @@ The final output in `data/out/public/data/` consists of two files:
 - **`index.json`** -- An index mapping each country to `{ start, count }` byte offsets into `stations.jsonl`, plus a `line_length` config value. The frontend uses this to fetch a random station for a given country with a single HTTP range request: `start + (randomIndex * line_length)`.
 
 Additionally, `data/out/centers.geojson` provides country centroid points used by the frontend to place markers on the map.
+
+## Radio Sources
+
+| Tag | Full Name | Website |
+|-----|-----------|---------|
+| RG | Radio Garden | <https://radio.garden/> |
+| RB | Radiocast / Radio Browser | <https://radiocast.co/> |

@@ -152,7 +152,7 @@ export function useRadio() {
       return;
     }
 
-    const { start, count } = countryData;
+    const { start, count, file: fileIndex } = countryData;
     const targetCount = Math.min(5, count);
     const selectedIndices: number[] = [];
     const pool = Array.from({ length: count }, (_, i) => i);
@@ -168,7 +168,7 @@ export function useRadio() {
     isLoading.value = true;
     try {
       const lineLength = idx.config.line_length;
-      const DATA_URL = "/data/stations.jsonl";
+      const DATA_URL = `/data/stations_${fileIndex}.jsonl`;
 
       const stations = await Promise.all(
         selectedIndices.map((offsetIdx) => {
