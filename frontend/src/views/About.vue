@@ -102,7 +102,7 @@ const sections = [
     title: "Data Sources",
     content: [
       'The country polygons are from <a href="https://www.naturalearthdata.com/" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Natural Earth</a>. They are the ones that decide what counts as a country.',
-      'The underlying radio data is borrowed, gratefully, from <a href="https://radio.garden/" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Radio.Garden</a>. There are over 36,000 stations to choose from (from 143 countries) when you start a game.',
+      'The underlying radio data is borrowed, gratefully, from <a href="https://radio.garden/" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Radio.Garden</a>, among other sources. There are over 36,000 stations to choose from (from 143 countries) when you start a game.',
     ],
   },
   {
