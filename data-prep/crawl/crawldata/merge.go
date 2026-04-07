@@ -19,7 +19,7 @@ func DeduplicateByURL(stations []*Station) []*Station {
 			noURL = append(noURL, s)
 			continue
 		}
-		if existing, ok := best[key]; !ok || Score(s) > Score(existing) {
+		if existing, ok := best[key]; !ok || better(s, existing) {
 			best[key] = s
 		}
 	}
@@ -45,7 +45,7 @@ func DeduplicateByNameCity(stations []*Station) []*Station {
 			continue
 		}
 		key := name + "|" + city
-		if existing, ok := best[key]; !ok || Score(s) > Score(existing) {
+		if existing, ok := best[key]; !ok || better(s, existing) {
 			best[key] = s
 		}
 	}
@@ -55,6 +55,17 @@ func DeduplicateByNameCity(stations []*Station) []*Station {
 		result = append(result, s)
 	}
 	return append(result, noKey...)
+}
+
+// better reports whether candidate should replace existing.
+// A record with a resolved stream URL always beats one without, regardless of
+// other field counts. When both have (or both lack) a URL, fall back to Score.
+func better(candidate, existing *Station) bool {
+	hasURL := func(s *Station) bool { return strings.TrimSpace(s.StreamURL) != "" }
+	if hasURL(candidate) != hasURL(existing) {
+		return hasURL(candidate)
+	}
+	return Score(candidate) > Score(existing)
 }
 
 // Score counts the number of populated fields in a station record.

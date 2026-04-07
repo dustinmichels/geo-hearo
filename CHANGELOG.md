@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-04-06
+
+### Data pipeline and station expansion
+
+- **Station data split into chunks**: Added `data-prep/scripts/06_split_chunks.py` to split the station dataset into multiple `stations_N.jsonl` files for better loading performance. Updated `index.json`, `useRadio.ts`, `StationDetails.vue`, and `geo.ts` types accordingly.
+- **Second radio scraper (RadioBrowser)**: Added `data-prep/crawl/radiobrowser/scraper.go` to pull stations from a second source (RadioBrowser), expanding coverage. Refactored crawl entry point (`main.go`, `runner.go`, `scraper.go`, `station.go`) and added a standalone `merge/` tool for combining datasets.
+- **Radio Garden scraper refactor**: Extracted a shared HTTP client (`radiogarden/client.go`) and updated place/channel/stream scrapers to use it.
+- **Matching script improvements**: Made `scripts/03_filter_radio.py` and `scripts/04_match_radio.py` more flexible to handle varied input formats.
+- **Updated country photos**: Refreshed country photos for all countries.
+- **About page update**: Minor copy update on the About page.
+
 ## 2026-03-27
 
 ### ICY metadata service (Go)

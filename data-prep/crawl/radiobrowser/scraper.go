@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"sync"
+	"time"
 )
 
 const (
@@ -47,6 +49,71 @@ type Station struct {
 	Language    string
 }
 
+const (
+	validateThreads = 20
+	validateTimeout = 5 * time.Second
+)
+
+var validateClient = &http.Client{
+	Timeout: validateTimeout,
+	// Do not follow redirects — we just want to know if the server responds.
+	CheckRedirect: func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	},
+}
+
+// validateStreamURL sends a minimal GET with Range: bytes=0-0 and returns true
+// if the server responds with 200, 206, or a redirect (3xx), indicating the
+// stream endpoint is alive. Many stream servers ignore HEAD, so we use GET.
+func validateStreamURL(streamURL string) bool {
+	req, err := http.NewRequest("GET", streamURL, nil)
+	if err != nil {
+		return false
+	}
+	req.Header.Set("Range", "bytes=0-0")
+
+	resp, err := validateClient.Do(req)
+	if err != nil {
+		return false
+	}
+	resp.Body.Close()
+
+	return resp.StatusCode == http.StatusOK ||
+		resp.StatusCode == http.StatusPartialContent ||
+		(resp.StatusCode >= 300 && resp.StatusCode < 400)
+}
+
+// validateBatch filters stations concurrently, returning only reachable ones.
+func validateBatch(stations []*Station, threads int) []*Station {
+	type result struct {
+		station *Station
+		ok      bool
+	}
+
+	results := make([]result, len(stations))
+	ch := make(chan int, threads)
+	var wg sync.WaitGroup
+
+	wg.Add(len(stations))
+	for i, st := range stations {
+		go func(i int, st *Station) {
+			defer wg.Done()
+			ch <- i
+			results[i] = result{station: st, ok: validateStreamURL(st.StreamURL)}
+			<-ch
+		}(i, st)
+	}
+	wg.Wait()
+
+	var valid []*Station
+	for _, r := range results {
+		if r.ok {
+			valid = append(valid, r.station)
+		}
+	}
+	return valid
+}
+
 // Scraper implements the Radio Browser crawl.
 type Scraper struct{}
 
@@ -67,12 +134,13 @@ func (s *Scraper) Scrape(_ context.Context, _ int) ([]*Station, error) {
 			break
 		}
 
+		var paginated []*Station
 		for _, a := range batch {
 			placeName := a.City
 			if placeName == "" {
 				placeName = a.State
 			}
-			all = append(all, &Station{
+			paginated = append(paginated, &Station{
 				ChannelID:   a.StationUUID,
 				ChannelName: a.Name,
 				StreamURL:   a.URLResolved,
@@ -86,6 +154,10 @@ func (s *Scraper) Scrape(_ context.Context, _ int) ([]*Station, error) {
 				Language:    a.Language,
 			})
 		}
+
+		valid := validateBatch(paginated, validateThreads)
+		log.Printf("[radiobrowser] offset=%d: %d/%d stations reachable\n", offset, len(valid), len(paginated))
+		all = append(all, valid...)
 
 		offset += pageLimit
 	}
