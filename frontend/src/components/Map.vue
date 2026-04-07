@@ -124,8 +124,9 @@ const updateSky = () => {
 
 watch(gameStage, (stage) => {
   updateSky();
-  // Reset to default view when round finishes (zoom to stations happens later on user action)
-  if (stage !== "guessing" && map.value) {
+  // Reset to default view when round finishes — only for seeResults (modal open).
+  // When transitioning to listening, zoomToStations handles the camera immediately.
+  if (stage === "seeResults" && map.value) {
     stopSpinning();
     map.value.easeTo({
       center: [0, 20],
@@ -653,15 +654,12 @@ const resetView = () => {
 
 const zoomToStationsWrapped = () => {
   stopSpinning();
-  // Stop any ongoing animations (e.g. from roundFinished transition)
-  if (map.value) {
-    map.value.stop();
-  }
-
-  // Small delay to ensure clean state for fitBounds
-  setTimeout(() => {
+  if (!map.value) return;
+  // Stop any ongoing animations; moveend fires immediately after stop()
+  map.value.stop();
+  map.value.once("moveend", () => {
     zoomToStations();
-  }, 100);
+  });
 };
 
 defineExpose({ resetView, zoomToStations: zoomToStationsWrapped });
