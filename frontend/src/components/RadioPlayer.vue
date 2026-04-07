@@ -80,16 +80,6 @@ watch(
       audioPlayer.value.src = newUrl;
       if (props.isPlaying) {
         isLoading.value = true;
-        // Manually trigger timer reset since isLoading might not change
-        if (loadingTimeout) clearTimeout(loadingTimeout);
-        loadingTimeout = setTimeout(() => {
-          if (isLoading.value) {
-            console.log("Loading timed out, skipping to next station");
-            isLoading.value = false; // Stop loading state locally
-            onNext();
-          }
-        }, 5000);
-
         await playStatic();
         audioPlayer.value.play().catch((e) => {
           if (e.name === "AbortError") return;
@@ -127,20 +117,20 @@ watch(
   () => props.isPlaying,
   (playing) => {
     if (playing) {
-      store.hasPlayedRadio = true;
-      store.hasEverPlayed = true;
+      store.setHasPlayedRadio(true);
+      store.setHasEverPlayed(true);
     }
   },
   { immediate: true },
 );
 
 const onPrevious = () => {
-  store.hasSkippedStation = true;
+  store.setHasSkippedStation(true);
   emit("previous");
 };
 
 const onNext = () => {
-  store.hasSkippedStation = true;
+  store.setHasSkippedStation(true);
   emit("next");
 };
 

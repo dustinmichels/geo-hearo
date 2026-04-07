@@ -3,13 +3,6 @@ import { ref } from "vue";
 import { useGameStore } from "../stores/game";
 import type { IndexStructure, RadioStation } from "../types/geo";
 
-export interface GameHistoryItem {
-  country: string;
-  score: string;
-  date: string;
-  mode: "daily" | "free";
-}
-
 /**
  * LCG Randomizer
  * A simple seeded random number generator (Linear Congruential Generator)
@@ -284,14 +277,32 @@ export function useRadio() {
   // Refactor note: we use local '2026-02-02' construction in getDailyChallengeNumber directly.
 
   /**
-   * Calculates the Day # based on UTC time relative to Feb 2, 2026.
+   * Returns the current date parts (year, month, day) in US/Eastern time.
+   * All players worldwide see the same daily challenge, based on Eastern time.
+   */
+  const getEasternDateParts = (): { year: number; month: number; day: number } => {
+    const now = new Date();
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/New_York",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+    }).formatToParts(now);
+    return {
+      year: parseInt(parts.find((p) => p.type === "year")!.value),
+      month: parseInt(parts.find((p) => p.type === "month")!.value),
+      day: parseInt(parts.find((p) => p.type === "day")!.value),
+    };
+  };
+
+  /**
+   * Calculates the Day # based on US/Eastern time relative to Feb 2, 2026.
    * Day 1 is Feb 2, 2026.
    */
   const getDailyChallengeNumber = (): number => {
-    const now = new Date();
-    // Compare UTC dates only
-    const current = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-    const start = new Date(Date.UTC(2026, 1, 2)); // Feb 2, 2026 UTC
+    const { year, month, day } = getEasternDateParts();
+    const current = new Date(Date.UTC(year, month - 1, day));
+    const start = new Date(Date.UTC(2026, 1, 2)); // Feb 2, 2026
 
     const diffTime = current.getTime() - start.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -301,18 +312,18 @@ export function useRadio() {
   };
 
   const getDailyChallengeSeed = (): number => {
-    const now = new Date();
-    // Create a unique integer from YYYYMMDD in UTC
-    return now.getUTCFullYear() * 10000 + (now.getUTCMonth() + 1) * 100 + now.getUTCDate();
+    const { year, month, day } = getEasternDateParts();
+    // Create a unique integer from YYYYMMDD in US/Eastern time
+    return year * 10000 + month * 100 + day;
   };
 
-  const getUTCDateString = (): string => {
-    const now = new Date();
-    return `${now.getUTCFullYear()}-${now.getUTCMonth() + 1}-${now.getUTCDate()}`;
+  const getEasternDateString = (): string => {
+    const { year, month, day } = getEasternDateParts();
+    return `${year}-${month}-${day}`;
   };
 
   const initDailyChallenge = () => {
-    const todayStr = getUTCDateString();
+    const todayStr = getEasternDateString();
     const lastCompleted = localStorage.getItem(STORAGE_KEY_DAILY_DATE);
 
     if (lastCompleted === todayStr) {
@@ -325,7 +336,7 @@ export function useRadio() {
   };
 
   const completeDailyChallenge = () => {
-    localStorage.setItem(STORAGE_KEY_DAILY_DATE, getUTCDateString());
+    localStorage.setItem(STORAGE_KEY_DAILY_DATE, getEasternDateString());
     store.setDailyChallengeMode(false);
   };
 
@@ -351,5 +362,6 @@ export function useRadio() {
     initDailyChallenge,
     completeDailyChallenge,
     getDailyChallengeSeed,
+    getDailyChallengeNumber,
   };
 }

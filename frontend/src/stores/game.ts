@@ -62,6 +62,18 @@ export const useGameStore = defineStore("game", () => {
     gameStage.value = stage;
   }
 
+  function setHasPlayedRadio(val: boolean) {
+    hasPlayedRadio.value = val;
+  }
+
+  function setHasEverPlayed(val: boolean) {
+    hasEverPlayed.value = val;
+  }
+
+  function setHasSkippedStation(val: boolean) {
+    hasSkippedStation.value = val;
+  }
+
   function resetGame() {
     guesses.value = [];
     secretCountry.value = "";
@@ -122,6 +134,9 @@ export const useGameStore = defineStore("game", () => {
     setStationIndex,
     setDailyChallengeMode,
     setSeed,
+    setHasPlayedRadio,
+    setHasEverPlayed,
+    setHasSkippedStation,
     resetGame,
     loadHistory,
     addToHistory,

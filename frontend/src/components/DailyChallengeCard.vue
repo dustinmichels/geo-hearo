@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Check, Share, Trophy } from "lucide-vue-next";
 import { ref } from "vue";
+import { useRadio } from "../composables/useRadio";
 import type { GameHistoryItem } from "../types/geo";
 
 defineProps<{
@@ -11,14 +12,7 @@ const emit = defineEmits<{
   showStats: [];
 }>();
 
-const getDailyChallengeNumber = (): number => {
-  const now = new Date();
-  const current = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-  const start = new Date(Date.UTC(2026, 1, 2)); // Feb 2, 2026 UTC
-  const diffTime = current.getTime() - start.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays + 1;
-};
+const { getDailyChallengeNumber } = useRadio();
 
 const copyButtonText = ref("Copy shareable score");
 
