@@ -1,6 +1,7 @@
 package crawldata
 
 import (
+	"log"
 	"os"
 	"strings"
 
@@ -88,6 +89,34 @@ func Score(s *Station) int {
 // Norm lowercases and trims a string for comparison.
 func Norm(s string) string {
 	return strings.ToLower(strings.TrimSpace(s))
+}
+
+// Merge loads stations from inputFiles, deduplicates them, and writes to outputPath.
+func Merge(inputFiles []string, outputPath string) error {
+	var all []*Station
+	for _, path := range inputFiles {
+		path = strings.TrimSpace(path)
+		stations, err := ReadCSV(path)
+		if err != nil {
+			log.Printf("WARN: skipping %s: %v\n", path, err)
+			continue
+		}
+		log.Printf("Loaded %d stations from %s\n", len(stations), path)
+		all = append(all, stations...)
+	}
+	log.Printf("Total before dedup: %d\n", len(all))
+
+	pass1 := DeduplicateByURL(all)
+	log.Printf("After URL dedup:       %d (removed %d)\n", len(pass1), len(all)-len(pass1))
+
+	pass2 := DeduplicateByNameCity(pass1)
+	log.Printf("After name+city dedup: %d (removed %d)\n", len(pass2), len(pass1)-len(pass2))
+
+	if err := WriteCSV(pass2, outputPath); err != nil {
+		return err
+	}
+	log.Printf("Written to %s\n", outputPath)
+	return nil
 }
 
 func ReadCSV(path string) ([]*Station, error) {

@@ -46,12 +46,12 @@ func (s *Scraper) Scrape(_ context.Context, threads int) ([]*Station, error) {
 	)
 
 	wg.Add(len(places))
-	ch := make(chan int, threads)
+	ch := make(chan struct{}, threads)
 
 	for i := range places {
 		go func(i int) {
 			defer wg.Done()
-			ch <- i
+			ch <- struct{}{}
 
 			place := places[i]
 			log.Printf("[radiogarden] GET [%d] - %s\n", i, place.Title)

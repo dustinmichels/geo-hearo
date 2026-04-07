@@ -49,10 +49,7 @@ type Station struct {
 	Language    string
 }
 
-const (
-	validateThreads = 20
-	validateTimeout = 5 * time.Second
-)
+const validateTimeout = 5 * time.Second
 
 var validateClient = &http.Client{
 	Timeout: validateTimeout,
@@ -119,7 +116,7 @@ type Scraper struct{}
 
 func (s *Scraper) Name() string { return "radiobrowser" }
 
-func (s *Scraper) Scrape(_ context.Context, _ int) ([]*Station, error) {
+func (s *Scraper) Scrape(_ context.Context, threads int) ([]*Station, error) {
 	var all []*Station
 	offset := 0
 
@@ -155,7 +152,7 @@ func (s *Scraper) Scrape(_ context.Context, _ int) ([]*Station, error) {
 			})
 		}
 
-		valid := validateBatch(paginated, validateThreads)
+		valid := validateBatch(paginated, threads)
 		log.Printf("[radiobrowser] offset=%d: %d/%d stations reachable\n", offset, len(valid), len(paginated))
 		all = append(all, valid...)
 

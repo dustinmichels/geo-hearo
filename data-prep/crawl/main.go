@@ -12,7 +12,6 @@ import (
 	"github.com/dustinmichels/geo-hearo/crawl/crawldata"
 	"github.com/dustinmichels/geo-hearo/crawl/radiobrowser"
 	"github.com/dustinmichels/geo-hearo/crawl/radiogarden"
-	"github.com/gocarina/gocsv"
 )
 
 // scraperAdapter wraps each package's Scraper so it satisfies the main.Scraper interface.
@@ -104,39 +103,19 @@ func main() {
 	for name, stations := range results {
 		path := "out/output_" + name + ".csv"
 		log.Printf("**** Saving %s (%d stations) ****\n", path, len(stations))
-		saveToCsv(stations, path)
+		if err := crawldata.WriteCSV(stations, path); err != nil {
+			log.Printf("ERROR: could not save %s: %v\n", path, err)
+		}
 		writtenFiles = append(writtenFiles, path)
 	}
 
 	if runAll {
 		log.Println("**** Merging and deduplicating ****")
-		runMerge(writtenFiles, "out/output.csv")
-	}
-}
-
-func runMerge(inputFiles []string, outputPath string) {
-	var all []*Station
-	for _, path := range inputFiles {
-		stations, err := crawldata.ReadCSV(path)
-		if err != nil {
-			log.Printf("WARN: could not read %s for merge: %v\n", path, err)
-			continue
+		if err := crawldata.Merge(writtenFiles, "out/output.csv"); err != nil {
+			log.Printf("ERROR: merge failed: %v\n", err)
 		}
-		all = append(all, stations...)
+		log.Println("**** Merged output written to out/output.csv ****")
 	}
-	log.Printf("Total before dedup: %d\n", len(all))
-
-	pass1 := crawldata.DeduplicateByURL(all)
-	log.Printf("After URL dedup:       %d (removed %d)\n", len(pass1), len(all)-len(pass1))
-
-	pass2 := crawldata.DeduplicateByNameCity(pass1)
-	log.Printf("After name+city dedup: %d (removed %d)\n", len(pass2), len(pass1)-len(pass2))
-
-	if err := crawldata.WriteCSV(pass2, outputPath); err != nil {
-		log.Printf("ERROR: merge write failed: %v\n", err)
-		return
-	}
-	log.Printf("**** Merged output written to %s ****\n", outputPath)
 }
 
 func selectScrapers(names string) []Scraper {
@@ -192,7 +171,7 @@ func backupFile(src, dst string) {
 
 func createDirIfNotExist(dir string) {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		log.Println("***** Creating './out' dir ****")
+		log.Printf("***** Creating %q dir ****\n", dir)
 		err = os.MkdirAll(dir, 0755)
 		if err != nil {
 			panic(err)
@@ -200,12 +179,3 @@ func createDirIfNotExist(dir string) {
 	}
 }
 
-func saveToCsv(output []*Station, path string) {
-	os.Remove(path)
-	outCSV, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, os.ModePerm)
-	if err != nil {
-		panic(err)
-	}
-	defer outCSV.Close()
-	gocsv.MarshalFile(output, outCSV)
-}

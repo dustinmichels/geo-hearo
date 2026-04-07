@@ -3,6 +3,7 @@ package radiogarden
 import (
 	"net/http"
 	"os"
+	"time"
 )
 
 const (
@@ -11,7 +12,7 @@ const (
 )
 
 func newClient() *http.Client {
-	return &http.Client{}
+	return &http.Client{Timeout: 15 * time.Second}
 }
 
 // userAgent returns the configured User-Agent or a Chrome fallback.

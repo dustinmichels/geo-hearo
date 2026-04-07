@@ -54,6 +54,9 @@ func GetPlaceChannels(client *http.Client, placeId string) ([]Channel, error) {
 		return nil, fmt.Errorf("GetPlaceChannels: unmarshal error: %w", err)
 	}
 
+	if len(placeChannelsResponse.Data.Content) == 0 {
+		return nil, nil
+	}
 	return placeChannelsResponse.Data.Content[0].Items, nil
 }
 
