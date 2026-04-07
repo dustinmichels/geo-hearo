@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-04-07
+
+- **Daily challenge timezone**: Daily challenge now rolls over at midnight US/Eastern time (`America/New_York`) instead of UTC. All players worldwide see the same challenge based on Eastern time. Updated `getDailyChallengeNumber`, `getDailyChallengeSeed`, and date string helpers in `useRadio.ts`.
+- **Map zoom fix**: Fixed a race condition in `Map.vue` where the camera would reset incorrectly after a round. The `gameStage` watcher now only resets to default view on `seeResults` (not all non-guessing stages), and `zoomToStationsWrapped` now waits for a `moveend` event instead of using a fixed `setTimeout` delay.
+- **RadioBrowser stream validation**: The RadioBrowser crawler now concurrently validates each station's stream URL (20 threads, 5s timeout) before including it in the output, filtering out dead streams. Deduplication logic was also improved so that a record with a resolved stream URL always beats one without, regardless of field count.
+
 ## 2026-04-06
 
 ### Data pipeline and station expansion

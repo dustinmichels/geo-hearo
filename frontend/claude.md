@@ -1,1 +1,2 @@
 - Use Vue3 composition API.
+- Use bun
