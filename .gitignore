@@ -1,6 +1,7 @@
+.codegraph
+
 .DS_Store
 .env
 
 # Demo
 /demo
-
