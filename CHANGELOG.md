@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-11-08
+
+- **Merged `main` (live `014ebf5`)**: brings the refreshed country photos and matching `country_details_with_pics.json` into `dev`. Fixed two mis-encoded language names in that JSON (Asháninka, Guaraní). `CountryDetails` now treats non-OK responses as errors and logs them.
+- **Regressions vs. live fixed**:
+  - `Map.vue` `zoomToStationsWrapped`: it waited for a `moveend` that `stop()` emits synchronously (or never, when idle), so the map stopped zooming to the stations after the results modal. It now zooms right after `stop()`.
+  - Daily-challenge stats (trophy / `DailyChallengeCard`) query the Eastern challenge date instead of the UTC date of the completion timestamp, matching what `trackDailyResult` records.
+  - `initDailyChallenge` compares the stored completion date numerically, so dates stored unpadded by the live build (`2026-11-9`) still count as completed.
+  - `RadioPlayer` re-arms the 5s dead-station timeout on every station change, so skipping while a station is loading no longer inherits the old timer.
+  - `Play.vue` pauses playback when crossing the 1024px layout breakpoint, because the remounted `<audio>` has no source.
+  - A failed country GeoJSON load no longer blocks game setup.
+  - `usePwaInstall()` registers its listeners in `main.ts`, before any route renders.
+  - driver.js 1.11 tour buttons keep the live `← Previous` / `Next →` labels.
+  - `.btn-pressable` transitions `box-shadow` again.
+
 ## 2026-04-07
 
 - **Daily challenge timezone**: Daily challenge now rolls over at midnight US/Eastern time (`America/New_York`) instead of UTC. All players worldwide see the same challenge based on Eastern time. Updated `getDailyChallengeNumber`, `getDailyChallengeSeed`, and date string helpers in `useRadio.ts`.

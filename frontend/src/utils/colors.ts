@@ -5,7 +5,7 @@
 // Level 5: Red 2 (1500-3000 km) - Medium Red
 // Level 6: Red 1 (3000+ km) - Darkest Red
 
-export const DISTANCE_COLORS = {
+export const DISTANCE_COLORS: Record<number, string> = {
   1: "#FDE047", // Light yellow (Yellow 300)
   2: "#FBBF24", // Golden yellow (Amber 400)
   3: "#FB923C", // Light orange (Orange 400)
@@ -15,6 +15,5 @@ export const DISTANCE_COLORS = {
 };
 
 export function getColorForDistanceLevel(level: number): string {
-  // @ts-ignore
   return DISTANCE_COLORS[level] ?? "#A855F7";
 }

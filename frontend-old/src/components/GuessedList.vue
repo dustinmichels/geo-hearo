@@ -7,14 +7,10 @@
         <span class="panel-index">{{ index + 1 }})</span>
         <span class="panel-name">{{ guess.name }}</span>
         <span class="panel-direction" v-if="guess.isCorrect">🎉</span>
-        <span class="panel-direction" v-else>{{
-          directionToArrow(guess.direction)
-        }}</span>
+        <span class="panel-direction" v-else>{{ directionToArrow(guess.direction) }}</span>
 
         <span class="panel-distance" v-if="guess.isCorrect">🎉</span>
-        <span class="panel-distance" v-else
-          >({{ formatNumber(guess.distance) }} km)</span
-        >
+        <span class="panel-distance" v-else>({{ formatNumber(guess.distance) }} km)</span>
       </span>
       <span v-else>{{ index + 1 }}) </span>
     </label>
@@ -22,16 +18,16 @@
 </template>
 
 <script setup lang="ts">
-import { CountryGuessed } from '../types'
-import { directionToArrow } from '../util/geo'
+import { CountryGuessed } from "../types";
+import { directionToArrow } from "../util/geo";
 
 defineProps<{
-  guessed: CountryGuessed[]
-}>()
+  guessed: CountryGuessed[];
+}>();
 
 const formatNumber = (num: number) => {
-  return Math.trunc(num).toLocaleString()
-}
+  return Math.trunc(num).toLocaleString();
+};
 </script>
 
 <style scoped>

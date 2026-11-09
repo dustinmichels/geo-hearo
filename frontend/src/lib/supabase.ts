@@ -1,9 +1,16 @@
-import { createClient } from "@supabase/supabase-js";
+import { PostgrestClient } from "@supabase/postgrest-js";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
-const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
+// Only PostgREST is used, so skip supabase-js (auth/realtime/storage/functions ≈ 200 KB).
+// Headers mirror what supabase-js sends for an anon/publishable key.
+const supabase =
+  supabaseUrl && supabaseAnonKey
+    ? new PostgrestClient(`${supabaseUrl.replace(/\/+$/, "")}/rest/v1`, {
+        headers: { apikey: supabaseAnonKey, Authorization: `Bearer ${supabaseAnonKey}` },
+      })
+    : null;
 
 /**
  * Atomically increments the daily challenge result counter.

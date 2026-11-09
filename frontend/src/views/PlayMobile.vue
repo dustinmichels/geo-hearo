@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Trophy } from "lucide-vue-next";
 import { FloatingPanel as VanFloatingPanel } from "vant";
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, useTemplateRef, watch } from "vue";
 import AnimatedClose from "../components/AnimatedClose.vue";
 import CountryDetails from "../components/CountryDetails.vue";
 import DailyChallengeCard from "../components/DailyChallengeCard.vue";
@@ -11,105 +11,104 @@ import HamburgerMenu from "../components/HamburgerMenu.vue";
 import Map from "../components/Map.vue";
 import RadioPlayer from "../components/RadioPlayer.vue";
 import ResultsPanel from "../components/ResultsPanel.vue";
-import { useGamePlay } from "../composables/useGamePlay";
-import { useOnboarding } from "../composables/useOnboarding";
+import type { GamePlayState } from "../composables/useGamePlay";
 import { useRadio } from "../composables/useRadio";
 
-const mapRef = ref<InstanceType<typeof Map> | null>(null);
+const props = defineProps<{
+  gameplay: GamePlayState;
+}>();
+
+const gameplay = props.gameplay;
+
+const mapRef = useTemplateRef<InstanceType<typeof Map>>("mapRef");
 
 const { isDailyChallengeMode } = useRadio();
-const { startResultsTour } = useOnboarding();
 
 // Vant Floating Panel setup
-const anchors = [
+const windowHeight = ref(window.innerHeight);
+const onResize = () => {
+  windowHeight.value = window.innerHeight;
+};
+
+onMounted(() => {
+  window.addEventListener("resize", onResize);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", onResize);
+});
+
+const anchors = computed(() => [
   140, // Collapsed height (px)
-  Math.round(window.innerHeight * 0.9), // Fully open
-];
-const panelHeight = ref(anchors[0]);
+  Math.round(windowHeight.value * 0.9), // Fully open
+]);
+const panelHeight = ref(140);
 
 // Results floating panel setup
-// Results floating panel setup
-const resultsAnchors = [
+const resultsAnchors = computed(() => [
   160, // Collapsed: station details + new game button visible
-  window.innerHeight - 130, // Expanded: leave room for X buttons at top
-];
-const resultsPanelHeight = ref(resultsAnchors[0]);
+  windowHeight.value - 130, // Expanded: leave room for X buttons at top
+]);
+const resultsPanelHeight = ref(160);
 
-const {
-  isPlaying,
-  guessInput,
-  guessColors,
-  showModal,
-  modalConfig,
-  guesses,
-  currentStation,
-  currentStations,
-  currentStationUrl,
-  debugCountry,
-  handlePlayPause,
-  handlePrevious,
-  handleNext,
-  handleAddGuess,
-  handleModalConfirm,
-  handleCountrySelect,
-  handleModalClose,
-  handleShowStats,
-  handleNewGame,
-  gameStage,
-  secretCountry,
-  gameHistory,
-  isStatsView,
-} = useGamePlay({
-  onGuessAdded: () => {
-    panelHeight.value = anchors[1];
-  },
-  onNewGame: () => {
-    mapRef.value?.resetView();
-    panelHeight.value = anchors[0];
-    resultsPanelHeight.value = resultsAnchors[0];
-  },
-  onModalClose: () => {
-    mapRef.value?.zoomToStations();
-    setTimeout(() => {
-      startResultsTour();
-    }, 500);
-  },
+const onGuessAdded = () => {
+  panelHeight.value = anchors.value[1] ?? 140;
+};
+
+const onNewGame = () => {
+  mapRef.value?.resetView();
+  panelHeight.value = anchors.value[0] ?? 140;
+  resultsPanelHeight.value = resultsAnchors.value[0] ?? 160;
+};
+
+const onModalClose = () => {
+  mapRef.value?.zoomToStations();
+};
+
+defineExpose({
+  mapRef,
+  onGuessAdded,
+  onNewGame,
+  onModalClose,
 });
 
-watch(gameStage, (stage) => {
-  if (stage !== "guessing") {
-    panelHeight.value = anchors[0];
-  }
-  if (stage === "listening") {
-    resultsPanelHeight.value = resultsAnchors[0];
-  }
-});
+watch(
+  () => gameplay.gameStage,
+  (stage) => {
+    if (stage !== "guessing") {
+      panelHeight.value = anchors.value[0] ?? 140;
+    }
+    if (stage === "listening") {
+      resultsPanelHeight.value = resultsAnchors.value[0] ?? 160;
+    }
+  },
+);
 
 const handleArrowClick = () => {
-  panelHeight.value = anchors[0];
+  panelHeight.value = anchors.value[0] ?? 140;
 };
 
 const handleResultsArrowClick = () => {
-  resultsPanelHeight.value = resultsAnchors[0];
+  resultsPanelHeight.value = resultsAnchors.value[0] ?? 160;
 };
 
 const isPanelFullHeight = computed(() => {
-  const fullHeight = anchors[1];
+  const fullHeight = anchors.value[1];
   if (typeof fullHeight === "undefined" || typeof panelHeight.value === "undefined") return false;
   return panelHeight.value >= fullHeight - 10;
 });
 
 const isResultsPanelFullHeight = computed(() => {
-  const fullHeight = resultsAnchors[1];
+  const fullHeight = resultsAnchors.value[1];
   if (typeof fullHeight === "undefined" || typeof resultsPanelHeight.value === "undefined")
     return false;
   return resultsPanelHeight.value >= fullHeight - 10;
 });
 
 const overlayOpacity = computed(() => {
-  const isListening = gameStage.value === "listening";
-  const min = isListening ? resultsAnchors[0] : anchors[0];
-  const max = isListening ? resultsAnchors[1] : anchors[1];
+  const isListening = gameplay.gameStage === "listening";
+  const min = isListening ? resultsAnchors.value[0] : anchors.value[0];
+  const max = isListening ? resultsAnchors.value[1] : anchors.value[1];
   const current = isListening ? resultsPanelHeight.value : panelHeight.value;
 
   if (typeof min === "undefined" || typeof max === "undefined" || typeof current === "undefined") {
@@ -119,15 +118,6 @@ const overlayOpacity = computed(() => {
   const progress = (current - min) / (max - min);
   const clamped = Math.min(Math.max(progress, 0), 1);
   return clamped * 0.6;
-});
-
-const activeStation = computed(() => {
-  if (!currentStations.value || !currentStations.value.length) return undefined;
-  return currentStations.value[currentStation.value - 1];
-});
-
-const dailyItem = computed(() => {
-  return gameHistory.value?.find((item) => item.mode === "daily");
 });
 </script>
 
@@ -144,11 +134,11 @@ const dailyItem = computed(() => {
     <div class="fixed top-4 left-4 z-[9999] flex gap-2">
       <HamburgerMenu />
       <button
-        v-if="dailyItem"
+        v-if="gameplay.dailyItem"
         class="bg-paper-white/90 backdrop-blur-sm text-[#B45309] rounded-lg p-2 hover:bg-paper-white transition-colors duration-200 cursor-pointer flex items-center justify-center shadow-sm"
         aria-label="View daily challenge stats"
         title="View daily challenge stats"
-        @click="handleShowStats"
+        @click="gameplay.handleShowStats"
       >
         <Trophy :size="20" :stroke-width="2.5" />
       </button>
@@ -185,7 +175,7 @@ const dailyItem = computed(() => {
             src="/emoji.png"
             class="absolute left-full bottom-0 h-12 ml-4 z-[-1] transition-transform duration-700 ease-out"
             style="will-change: transform"
-            :class="isPlaying ? 'translate-y-0' : 'translate-y-16'"
+            :class="gameplay.isPlaying ? 'translate-y-0' : 'translate-y-16'"
           />
         </div>
       </div>
@@ -196,12 +186,12 @@ const dailyItem = computed(() => {
         style="transform: translate3d(0, 0, 0)"
       >
         <RadioPlayer
-          :is-playing="isPlaying"
-          :current-station="currentStation"
-          :station-url="currentStationUrl"
-          @play-pause="handlePlayPause"
-          @previous="handlePrevious"
-          @next="handleNext"
+          :is-playing="gameplay.isPlaying"
+          :current-station="gameplay.currentStation"
+          :station-url="gameplay.currentStationUrl"
+          @play-pause="gameplay.handlePlayPause"
+          @previous="gameplay.handlePrevious"
+          @next="gameplay.handleNext"
         />
       </div>
 
@@ -212,15 +202,8 @@ const dailyItem = computed(() => {
       >
         <Map
           ref="mapRef"
-          @select-country="handleCountrySelect"
-          :guessed-countries="guesses"
-          :guess-colors="guessColors"
-          :selected-country="guessInput"
-          :secret-country="gameStage !== 'guessing' ? secretCountry : debugCountry"
-          :stations="currentStations"
-          :active-station-id="activeStation?.channel_id"
-          :are-stations-visible="gameStage === 'listening'"
-          :show-tiles="gameStage !== 'guessing'"
+          @select-country="gameplay.handleCountrySelect"
+          v-bind="gameplay.mapProps"
           default-projection="globe"
         />
       </div>
@@ -228,24 +211,24 @@ const dailyItem = computed(() => {
 
     <!-- Results Floating Panel (listening stage) -->
     <van-floating-panel
-      v-if="gameStage === 'listening'"
+      v-if="gameplay.gameStage === 'listening'"
       v-model:height="resultsPanelHeight"
       :anchors="resultsAnchors"
       :content-class="'bg-paper-white rounded-t-[24px] border-t-3 border-l-3 border-r-3 border-pencil-lead shadow-[0_-4px_0_0_#334155] flex flex-col'"
       style="z-index: 50"
     >
       <div class="px-4 pt-2 pb-4 shrink-0">
-        <ResultsPanel :station="activeStation" @new-game="handleNewGame" />
+        <ResultsPanel :station="gameplay.activeStation" @new-game="gameplay.handleNewGame" />
       </div>
       <div class="border-t border-pencil-lead/20 overflow-y-auto flex-1 min-h-0">
         <div class="max-w-md mx-auto px-4 pt-4 pb-12 space-y-4">
           <CountryDetails
-            v-if="secretCountry"
-            :country-name="secretCountry"
+            v-if="gameplay.secretCountry"
+            :country-name="gameplay.secretCountry"
             :show-name="false"
             :small-image="true"
           />
-          <DailyChallengeCard v-if="dailyItem" @show-stats="handleShowStats" />
+          <DailyChallengeCard v-if="gameplay.dailyItem" @show-stats="gameplay.handleShowStats" />
         </div>
       </div>
     </van-floating-panel>
@@ -258,28 +241,27 @@ const dailyItem = computed(() => {
 
     <!-- Vant Floating Panel -->
     <van-floating-panel
-      v-if="gameStage === 'guessing'"
+      v-if="gameplay.gameStage === 'guessing'"
       v-model:height="panelHeight"
       :anchors="anchors"
       :content-class="'bg-paper-white rounded-t-[24px] border-t-3 border-l-3 border-r-3 border-pencil-lead shadow-[0_-4px_0_0_#334155] flex flex-col'"
       style="z-index: 50"
     >
-      <GuessPanel v-model="guessInput" :guesses="guesses" @add-guess="handleAddGuess" />
+      <GuessPanel
+        v-model="gameplay.guessInput"
+        :guesses="gameplay.guesses"
+        @add-guess="gameplay.handleAddGuess"
+      />
     </van-floating-panel>
 
     <!-- Game Result Modal -->
     <GameResultModal
-      :show="showModal"
-      :is-win="modalConfig.isWin"
-      :secret-country="modalConfig.secretCountry"
-      :history="gameHistory"
-      :is-daily-challenge="modalConfig.isDailyChallenge"
-      :daily-challenge-number="modalConfig.dailyChallengeNumber"
-      :challenge-date="modalConfig.challengeDate"
-      :stats-view="isStatsView"
-      :tracked-promise="modalConfig.trackedPromise"
-      @confirm="handleModalConfirm"
-      @close="handleModalClose"
+      v-bind="gameplay.modalConfig"
+      :show="gameplay.showModal"
+      :history="gameplay.gameHistory"
+      :stats-view="gameplay.isStatsView"
+      @confirm="gameplay.handleModalConfirm"
+      @close="gameplay.handleModalClose"
     />
   </div>
 </template>

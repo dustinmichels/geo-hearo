@@ -5,7 +5,7 @@ Scrapes radio station data from multiple sources. Running all scrapers together 
 ## Build
 
 ```sh
-go build -o crawl . 
+go build -o crawl .
 go build -o merge ./merge/
 ```
 
@@ -46,11 +46,11 @@ This is useful when you want to re-scrape only one source without re-running the
 
 ## Output files
 
-| File | Description |
-|------|-------------|
-| `out/output_radiogarden.csv` | Raw Radio Garden results |
-| `out/output_radiobrowser.csv` | Raw Radio Browser results |
-| `out/output.csv` | Merged, deduplicated output (produced by `./crawl` or `./merge`) |
+| File                          | Description                                                      |
+| ----------------------------- | ---------------------------------------------------------------- |
+| `out/output_radiogarden.csv`  | Raw Radio Garden results                                         |
+| `out/output_radiobrowser.csv` | Raw Radio Browser results                                        |
+| `out/output.csv`              | Merged, deduplicated output (produced by `./crawl` or `./merge`) |
 
 Previous runs are backed up to `out/output_<name>_previous.csv` before each new run.
 
@@ -68,19 +68,19 @@ Two dedup passes are applied in order:
 
 ## Output columns
 
-| Column | Description |
-|--------|-------------|
-| `source` | Which scraper produced this row (`radiogarden` or `radiobrowser`) |
-| `channel_id` | Unique station identifier |
-| `channel_name` | Station name |
-| `channel_resolved_url` | Final stream URL (dedup key) |
-| `country` | Country name string (used by downstream pipeline) |
-| `country_code` | ISO 3166-1 alpha-2 code (Radio Browser only) |
-| `geo_lat` / `geo_lon` | Station coordinates |
-| `place_name` | City or state (best available) |
-| `tags` | Comma-separated genre/format tags (Radio Browser only) |
-| `homepage` | Station website URL |
-| `language` | Broadcast language (Radio Browser only) |
+| Column                 | Description                                                       |
+| ---------------------- | ----------------------------------------------------------------- |
+| `source`               | Which scraper produced this row (`radiogarden` or `radiobrowser`) |
+| `channel_id`           | Unique station identifier                                         |
+| `channel_name`         | Station name                                                      |
+| `channel_resolved_url` | Final stream URL (dedup key)                                      |
+| `country`              | Country name string (used by downstream pipeline)                 |
+| `country_code`         | ISO 3166-1 alpha-2 code (Radio Browser only)                      |
+| `geo_lat` / `geo_lon`  | Station coordinates                                               |
+| `place_name`           | City or state (best available)                                    |
+| `tags`                 | Comma-separated genre/format tags (Radio Browser only)            |
+| `homepage`             | Station website URL                                               |
+| `language`             | Broadcast language (Radio Browser only)                           |
 
 ## Adding a new scraper
 

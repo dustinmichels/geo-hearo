@@ -1,3 +1,31 @@
+<script setup lang="ts">
+import { useRouter } from "vue-router";
+import Footer from "../components/Footer.vue";
+import HamburgerMenu from "../components/HamburgerMenu.vue";
+
+const router = useRouter();
+
+const steps = [
+  {
+    text: "Stream five live, random radio stations from one mystery country",
+    colorClass: "bg-gumball-blue",
+  },
+  {
+    text: "Make a guess, get a hint, repeat",
+    colorClass: "bg-bubblegum-pop",
+  },
+  {
+    text: "Tomorrow will bring a new daily challenge",
+    colorClass: "bg-mint-shake",
+  },
+];
+
+const handleTuneIn = (_event: Event) => {
+  // Simple click animation feedback handled by :active CSS or small JS delay if critical
+  // For now, just navigate immediately as CSS active state provides feedback
+  router.push({ name: "Play" });
+};
+</script>
 <template>
   <div
     class="min-h-screen w-screen no-scroll-container flex flex-col items-center justify-center p-6 md:p-12 overflow-x-hidden relative"
@@ -27,10 +55,9 @@
 
           <!-- Globe Image -->
           <img
-            :src="globeImage"
+            src="/globe.png"
             alt="GeoHearo Globe"
             class="w-24 sm:w-64 md:w-80 lg:w-[480px] xl:w-[540px] object-contain relative z-10 animate-float-globe"
-            @error="handleImageError"
           />
 
           <!-- Floating Sticker Decorations (Visible on mobile now) -->
@@ -127,55 +154,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from "vue";
-import { useRouter } from "vue-router";
-import Footer from "../components/Footer.vue";
-import HamburgerMenu from "../components/HamburgerMenu.vue";
-
-const router = useRouter();
-const globeImage = ref("/globe.png");
-
-const steps = [
-  {
-    text: "Stream five live, random radio stations from one mystery country",
-    colorClass: "bg-gumball-blue",
-  },
-  {
-    text: "Make a guess, get a hint, repeat",
-    colorClass: "bg-bubblegum-pop",
-  },
-  {
-    text: "Tomorrow will bring a new daily challenge",
-    colorClass: "bg-mint-shake",
-  },
-];
-
-const handleImageError = (event: Event) => {
-  const img = event.target as HTMLImageElement;
-  img.src = "https://via.placeholder.com/400?text=< ";
-};
-
-const handleTuneIn = (_event: Event) => {
-  // Simple click animation feedback handled by :active CSS or small JS delay if critical
-  // For now, just navigate immediately as CSS active state provides feedback
-  router.push({ name: "Play" });
-};
-</script>
-
 <style scoped>
-/* The "Pressable" Button Effect */
-.btn-pressable {
-  position: relative;
-  transition:
-    transform 0.1s ease,
-    box-shadow 0.1s ease;
-  box-shadow: 0 8px 0 0 #334155;
-  border: 3px solid #334155;
-  transform-origin: center center;
-  cursor: pointer;
-}
-
 .hover-scale:hover .btn-pressable {
   transform: scale(1.05) rotate(-2deg);
   box-shadow: 0 12px 0 0 #334155;
@@ -233,46 +212,6 @@ const handleTuneIn = (_event: Event) => {
     overflow: hidden;
     height: 100vh;
   }
-}
-
-/* Magic Ripple Effect */
-@keyframes ripple {
-  0% {
-    transform: scale(0.8);
-    opacity: 0.6;
-  }
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
-.magic-container {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.magic-wave {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  animation: ripple 3s infinite cubic-bezier(0, 0, 0.2, 1);
-}
-
-.wave-1 {
-  background-color: rgba(244, 114, 182, 0.5); /* Bubblegum Pop */
-  animation-delay: 0s;
-}
-
-.wave-2 {
-  background-color: rgba(244, 114, 182, 0.5); /* Bubblegum Pop */
-  animation-delay: 1.5s;
 }
 
 /* ------------------

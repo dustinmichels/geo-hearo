@@ -61,20 +61,8 @@ h3,
 }
 
 :root {
-  /* Vant Customization */
-  --van-primary-color: var(--color-gumball-blue);
-  --van-success-color: var(--color-mint-shake);
-  --van-danger-color: var(--color-berry-oops);
-  --van-warning-color: var(--color-yuzu-yellow);
-  --van-text-color: var(--color-pencil-lead);
-  --van-text-color-2: var(--color-eraser-grey);
-  --van-background: var(--color-cloud-white);
+  /* Vant Customization (only FloatingPanel remains; these are the vars its CSS reads) */
   --van-background-2: var(--color-paper-white);
-  --van-base-font-family: var(--font-body);
-  --van-button-default-color: var(--color-pencil-lead);
-  --van-button-default-background: var(--color-paper-white);
-  --van-button-radius: var(--radius-btn);
-  --van-radius-lg: var(--radius-card);
   --van-radius-md: var(--radius-btn);
 }
 
@@ -85,7 +73,9 @@ h3,
   border: 3px solid var(--color-pencil-lead);
   transform-origin: center center;
   cursor: pointer;
-  transition: transform 0.1s ease;
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease;
 }
 
 .btn-pressable:active {
@@ -135,4 +125,44 @@ h3,
 
 .animate-close-pulse {
   animation: close-pulse 1.2s ease-in-out infinite;
+}
+
+/* Magic Ripple Effect */
+@keyframes ripple {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.magic-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.magic-wave {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  animation: ripple 3s infinite cubic-bezier(0, 0, 0.2, 1);
+}
+
+.magic-wave.wave-1 {
+  background-color: rgba(244, 114, 182, 0.5); /* Bubblegum Pop */
+  animation-delay: 0s;
+}
+
+.magic-wave.wave-2 {
+  background-color: rgba(244, 114, 182, 0.5); /* Bubblegum Pop */
+  animation-delay: 1.5s;
 }

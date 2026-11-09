@@ -6,6 +6,10 @@ const isTourActive = ref(false);
 const activeTourKey = ref<string | null>(null);
 let activeDriver: Driver | null = null;
 
+// driver.js 1.11 dropped the arrows from its default labels (1.4 had them); keep the released look.
+const PREV_BTN_TEXT = "&larr; Previous";
+const NEXT_BTN_TEXT = "Next &rarr;";
+
 function skipTour() {
   if (activeDriver) {
     activeDriver.destroy();
@@ -26,6 +30,8 @@ export function useOnboarding() {
     activeTourKey.value = key;
     const driverObj = driver({
       showProgress: true,
+      prevBtnText: PREV_BTN_TEXT,
+      nextBtnText: NEXT_BTN_TEXT,
       steps: [
         {
           element: "#tour-play-btn",
@@ -79,6 +85,8 @@ export function useOnboarding() {
 
     const driverObj = driver({
       showProgress: true,
+      prevBtnText: PREV_BTN_TEXT,
+      nextBtnText: NEXT_BTN_TEXT,
       steps: [
         {
           element: "#station-details-panel",

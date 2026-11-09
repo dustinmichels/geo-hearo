@@ -1,8 +1,9 @@
 import { init, track } from "@plausible-analytics/tracker";
-import "vant/lib/index.css";
+import "vant/es/floating-panel/style";
 import { createApp } from "vue";
 import App from "./App.vue";
 import "./assets/styles/style.css";
+import { usePwaInstall } from "./composables/usePwaInstall";
 import router from "./router";
 
 // 1. Initialize and store the instance
@@ -18,6 +19,9 @@ router.afterEach((to) => {
     url: window.location.origin + to.fullPath,
   });
 });
+
+// Register install-prompt listeners before any route renders: beforeinstallprompt can fire early.
+usePwaInstall();
 
 import { createPinia } from "pinia";
 

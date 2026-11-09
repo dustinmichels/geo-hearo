@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { useCountryData } from "../composables/useCountryData";
 import { useDistanceUnit } from "../composables/useDistanceUnit";
 import { useRadio } from "../composables/useRadio";
@@ -34,85 +35,95 @@ const getHintForGuess = (guessName: string | undefined) => {
   return getDistanceHint(guessFeature, secretFeature);
 };
 
-const getGuessColor = (guessName: string | undefined) => {
-  // Exact match override (Win)
-  if (
-    guessName &&
-    secretCountry.value &&
-    guessName.toLowerCase() === secretCountry.value.toLowerCase()
-  ) {
-    return "#4ade80"; // Green-400
-  }
+const guessRows = computed(() => {
+  return Array.from({ length: maxGuesses }, (_, i) => {
+    const guessName = props.guesses[i];
+    if (!guessName) {
+      return {
+        hasGuess: false,
+        num: i + 1,
+      };
+    }
 
-  const result = getHintForGuess(guessName);
-  if (!result) return "#FFFFFF";
-  return getColorForDistanceLevel(result.level);
-};
+    const hint = getHintForGuess(guessName);
+    const isDark = hint != null && hint.level >= 5;
+    const isExact = guessName.toLowerCase() === secretCountry.value?.toLowerCase();
 
-const isDarkBackground = (guessName: string | undefined) => {
-  const hint = getHintForGuess(guessName);
-  return hint != null && hint.level >= 5;
-};
+    let color = "#FFFFFF";
+    if (isExact) {
+      color = "#4ade80"; // Green-400
+    } else if (hint) {
+      color = getColorForDistanceLevel(hint.level);
+    }
+
+    const isTouching = hint?.distance === 0 && hint?.level !== 0;
+    const formattedDistance = hint ? formatDistance(hint.distance) : "";
+
+    return {
+      hasGuess: true,
+      num: i + 1,
+      name: guessName,
+      color,
+      isDark,
+      isTouching,
+      formattedDistance,
+      emoji: hint?.emoji || "",
+    };
+  });
+});
 </script>
 
 <template>
   <div class="w-full">
     <div class="space-y-3">
       <div
-        v-for="num in maxGuesses"
-        :key="num"
+        v-for="row in guessRows"
+        :key="row.num"
         class="flex items-center gap-4 p-3 rounded-xl border-3 transition-all"
         :class="
-          guesses[num - 1]
+          row.hasGuess
             ? 'border-pencil-lead shadow-[0_2px_0_0_#334155] cursor-pointer select-none'
             : 'border-eraser-grey border-dashed bg-transparent opacity-60'
         "
         :style="{
-          backgroundColor: guesses[num - 1] ? getGuessColor(guesses[num - 1]) : undefined,
+          backgroundColor: row.hasGuess ? row.color : undefined,
         }"
-        @click="guesses[num - 1] && toggleUnit()"
+        @click="row.hasGuess && toggleUnit()"
       >
         <div
           class="flex items-center justify-center w-8 h-8 rounded-full border-2 text-sm font-heading font-bold"
           :class="
-            guesses[num - 1]
+            row.hasGuess
               ? 'bg-gumball-blue border-pencil-lead text-white'
               : 'bg-transparent border-eraser-grey text-eraser-grey'
           "
         >
-          {{ num }}
+          {{ row.num }}
         </div>
         <div class="flex-1 font-heading min-w-0 flex items-center justify-between gap-1">
-          <template v-if="guesses[num - 1]">
+          <template v-if="row.hasGuess">
             <span
               class="text-base truncate"
-              :class="isDarkBackground(guesses[num - 1]) ? 'text-white' : 'text-pencil-lead'"
-              >{{ guesses[num - 1] }}</span
+              :class="row.isDark ? 'text-white' : 'text-pencil-lead'"
+              >{{ row.name }}</span
             >
             <div class="flex items-center justify-end gap-2 shrink-0 min-w-[60px]">
               <span
-                v-if="
-                  getHintForGuess(guesses[num - 1])?.distance === 0 &&
-                  getHintForGuess(guesses[num - 1])?.level !== 0
-                "
+                v-if="row.isTouching"
                 class="text-xs italic font-bold font-body"
-                :class="
-                  isDarkBackground(guesses[num - 1]) ? 'text-white/90' : 'text-pencil-lead/80'
-                "
+                :class="row.isDark ? 'text-white/90' : 'text-pencil-lead/80'"
               >
                 TOUCHING
               </span>
               <span
                 v-else
                 class="text-sm font-bold font-body"
-                :class="
-                  isDarkBackground(guesses[num - 1]) ? 'text-white/90' : 'text-pencil-lead/80'
-                "
+                :class="row.isDark ? 'text-white/90' : 'text-pencil-lead/80'"
               >
-                {{ formatDistance(getHintForGuess(guesses[num - 1])?.distance) }}
+                {{ row.formattedDistance }}
               </span>
               <span class="text-xl leading-none tracking-widest">
-                {{ getHintForGuess(guesses[num - 1])?.emoji }}
+                {{ row.emoji }}
               </span>
             </div>
           </template>

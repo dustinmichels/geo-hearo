@@ -178,4 +178,3 @@ func createDirIfNotExist(dir string) {
 		}
 	}
 }
-

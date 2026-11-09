@@ -37,9 +37,8 @@ const imageError = ref(false);
 onMounted(async () => {
   try {
     const response = await fetch("/data/country_details_with_pics.json");
-    if (response.ok) {
-      allCountryDetails.value = await response.json();
-    }
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    allCountryDetails.value = await response.json();
   } catch (e) {
     console.error("Failed to load country details", e);
   }

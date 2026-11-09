@@ -28,7 +28,9 @@ def main():
     sample = next(iter(idx["countries"].values()))
     if "file" in sample:
         # Index was already chunked — reconstruct global offsets from (file, local_start) order
-        by_file_order = sorted(idx["countries"].items(), key=lambda kv: (kv[1]["file"], kv[1]["start"]))
+        by_file_order = sorted(
+            idx["countries"].items(), key=lambda kv: (kv[1]["file"], kv[1]["start"])
+        )
         cumulative = 0
         ordered = []
         for name, data in by_file_order:
@@ -86,7 +88,9 @@ def main():
         for name, _, count, cid, local_start in plan
     }
     with open(INDEX_OUTPUT, "w") as f:
-        json.dump({"config": {"line_length": line_length}, "countries": new_countries}, f)
+        json.dump(
+            {"config": {"line_length": line_length}, "countries": new_countries}, f
+        )
 
     # Print summary
     for i, path in enumerate(out_paths):

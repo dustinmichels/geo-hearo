@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RotateCcw, Trophy } from "lucide-vue-next";
-import { computed, ref } from "vue";
+import { useTemplateRef } from "vue";
 import CountryDetails from "../components/CountryDetails.vue";
 import DailyChallengeCard from "../components/DailyChallengeCard.vue";
 import Footer from "../components/Footer.vue";
@@ -10,57 +10,31 @@ import HamburgerMenu from "../components/HamburgerMenu.vue";
 import Map from "../components/Map.vue";
 import RadioPlayer from "../components/RadioPlayer.vue";
 import StationDetails from "../components/StationDetails.vue";
-import { useGamePlay } from "../composables/useGamePlay";
-import { useOnboarding } from "../composables/useOnboarding";
+import type { GamePlayState } from "../composables/useGamePlay";
 import { useRadio } from "../composables/useRadio";
 
-const mapRef = ref<InstanceType<typeof Map> | null>(null);
+const mapRef = useTemplateRef<InstanceType<typeof Map>>("mapRef");
 
 const { isDailyChallengeMode } = useRadio();
-const { startResultsTour } = useOnboarding();
 
-const {
-  isPlaying,
-  guessInput,
-  guessColors,
-  showModal,
-  modalConfig,
-  guesses,
-  currentStation,
-  currentStations,
-  currentStationUrl,
-  debugCountry,
-  handlePlayPause,
-  handlePrevious,
-  handleNext,
-  handleAddGuess,
-  handleModalConfirm,
-  handleCountrySelect,
-  handleModalClose,
-  handleShowStats,
-  handleNewGame,
-  gameStage,
-  secretCountry,
-  gameHistory,
-  isStatsView,
-} = useGamePlay({
-  setupKeyboardShortcuts: true,
-  onNewGame: () => mapRef.value?.resetView(),
-  onModalClose: () => {
-    mapRef.value?.zoomToStations();
-    setTimeout(() => {
-      startResultsTour();
-    }, 500);
-  },
-});
+const props = defineProps<{
+  gameplay: GamePlayState;
+}>();
 
-const activeStation = computed(() => {
-  if (!currentStations.value || !currentStations.value.length) return undefined;
-  return currentStations.value[currentStation.value - 1];
-});
+const gameplay = props.gameplay;
 
-const dailyItem = computed(() => {
-  return gameHistory.value?.find((item) => item.mode === "daily");
+const onNewGame = () => {
+  mapRef.value?.resetView();
+};
+
+const onModalClose = () => {
+  mapRef.value?.zoomToStations();
+};
+
+defineExpose({
+  mapRef,
+  onNewGame,
+  onModalClose,
 });
 </script>
 
@@ -90,15 +64,8 @@ const dailyItem = computed(() => {
       >
         <Map
           ref="mapRef"
-          @select-country="handleCountrySelect"
-          :guessed-countries="guesses"
-          :guess-colors="guessColors"
-          :selected-country="guessInput"
-          :secret-country="gameStage !== 'guessing' ? secretCountry : debugCountry"
-          :stations="currentStations"
-          :active-station-id="activeStation?.channel_id"
-          :are-stations-visible="gameStage === 'listening'"
-          :show-tiles="gameStage !== 'guessing'"
+          @select-country="gameplay.handleCountrySelect"
+          v-bind="gameplay.mapProps"
           default-projection="mercator"
         />
       </div>
@@ -109,11 +76,11 @@ const dailyItem = computed(() => {
         <div class="flex justify-center">
           <div class="relative z-10">
             <button
-              v-if="dailyItem"
+              v-if="gameplay.dailyItem"
               class="absolute right-full mr-3 inset-y-0 bg-paper-white/90 backdrop-blur-sm text-[#B45309] rounded-lg px-2.5 hover:bg-paper-white transition-colors duration-200 cursor-pointer flex items-center justify-center shadow-sm"
               aria-label="View daily challenge stats"
               title="View daily challenge stats"
-              @click="handleShowStats"
+              @click="gameplay.handleShowStats"
             >
               <Trophy :size="22" :stroke-width="2.5" />
             </button>
@@ -131,7 +98,7 @@ const dailyItem = computed(() => {
               src="/emoji.png"
               class="absolute left-full bottom-0 h-12 ml-4 z-[-1] transition-transform duration-700 ease-out"
               style="will-change: transform"
-              :class="isPlaying ? 'translate-y-4' : 'translate-y-16'"
+              :class="gameplay.isPlaying ? 'translate-y-4' : 'translate-y-16'"
             />
           </div>
         </div>
@@ -139,34 +106,33 @@ const dailyItem = computed(() => {
         <!-- Radio Player -->
         <div class="relative z-30">
           <RadioPlayer
-            :is-playing="isPlaying"
-            :current-station="currentStation"
-            :station-url="currentStationUrl"
-            @play-pause="handlePlayPause"
-            @previous="handlePrevious"
-            @next="handleNext"
+            :is-playing="gameplay.isPlaying"
+            :current-station="gameplay.currentStation"
+            :station-url="gameplay.currentStationUrl"
+            @play-pause="gameplay.handlePlayPause"
+            @previous="gameplay.handlePrevious"
+            @next="gameplay.handleNext"
           />
         </div>
 
         <!-- Results Panel -->
         <div
-          v-if="gameStage === 'listening'"
+          v-if="gameplay.gameStage === 'listening'"
           class="relative z-10 flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto"
         >
           <!-- Station Details + New Game Button -->
           <div class="flex gap-2 shrink-0">
             <div id="station-details-panel" class="flex-1 min-w-0">
               <StationDetails
-                :station="activeStation"
+                :station="gameplay.activeStation"
                 layout="desktop"
                 class="!shadow-[0_4px_0_0_#334155] w-full !max-w-none !p-2 !mb-0"
               />
             </div>
-
             <button
               id="new-game-btn"
               class="h-auto bg-yuzu-yellow text-pencil-lead rounded-2xl border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] active:translate-y-1 active:shadow-none transition-all duration-100 flex items-center justify-center gap-1.5 hover:brightness-110 shrink-0 px-6 flex-col"
-              @click="handleNewGame"
+              @click="gameplay.handleNewGame"
               title="New Game"
             >
               <RotateCcw class="w-5 h-5" />
@@ -175,21 +141,25 @@ const dailyItem = computed(() => {
           </div>
 
           <!-- Country Details -->
-          <CountryDetails v-if="secretCountry" :country-name="secretCountry" class="text-left" />
+          <CountryDetails
+            v-if="gameplay.secretCountry"
+            :country-name="gameplay.secretCountry"
+            class="text-left"
+          />
 
           <!-- Daily Challenge Card -->
-          <DailyChallengeCard v-if="dailyItem" @show-stats="handleShowStats" />
+          <DailyChallengeCard v-if="gameplay.dailyItem" @show-stats="gameplay.handleShowStats" />
         </div>
 
         <!-- Guess Panel Card -->
         <div
-          v-if="gameStage === 'guessing'"
+          v-if="gameplay.gameStage === 'guessing'"
           class="flex-1 bg-paper-white rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] overflow-hidden flex flex-col relative"
         >
           <GuessPanel
-            v-model="guessInput"
-            :guesses="guesses"
-            @add-guess="handleAddGuess"
+            v-model="gameplay.guessInput"
+            :guesses="gameplay.guesses"
+            @add-guess="gameplay.handleAddGuess"
             :with-footer="false"
           />
         </div>
@@ -203,17 +173,12 @@ const dailyItem = computed(() => {
 
     <!-- Game Result Modal -->
     <GameResultModal
-      :show="showModal"
-      :is-win="modalConfig.isWin"
-      :secret-country="modalConfig.secretCountry"
-      :history="gameHistory"
-      :is-daily-challenge="modalConfig.isDailyChallenge"
-      :daily-challenge-number="modalConfig.dailyChallengeNumber"
-      :challenge-date="modalConfig.challengeDate"
-      :stats-view="isStatsView"
-      :tracked-promise="modalConfig.trackedPromise"
-      @confirm="handleModalConfirm"
-      @close="handleModalClose"
+      v-bind="gameplay.modalConfig"
+      :show="gameplay.showModal"
+      :history="gameplay.gameHistory"
+      :stats-view="gameplay.isStatsView"
+      @confirm="gameplay.handleModalConfirm"
+      @close="gameplay.handleModalClose"
     />
   </div>
 </template>

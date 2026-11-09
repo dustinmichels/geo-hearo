@@ -1,0 +1,80 @@
+# Run `mise tasks` to list. Extra args are appended, e.g. `mise run crawl -- --threads=10`.
+
+[tools]
+go = "1.27"
+bun = "1.4"
+# keep in sync with frontend/package.json
+oxfmt = "0.40.0"
+ruff = "0.17.4"
+
+# ---- frontend ----
+
+[tasks.install]
+description = "Install frontend dependencies"
+dir = "{{config_root}}/frontend"
+run = "bun install"
+
+[tasks.dev]
+description = "Start the frontend dev server (vite)"
+dir = "{{config_root}}/frontend"
+run = "bun run dev"
+
+[tasks.build]
+description = "Build the frontend for production"
+dir = "{{config_root}}/frontend"
+run = "bun run build"
+
+[tasks.test]
+description = "Run frontend tests (vitest)"
+dir = "{{config_root}}/frontend"
+run = "bun run test"
+
+# ---- formatting ----
+
+[tasks.fmt]
+description = "Format the repo with oxfmt, Go code with gofmt, and Python with ruff"
+run = [
+  # frontend/.prettierignore keeps the generated frontend/public/data files out
+  "oxfmt --ignore-path=.gitignore --ignore-path=frontend/.prettierignore .",
+  "gofmt -l -w data-prep/crawl icy",
+  "ruff format data-prep",
+]
+
+# ---- scrapers (data-prep/crawl) ----
+
+[tasks.crawl]
+description = "Run all scrapers and merge into crawl/out/output.csv"
+dir = "{{config_root}}/data-prep/crawl"
+run = "go run ."
+
+[tasks."crawl:radiogarden"]
+description = "Scrape Radio Garden only (run crawl:merge afterwards)"
+dir = "{{config_root}}/data-prep/crawl"
+run = "go run . --scrapers=radiogarden"
+
+[tasks."crawl:radiobrowser"]
+description = "Scrape Radio Browser only (run crawl:merge afterwards)"
+dir = "{{config_root}}/data-prep/crawl"
+run = "go run . --scrapers=radiobrowser"
+
+[tasks."crawl:merge"]
+description = "Merge per-source CSVs into crawl/out/output.csv"
+dir = "{{config_root}}/data-prep/crawl"
+run = "go run ./merge"
+
+# ---- data pipeline ----
+
+[tasks.prep]
+description = "Run the Python data-prep scripts against existing crawl output"
+dir = "{{config_root}}/data-prep"
+run = "./run_py.sh"
+
+[tasks.data]
+description = "Full pipeline: crawl, then Python data-prep"
+depends = ["crawl"]
+dir = "{{config_root}}/data-prep"
+run = "./run_py.sh"
+
+[tasks.copy]
+description = "Copy data-prep outputs into frontend/public"
+run = "./copy.sh"

@@ -111,9 +111,10 @@ export function useRadio() {
    */
   const loadCountryBySeed = async (seed: number) => {
     if (!countriesIndex.value) return;
+    if (store.currentSeed === seed && store.secretCountry) return;
 
     const rng = new SeededRandom(seed);
-    store.setSeed(seed);
+    store.currentSeed = seed;
 
     const idx = countriesIndex.value;
     const countries = idx.countries;
@@ -135,8 +136,8 @@ export function useRadio() {
     }
 
     store.guesses = [];
-    store.setSecretCountry(countryName);
-    store.setStationIndex(3);
+    store.secretCountry = countryName;
+    store.currentStationIndex = 3;
 
     const countryData = countries[countryName];
     if (!countryData) {
@@ -170,7 +171,7 @@ export function useRadio() {
         }),
       );
 
-      store.setStations(stations);
+      store.currentStations = stations;
       updatePreconnectLinks(stations);
     } catch (err) {
       console.error("Error fetching stations:", err);
@@ -216,7 +217,7 @@ export function useRadio() {
         link.crossOrigin = "anonymous"; // Audio is often CORS-enabled
         link.dataset.ghPreconnect = "true";
         document.head.appendChild(link);
-      } catch (e) {
+      } catch {
         // Ignore invalid URLs
       }
     });
@@ -235,8 +236,8 @@ export function useRadio() {
 
         // Restore game progress AFTER loadCountryBySeed, which resets guesses/stationIndex
         if (g) store.guesses = g;
-        if (typeof si === "number") store.setStationIndex(si);
-        if (gs) store.setGameStage(gs);
+        if (typeof si === "number") store.currentStationIndex = si;
+        if (gs) store.gameStage = gs;
 
         return true;
       } catch (e) {
@@ -265,13 +266,6 @@ export function useRadio() {
     return false;
   };
 
-  const resetData = () => {
-    // Resetting mostly for testing or hard restart
-    clearState();
-    countriesIndex.value = null;
-    countryList.value = [];
-  };
-
   // --- Daily Challenge Logic ---
 
   // Refactor note: we use local '2026-02-02' construction in getDailyChallengeNumber directly.
@@ -280,8 +274,9 @@ export function useRadio() {
    * Returns the current date parts (year, month, day) in US/Eastern time.
    * All players worldwide see the same daily challenge, based on Eastern time.
    */
-  const getEasternDateParts = (): { year: number; month: number; day: number } => {
-    const now = new Date();
+  const getEasternDateParts = (
+    now: Date = new Date(),
+  ): { year: number; month: number; day: number } => {
     const parts = new Intl.DateTimeFormat("en-US", {
       timeZone: "America/New_York",
       year: "numeric",
@@ -295,12 +290,27 @@ export function useRadio() {
     };
   };
 
+  const getNextEasternMidnight = (now: Date = new Date()): Date => {
+    const { year, month, day } = getEasternDateParts(now);
+    const candidate4 = new Date(Date.UTC(year, month - 1, day + 1, 4, 0, 0));
+    const fmt = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/New_York",
+      hour: "numeric",
+      hour12: false,
+    });
+    const hour = parseInt(fmt.format(candidate4), 10);
+    if (hour === 0 || hour === 24) {
+      return candidate4;
+    }
+    return new Date(Date.UTC(year, month - 1, day + 1, 5, 0, 0));
+  };
+
   /**
    * Calculates the Day # based on US/Eastern time relative to Feb 2, 2026.
    * Day 1 is Feb 2, 2026.
    */
-  const getDailyChallengeNumber = (): number => {
-    const { year, month, day } = getEasternDateParts();
+  const getDailyChallengeNumber = (now: Date = new Date()): number => {
+    const { year, month, day } = getEasternDateParts(now);
     const current = new Date(Date.UTC(year, month - 1, day));
     const start = new Date(Date.UTC(2026, 1, 2)); // Feb 2, 2026
 
@@ -317,19 +327,29 @@ export function useRadio() {
     return year * 10000 + month * 100 + day;
   };
 
-  const getEasternDateString = (): string => {
+  const getEasternDateString = (now: Date = new Date()): string => {
+    const { year, month, day } = getEasternDateParts(now);
+    const mm = String(month).padStart(2, "0");
+    const dd = String(day).padStart(2, "0");
+    return `${year}-${mm}-${dd}`;
+  };
+
+  // Compare numerically: live builds stored the date unpadded ("2026-11-9"),
+  // so a string compare would re-offer an already-completed daily and clear history.
+  const isCompletedToday = (stored: string | null): boolean => {
+    if (!stored) return false;
+    const [y, m, d] = stored.split("-").map(Number);
     const { year, month, day } = getEasternDateParts();
-    return `${year}-${month}-${day}`;
+    return y === year && m === month && d === day;
   };
 
   const initDailyChallenge = () => {
-    const todayStr = getEasternDateString();
-    const lastCompleted = localStorage.getItem(STORAGE_KEY_DAILY_DATE);
-
-    if (lastCompleted === todayStr) {
-      store.setDailyChallengeMode(false);
+    if (isCompletedToday(localStorage.getItem(STORAGE_KEY_DAILY_DATE))) {
+      store.isDailyChallengeMode = false;
+      store.dailyChallengeNumber = undefined;
     } else {
-      store.setDailyChallengeMode(true, getDailyChallengeNumber());
+      store.isDailyChallengeMode = true;
+      store.dailyChallengeNumber = getDailyChallengeNumber();
       // Clear history on new daily challenge start
       store.clearHistory();
     }
@@ -337,12 +357,12 @@ export function useRadio() {
 
   const completeDailyChallenge = () => {
     localStorage.setItem(STORAGE_KEY_DAILY_DATE, getEasternDateString());
-    store.setDailyChallengeMode(false);
+    store.isDailyChallengeMode = false;
+    store.dailyChallengeNumber = undefined;
   };
 
   return {
     currentStations,
-    countryList, // Exposed if needed for autocomplete
     secretCountry,
     currentStationIndex,
     currentSeed,
@@ -355,7 +375,6 @@ export function useRadio() {
     clearState,
     restoreState,
     checkGuess,
-    resetData,
     // Daily Challenge
     isDailyChallengeMode,
     dailyChallengeNumber,
@@ -363,5 +382,8 @@ export function useRadio() {
     completeDailyChallenge,
     getDailyChallengeSeed,
     getDailyChallengeNumber,
+    getEasternDateParts,
+    getEasternDateString,
+    getNextEasternMidnight,
   };
 }

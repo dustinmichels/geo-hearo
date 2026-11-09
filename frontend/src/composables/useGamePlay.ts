@@ -1,5 +1,5 @@
 import { storeToRefs } from "pinia";
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, type UnwrapNestedRefs } from "vue";
 import { trackDailyResult } from "../lib/supabase";
 import { useGameStore } from "../stores/game";
 import type { GamePhase } from "../types/geo";
@@ -15,11 +15,18 @@ interface GamePlayOptions {
   setupKeyboardShortcuts?: boolean;
 }
 
-// Returns number of guesses used (1-5) for a win, or 6 for a loss.
-const calculateScore = (attempts: number[]): number => {
-  if (!attempts || attempts.length === 0) return 6;
-  const winIndex = attempts.findIndex((lvl) => lvl === 0);
-  return winIndex !== -1 ? winIndex + 1 : 6;
+export interface ModalConfig {
+  isWin: boolean;
+  secretCountry?: string;
+  dailyChallengeNumber?: number;
+  isDailyChallenge?: boolean;
+  challengeDate?: string;
+  trackedPromise?: Promise<boolean>;
+}
+
+const DEFAULT_MODAL_CONFIG: ModalConfig = {
+  isWin: false,
+  isDailyChallenge: false,
 };
 
 export function useGamePlay(options: GamePlayOptions) {
@@ -27,17 +34,14 @@ export function useGamePlay(options: GamePlayOptions) {
   const guessInput = ref("");
   const guessColors = ref<Record<string, string>>({});
 
-  const modalConfig = ref({
-    isWin: false,
-    shareText: undefined as string | undefined, // text to copy to clipboard
-    resultsGrid: undefined as string | undefined,
-    secretCountry: undefined as string | undefined,
-    dailyChallengeNumber: undefined as number | undefined,
-    numericScore: undefined as number | undefined,
-    isDailyChallenge: false,
-    challengeDate: undefined as string | undefined,
-    trackedPromise: undefined as Promise<boolean> | undefined,
-  });
+  const modalConfig = ref<ModalConfig>({ ...DEFAULT_MODAL_CONFIG });
+
+  const setModalConfig = (config: Partial<ModalConfig>) => {
+    modalConfig.value = {
+      ...DEFAULT_MODAL_CONFIG,
+      ...config,
+    };
+  };
 
   // State
   const store = useGameStore();
@@ -67,6 +71,8 @@ export function useGamePlay(options: GamePlayOptions) {
     completeDailyChallenge,
     getDailyChallengeSeed,
     dailyChallengeNumber,
+    getDailyChallengeNumber,
+    getEasternDateString,
   } = useRadio();
 
   // Hooking up country data
@@ -75,6 +81,26 @@ export function useGamePlay(options: GamePlayOptions) {
   const currentStationUrl = computed(() => {
     return currentStations.value[currentStation.value - 1]?.channel_resolved_url;
   });
+
+  const activeStation = computed(() => {
+    if (!currentStations.value || !currentStations.value.length) return undefined;
+    return currentStations.value[currentStation.value - 1];
+  });
+
+  const dailyItem = computed(() => {
+    return gameHistory.value?.find((item) => item.mode === "daily");
+  });
+
+  const mapProps = computed(() => ({
+    guessedCountries: guesses.value,
+    guessColors: guessColors.value,
+    selectedCountry: guessInput.value,
+    secretCountry: gameStage.value !== "guessing" ? secretCountry.value : debugCountry.value,
+    stations: currentStations.value,
+    activeStationId: activeStation.value?.channel_id,
+    areStationsVisible: gameStage.value === "listening",
+    showTiles: gameStage.value !== "guessing",
+  }));
 
   const debugCountry = computed(() => {
     return import.meta.env.VITE_DEBUG_MODE === "true" ? secretCountry.value : undefined;
@@ -150,27 +176,48 @@ export function useGamePlay(options: GamePlayOptions) {
     return lines.join("\n");
   };
 
-  const getScoreLevels = (): number[] => {
-    return guesses.value.map((g) => {
-      if (g.toLowerCase() === secretCountry.value?.toLowerCase()) return 0;
-      const sFeature = getFeature(secretCountry.value);
-      const gFeature = getFeature(g);
-      if (sFeature && gFeature) {
-        const { level } = getDistanceHint(gFeature, sFeature);
-        // Map 1-6 to user's 1-4 scale
-        if (level === 1) return 1;
-        if (level === 2) return 2;
-        if (level === 3 || level === 4) return 3;
-        return 4;
-      }
-      return 4;
-    });
-  };
-
   // currentSeed is YYYYMMDD as a number (e.g. 20260319) — convert to "2026-03-19"
   const getChallengeDate = (): string => {
     const s = (currentSeed.value ?? 0).toString();
     return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
+  };
+
+  const finishRound = (isWin: boolean) => {
+    const resultsGrid = generateEmojiString();
+    let dayNumber: number | undefined;
+    const gameMode = isDailyChallengeMode.value ? "daily" : "free";
+    const isDaily = isDailyChallengeMode.value;
+
+    const numericScore =
+      guesses.value.findIndex((g) => g.toLowerCase() === secretCountry.value?.toLowerCase()) + 1 ||
+      6;
+
+    let trackedPromise: Promise<boolean> | undefined;
+    if (isDaily) {
+      dayNumber = dailyChallengeNumber.value || 0;
+      completeDailyChallenge(); // Mark as done for today
+      trackedPromise = trackDailyResult(getChallengeDate(), numericScore);
+    }
+
+    setModalConfig({
+      isWin,
+      secretCountry: secretCountry.value,
+      dailyChallengeNumber: dayNumber,
+      isDailyChallenge: isDaily,
+      challengeDate: isDaily ? getChallengeDate() : undefined,
+      trackedPromise,
+    });
+
+    addToHistory({
+      country: secretCountry.value || "Unknown",
+      score: resultsGrid,
+      numericScore,
+      date: new Date().toISOString(),
+      mode: gameMode,
+    });
+
+    store.gameStage = "seeResults";
+    saveState();
   };
 
   const handleAddGuess = () => {
@@ -179,48 +226,7 @@ export function useGamePlay(options: GamePlayOptions) {
 
     if (checkGuess(guess)) {
       addGuess(guess); // Ensure winning guess is added to state
-
-      const resultsGrid = generateEmojiString();
-      let shareText: string | undefined;
-      let dayNumber: number | undefined;
-      const gameMode = isDailyChallengeMode.value ? "daily" : "free";
-
-      const isDaily = isDailyChallengeMode.value;
-
-      let trackedPromise: Promise<boolean> | undefined;
-      if (isDaily) {
-        dayNumber = dailyChallengeNumber.value || 0;
-        completeDailyChallenge(); // Mark as done for today
-        shareText = generateShareText(dayNumber);
-        trackedPromise = trackDailyResult(getChallengeDate(), guesses.value.length);
-      }
-
-      const attempts = getScoreLevels();
-      const numericScore = calculateScore(attempts);
-
-      modalConfig.value = {
-        isWin: true,
-        shareText,
-        resultsGrid,
-        secretCountry: secretCountry.value,
-        dailyChallengeNumber: dayNumber,
-        numericScore,
-        isDailyChallenge: isDaily,
-        challengeDate: isDaily ? getChallengeDate() : undefined,
-        trackedPromise,
-      };
-
-      addToHistory({
-        country: secretCountry.value || "Unknown",
-        score: resultsGrid,
-        numericScore: numericScore,
-        date: new Date().toISOString(),
-        mode: gameMode,
-      });
-
-      // clearState() <-- REMOVED
-      store.setGameStage("seeResults");
-      saveState();
+      finishRound(true);
       return;
     }
 
@@ -244,47 +250,7 @@ export function useGamePlay(options: GamePlayOptions) {
     options.onGuessAdded?.();
 
     if (guesses.value.length >= 5) {
-      const resultsGrid = generateEmojiString();
-      let shareText: string | undefined;
-      let dayNumber: number | undefined;
-      const gameMode = isDailyChallengeMode.value ? "daily" : "free";
-
-      const isDaily = isDailyChallengeMode.value;
-
-      let trackedPromise: Promise<boolean> | undefined;
-      if (isDaily) {
-        dayNumber = dailyChallengeNumber.value || 0;
-        completeDailyChallenge();
-        shareText = generateShareText(dayNumber);
-        trackedPromise = trackDailyResult(getChallengeDate(), 6); // 6 = loss sentinel
-      }
-
-      const attempts = getScoreLevels();
-      const numericScore = calculateScore(attempts);
-
-      modalConfig.value = {
-        isWin: false,
-        shareText,
-        resultsGrid,
-        secretCountry: secretCountry.value,
-        dailyChallengeNumber: dayNumber,
-        numericScore,
-        isDailyChallenge: isDaily,
-        challengeDate: isDaily ? getChallengeDate() : undefined,
-        trackedPromise,
-      };
-
-      addToHistory({
-        country: secretCountry.value || "Unknown",
-        score: resultsGrid,
-        numericScore: numericScore, // 0 for a loss
-        date: new Date().toISOString(),
-        mode: gameMode,
-      });
-
-      // clearState() <-- REMOVED
-      store.setGameStage("seeResults");
-      saveState();
+      finishRound(false);
     }
   };
 
@@ -292,23 +258,18 @@ export function useGamePlay(options: GamePlayOptions) {
     const dailyItem = gameHistory.value.find((item) => item.mode === "daily");
     if (!dailyItem) return;
 
-    const challengeDate = dailyItem.date.slice(0, 10); // "YYYY-MM-DD"
-    const start = new Date(2026, 1, 2); // Feb 2, 2026
-    const date = new Date(challengeDate);
-    const diffDays = Math.ceil((date.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-    const dayNumber = diffDays + 1;
+    // Results are recorded under the Eastern date (seed), not the UTC timestamp's date
+    const challengeDate = getEasternDateString(new Date(dailyItem.date));
+    const dayNumber = getDailyChallengeNumber();
 
-    modalConfig.value = {
+    setModalConfig({
       isWin: dailyItem.score.includes("🟢"),
-      shareText: `GeoHearo #${dayNumber}\nhttps://geohearo.com/\n${dailyItem.score}`,
-      resultsGrid: dailyItem.score,
       secretCountry: dailyItem.country,
       dailyChallengeNumber: dayNumber,
-      numericScore: dailyItem.numericScore,
       isDailyChallenge: true,
       challengeDate,
       trackedPromise: Promise.resolve(true),
-    };
+    });
     showStatsOverride.value = true;
   };
 
@@ -317,7 +278,7 @@ export function useGamePlay(options: GamePlayOptions) {
       showStatsOverride.value = false;
       return;
     }
-    store.setGameStage("listening");
+    store.gameStage = "listening";
     saveState();
     options.onModalClose?.();
   };
@@ -367,7 +328,8 @@ export function useGamePlay(options: GamePlayOptions) {
     loadHistory();
 
     // Load both stations (for audio) and country data (for map/distance)
-    Promise.all([loadStations(), loadCountryData()]).then(async () => {
+    // Country data failure must not block game setup (map/distance degrade, radio still works)
+    Promise.all([loadStations(), loadCountryData().catch(() => {})]).then(async () => {
       // Initialize Daily Challenge Logic
       initDailyChallenge();
 
@@ -381,18 +343,10 @@ export function useGamePlay(options: GamePlayOptions) {
           await selectRandomCountry();
         }
 
-        modalConfig.value = {
-          isWin: false,
-          shareText: undefined,
-          resultsGrid: undefined,
+        setModalConfig({
           secretCountry: secretCountry.value,
-          dailyChallengeNumber: undefined,
-          numericScore: undefined,
-          isDailyChallenge: false,
-          challengeDate: undefined,
-          trackedPromise: undefined,
-        };
-        store.setGameStage(debugStage);
+        });
+        store.gameStage = debugStage;
       } else if (isDailyChallengeMode.value) {
         const dailySeed = getDailyChallengeSeed();
         // Try restoring session state, but only keep it if it matches today's seed
@@ -401,19 +355,16 @@ export function useGamePlay(options: GamePlayOptions) {
           populateGuessColors();
           // Re-populate modal config if we're restoring into seeResults
           if (gameStage.value === "seeResults") {
-            modalConfig.value = {
+            setModalConfig({
               isWin:
                 roundFinished.value &&
                 guesses.value.some((g) => g.toLowerCase() === secretCountry.value?.toLowerCase()),
-              shareText: undefined,
-              resultsGrid: undefined,
               secretCountry: secretCountry.value,
               dailyChallengeNumber: dailyChallengeNumber.value,
-              numericScore: undefined,
               isDailyChallenge: true,
               challengeDate: getChallengeDate(),
               trackedPromise: Promise.resolve(true),
-            };
+            });
           }
         } else {
           clearState();
@@ -429,19 +380,15 @@ export function useGamePlay(options: GamePlayOptions) {
             const lastHistory = gameHistory.value[gameHistory.value.length - 1];
             const isDailyHistory = lastHistory?.mode === "daily";
 
-            modalConfig.value = {
+            setModalConfig({
               isWin:
                 roundFinished.value &&
                 guesses.value.some((g) => g.toLowerCase() === secretCountry.value?.toLowerCase()),
-              shareText: undefined,
-              resultsGrid: undefined,
               secretCountry: secretCountry.value,
-              dailyChallengeNumber: undefined,
-              numericScore: undefined,
               isDailyChallenge: isDailyHistory,
               challengeDate: isDailyHistory ? getChallengeDate() : undefined,
               trackedPromise: isDailyHistory ? Promise.resolve(true) : undefined,
-            };
+            });
           }
         } else {
           selectRandomCountry();
@@ -469,6 +416,9 @@ export function useGamePlay(options: GamePlayOptions) {
     currentStationUrl,
     secretCountry,
     debugCountry,
+    activeStation,
+    dailyItem,
+    mapProps,
     gameStage,
     handlePlayPause,
     handlePrevious,
@@ -488,18 +438,10 @@ export function useGamePlay(options: GamePlayOptions) {
         // Debug override: Skip to specified stage on new game
         const debugStage = import.meta.env.VITE_GAME_STAGE as GamePhase | undefined;
         if (debugStage === "seeResults" || debugStage === "listening") {
-          modalConfig.value = {
-            isWin: false,
-            shareText: undefined,
-            resultsGrid: undefined,
+          setModalConfig({
             secretCountry: secretCountry.value,
-            dailyChallengeNumber: undefined,
-            numericScore: undefined,
-            isDailyChallenge: false,
-            challengeDate: undefined,
-            trackedPromise: undefined,
-          };
-          store.setGameStage(debugStage);
+          });
+          store.gameStage = debugStage;
         }
       });
     },
@@ -515,3 +457,5 @@ export function useGamePlay(options: GamePlayOptions) {
     },
   };
 }
+
+export type GamePlayState = UnwrapNestedRefs<ReturnType<typeof useGamePlay>>;

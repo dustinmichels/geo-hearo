@@ -5,7 +5,8 @@ import { Globe, Loader2, Map as MapIcon, RefreshCw, ZoomIn, ZoomOut } from "luci
 import maplibregl, { type SkySpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { storeToRefs } from "pinia";
-import { onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
+import { onMounted, onUnmounted, ref, shallowRef, useTemplateRef, watch } from "vue";
+import { useCountryData } from "@/composables/useCountryData";
 import type { NeCountryProperties, RadioStation } from "../types/geo";
 
 const props = defineProps<{
@@ -22,8 +23,9 @@ const props = defineProps<{
 
 const gameStore = useGameStore();
 const { gameStage } = storeToRefs(gameStore);
+const { geoJsonData } = useCountryData();
 
-const mapContainer = ref<HTMLElement | null>(null);
+const mapContainer = useTemplateRef<HTMLElement>("mapContainer");
 const map = shallowRef<maplibregl.Map | null>(null);
 const loaded = ref(false);
 const resizeObserver = shallowRef<ResizeObserver | null>(null);
@@ -269,13 +271,13 @@ const initMap = () => {
       // Add source for countries
       map.value.addSource("countries", {
         type: "geojson",
-        data: "/data/ne_countries.geojson",
+        data: geoJsonData.value || { type: "FeatureCollection", features: [] },
         promoteId: "ADMIN", // Use ADMIN as ID
       });
 
       // Wait for GeoJSON to actually load before hiding the spinner
       const onSourceData = (e: maplibregl.MapSourceDataEvent) => {
-        if (e.sourceId === "countries" && e.isSourceLoaded) {
+        if (e.sourceId === "countries" && e.isSourceLoaded && geoJsonData.value) {
           loaded.value = true;
           if (loadingTimeout) clearTimeout(loadingTimeout);
           map.value?.off("sourcedata", onSourceData);
@@ -284,6 +286,22 @@ const initMap = () => {
       };
       map.value.on("sourcedata", onSourceData);
 
+      if (!geoJsonData.value) {
+        // Watch for when geoJsonData loads
+        const unwatch = watch(
+          () => geoJsonData.value,
+          (newData) => {
+            if (newData && map.value) {
+              const source = map.value.getSource("countries") as maplibregl.GeoJSONSource;
+              if (source) {
+                source.setData(newData);
+                unwatch();
+              }
+            }
+          },
+          { immediate: true },
+        );
+      }
       setupLayers();
       setupInteractions();
 
@@ -655,11 +673,9 @@ const resetView = () => {
 const zoomToStationsWrapped = () => {
   stopSpinning();
   if (!map.value) return;
-  // Stop any ongoing animations; moveend fires immediately after stop()
+  // stop() emits moveend synchronously when an animation was running, so zoom right after.
   map.value.stop();
-  map.value.once("moveend", () => {
-    zoomToStations();
-  });
+  zoomToStations();
 };
 
 defineExpose({ resetView, zoomToStations: zoomToStationsWrapped });

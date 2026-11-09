@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { Field as VanField } from "vant";
 import { ref } from "vue";
 import PanelFooter from "./Footer.vue";
 import GuessDisplay from "./GuessDisplay.vue";
 
+const modelValue = defineModel<string>({ required: true });
+
 const props = withDefaults(
   defineProps<{
-    modelValue: string;
     guesses: string[];
     withFooter?: boolean;
     disabled?: boolean;
@@ -18,7 +18,6 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: "update:modelValue", value: string): void;
   (e: "add-guess"): void;
 }>();
 
@@ -43,17 +42,15 @@ const handleGuess = () => {
     <div class="px-4 pb-4 flex-1 overflow-y-auto flex flex-col gap-6">
       <!-- Input Area -->
       <div class="flex gap-3 items-center">
-        <van-field
+        <input
           id="tour-guess-input"
-          :model-value="modelValue"
-          @update:model-value="emit('update:modelValue', $event)"
+          v-model="modelValue"
           placeholder="Select a country"
           :disabled="guesses.length >= 5 || disabled"
           readonly
           @keypress.enter="handleGuess"
-          class="flex-1 !border-3 !rounded-2xl !py-3 !px-4 !text-[18px] font-body text-pencil-lead placeholder:text-eraser-grey transition-colors bg-white"
-          :class="modelValue ? '!border-[#f472b6]' : '!border-pencil-lead'"
-          :border="false"
+          class="flex-1 min-w-0 border-3 rounded-2xl py-3 px-4 !text-[18px] !leading-6 font-body text-pencil-lead placeholder:text-eraser-grey disabled:!text-eraser-grey disabled:cursor-not-allowed transition-colors bg-white"
+          :class="modelValue ? 'border-[#f472b6]' : 'border-pencil-lead'"
         />
         <button
           id="tour-guess-btn"

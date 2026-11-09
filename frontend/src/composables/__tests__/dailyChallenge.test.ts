@@ -64,21 +64,21 @@ describe("daily challenge country selection", () => {
   // Expected countries for Dec 1-15, 2025.
   // These were computed from the current algorithm and locked in.
   const expectedCountries: Record<string, string> = {
-    "20251201": "United States of America",
-    "20251202": "Slovenia",
-    "20251203": "Turkey",
-    "20251204": "Russia",
-    "20251205": "Tajikistan",
-    "20251206": "Poland",
-    "20251207": "Sudan",
-    "20251208": "Palestine",
-    "20251209": "Slovakia",
-    "20251210": "Nicaragua",
-    "20251211": "Romania",
-    "20251212": "Morocco",
-    "20251213": "Philippines",
-    "20251214": "Malaysia",
-    "20251215": "Hungary",
+    "20251201": "Brazil",
+    "20251202": "Sierra Leone",
+    "20251203": "Nepal",
+    "20251204": "Egypt",
+    "20251205": "Belgium",
+    "20251206": "Romania",
+    "20251207": "Moldova",
+    "20251208": "Democratic Republic of the Congo",
+    "20251209": "Australia",
+    "20251210": "Poland",
+    "20251211": "Madagascar",
+    "20251212": "Costa Rica",
+    "20251213": "Albania",
+    "20251214": "Panama",
+    "20251215": "Greece",
   };
 
   it.each(
@@ -121,6 +121,6 @@ describe("daily challenge country selection", () => {
   it("country list has expected length", () => {
     // If countries are added/removed from index.json, country selection
     // indices will shift. This test catches that.
-    expect(sortedNames.length).toBe(142);
+    expect(sortedNames.length).toBe(143);
   });
 });

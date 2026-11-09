@@ -26,10 +26,7 @@ const websiteUrl = computed(() => props.station?.homepage ?? "");
     v-if="station"
     class="bg-paper-white rounded-xl border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] p-3 max-w-[280px] w-full text-center pointer-events-auto"
   >
-    <div
-      class="font-heading leading-tight mb-1 text-pencil-lead truncate"
-      :class="layout === 'desktop' ? 'text-lg' : 'text-lg'"
-    >
+    <div class="font-heading leading-tight mb-1 text-pencil-lead truncate text-lg">
       {{ station.channel_name }}
     </div>
 
@@ -47,7 +44,6 @@ const websiteUrl = computed(() => props.station?.homepage ?? "");
         target="_blank"
         rel="noopener noreferrer"
         class="inline-flex items-center justify-center gap-1.5 font-bold text-gumball-blue hover:underline text-xs"
-        :class="layout === 'desktop' ? 'text-xs' : 'text-xs'"
       >
         Visit website
         <ExternalLink :class="layout === 'desktop' ? 'w-4 h-4' : 'w-3 h-3'" />

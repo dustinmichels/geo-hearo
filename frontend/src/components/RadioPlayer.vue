@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { useGameStore } from "@/stores/game";
 import { Loader2, Pause, Play, SkipBack, SkipForward } from "lucide-vue-next";
-import { Button as VanButton } from "vant";
-import { onUnmounted, ref, watch } from "vue";
+import { onUnmounted, ref, useTemplateRef, watch } from "vue";
 import { playRadioStatic } from "../utils/audio";
 
 const store = useGameStore();
@@ -19,11 +18,10 @@ const emit = defineEmits<{
   (e: "next"): void;
 }>();
 
-const audioPlayer = ref<HTMLAudioElement | null>(null);
+const audioPlayer = useTemplateRef<HTMLAudioElement>("audioPlayer");
 const currentStaticSource = ref<AudioBufferSourceNode | null>(null); // Store the source node
 const isLoading = ref(false);
 let loadingTimeout: ReturnType<typeof setTimeout> | undefined;
-
 
 const stopStatic = () => {
   if (currentStaticSource.value) {
@@ -52,6 +50,10 @@ const onAudioPlaying = () => {
 watch(
   () => props.isPlaying,
   async (playing) => {
+    if (playing) {
+      store.hasPlayedRadio = true;
+      store.hasEverPlayed = true;
+    }
     if (!audioPlayer.value) return;
     if (playing) {
       isLoading.value = true;
@@ -70,6 +72,7 @@ watch(
       stopStatic();
     }
   },
+  { immediate: true },
 );
 
 watch(
@@ -79,6 +82,8 @@ watch(
     if (newUrl) {
       audioPlayer.value.src = newUrl;
       if (props.isPlaying) {
+        // isLoading may already be true (skip while loading), so its watcher won't re-arm.
+        armLoadingTimeout();
         isLoading.value = true;
         await playStatic();
         audioPlayer.value.play().catch((e) => {
@@ -92,45 +97,33 @@ watch(
   },
 );
 
+const armLoadingTimeout = () => {
+  if (loadingTimeout) clearTimeout(loadingTimeout);
+  loadingTimeout = setTimeout(() => {
+    if (isLoading.value) {
+      console.log("Loading timed out, skipping to next station");
+      isLoading.value = false; // Stop loading state locally
+      onNext();
+    }
+  }, 5000);
+};
+
 watch(isLoading, (loading) => {
   if (loading) {
-    // Clear any existing timeout just in case
-    if (loadingTimeout) clearTimeout(loadingTimeout);
-    // Set new timeout
-    loadingTimeout = setTimeout(() => {
-      if (isLoading.value) {
-        console.log("Loading timed out, skipping to next station");
-        isLoading.value = false; // Stop loading state locally
-        onNext();
-      }
-    }, 5000);
-  } else {
-    // Clear timeout if loading stops
-    if (loadingTimeout) {
-      clearTimeout(loadingTimeout);
-      loadingTimeout = undefined;
-    }
+    armLoadingTimeout();
+  } else if (loadingTimeout) {
+    clearTimeout(loadingTimeout);
+    loadingTimeout = undefined;
   }
 });
 
-watch(
-  () => props.isPlaying,
-  (playing) => {
-    if (playing) {
-      store.setHasPlayedRadio(true);
-      store.setHasEverPlayed(true);
-    }
-  },
-  { immediate: true },
-);
-
 const onPrevious = () => {
-  store.setHasSkippedStation(true);
+  store.hasSkippedStation = true;
   emit("previous");
 };
 
 const onNext = () => {
-  store.setHasSkippedStation(true);
+  store.hasSkippedStation = true;
   emit("next");
 };
 
@@ -168,14 +161,14 @@ onUnmounted(() => {
           <div class="magic-wave wave-1"></div>
           <div class="magic-wave wave-2"></div>
         </div>
-        <van-button
+        <button
           id="tour-skip-back-btn"
-          plain
-          class="relative z-10 !p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead !h-10 !w-10"
+          type="button"
+          class="relative z-10 flex items-center justify-center rounded-xl border-3 border-pencil-lead bg-white text-pencil-lead h-10 w-10 cursor-pointer active:brightness-90"
           @click="onPrevious"
         >
           <SkipBack class="text-pencil-lead h-5 w-5" />
-        </van-button>
+        </button>
       </div>
 
       <div class="relative group">
@@ -183,17 +176,16 @@ onUnmounted(() => {
           <div class="magic-wave wave-1"></div>
           <div class="magic-wave wave-2"></div>
         </div>
-        <van-button
+        <button
           id="tour-play-btn"
-          type="primary"
-          round
-          class="relative z-10 !p-0 !border-3 !border-pencil-lead shadow-[0_4px_0_0_#334155] active:translate-y-1 active:shadow-none transition-all duration-100 bg-gumball-blue !h-14 !w-14"
+          type="button"
+          class="relative z-10 flex items-center justify-center rounded-full border-3 border-pencil-lead shadow-[0_4px_0_0_#334155] active:translate-y-1 active:shadow-none active:brightness-90 transition-all duration-100 bg-gumball-blue h-14 w-14 cursor-pointer"
           @click="emit('playPause')"
         >
           <Loader2 v-if="isLoading" class="animate-spin text-white h-6 w-6" />
           <Pause v-else-if="isPlaying" class="text-white fill-current h-6 w-6" />
           <Play v-else class="ml-1 text-white fill-current h-6 w-6" />
-        </van-button>
+        </button>
       </div>
 
       <div class="relative">
@@ -201,14 +193,14 @@ onUnmounted(() => {
           <div class="magic-wave wave-1"></div>
           <div class="magic-wave wave-2"></div>
         </div>
-        <van-button
+        <button
           id="tour-skip-forward-btn"
-          plain
-          class="relative z-10 !p-0 !rounded-xl !border-3 !border-pencil-lead !bg-white shadow-none text-pencil-lead !h-10 !w-10"
+          type="button"
+          class="relative z-10 flex items-center justify-center rounded-xl border-3 border-pencil-lead bg-white text-pencil-lead h-10 w-10 cursor-pointer active:brightness-90"
           @click="onNext"
         >
           <SkipForward class="text-pencil-lead h-5 w-5" />
-        </van-button>
+        </button>
       </div>
     </div>
 
@@ -242,56 +234,7 @@ onUnmounted(() => {
   animation: blink 1.5s ease-in-out infinite;
 }
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes ripple {
-  0% {
-    transform: scale(0.8);
-    opacity: 0.6;
-  }
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
-.magic-container {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .magic-wave {
-  position: absolute;
-  width: 100%;
-  height: 100%;
   border-radius: 50%;
-  opacity: 0;
-  animation: ripple 3s infinite cubic-bezier(0, 0, 0.2, 1);
-}
-
-.wave-1 {
-  background-color: rgba(244, 114, 182, 0.5); /* Bubblegum Pop */
-  animation-delay: 0s;
-}
-
-.wave-2 {
-  background-color: rgba(244, 114, 182, 0.5); /* Bubblegum Pop */
-  animation-delay: 1.5s;
 }
 </style>

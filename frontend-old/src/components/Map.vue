@@ -17,37 +17,37 @@
 </template>
 
 <script setup lang="ts">
-import Datamap from 'datamaps'
-import { onMounted, watch } from 'vue'
-import { Country, CountryGuessed } from '../types'
-import { isMobile } from '../util/general'
+import Datamap from "datamaps";
+import { onMounted, watch } from "vue";
+import { Country, CountryGuessed } from "../types";
+import { isMobile } from "../util/general";
 
 const props = defineProps<{
-  guessed: CountryGuessed[]
-  secretCountry: Country
-  isGameOver: boolean
-  colorFcn: Function
-}>()
+  guessed: CountryGuessed[];
+  secretCountry: Country;
+  isGameOver: boolean;
+  colorFcn: Function;
+}>();
 
-const mapBorder = '#ffffff'
-const mapFill = '#D4D4D8'
+const mapBorder = "#ffffff";
+const mapFill = "#D4D4D8";
 
-let map: Datamap
+let map: Datamap;
 
 // const proj = geoAitoff()
 
 // const projs = ['equirectangular', 'mercator', 'orthographic']
 
 onMounted(() => {
-  let borderWidth = 1
+  let borderWidth = 1;
   if (isMobile()) {
-    borderWidth = 0.5
+    borderWidth = 0.5;
   }
 
   map = new window.Datamap({
-    element: document.getElementById('container'),
+    element: document.getElementById("container"),
     responsive: true,
-    projection: 'mercator',
+    projection: "mercator",
     geographyConfig: {
       hideAntarctica: true,
       hideHawaiiAndAlaska: false,
@@ -56,79 +56,79 @@ onMounted(() => {
       borderColor: mapBorder,
       popupOnHover: true,
       highlightOnHover: true,
-      highlightFillColor: '#FC8D59',
-      highlightBorderColor: 'rgba(250, 15, 160, 0.2)',
+      highlightFillColor: "#FC8D59",
+      highlightBorderColor: "rgba(250, 15, 160, 0.2)",
       highlightBorderWidth: 2,
       highlightBorderOpacity: 1,
     },
     fills: {
       defaultFill: mapFill,
-      wrong: '#ff0000',
-      dot: '#000000',
+      wrong: "#ff0000",
+      dot: "#000000",
     },
     done: function (map: Datamap) {
       // responsive
-      window.addEventListener('resize', function () {
-        map.resize()
-      })
+      window.addEventListener("resize", function () {
+        map.resize();
+      });
 
       // update map if secret country is set
-      if (!props.secretCountry.three_code) return
-      const updateObject: { [key: string]: string } = {}
-      const code = props.secretCountry.three_code
-      updateObject[code] = 'black'
+      if (!props.secretCountry.three_code) return;
+      const updateObject: { [key: string]: string } = {};
+      const code = props.secretCountry.three_code;
+      updateObject[code] = "black";
       // map.updateChoropleth(updateObject)
     },
-  })
-})
+  });
+});
 
 const updateMap = () => {
   if (!map) {
-    return
+    return;
   }
   props.guessed.forEach((country) => {
     if (!country.three_code) {
-      return
+      return;
     }
-    let fillColor = props.colorFcn(country.distance)
+    let fillColor = props.colorFcn(country.distance);
     if (country.name === props.secretCountry.name) {
       map.updateChoropleth({
-        [country.three_code]: '#006837',
-      })
+        [country.three_code]: "#006837",
+      });
     } else {
-      console.log(country)
+      console.log(country);
       map.updateChoropleth({
         [country.three_code]: fillColor,
-      })
+      });
     }
-  })
+  });
 
   if (props.isGameOver) {
     map.updateChoropleth({
-      [props.secretCountry.three_code]: '#006837',
-    })
+      [props.secretCountry.three_code]: "#006837",
+    });
   }
-}
+};
 
 onMounted(() => {
-  updateMap()
-})
+  updateMap();
+});
 
 watch(
   () => props.guessed,
   () => {
-    updateMap()
+    updateMap();
   },
-  { deep: true }
-)
+  { deep: true },
+);
 
 watch(
   () => props.isGameOver,
   () => {
-    updateMap()
+    updateMap();
   },
-  { deep: true }
-)
+  { deep: true },
+);
 </script>
 
 <style scoped>

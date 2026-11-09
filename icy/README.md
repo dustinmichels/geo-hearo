@@ -57,6 +57,16 @@ WebSocket client
 
 **ICY stream parsing** (`icy.go`): sends `Icy-Metadata: 1` header, then reads the interleaved stream — skip `metaint` audio bytes, read 1 length byte (`× 16` = metadata block size), parse `StreamTitle='Artist - Title';` from the block. Fires callback only when metadata changes.
 
-**Metadata parsing** (`metadata.go`): regex extracts `StreamTitle` value; splits on ` - ` to separate artist from title. Raw string is always included in the message.
+**Metadata parsing** (`metadata.go`): regex extracts `StreamTitle` value; splits on `-` to separate artist from title. Raw string is always included in the message.
 
 **Lifecycle**: a `Station` is created on first subscriber, cancelled via context when the idle timer fires (90s with zero clients), and removed from the Hub registry. Client `send` channels are closed to signal write pumps to exit cleanly.
+
+## Bun scripts
+
+Standalone TypeScript prototypes, run with `bun <file>`:
+
+| File        | Purpose                                                                                                   |
+| ----------- | --------------------------------------------------------------------------------------------------------- |
+| `icy.ts`    | Single-stream ICY metadata reader; the prototype for the Go server above                                  |
+| `serve.ts`  | Serves `../data-prep/data/out` on `:3000` with HTTP range support                                         |
+| `select.ts` | Seeded daily station selection against `serve.ts` (reads `index.json` and the unchunked `stations.jsonl`) |

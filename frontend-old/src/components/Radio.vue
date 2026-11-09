@@ -83,99 +83,88 @@
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  onMounted,
-  onUnmounted,
-  ref,
-  useTemplateRef,
-  watch,
-} from 'vue'
-import CoverImageDefault from '../assets/images/cover.png'
-import IconLoading from '../assets/images/loading.png'
-import IconNext from '../assets/images/next.png'
-import IconPause from '../assets/images/pause.png'
-import IconPlay from '../assets/images/play.png'
-import IconPrev from '../assets/images/prev.png'
+import { computed, onMounted, onUnmounted, ref, useTemplateRef, watch } from "vue";
+import CoverImageDefault from "../assets/images/cover.png";
+import IconLoading from "../assets/images/loading.png";
+import IconNext from "../assets/images/next.png";
+import IconPause from "../assets/images/pause.png";
+import IconPlay from "../assets/images/play.png";
+import IconPrev from "../assets/images/prev.png";
 
-import { RadioStationWithStreamingUrl } from '../types'
+import { RadioStationWithStreamingUrl } from "../types";
 
 const props = defineProps<{
-  radioStations: RadioStationWithStreamingUrl[]
-  isGameOver: boolean
-  secretCountry: { name: string }
-}>()
+  radioStations: RadioStationWithStreamingUrl[];
+  isGameOver: boolean;
+  secretCountry: { name: string };
+}>();
 
-const audioPlayer = useTemplateRef('audioPlayer')
-const isPlaying = ref(false)
-const isLoading = ref(false)
-const selectedStationIdx = ref(0)
-const audioSrc = ref(props.radioStations[0].streamingUrl)
+const audioPlayer = useTemplateRef("audioPlayer");
+const isPlaying = ref(false);
+const isLoading = ref(false);
+const selectedStationIdx = ref(0);
+const audioSrc = ref(props.radioStations[0].streamingUrl);
 
 const togglePlay = () => {
-  isPlaying.value = !isPlaying.value
+  isPlaying.value = !isPlaying.value;
 
   // try to play/pause the audio
   if (audioPlayer === null || audioPlayer.value === null) {
-    return
+    return;
   }
   if (isPlaying.value) {
     audioPlayer.value.play().catch((error: any) => {
-      console.error('play error', error)
-    })
+      console.error("play error", error);
+    });
   } else {
-    audioPlayer.value.pause()
+    audioPlayer.value.pause();
   }
-}
+};
 
 // change streaming url when selected station changes
 watch(selectedStationIdx, async (newIdx, _oldIdx) => {
-  audioSrc.value = props.radioStations[newIdx].streamingUrl
+  audioSrc.value = props.radioStations[newIdx].streamingUrl;
 
-  if (audioPlayer === null || audioPlayer.value === null) return
-  audioPlayer.value.load() //preload
-  isLoading.value = true
-  audioPlayer.value.addEventListener('loadeddata', () => {
-    isLoading.value = false
-    if (audioPlayer === null || audioPlayer.value === null) return
+  if (audioPlayer === null || audioPlayer.value === null) return;
+  audioPlayer.value.load(); //preload
+  isLoading.value = true;
+  audioPlayer.value.addEventListener("loadeddata", () => {
+    isLoading.value = false;
+    if (audioPlayer === null || audioPlayer.value === null) return;
     if (isPlaying.value) {
-      audioPlayer.value.play() //playing
+      audioPlayer.value.play(); //playing
     }
-  })
-})
+  });
+});
 
 const stationLink = computed(() => {
-  return `https://radio.garden${
-    props.radioStations[selectedStationIdx.value].channel_url
-  }`
-})
+  return `https://radio.garden${props.radioStations[selectedStationIdx.value].channel_url}`;
+});
 
 const increaseStationIdx = () => {
-  selectedStationIdx.value =
-    (selectedStationIdx.value + 1) % props.radioStations.length
-}
+  selectedStationIdx.value = (selectedStationIdx.value + 1) % props.radioStations.length;
+};
 
 const decreaseStationIdx = () => {
   selectedStationIdx.value =
-    (selectedStationIdx.value - 1 + props.radioStations.length) %
-    props.radioStations.length
-}
+    (selectedStationIdx.value - 1 + props.radioStations.length) % props.radioStations.length;
+};
 
 // capture space bar events
 const handleKeydown = (event: KeyboardEvent) => {
-  if (event.code === 'Space') {
-    event.preventDefault() // Prevent the default spacebar action (scrolling)
-    togglePlay()
-  } else if (event.code === 'ArrowRight') {
-    event.preventDefault() // Prevent the default right arrow action (scrolling)
-    increaseStationIdx()
-  } else if (event.code === 'ArrowLeft') {
-    event.preventDefault() // Prevent the default left arrow action (scrolling)
-    decreaseStationIdx()
+  if (event.code === "Space") {
+    event.preventDefault(); // Prevent the default spacebar action (scrolling)
+    togglePlay();
+  } else if (event.code === "ArrowRight") {
+    event.preventDefault(); // Prevent the default right arrow action (scrolling)
+    increaseStationIdx();
+  } else if (event.code === "ArrowLeft") {
+    event.preventDefault(); // Prevent the default left arrow action (scrolling)
+    decreaseStationIdx();
   }
-}
+};
 onMounted(() => {
-  window.addEventListener('keydown', handleKeydown)
+  window.addEventListener("keydown", handleKeydown);
   // if (audioPlayer === null || audioPlayer.value === null) return
   // audioPlayer.value.load() //preload
   // isLoading.value = true
@@ -186,10 +175,10 @@ onMounted(() => {
   //     audioPlayer.value.play() //playing
   //   }
   // })
-})
+});
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown)
-})
+  window.removeEventListener("keydown", handleKeydown);
+});
 </script>
 
 <style scoped>
@@ -261,7 +250,7 @@ onUnmounted(() => {
 
 /* ----- radio buttons ----- */
 /* Styling the radio button to look like a square */
-.square-radio input[type='radio'] {
+.square-radio input[type="radio"] {
   display: none; /* Hide the default radio input */
 }
 .square-radio label {
@@ -274,7 +263,7 @@ onUnmounted(() => {
   cursor: pointer;
   transition: all 0.2s ease;
 }
-.square-radio input[type='radio']:checked + label {
+.square-radio input[type="radio"]:checked + label {
   background-color: #00d1b2; /* Bulma primary color */
   border-color: #00a38c;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);

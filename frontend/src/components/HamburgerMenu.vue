@@ -17,8 +17,38 @@ const toggleMenu = () => {
 const closeMenu = () => {
   isOpen.value = false;
 };
-</script>
 
+const menuItems = [
+  {
+    to: "/",
+    name: "Home",
+    label: "Home",
+    icon: Home,
+    iconBgClass: "bg-gumball-blue/20 text-gumball-blue border-gumball-blue",
+  },
+  {
+    to: "/play",
+    name: "Play",
+    label: "Play",
+    icon: CirclePlay,
+    iconBgClass: "bg-mint-shake/20 text-emerald-600 border-emerald-600",
+  },
+  {
+    to: "/about",
+    name: "About",
+    label: "About",
+    icon: Info,
+    iconBgClass: "bg-yuzu-yellow/20 text-[#d97706] border-[#d97706]",
+  },
+  {
+    to: "/privacy",
+    name: "Privacy",
+    label: "Privacy",
+    icon: Shield,
+    iconBgClass: "bg-bubblegum-pop/20 text-bubblegum-pop border-bubblegum-pop",
+  },
+];
+</script>
 <template>
   <div class="inline-flex">
     <button
@@ -61,142 +91,44 @@ const closeMenu = () => {
           <!-- Links -->
           <nav class="flex flex-col gap-4">
             <RouterLink
-              to="/"
+              v-for="item in menuItems"
+              :key="item.name"
+              :to="item.to"
               class="group relative flex items-center gap-4 p-3 rounded-xl border-2 border-transparent hover:border-pencil-lead hover:bg-cloud-white transition-all duration-200"
               :class="{
-                'pointer-events-none': currentRouteName === 'Home',
+                'pointer-events-none': currentRouteName === item.name,
               }"
               @click="closeMenu"
             >
               <div
-                class="w-10 h-10 rounded-full bg-gumball-blue/20 text-gumball-blue flex items-center justify-center border-2 border-gumball-blue group-hover:scale-110 transition-transform"
-                :class="{
-                  'opacity-50 grayscale': currentRouteName === 'Home',
-                }"
+                class="w-10 h-10 rounded-full flex items-center justify-center border-2 group-hover:scale-110 transition-transform"
+                :class="[
+                  item.iconBgClass,
+                  {
+                    'opacity-50 grayscale': currentRouteName === item.name,
+                  },
+                ]"
               >
-                <Home :size="20" :stroke-width="2.5" />
+                <component :is="item.icon" :size="20" :stroke-width="2.5" />
               </div>
 
               <div class="relative">
                 <span
                   class="font-heading text-lg text-pencil-lead"
                   :class="{
-                    'opacity-50 grayscale': currentRouteName === 'Home',
+                    'opacity-50 grayscale': currentRouteName === item.name,
                   }"
                 >
-                  Home
+                  {{ item.label }}
                 </span>
                 <!-- Scribble Underline -->
                 <div
-                  v-if="currentRouteName === 'Home'"
-                  class="absolute -bottom-2 -left-1 -right-1 h-3 bg-scribble bg-no-repeat bg-center bg-contain opacity-100"
-                ></div>
-              </div>
-            </RouterLink>
-
-            <RouterLink
-              to="/play"
-              class="group relative flex items-center gap-4 p-3 rounded-xl border-2 border-transparent hover:border-pencil-lead hover:bg-cloud-white transition-all duration-200"
-              :class="{
-                'pointer-events-none': currentRouteName === 'Play',
-              }"
-              @click="closeMenu"
-            >
-              <div
-                class="w-10 h-10 rounded-full bg-mint-shake/20 text-emerald-600 flex items-center justify-center border-2 border-emerald-600 group-hover:scale-110 transition-transform"
-                :class="{
-                  'opacity-50 grayscale': currentRouteName === 'Play',
-                }"
-              >
-                <CirclePlay :size="20" :stroke-width="2.5" />
-              </div>
-
-              <div class="relative">
-                <span
-                  class="font-heading text-lg text-pencil-lead"
-                  :class="{
-                    'opacity-50 grayscale': currentRouteName === 'Play',
-                  }"
-                >
-                  Play
-                </span>
-                <!-- Scribble Underline -->
-                <div
-                  v-if="currentRouteName === 'Play'"
-                  class="absolute -bottom-2 -left-1 -right-1 h-3 bg-scribble bg-no-repeat bg-center bg-contain opacity-100"
-                ></div>
-              </div>
-            </RouterLink>
-
-            <RouterLink
-              to="/about"
-              class="group relative flex items-center gap-4 p-3 rounded-xl border-2 border-transparent hover:border-pencil-lead hover:bg-cloud-white transition-all duration-200"
-              :class="{
-                'pointer-events-none': currentRouteName === 'About',
-              }"
-              @click="closeMenu"
-            >
-              <div
-                class="w-10 h-10 rounded-full bg-yuzu-yellow/20 text-[#d97706] flex items-center justify-center border-2 border-[#d97706] group-hover:scale-110 transition-transform"
-                :class="{
-                  'opacity-50 grayscale': currentRouteName === 'About',
-                }"
-              >
-                <Info :size="20" :stroke-width="2.5" />
-              </div>
-
-              <div class="relative">
-                <span
-                  class="font-heading text-lg text-pencil-lead"
-                  :class="{
-                    'opacity-50 grayscale': currentRouteName === 'About',
-                  }"
-                >
-                  About
-                </span>
-                <!-- Scribble Underline -->
-                <div
-                  v-if="currentRouteName === 'About'"
-                  class="absolute -bottom-2 -left-1 -right-1 h-3 bg-scribble bg-no-repeat bg-center bg-contain opacity-100"
-                ></div>
-              </div>
-            </RouterLink>
-
-            <RouterLink
-              to="/privacy"
-              class="group relative flex items-center gap-4 p-3 rounded-xl border-2 border-transparent hover:border-pencil-lead hover:bg-cloud-white transition-all duration-200"
-              :class="{
-                'pointer-events-none': currentRouteName === 'Privacy',
-              }"
-              @click="closeMenu"
-            >
-              <div
-                class="w-10 h-10 rounded-full bg-bubblegum-pop/20 text-bubblegum-pop flex items-center justify-center border-2 border-bubblegum-pop group-hover:scale-110 transition-transform"
-                :class="{
-                  'opacity-50 grayscale': currentRouteName === 'Privacy',
-                }"
-              >
-                <Shield :size="20" :stroke-width="2.5" />
-              </div>
-
-              <div class="relative">
-                <span
-                  class="font-heading text-lg text-pencil-lead"
-                  :class="{
-                    'opacity-50 grayscale': currentRouteName === 'Privacy',
-                  }"
-                >
-                  Privacy
-                </span>
-                <!-- Scribble Underline -->
-                <div
-                  v-if="currentRouteName === 'Privacy'"
+                  v-if="currentRouteName === item.name"
                   class="absolute -bottom-2 -left-1 -right-1 h-3 bg-scribble bg-no-repeat bg-center bg-contain opacity-100"
                 ></div>
               </div>
             </RouterLink>
           </nav>
-
           <!-- Footer Decoration -->
           <div class="mt-auto">
             <div

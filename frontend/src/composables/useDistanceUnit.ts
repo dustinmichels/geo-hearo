@@ -17,11 +17,22 @@ function getDefaultUnit(): DistanceUnit {
   return "km";
 }
 
-const distanceUnit = ref<DistanceUnit>(getDefaultUnit());
+const STORAGE_KEY = "geo_hearo_distance_unit";
+
+function getSavedUnit(): DistanceUnit {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved === "mi" || saved === "km") {
+    return saved;
+  }
+  return getDefaultUnit();
+}
+
+const distanceUnit = ref<DistanceUnit>(getSavedUnit());
 
 export function useDistanceUnit() {
   const toggleUnit = () => {
     distanceUnit.value = distanceUnit.value === "mi" ? "km" : "mi";
+    localStorage.setItem(STORAGE_KEY, distanceUnit.value);
   };
 
   const formatDistance = (km: number | undefined): string => {

@@ -1,6 +1,5 @@
 export interface NeCountryProperties {
   ADMIN: string;
-  [key: string]: any;
 }
 
 export interface RadioStation {

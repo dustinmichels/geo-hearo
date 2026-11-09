@@ -1,3 +1,52 @@
+<script setup lang="ts">
+import { useRouter } from "vue-router";
+import Footer from "../components/Footer.vue";
+import HamburgerMenu from "../components/HamburgerMenu.vue";
+
+const router = useRouter();
+
+const sections = [
+  {
+    emoji: "🌍",
+    title: "What is GeoHearo?",
+    content:
+      'GeoHearo is a passion project of a solo developer, <a href="https://dustinmichels.com" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Dustin Michels</a>. It\'s free and <a href="https://github.com/dustinmichels/geo-hearo" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">open-source</a>. There is no business model.',
+  },
+  {
+    emoji: "💾",
+    title: "Data Sources",
+    content: [
+      'The country polygons are from <a href="https://www.naturalearthdata.com/" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Natural Earth</a>. They are the ones that decide what counts as a country.',
+      'The underlying radio data is borrowed, gratefully, from <a href="https://radio.garden/" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Radio.Garden</a>, among other sources. There are over 36,000 stations to choose from (from 143 countries) when you start a game.',
+    ],
+  },
+  {
+    emoji: "📏",
+    title: "Distance Considerations",
+    content: [
+      "The clue you get is based on the distance between countries, from border to border.",
+      "I filter out polygons that makeup &lt; 20% of the country's land mass, so as to exclude overseas territories but include major islands. The idea is to direct the player towards the main borders of the country.",
+    ],
+  },
+  {
+    emoji: "📡",
+    title: "Radio Considerations",
+    content: [
+      'Stations can be weird! It\'s not always a bug. Sometimes you get a Lebanese station in Germany, because there really is a Lebanese station in Germany. The world is complicated! The "show stations" feature is provided so you can find out more about the stations you hear.',
+      "Sometimes a radio stream gives you commercials localized to your location, which is confusing and unfortunate.",
+      "Sometimes a station is just being weird, which is why I give you five to choose from!",
+    ],
+  },
+];
+
+const handleBackHome = () => {
+  router.push({ name: "Home" });
+};
+
+const handlePlay = () => {
+  router.push({ name: "Play" });
+};
+</script>
 <template>
   <div
     class="min-h-screen w-screen flex flex-col items-center justify-center p-6 md:p-12 overflow-x-hidden relative"
@@ -83,69 +132,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { useRouter } from "vue-router";
-import Footer from "../components/Footer.vue";
-import HamburgerMenu from "../components/HamburgerMenu.vue";
-
-const router = useRouter();
-
-const sections = [
-  {
-    emoji: "🌍",
-    title: "What is GeoHearo?",
-    content:
-      'GeoHearo is a passion project of a solo developer, <a href="https://dustinmichels.com" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Dustin Michels</a>. It\'s free and <a href="https://github.com/dustinmichels/geo-hearo" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">open-source</a>. There is no business model.',
-  },
-  {
-    emoji: "💾",
-    title: "Data Sources",
-    content: [
-      'The country polygons are from <a href="https://www.naturalearthdata.com/" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Natural Earth</a>. They are the ones that decide what counts as a country.',
-      'The underlying radio data is borrowed, gratefully, from <a href="https://radio.garden/" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">Radio.Garden</a>, among other sources. There are over 36,000 stations to choose from (from 143 countries) when you start a game.',
-    ],
-  },
-  {
-    emoji: "📏",
-    title: "Distance Considerations",
-    content: [
-      "The clue you get is based on the distance between countries, from border to border.",
-      "I filter out polygons that makeup &lt; 20% of the country's land mass, so as to exclude overseas territories but include major islands. The idea is to direct the player towards the main borders of the country.",
-    ],
-  },
-  {
-    emoji: "📡",
-    title: "Radio Considerations",
-    content: [
-      'Stations can be weird! It\'s not always a bug. Sometimes you get a Lebanese station in Germany, because there really is a Lebanese station in Germany. The world is complicated! The "show stations" feature is provided so you can find out more about the stations you hear.',
-      "Sometimes a radio stream gives you commercials localized to your location, which is confusing and unfortunate.",
-      "Sometimes a station is just being weird, which is why I give you five to choose from!",
-    ],
-  },
-];
-
-const handleBackHome = () => {
-  router.push({ name: "Home" });
-};
-
-const handlePlay = () => {
-  router.push({ name: "Play" });
-};
-</script>
-
 <style scoped>
-/* Pressable Button Styles */
-.btn-pressable {
-  position: relative;
-  box-shadow: 0 8px 0 0 #334155;
-  border: 3px solid #334155;
-  transform-origin: center center;
-  cursor: pointer;
-  transition:
-    transform 0.1s ease,
-    box-shadow 0.1s ease;
-}
-
 .hover-scale:hover {
   transform: scale(1.05) rotate(-2deg);
   box-shadow: 0 12px 0 0 #334155;

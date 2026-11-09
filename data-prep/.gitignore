@@ -5,6 +5,7 @@ crawl/out/*.csv
 
 
 crawl/crawl
+crawl/merge/merge
 
 # Ignore all Jupyter Notebook checkpoints
 **/.ipynb_checkpoints

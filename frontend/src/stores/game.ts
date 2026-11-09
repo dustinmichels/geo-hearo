@@ -31,47 +31,10 @@ export const useGameStore = defineStore("game", () => {
   });
 
   // Actions
-  function setSecretCountry(country: string) {
-    secretCountry.value = country;
-  }
-
   function addGuess(guess: string) {
     if (!guesses.value.includes(guess)) {
       guesses.value.push(guess);
     }
-  }
-
-  function setStations(stations: RadioStation[]) {
-    currentStations.value = stations;
-  }
-
-  function setStationIndex(index: number) {
-    currentStationIndex.value = index;
-  }
-
-  function setDailyChallengeMode(isDaily: boolean, dayNumber?: number) {
-    isDailyChallengeMode.value = isDaily;
-    dailyChallengeNumber.value = dayNumber;
-  }
-
-  function setSeed(seed: number | null) {
-    currentSeed.value = seed;
-  }
-
-  function setGameStage(stage: GamePhase) {
-    gameStage.value = stage;
-  }
-
-  function setHasPlayedRadio(val: boolean) {
-    hasPlayedRadio.value = val;
-  }
-
-  function setHasEverPlayed(val: boolean) {
-    hasEverPlayed.value = val;
-  }
-
-  function setHasSkippedStation(val: boolean) {
-    hasSkippedStation.value = val;
   }
 
   function resetGame() {
@@ -127,16 +90,7 @@ export const useGameStore = defineStore("game", () => {
     roundFinished,
 
     // Actions
-    setSecretCountry,
-    setGameStage,
     addGuess,
-    setStations,
-    setStationIndex,
-    setDailyChallengeMode,
-    setSeed,
-    setHasPlayedRadio,
-    setHasEverPlayed,
-    setHasSkippedStation,
     resetGame,
     loadHistory,
     addToHistory,

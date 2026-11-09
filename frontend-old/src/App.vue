@@ -23,22 +23,12 @@
       <div class="columns">
         <!-- Left Column: Radio + Guesses Components -->
         <div class="column has-text-centered">
-          <SearchBar
-            :countries="countries"
-            :guessed="guessed"
-            @searched="handleSearched"
-          />
+          <SearchBar :countries="countries" :guessed="guessed" @searched="handleSearched" />
           <GuessList :guessed="guessed" />
 
           <ScoreModal :guessed="guessed" />
 
-          <button
-            class="button is-warning"
-            v-show="isGameOver"
-            @click="resetGame"
-          >
-            Reset
-          </button>
+          <button class="button is-warning" v-show="isGameOver" @click="resetGame">Reset</button>
         </div>
 
         <!-- Right Column: Map Component -->
@@ -58,17 +48,14 @@
 
   <!-- for debug -->
   <h3 style="display: None">
-    <span style="background-color: lightcoral"
-      >Secret country: {{ secretCountry.name }}</span
-    >
+    <span style="background-color: lightcoral">Secret country: {{ secretCountry.name }}</span>
   </h3>
 
   <footer class="footer">
     <div class="content has-text-centered">
       <p>
-        Made by <a href="https://dustinmichels.com/">Dustin Michels</a>.
-        Inspired by <a href="https://worldle.teuteuf.fr">worldle.teuteuf</a>.
-        See
+        Made by <a href="https://dustinmichels.com/">Dustin Michels</a>. Inspired by
+        <a href="https://worldle.teuteuf.fr">worldle.teuteuf</a>. See
         <a href="https://github.com/dustinmichels/geo-hearo">GitHub.</a>
       </p>
     </div>
@@ -76,45 +63,43 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Country, CountryGuessed } from './types'
-import { MapUtil } from './util/geo'
-import { getCountries, loadData } from './util/load'
+import { ref } from "vue";
+import { Country, CountryGuessed } from "./types";
+import { MapUtil } from "./util/geo";
+import { getCountries, loadData } from "./util/load";
 
-import { addStreamingUrl } from './util/radio'
-import { getRandomCountry, pickRadioStations } from './util/random'
+import { addStreamingUrl } from "./util/radio";
+import { getRandomCountry, pickRadioStations } from "./util/random";
 
 // components
-import GuessList from './components/GuessedList.vue'
-import Map from './components/Map.vue'
-import Radio from './components/Radio.vue'
-import ScoreModal from './components/ScoreModal/ScoreModal.vue'
-import SearchBar from './components/SearchBar.vue'
+import GuessList from "./components/GuessedList.vue";
+import Map from "./components/Map.vue";
+import Radio from "./components/Radio.vue";
+import ScoreModal from "./components/ScoreModal/ScoreModal.vue";
+import SearchBar from "./components/SearchBar.vue";
 
-const ALLOWED_GUESSES = 5
-const NUM_STATIONS = 5
+const ALLOWED_GUESSES = 5;
+const NUM_STATIONS = 5;
 
-const radioData = loadData()
-const countries = getCountries(radioData)
-const mapUtil = new MapUtil()
-const colorFcn = mapUtil.getColorFunction()
+const radioData = loadData();
+const countries = getCountries(radioData);
+const mapUtil = new MapUtil();
+const colorFcn = mapUtil.getColorFunction();
 
 // SETUP
 let guessed = ref<CountryGuessed[]>(
-  Array(ALLOWED_GUESSES).fill({ name: '', two_code: '', three_code: '' })
-)
-let guessCount = 0
-const isGameOver = ref(false)
-let secretCountry = getRandomCountry(countries)
-let radioStations = addStreamingUrl(
-  pickRadioStations(radioData, secretCountry, NUM_STATIONS)
-)
+  Array(ALLOWED_GUESSES).fill({ name: "", two_code: "", three_code: "" }),
+);
+let guessCount = 0;
+const isGameOver = ref(false);
+let secretCountry = getRandomCountry(countries);
+let radioStations = addStreamingUrl(pickRadioStations(radioData, secretCountry, NUM_STATIONS));
 
 const handleSearched = (country: Country) => {
   // compute distance & direction
-  const distance = mapUtil.computeDistance(country, secretCountry)
-  const direction = mapUtil.computeDirection(country, secretCountry)
-  const isCorrect = country.three_code === secretCountry.three_code
+  const distance = mapUtil.computeDistance(country, secretCountry);
+  const direction = mapUtil.computeDirection(country, secretCountry);
+  const isCorrect = country.three_code === secretCountry.three_code;
 
   // add guess to list
   guessed.value[guessCount] = {
@@ -122,30 +107,30 @@ const handleSearched = (country: Country) => {
     distance,
     direction,
     isCorrect,
-  }
-  guessCount += 1
+  };
+  guessCount += 1;
 
   if (isCorrect === true) {
-    gameWon()
+    gameWon();
   } else {
     if (guessCount === ALLOWED_GUESSES) {
-      gameOver()
+      gameOver();
     }
   }
-}
+};
 
 const gameWon = () => {
-  isGameOver.value = true
-  alert('Perfect! You won!')
-}
+  isGameOver.value = true;
+  alert("Perfect! You won!");
+};
 
 const gameOver = () => {
-  isGameOver.value = true
+  isGameOver.value = true;
   // wait a moment before showing alert
   setTimeout(() => {
-    alert('Good try! The mystery country was ' + secretCountry.name)
-  }, 200)
-}
+    alert("Good try! The mystery country was " + secretCountry.name);
+  }, 200);
+};
 
 const resetGame = () => {
   // guessed.value = Array(ALLOWED_GUESSES).fill('')
@@ -154,8 +139,8 @@ const resetGame = () => {
   // radioStations = addStreamingUrl(
   // pickRadioStations(radioData, secretCountry, NUM_STATIONS)
   // )
-  location.reload()
-}
+  location.reload();
+};
 </script>
 
 <style scoped>
@@ -164,13 +149,13 @@ const resetGame = () => {
 }
 
 .knewave-regular {
-  font-family: 'Knewave', system-ui;
+  font-family: "Knewave", system-ui;
   font-weight: 400;
   font-style: normal;
 }
 
 .hero.is-info .title {
-  font-family: 'Knewave', system-ui;
+  font-family: "Knewave", system-ui;
   font-weight: 400;
   font-style: normal;
 }

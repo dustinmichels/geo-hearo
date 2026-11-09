@@ -1,3 +1,17 @@
+<script setup lang="ts">
+import { useRouter } from "vue-router";
+import HamburgerMenu from "../components/HamburgerMenu.vue";
+
+const router = useRouter();
+
+const handleBackHome = () => {
+  router.push({ name: "Home" });
+};
+
+const handlePlay = () => {
+  router.push({ name: "Play" });
+};
+</script>
 <template>
   <div
     class="min-h-screen w-screen flex flex-col items-center justify-center p-6 md:p-12 overflow-x-hidden relative"
@@ -79,34 +93,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { useRouter } from "vue-router";
-import HamburgerMenu from "../components/HamburgerMenu.vue";
-
-const router = useRouter();
-
-const handleBackHome = () => {
-  router.push({ name: "Home" });
-};
-
-const handlePlay = () => {
-  router.push({ name: "Play" });
-};
-</script>
-
 <style scoped>
-/* Pressable Button Styles */
-.btn-pressable {
-  position: relative;
-  box-shadow: 0 8px 0 0 #334155;
-  border: 3px solid #334155;
-  transform-origin: center center;
-  cursor: pointer;
-  transition:
-    transform 0.1s ease,
-    box-shadow 0.1s ease;
-}
-
 .hover-scale:hover {
   transform: scale(1.05) rotate(-2deg);
   box-shadow: 0 12px 0 0 #334155;

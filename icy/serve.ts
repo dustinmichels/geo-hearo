@@ -1,7 +1,7 @@
 import { join } from "path";
 
 const PORT = 3000;
-const PUBLIC_DIR = join(import.meta.dir, "data/out");
+const PUBLIC_DIR = join(import.meta.dir, "../data-prep/data/out");
 
 console.log(`Serving files from ${PUBLIC_DIR}`);
 
