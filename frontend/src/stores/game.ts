@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
+import { persist, unpersist } from "../lib/persist";
 import type { GameHistoryItem, GamePhase, RadioStation } from "../types/geo";
 
 export const useGameStore = defineStore("game", () => {
@@ -63,12 +64,12 @@ export const useGameStore = defineStore("game", () => {
   function addToHistory(item: GameHistoryItem) {
     loadHistory(); // Ensure latest
     gameHistory.value.push(item);
-    localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(gameHistory.value));
+    persist(STORAGE_KEY_HISTORY, JSON.stringify(gameHistory.value));
   }
 
   function clearHistory() {
     gameHistory.value = [];
-    localStorage.removeItem(STORAGE_KEY_HISTORY);
+    unpersist(STORAGE_KEY_HISTORY);
   }
 
   return {

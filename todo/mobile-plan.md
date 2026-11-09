@@ -30,7 +30,7 @@ experimental.
 | PWA (`vite-plugin-pwa`, `usePwaInstall`)                                  | Disabled in native mode                                           | Service workers don't run on `capacitor://` `[verify]`; the install button is meaningless inside an app.                                                                                                                                           |
 | Background audio                                                          | **Not supported**; pause on app background                        | A guessing round needs the screen. Avoids `UIBackgroundModes` justification and an Android foreground service.                                                                                                                                     |
 | Persistence                                                               | `@capacitor/preferences` mirrored into `localStorage`             | iOS may evict WKWebView storage; game history and daily-completion date must survive. Keeps existing sync `localStorage` reads unchanged.                                                                                                          |
-| App ID                                                                    | `com.geohearo.app`                                                | Reverse-DNS of geohearo.com plus an app suffix. Fixed once the App Store Connect record exists (app-store-ios.md step 5); until then it is a one-line change in `capacitor.config.ts` + Xcode. |
+| App ID                                                                    | `com.geohearo.app`                                                | Reverse-DNS of geohearo.com plus an app suffix. Fixed once the App Store Connect record exists (app-store-ios.md step 5); until then it is a one-line change in `capacitor.config.ts` + Xcode.                                                     |
 
 Page origins inside the app: iOS `capacitor://localhost`, Android
 `https://localhost` (Capacitor defaults).
@@ -189,28 +189,38 @@ results panel all clear the Dynamic Island and home indicator. Android open.
 
 ## Phase 2 — Add Capacitor and run on devices
 
-iOS first; Android items stay open until Android Studio is installed.
+iOS first. Android is scaffolded but not yet built or run: the SDK folder
+(`~/Library/Android/sdk`) is empty until Android Studio's setup wizard runs, and
+Gradle needs JDK 21 (the default `java` is 27, which the Gradle 8.14.3 wrapper
+rejects with "Unsupported class file major version 71").
 
-- [ ] Deploy the `netlify.toml` CORS headers to production. Until then an app
-      built with the default `.env.native` (`https://geohearo.com`) cannot load
-      stations; build against the draft deploy with
-      `VITE_REMOTE_DATA_BASE=https://mobile-spike--geohearo.netlify.app bun run cap:sync`.
+- [x] Deploy the `netlify.toml` CORS headers to production (2026-11-09,
+      `b5a1ae8`; previous production tagged `v1.0.0`). `OPTIONS` and `GET` with
+      `Range` on `geohearo.com/data/*` return all three `Access-Control-*`
+      headers, so the default `.env.native` build now loads stations.
 
 - [x] `bun add @capacitor/ios` + `bun add -d @capacitor/cli` (8.6.0)
-- [ ] `bun add @capacitor/android`
+- [x] `bun add @capacitor/android` (8.6.0)
 - [x] `bunx cap init GeoHearo com.geohearo.app --web-dir dist-native`
 - [x] `capacitor.config.ts`: `backgroundColor: "#fff9f5"` (matches manifest
       `background_color`). Type-checked via `tsconfig.node.json`.
-- [ ] Android: `plugins.SystemBars.insetsHandling: "native"` so Android
-      WebView < 140 (broken `env(safe-area-inset-*)`) gets native padding
-      instead, per `@capacitor/core/system-bars.md`. Its Android note also asks
-      for `EdgeToEdge.enable(this)` in `MainActivity.onCreate`.
+- [x] Android: `plugins.SystemBars.insetsHandling: "native"` (+
+      `initialViewportFitValueHint: "cover"`) in `capacitor.config.ts`, so
+      Android WebView < 140 (broken `env(safe-area-inset-*)`) gets native
+      padding instead, per `@capacitor/core/system-bars.md`.
+      `MainActivity.onCreate` calls `EdgeToEdge.enable(this)` before
+      `super.onCreate`. Not built yet.
 - [x] `bunx cap add ios` (Swift Package Manager project, no CocoaPods). Commit
       `ios/`.
-- [ ] `bunx cap add android`; commit `android/`.
+- [x] `bunx cap add android`; commit `android/`. The project was generated;
+      only the post-add Gradle sync failed (JDK 27, see above).
 - [x] Scripts: `cap:sync` (`build:native && cap sync`), `cap:ios`
       (`cap:sync && cap run ios`).
-- [ ] Script `cap:android`.
+- [x] Script `cap:android` (`cap:sync && cap run android`).
+- [x] Vite watch ignore and `.prettierignore` also cover `android/`.
+- [ ] Android: finish Android Studio setup (SDK + emulator image), set the
+      Gradle JDK to 21, then `bun run cap:android` and run the Phase 1.5 and
+      smoke-test checks on an Android 15 emulator.
 - [x] Dev loop: `CAP_SERVER_URL=http://<lan-ip>:5173` sets `server.url`
       (+ `cleartext: true`) in `capacitor.config.ts` only when set. Serve with
       `bun run dev:native` (`vite --host --mode native`): plain `bun run dev`
@@ -239,6 +249,8 @@ iOS simulator status (iPhone 17 Pro, iOS 26.5, draft-deploy data):
 - [x] Driver.js onboarding tours (play, results) fit the screen.
 - First paint on a cold launch: ~2 s; the first launch after a simulator boot
   took ~8 s.
+- Completing a daily in a test build posts a real result to the production
+  Supabase daily stats (daily #281 on 2026-11-09 has one test result, 1 guess).
 
 **Accept when:** a full daily challenge and a free-play round complete on a
 physical iPhone and a physical Android phone.
@@ -247,59 +259,96 @@ physical iPhone and a physical Android phone.
 
 ## Phase 3 — Native behaviour
 
-Each item branches on `isNative`; web keeps the current code path.
+Each item branches on `isNative`; web keeps the current code path. App-wide
+wiring lives in `src/lib/nativeApp.ts` (`setupNativeApp(router)`, called from
+`main.ts` after mount).
+
+**iOS simulator results (2026-11-09, production data):** recorded under each
+item. Android untested (see Phase 2).
 
 ### 3.1 App lifecycle and audio
 
-- [ ] `bun add @capacitor/app`
-- [ ] On `App` `pause`: pause the `<audio>` element and stop the static source
-      (expose a `pause()` from `RadioPlayer.vue` via the game store or an event).
-- [ ] On `resume`: re-run `initDailyChallenge()` so a phone left open overnight
-      rolls to the new Eastern-time challenge.
-- [ ] Android hardware back: `router.back()` when history exists, else
-      `App.exitApp()`.
+- [x] `bun add @capacitor/app` (8.1.2)
+- [x] On `App` `pause`: `useGamePlay` sets `isPlaying = false`, and
+      `RadioPlayer`'s existing watcher pauses the `<audio>` element and stops
+      the static. Simpler than exposing a `pause()` from `RadioPlayer`.
+      Verified: playing → Home button → reopen shows the player stopped.
+- [x] On `resume`: when the Eastern-time challenge number differs from the one
+      at launch, `window.location.replace("/")` restarts on Home. Re-running
+      `initDailyChallenge()` alone is not enough: `Play` only picks the daily
+      on mount. Not exercised (needs the clock to cross Eastern midnight)
+      `[verify]`.
+- [x] Android hardware back: `router.back()` when the event's `canGoBack`,
+      else `App.exitApp()`. Not run.
 
 ### 3.2 Persistence
 
-- [ ] `bun add @capacitor/preferences`
-- [ ] New `src/lib/persist.ts`:
-  - `hydrate()` — before `app.mount` in `main.ts`, copy persisted keys from
-    Preferences into `localStorage`.
-  - `persist(key, value)` — write `localStorage` and (native) Preferences.
-- [ ] Persisted keys: `geo_hearo_history` (`stores/game.ts`),
-      `dailyChallengeDate` (`useRadio.completeDailyChallenge`), the distance
-      unit (`useDistanceUnit.ts`), onboarding flags (`useOnboarding.ts`).
-- [ ] `sessionStorage` (in-progress round, `useRadio.saveState`) stays as is.
+- [x] `bun add @capacitor/preferences` (8.0.1)
+- [x] New `src/lib/persist.ts`:
+  - `hydrate()` — before `app.mount` in `main.ts`, copies persisted keys from
+    Preferences into `localStorage`; a key only in `localStorage` is backed up
+    to Preferences.
+  - `persist(key, value)` / `unpersist(key)` — write `localStorage` and
+    (native) Preferences.
+  - `useDistanceUnit` now reads its saved unit on first use instead of at
+    module import, which ran before `hydrate()`.
+- [x] Persisted keys (`PERSISTED_KEYS`): `geo_hearo_history`,
+      `dailyChallengeDate`, `geo_hearo_distance_unit`, the two onboarding
+      flags, and `geo_hearo_daily_reminder` (3.5).
+- [x] `sessionStorage` (in-progress round, `useRadio.saveState`) stays as is.
 
 **Accept when:** complete the daily, force-quit, clear Safari website data,
 reopen → daily still marked complete and history intact.
 
+**Result:** passed on the simulator. Won daily #281, terminated the app,
+deleted its `Library/WebKit` (where `localStorage` lives), relaunched: Free
+Play mode (daily complete), trophy button (daily history), no onboarding tour,
+reminder toggle still on. The values are in
+`Library/Preferences/com.geohearo.app.plist` under `CapacitorStorage.*`.
+
 ### 3.3 Haptics
 
-- [ ] `bun add @capacitor/haptics`
-- [ ] `GuessPanel.vue`: replace `navigator.vibrate(200)` (no-op on iOS) with
-      `Haptics.impact({ style: ImpactStyle.Medium })` on native.
-- [ ] Add `Haptics.notification({ type: Success | Error })` on win/lose.
+- [x] `bun add @capacitor/haptics` (8.0.2)
+- [x] `GuessPanel.vue`: `Haptics.impact({ style: ImpactStyle.Medium })` on
+      native; `navigator.vibrate(200)` stays on the web.
+- [x] `Haptics.notification({ type: Success | Error })` on win/lose
+      (`useGamePlay.finishRound`).
+- [ ] Feel both on a physical phone (the simulator has no haptics).
 
 ### 3.4 Share sheet
 
-- [ ] `bun add @capacitor/share`
-- [ ] `DailyChallengeCard.vue` and `useGamePlay.ts` (share results): on native
-      call `Share.share({ text })`; keep `navigator.clipboard.writeText` on web.
-      Button label changes from "Copy" to "Share" on native.
+- [x] `bun add @capacitor/share` (8.0.3)
+- [x] `DailyChallengeCard.vue`: on native `Share.share({ text })` (dismissing
+      the sheet is not an error); `navigator.clipboard.writeText` on the web.
+      Label "Share score" on native, "Copy shareable score" on the web.
+      `useGamePlay`'s `handleShare`/`generateShareText` were never called and
+      are removed. Verified: the share sheet opens with the "GeoHearo #281"
+      text (first presentation takes ~3 s on the simulator).
 
 ### 3.5 Daily reminder notification
 
-- [ ] `bun add @capacitor/local-notifications`
-- [ ] Ask permission only after the user finishes their first daily challenge
-      (not at launch).
-- [ ] Schedule one notification per day at a fixed **local** time (default
-      09:00), text "GeoHearo #N is live". Reschedule on every launch/resume for
-      the next 7 days; cancel today's if the daily is already complete.
-- [ ] Settings toggle in `HamburgerMenu.vue` (on/off), stored via `persist`.
+- [x] `bun add @capacitor/local-notifications` (8.3.1); `src/lib/dailyReminder.ts`.
+- [x] Permission is asked only after the first completed daily
+      (`finishRound` → `offerDailyReminder()`); the answer sets the toggle.
+      Verified: the iOS prompt appears over the results modal.
+- [x] One notification per day at 09:00 **local**, "GeoHearo #N is live",
+      where N is the challenge live at that moment (Eastern time). All pending
+      reminders are replaced on launch, resume, daily completion and toggle,
+      for the next 7 days; a reminder whose challenge is already completed is
+      skipped (today's, once the daily is done). Notification id = challenge
+      number. Verified: after winning #281 at 00:30, seven pending
+      notifications #282–#288, Tue–Mon at 09:00.
+- [x] "Daily reminder" switch in `HamburgerMenu.vue` (app only), stored via
+      `persist`. If permission is denied it stays off and says to enable
+      notifications in Settings. Verified: off cancels all pending, on
+      schedules the seven again. Denied path not run.
+- [x] Tapping a notification navigates to `/` (`nativeApp.ts`).
 
 **Accept when:** with device time advanced, the notification fires once,
 tapping it opens the app on Home with the new daily offered.
+
+**Status:** open. The simulator follows the Mac clock; check on a device by
+setting the time past 09:00.
 
 ---
 
@@ -311,6 +360,10 @@ tapping it opens the app on Home with the new daily offered.
 - [ ] `bun add @capacitor/splash-screen @capacitor/status-bar`; hide splash
       after first route renders; status bar style matches the light theme.
 - [ ] Android adaptive icon foreground/background layers.
+- [ ] Android notification small icon: a monochrome drawable set as
+      `plugins.LocalNotifications.smallIcon` in `capacitor.config.ts`. Without
+      it Android shows the app icon, which renders as a blank square in the
+      status bar `[verify]`.
 
 ---
 

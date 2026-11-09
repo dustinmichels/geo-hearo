@@ -76,10 +76,11 @@ export default defineConfig(({ mode }) => {
     plugins: [vue(), tailwindcss(), ...modePlugins],
     server: {
       allowedHosts: true,
-      // `cap sync` / Xcode write built copies of index.html under ios/; don't reload on them.
-      watch: { ignored: ["**/ios/**"] },
+      // `cap sync` / Xcode / Gradle write built copies of index.html under ios/ and
+      // android/; don't reload on them.
+      watch: { ignored: ["**/ios/**", "**/android/**"] },
     },
-    // Without this, the dependency scan crawls every index.html, including those under ios/.
+    // Without this, the dependency scan crawls every index.html, including those under ios/ and android/.
     optimizeDeps: { entries: ["index.html"] },
     resolve: {
       alias: {

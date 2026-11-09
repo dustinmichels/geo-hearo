@@ -4,6 +4,8 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import "./assets/styles/style.css";
 import { usePwaInstall } from "./composables/usePwaInstall";
+import { hydrate } from "./lib/persist";
+import { setupNativeApp } from "./lib/nativeApp";
 import { isNative, platform } from "./lib/platform";
 import router from "./router";
 
@@ -34,4 +36,8 @@ usePwaInstall();
 import { createPinia } from "pinia";
 
 const pinia = createPinia();
-createApp(App).use(router).use(pinia).mount("#app");
+// Restore app-persisted keys into localStorage before any component reads them (no-op on the web).
+hydrate().then(() => {
+  createApp(App).use(router).use(pinia).mount("#app");
+  if (isNative) setupNativeApp(router);
+});

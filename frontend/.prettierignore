@@ -1,4 +1,5 @@
-# Read by oxfmt. Xcode owns the files in the native project; public/data is
-# generated and minified by the data pipeline / `prebuild`.
+# Read by oxfmt. Xcode / Android Studio own the files in the native projects;
+# public/data is generated and minified by the data pipeline / `prebuild`.
+android/
 ios/
 public/data/

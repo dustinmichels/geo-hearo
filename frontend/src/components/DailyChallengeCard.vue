@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { Share as NativeShare } from "@capacitor/share";
 import { Check, Share, Trophy } from "lucide-vue-next";
 import { ref } from "vue";
+import { isNative } from "../lib/platform";
 import { useRadio } from "../composables/useRadio";
 import type { GameHistoryItem } from "../types/geo";
 
@@ -14,17 +16,24 @@ const emit = defineEmits<{
 
 const { getDailyChallengeNumber } = useRadio();
 
-const copyButtonText = ref("Copy shareable score");
+// The app opens the native share sheet; the web copies to the clipboard.
+const idleLabel = isNative ? "Share score" : "Copy shareable score";
+const copyButtonText = ref(idleLabel);
 
 const handleShare = async (item: GameHistoryItem) => {
   const text = [`GeoHearo #${getDailyChallengeNumber()}`, "https://geohearo.com/", item.score].join(
     "\n",
   );
+  if (isNative) {
+    // Rejects when the sheet is dismissed; nothing to report.
+    await NativeShare.share({ text }).catch(() => {});
+    return;
+  }
   try {
     await navigator.clipboard.writeText(text);
     copyButtonText.value = "Copied!";
     setTimeout(() => {
-      copyButtonText.value = "Copy shareable score";
+      copyButtonText.value = idleLabel;
     }, 2000);
   } catch (err) {
     console.error("Failed to copy text: ", err);

@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { CirclePlay, Home, Info, Menu, Shield, X } from "lucide-vue-next";
+import { Bell, CirclePlay, Home, Info, Menu, Shield, X } from "lucide-vue-next";
 import { computed, ref } from "vue";
 import { RouterLink, useRoute } from "vue-router";
+import { isDailyReminderOn, setDailyReminder } from "../lib/dailyReminder";
+import { isNative } from "../lib/platform";
 import { useGameStore } from "../stores/game";
 
 const route = useRoute();
@@ -12,6 +14,19 @@ const currentRouteName = computed(() => route.name);
 
 const toggleMenu = () => {
   isOpen.value = !isOpen.value;
+  // Finishing the first daily can turn reminders on, so read the setting on each open.
+  if (isOpen.value) reminderOn.value = isDailyReminderOn();
+};
+
+// App only: daily reminder notification.
+const reminderOn = ref(false);
+const reminderDenied = ref(false);
+
+const toggleReminder = async () => {
+  const want = !reminderOn.value;
+  const allowed = await setDailyReminder(want);
+  reminderOn.value = want && allowed;
+  reminderDenied.value = !allowed;
 };
 
 const closeMenu = () => {
@@ -129,6 +144,37 @@ const menuItems = [
               </div>
             </RouterLink>
           </nav>
+
+          <!-- Daily reminder (app only) -->
+          <button
+            v-if="isNative"
+            type="button"
+            role="switch"
+            :aria-checked="reminderOn"
+            class="mt-4 flex items-center gap-4 p-3 rounded-xl border-2 border-transparent hover:border-pencil-lead hover:bg-cloud-white transition-all duration-200 cursor-pointer text-left"
+            @click="toggleReminder"
+          >
+            <div
+              class="w-10 h-10 rounded-full flex items-center justify-center border-2 bg-[#B45309]/10 text-[#B45309] border-[#B45309]"
+            >
+              <Bell :size="20" :stroke-width="2.5" />
+            </div>
+            <span class="flex-1 font-heading text-lg leading-tight text-pencil-lead"
+              >Daily reminder</span
+            >
+            <span
+              class="relative w-11 h-6 rounded-full border-2 border-pencil-lead transition-colors duration-200"
+              :class="reminderOn ? 'bg-mint-shake' : 'bg-cloud-white'"
+            >
+              <span
+                class="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-pencil-lead transition-transform duration-200"
+                :class="{ 'translate-x-5': reminderOn }"
+              ></span>
+            </span>
+          </button>
+          <p v-if="isNative && reminderDenied" class="px-3 text-sm text-pencil-lead/70">
+            Notifications are off for GeoHearo. Turn them on in Settings.
+          </p>
           <!-- Footer Decoration -->
           <div class="mt-auto">
             <div

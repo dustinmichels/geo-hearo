@@ -1,9 +1,10 @@
 import { driver, type Driver } from "driver.js";
 import "driver.js/dist/driver.css";
 import { ref } from "vue";
+import { persist, type PersistedKey } from "../lib/persist";
 
 const isTourActive = ref(false);
-const activeTourKey = ref<string | null>(null);
+const activeTourKey = ref<PersistedKey | null>(null);
 let activeDriver: Driver | null = null;
 
 // driver.js 1.11 dropped the arrows from its default labels (1.4 had them); keep the released look.
@@ -15,7 +16,7 @@ function skipTour() {
     activeDriver.destroy();
   }
   if (activeTourKey.value) {
-    localStorage.setItem(activeTourKey.value, "true");
+    persist(activeTourKey.value, "true");
   }
   activeDriver = null;
   activeTourKey.value = null;
@@ -63,7 +64,7 @@ export function useOnboarding() {
       ],
       onDestroyStarted: () => {
         driverObj.destroy();
-        localStorage.setItem(key, "true");
+        persist(key, "true");
         activeDriver = null;
         activeTourKey.value = null;
         isTourActive.value = false;
@@ -110,7 +111,7 @@ export function useOnboarding() {
       ],
       onDestroyStarted: () => {
         driverObj.destroy();
-        localStorage.setItem(key, "true");
+        persist(key, "true");
         activeDriver = null;
         activeTourKey.value = null;
         isTourActive.value = false;

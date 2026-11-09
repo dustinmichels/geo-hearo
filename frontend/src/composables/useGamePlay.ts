@@ -1,5 +1,10 @@
+import { App } from "@capacitor/app";
+import { Haptics, NotificationType } from "@capacitor/haptics";
+import type { PluginListenerHandle } from "@capacitor/core";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, type UnwrapNestedRefs } from "vue";
+import { offerDailyReminder } from "../lib/dailyReminder";
+import { isNative } from "../lib/platform";
 import { trackDailyResult } from "../lib/supabase";
 import { useGameStore } from "../stores/game";
 import type { GamePhase } from "../types/geo";
@@ -168,14 +173,6 @@ export function useGamePlay(options: GamePlayOptions) {
     return emojiLine;
   };
 
-  const generateShareText = (dayNumber: number) => {
-    const lines = [`GeoHearo #${dayNumber}`, "https://geohearo.com/"];
-
-    const emojiLine = generateEmojiString();
-    lines.push(emojiLine);
-    return lines.join("\n");
-  };
-
   // currentSeed is YYYYMMDD as a number (e.g. 20260319) — convert to "2026-03-19"
   const getChallengeDate = (): string => {
     const s = (currentSeed.value ?? 0).toString();
@@ -183,6 +180,11 @@ export function useGamePlay(options: GamePlayOptions) {
   };
 
   const finishRound = (isWin: boolean) => {
+    if (isNative) {
+      void Haptics.notification({
+        type: isWin ? NotificationType.Success : NotificationType.Error,
+      });
+    }
     const resultsGrid = generateEmojiString();
     let dayNumber: number | undefined;
     const gameMode = isDailyChallengeMode.value ? "daily" : "free";
@@ -196,6 +198,7 @@ export function useGamePlay(options: GamePlayOptions) {
     if (isDaily) {
       dayNumber = dailyChallengeNumber.value || 0;
       completeDailyChallenge(); // Mark as done for today
+      void offerDailyReminder(); // App only: first time asks for notification permission
       trackedPromise = trackDailyResult(getChallengeDate(), numericScore);
     }
 
@@ -320,7 +323,16 @@ export function useGamePlay(options: GamePlayOptions) {
     }
   };
 
+  // The app has no background audio: stop the stream (and its static) when it leaves the foreground.
+  let pauseListener: Promise<PluginListenerHandle> | undefined;
+
   onMounted(() => {
+    if (isNative) {
+      pauseListener = App.addListener("pause", () => {
+        isPlaying.value = false;
+      });
+    }
+
     if (options.setupKeyboardShortcuts) {
       window.addEventListener("keydown", handleKeydown);
     }
@@ -398,6 +410,7 @@ export function useGamePlay(options: GamePlayOptions) {
   });
 
   onUnmounted(() => {
+    void pauseListener?.then((handle) => handle.remove());
     if (options.setupKeyboardShortcuts) {
       window.removeEventListener("keydown", handleKeydown);
     }
@@ -446,15 +459,6 @@ export function useGamePlay(options: GamePlayOptions) {
       });
     },
     isStatsView: showStatsOverride,
-    handleShare: async () => {
-      const text = generateShareText(dailyChallengeNumber.value || 0);
-      try {
-        await navigator.clipboard.writeText(text);
-        // Could add toast notification here
-      } catch (err) {
-        console.error("Failed to copy results", err);
-      }
-    },
   };
 }
 

@@ -12,6 +12,14 @@ const config: CapacitorConfig = {
   // Matches the web manifest's background_color; shown before the page paints.
   backgroundColor: "#fff9f5",
   server: devServerUrl ? { url: devServerUrl, cleartext: true } : undefined,
+  plugins: {
+    SystemBars: {
+      // Android WebView < 140 reports wrong env(safe-area-inset-*); "native" pads
+      // the WebView there instead. On newer WebViews it honours viewport-fit=cover.
+      insetsHandling: "native",
+      initialViewportFitValueHint: "cover",
+    },
+  },
 };
 
 export default config;

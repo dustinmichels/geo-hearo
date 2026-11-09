@@ -25,11 +25,11 @@ names and each country's **station rows** do.
 
 ## What a data refresh changes
 
-| Change in new data | Daily country | Daily stations |
-| --- | --- | --- |
-| Same countries, rows reordered | same | different (row *i* is another station) |
-| A country's station count changes | same | different (picks depend on `count`) |
-| A country added or dropped | **different on almost every day** (`names.length` and alphabetical positions shift) | different |
+| Change in new data                | Daily country                                                                       | Daily stations                         |
+| --------------------------------- | ----------------------------------------------------------------------------------- | -------------------------------------- |
+| Same countries, rows reordered    | same                                                                                | different (row _i_ is another station) |
+| A country's station count changes | same                                                                                | different (picks depend on `count`)    |
+| A country added or dropped        | **different on almost every day** (`names.length` and alphabetical positions shift) | different                              |
 
 Countries can be added or dropped easily:
 

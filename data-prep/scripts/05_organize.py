@@ -53,6 +53,9 @@ def main():
 
     radio = pd.read_json(RADIO_INPUT)
     radio = radio.sort_values("ADMIN")
+    # NaN -> None so json.dumps writes null; astype(object) keeps pandas 3 from
+    # coercing None back to NaN in string/float columns
+    radio = radio.astype(object).where(radio.notna(), None)
 
     # Step 1: Calculate the maximum line length needed
     console.print("Calculating maximum record length...")

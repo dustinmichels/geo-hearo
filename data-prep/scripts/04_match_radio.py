@@ -267,9 +267,12 @@ def main():
     # --------------------------------------------------------------------------
     console.print(f"\n[bold cyan]Saving to {OUTPUT}...[/bold cyan]")
 
-    # Ensure we don't have NaN in the final JSON output (converts to null)
-    output_data = radio_final.where(pd.notnull(radio_final), None).to_dict(
-        orient="records"
+    # Ensure we don't have NaN in the final JSON output (converts to null).
+    # astype(object) first: pandas 3 string/float columns coerce None back to NaN.
+    output_data = (
+        radio_final.astype(object)
+        .where(radio_final.notna(), None)
+        .to_dict(orient="records")
     )
 
     with open(OUTPUT, "w", encoding="utf-8") as f:

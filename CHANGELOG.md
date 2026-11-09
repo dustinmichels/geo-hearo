@@ -2,6 +2,17 @@
 
 ## 2026-11-09
 
+- **Production deploy** of `dev` (`b5a1ae8`), including the `/data/*` CORS headers the app needs. The previous production commit is tagged `v1.0.0`.
+- **Mobile app, Phase 3 (native behaviour)** (`todo/mobile-plan.md`). All of it is gated on `isNative`; the web keeps its current behaviour.
+  - Plugins: `@capacitor/app`, `preferences`, `haptics`, `share`, `local-notifications`.
+  - `lib/persist.ts`: history, daily completion date, distance unit, onboarding flags and the reminder setting are mirrored to native Preferences and restored into `localStorage` before mount, so iOS evicting WKWebView storage loses nothing. `useDistanceUnit` reads its saved unit on first use instead of at import.
+  - `lib/nativeApp.ts`: when the Eastern-time day changes while the app is in the background, resuming restarts on Home with the new daily; the Android back button walks history, then exits; tapping a reminder opens Home.
+  - Audio stops when the app goes to the background (`useGamePlay` clears `isPlaying`).
+  - Haptics on a guess and on win/lose.
+  - "Share score" opens the native share sheet. Removed the unused `useGamePlay.handleShare` / `generateShareText`.
+  - `lib/dailyReminder.ts`: after the first completed daily the app asks for notification permission, then schedules a "GeoHearo #N is live" reminder at 09:00 local time for the next 7 days, skipping completed dailies. "Daily reminder" switch in the menu drawer.
+  - Verified on the iPhone 17 Pro simulator: background pause, wiping WebKit storage keeps the daily and history, the permission prompt, the seven scheduled reminders, the toggle and the share sheet.
+- **Mobile app, Phase 2 (Android scaffold)**: `frontend/android` (`cap add android`), script `cap:android`, `SystemBars.insetsHandling: "native"`, `EdgeToEdge.enable` in `MainActivity`; Vite and `.prettierignore` ignore `android/`. Not built yet: needs the Android Studio SDK setup and JDK 21 for Gradle (see `frontend/README.md`).
 - **Mobile app, Phase 2 (iOS)** (`todo/mobile-plan.md`): Capacitor 8 iOS project in `frontend/ios` (Swift Package Manager), app ID `com.geohearo.app`.
   - `capacitor.config.ts` (web dir `dist-native`, background `#fff9f5`, `CAP_SERVER_URL` → `server.url` for live reload); scripts `cap:sync`, `cap:ios`, `dev:native`.
   - Ran on the iPhone 17 Pro simulator against a Netlify draft deploy with the new CORS headers: stations load via `Range` from `capacitor://localhost`, audio plays and skips, a daily challenge completes with Supabase stats, external links open Safari.

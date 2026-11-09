@@ -12,23 +12,29 @@ bun run build     # Production build (output: dist/)
 bun run fmt       # Format code
 ```
 
-## Mobile app (iOS, Capacitor)
+## Mobile app (iOS and Android, Capacitor)
 
-The same frontend runs as an iOS app via [Capacitor](https://capacitorjs.com/). Plan and status: `todo/mobile-plan.md`.
+The same frontend runs as an iOS and Android app via [Capacitor](https://capacitorjs.com/). Plan and status: `todo/mobile-plan.md`.
 
-Prerequisites: Xcode 26+ with an iOS simulator (CocoaPods not needed; the project uses Swift Package Manager).
+Prerequisites:
+
+- iOS: Xcode 26+ with an iOS simulator (CocoaPods not needed; the project uses Swift Package Manager).
+- Android: Android Studio with an SDK and an emulator image (its setup wizard installs them into `~/Library/Android/sdk`), and JDK 21 for Gradle. The Gradle 8.14 wrapper fails on newer JDKs with "Unsupported class file major version"; point `JAVA_HOME` (or Android Studio's Gradle JDK setting) at a JDK 21.
 
 ```bash
 bun run build:native   # Web assets for the app (output: dist-native/, settings from .env.native)
-bun run cap:sync       # build:native + copy into ios/
+bun run cap:sync       # build:native + copy into ios/ and android/
 bun run cap:ios        # cap:sync + build and launch (prompts for a simulator/device)
+bun run cap:android    # cap:sync + build and launch (prompts for an emulator/device)
 bunx cap open ios      # Open the Xcode project
+bunx cap open android  # Open the Android Studio project
 ```
 
-- `ios/` is committed; `ios/App/App/public` and the generated `capacitor.config.json` are not (recreated by `cap sync`).
+- `ios/` and `android/` are committed; the copied web assets (`ios/App/App/public`, `android/app/src/main/assets/public`) and the generated `capacitor.config.json` files are not (recreated by `cap sync`).
 - The app bundles the map and country data but fetches `index.json` and `stations_*.jsonl` from `VITE_REMOTE_DATA_BASE` (`https://geohearo.com`), which must serve the CORS headers in `netlify.toml`. To point a build at another deploy: `VITE_REMOTE_DATA_BASE=https://<deploy>--geohearo.netlify.app bun run cap:sync`.
 - Live reload: `bun run dev:native` (Vite on the LAN in `native` mode, so `.env.native` and `viewport-fit=cover` apply), then `CAP_SERVER_URL=http://<lan-ip>:5173 bun run cap:ios`. Run a plain `bun run cap:sync` afterwards to remove the dev URL from the native project. Debug flags for this mode go in `.env.native.local`.
 - Debug the WebView with Safari → Develop → Simulator → GeoHearo.
+- App-only behaviour is gated on `isNative` (`src/lib/platform.ts`): `src/lib/nativeApp.ts` (resume, Android back button, notification taps), `src/lib/dailyReminder.ts` (09:00 local reminder, toggle in the menu), `src/lib/persist.ts` (localStorage keys mirrored to native Preferences; add new long-lived keys to `PERSISTED_KEYS` and write them with `persist()`).
 
 ## Symlinked Files
 

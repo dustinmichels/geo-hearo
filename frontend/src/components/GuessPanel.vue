@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { Haptics, ImpactStyle } from "@capacitor/haptics";
 import { ref } from "vue";
+import { isNative } from "../lib/platform";
 import PanelFooter from "./Footer.vue";
 import GuessDisplay from "./GuessDisplay.vue";
 
@@ -30,7 +32,10 @@ const handleGuess = () => {
     isShaking.value = false;
   }, 500);
 
-  if (navigator.vibrate) {
+  // navigator.vibrate is a no-op on iOS.
+  if (isNative) {
+    void Haptics.impact({ style: ImpactStyle.Medium });
+  } else if (navigator.vibrate) {
     navigator.vibrate(200);
   }
   emit("add-guess");

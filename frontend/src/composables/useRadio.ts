@@ -1,5 +1,6 @@
 import { storeToRefs } from "pinia";
 import { ref } from "vue";
+import { persist } from "../lib/persist";
 import { remoteDataUrl } from "../lib/platform";
 import { useGameStore } from "../stores/game";
 import type { IndexStructure, RadioStation } from "../types/geo";
@@ -29,7 +30,7 @@ const countryList = ref<string[]>([]);
 const isLoading = ref(false);
 
 const STORAGE_KEY = "geo_hearo_state";
-const STORAGE_KEY_DAILY_DATE = "dailyChallengeDate";
+export const STORAGE_KEY_DAILY_DATE = "dailyChallengeDate";
 
 export function useRadio() {
   const store = useGameStore();
@@ -357,7 +358,7 @@ export function useRadio() {
   };
 
   const completeDailyChallenge = () => {
-    localStorage.setItem(STORAGE_KEY_DAILY_DATE, getEasternDateString());
+    persist(STORAGE_KEY_DAILY_DATE, getEasternDateString());
     store.isDailyChallengeMode = false;
     store.dailyChallengeNumber = undefined;
   };

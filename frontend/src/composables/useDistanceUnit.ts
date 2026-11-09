@@ -1,4 +1,5 @@
 import { ref } from "vue";
+import { persist } from "../lib/persist";
 
 export type DistanceUnit = "mi" | "km";
 
@@ -27,12 +28,16 @@ function getSavedUnit(): DistanceUnit {
   return getDefaultUnit();
 }
 
-const distanceUnit = ref<DistanceUnit>(getSavedUnit());
+// Read on first use, not at import: the app copies persisted values into
+// localStorage (`hydrate()` in main.ts) after modules load but before mount.
+const distanceUnit = ref<DistanceUnit | null>(null);
 
 export function useDistanceUnit() {
+  distanceUnit.value ??= getSavedUnit();
+
   const toggleUnit = () => {
     distanceUnit.value = distanceUnit.value === "mi" ? "km" : "mi";
-    localStorage.setItem(STORAGE_KEY, distanceUnit.value);
+    persist(STORAGE_KEY, distanceUnit.value);
   };
 
   const formatDistance = (km: number | undefined): string => {
