@@ -14,7 +14,7 @@ uv run scripts/05_organize.py
 uv run scripts/06_split_chunks.py
 
 # country details
-# uv run scripts/country-details/01_scrape.py
-# uv run scripts/country-details/02_get_pics.py
+uv run scripts/country-details/01_scrape.py
+uv run scripts/country-details/02_get_pics.py
 
 # TODO: replace with manually selected images
