@@ -1,1 +1,4 @@
-public/data
+# Read by oxfmt. Xcode owns the files in the native project; public/data is
+# generated and minified by the data pipeline / `prebuild`.
+ios/
+public/data/

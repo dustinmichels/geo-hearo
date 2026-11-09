@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-09
+
+- **Mobile app, Phase 2 (iOS)** (`todo/mobile-plan.md`): Capacitor 8 iOS project in `frontend/ios` (Swift Package Manager), app ID `com.geohearo.app`.
+  - `capacitor.config.ts` (web dir `dist-native`, background `#fff9f5`, `CAP_SERVER_URL` → `server.url` for live reload); scripts `cap:sync`, `cap:ios`, `dev:native`.
+  - Ran on the iPhone 17 Pro simulator against a Netlify draft deploy with the new CORS headers: stations load via `Range` from `capacitor://localhost`, audio plays and skips, a daily challenge completes with Supabase stats, external links open Safari.
+  - `PlayMobile`: collapsed panel heights include the home-indicator inset and that inset is painted white; `safeAreaTop()` became `safeAreaInsets()`.
+  - Vite ignores `ios/` for file watching and dependency scanning; `.prettierignore` also excludes `ios/` (Xcode-owned JSON).
+  - `frontend/README.md` has a "Mobile app" section.
+
 ## 2026-11-08
 
 - **Merged `main` (live `014ebf5`)**: brings the refreshed country photos and matching `country_details_with_pics.json` into `dev`. Fixed two mis-encoded language names in that JSON (Asháninka, Guaraní). `CountryDetails` now treats non-OK responses as errors and logs them.
@@ -13,6 +22,18 @@
   - `usePwaInstall()` registers its listeners in `main.ts`, before any route renders.
   - driver.js 1.11 tour buttons keep the live `← Previous` / `Next →` labels.
   - `.btn-pressable` transitions `box-shadow` again.
+- **Bundle trim** (findings from `frontend/packages_eval.md`, follow-ups in `todo/package-audit-followups.md`):
+  - `main.ts` imports only `vant/es/floating-panel/style` instead of `vant/lib/index.css`. The vant CSS chunk went from 198.9 KB to 7.0 KB (53.1 → 1.9 KB gzip).
+  - `GuessPanel` uses a native `<input readonly>` and `RadioPlayer` uses native `<button>`s instead of vant `Field`/`Button`. Size and colors match the old build. The `--van-*` overrides in `style.css` are trimmed to the two that `FloatingPanel` reads.
+  - `lib/supabase.ts` uses `@supabase/postgrest-js` in place of `@supabase/supabase-js`. It sends the same `apikey`/`Authorization` headers to the same `/rest/v1` endpoints. The `vendor` chunk went from 325 KB to 117 KB (92 → 38 KB gzip).
+  - Removed the unused deps `geojson`, `jsdom` and `@types/jsdom`. Added `@types/geojson` as a devDependency (it was only present transitively). `tsconfig.vitest.json` now inherits `lib` (with DOM) from the app config; DOM types used to come from `@types/jsdom`.
+  - Removed the dead `:deep(.van-floating-panel__bar)` rule from `PlayMobile.vue`. Vant's class is `__header-bar`, so the rule never matched.
+- **Mobile app, Phase 1** (`todo/mobile-plan.md`): the frontend can now be built for Capacitor; the web build is unchanged.
+  - `bun run build:native` (`vite build --mode native`) writes `dist-native/` (9.4 MB): no PWA/service worker, no `404.html`, no `stations_*.jsonl`/`index.json`, and `viewport-fit=cover` in `index.html`. Settings come from `frontend/.env.native`.
+  - `lib/platform.ts`: `isNative`, `platform`, `remoteDataUrl()`, `safeAreaTop()` (now `safeAreaInsets()`). `useRadio` loads `index.json` and station byte ranges via `remoteDataUrl()`, which is same-origin on the web and `https://geohearo.com` in the app.
+  - `netlify.toml` sends CORS headers (`Access-Control-Allow-Origin: *`, `Range` allowed, `Content-Range` exposed) for `/data/*`.
+  - In the app, Plausible reports `https://geohearo.com` URLs with a `platform` property and `usePwaInstall` registers no listeners.
+  - Safe-area utilities (`pt-safe-N`, `top-safe-N`, …) and a status-bar scrim; applied to the menu buttons, page padding, `PlayMobile`, the menu drawer and the tour "Skip" button. They resolve to the old values on the web.
 
 ## 2026-04-07
 

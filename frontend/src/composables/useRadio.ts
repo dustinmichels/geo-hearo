@@ -1,5 +1,6 @@
 import { storeToRefs } from "pinia";
 import { ref } from "vue";
+import { remoteDataUrl } from "../lib/platform";
 import { useGameStore } from "../stores/game";
 import type { IndexStructure, RadioStation } from "../types/geo";
 
@@ -71,7 +72,7 @@ export function useRadio() {
     isLoading.value = true;
     try {
       // 1. Load Index
-      const indexResponse = await fetch("/data/index.json");
+      const indexResponse = await fetch(remoteDataUrl("index.json"));
       const indexData: IndexStructure = await indexResponse.json();
       countriesIndex.value = indexData;
       // The keys in index.json are ADMIN names
@@ -162,7 +163,7 @@ export function useRadio() {
     isLoading.value = true;
     try {
       const lineLength = idx.config.line_length;
-      const DATA_URL = `/data/stations_${fileIndex}.jsonl`;
+      const DATA_URL = remoteDataUrl(`stations_${fileIndex}.jsonl`);
 
       const stations = await Promise.all(
         selectedIndices.map((offsetIdx) => {

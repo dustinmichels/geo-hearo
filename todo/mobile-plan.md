@@ -30,7 +30,7 @@ experimental.
 | PWA (`vite-plugin-pwa`, `usePwaInstall`)                                  | Disabled in native mode                                           | Service workers don't run on `capacitor://` `[verify]`; the install button is meaningless inside an app.                                                                                                                                           |
 | Background audio                                                          | **Not supported**; pause on app background                        | A guessing round needs the screen. Avoids `UIBackgroundModes` justification and an Android foreground service.                                                                                                                                     |
 | Persistence                                                               | `@capacitor/preferences` mirrored into `localStorage`             | iOS may evict WKWebView storage; game history and daily-completion date must survive. Keeps existing sync `localStorage` reads unchanged.                                                                                                          |
-| App ID                                                                    | `com.geohearo.app`                                                | Permanent once published; decide before Phase 2.                                                                                                                                                                                                   |
+| App ID                                                                    | `com.geohearo.app`                                                | Reverse-DNS of geohearo.com plus an app suffix. Fixed once the App Store Connect record exists (app-store-ios.md step 5); until then it is a one-line change in `capacitor.config.ts` + Xcode. |
 
 Page origins inside the app: iOS `capacitor://localhost`, Android
 `https://localhost` (Capacitor defaults).
@@ -42,30 +42,49 @@ Page origins inside the app: iOS `capacitor://localhost`, Android
 Goal: prove the three things that could force a design change, before touching
 real code.
 
-- [ ] Add CORS headers for `/data/*` in `netlify.toml` and deploy to a Netlify
-      branch deploy:
-      `toml
-    [[headers]]
-    for = "/data/*"
-    [headers.values]
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Headers = "Range"
-    Access-Control-Expose-Headers = "Content-Range, Content-Length"
-    `
-- [ ] Scratch Capacitor app (`bunx cap init` in a temp dir) whose page does,
-      from an iOS **device** and an Android emulator:
-  - [ ] `fetch("https://<branch>.netlify.app/data/stations_0.jsonl", { headers: { Range: "bytes=0-799" } })`
-        → status 206, body is one JSON line. `[verify]` whether a preflight
-        `OPTIONS` is sent and whether Netlify answers it with the headers above
-        (the `/*` → `/index.html` SPA redirect must not swallow it).
-  - [ ] `<audio src="<an https station URL>">` started from a tap, then a
-        second station started **after an `await fetch(...)`** (mirrors
-        station switching in `RadioPlayer.vue`). `[verify]` autoplay policy
-        allows it.
-  - [ ] POST to `https://geohearo.com/we-hear/for-you` (Plausible proxy) from
-        the app origin succeeds. `[verify]` CORS on the proxied response.
+- [x] Add CORS headers for `/data/*` in `netlify.toml`:
+
+  ```toml
+  [[headers]]
+  for = "/data/*"
+  [headers.values]
+  Access-Control-Allow-Origin = "*"
+  Access-Control-Allow-Headers = "Range"
+  Access-Control-Expose-Headers = "Content-Range, Content-Length"
+  ```
+
+- [x] Deploy that to a Netlify draft deploy:
+      `https://mobile-spike--geohearo.netlify.app` (`netlify deploy --alias mobile-spike`).
+- [x] ~~Scratch Capacitor app~~ Ran the real app (Phase 2, iOS) built with
+      `VITE_REMOTE_DATA_BASE=https://mobile-spike--geohearo.netlify.app`, on
+      the iPhone 17 Pro simulator (iOS 26.5). Android deferred.
+  - [x] Range fetch from `capacitor://localhost`: daily challenge #280 loaded
+        its country and all 5 stations from the draft deploy.
+  - [x] Audio: Play started the stream from a tap, and Skip started the next
+        station after `await playStatic()` with no autoplay block. Evidence: UI
+        left the loading state and macOS showed an active
+        `iOSSimulatorAudioDevice` output assertion. Still to repeat on a
+        physical iPhone (autoplay policy can differ).
+  - [ ] Plausible POST from the app origin. Not observable from here (Web
+        Inspector proxy shows no pages on iOS 26); the proxy's CORS preflight
+        passes. Confirm in Plausible realtime after the first device run.
 
 **Accept when:** all three work on both platforms.
+
+**Findings (curl, 2026-11-08):**
+
+- Live `GET /data/stations_0.jsonl` with `Range: bytes=0-799` → `206`,
+  `content-range: bytes 0-799/43876936`. Range support is fine.
+- Live preflight `OPTIONS /data/…` → `200` with **no** CORS headers, so the
+  headers above are required in production before the app can load stations.
+- Draft deploy: `OPTIONS` (`Origin: capacitor://localhost` and
+  `https://localhost`) → `200` with all three `Access-Control-*` headers; the
+  SPA redirect does not interfere. `GET` with `Range` → `206` with the same
+  headers; `index.json` → `200` with them.
+- Live preflight `OPTIONS /we-hear/for-you` → `204`,
+  `access-control-allow-origin: *`, `POST` allowed (from Plausible).
+- Toolchain: Xcode 26 + iOS 26.5 simulators, CocoaPods present (unused: the
+  iOS project is SPM). No Android SDK.
 
 **If the `Range` request fails CORS:** add a Netlify Function
 `/api/stations/:file/:start/:len` that reads the byte range server-side and
@@ -85,86 +104,141 @@ All changes keep the web build behaving exactly as today.
 
 ### 1.1 Platform module
 
-- [ ] `bun add @capacitor/core`
-- [ ] New `src/lib/platform.ts`:
-  - `isNative = Capacitor.isNativePlatform()`
+- [x] `bun add @capacitor/core` (8.6.0)
+- [x] New `src/lib/platform.ts`:
+  - `isNative = Capacitor.isNativePlatform()`, `platform = Capacitor.getPlatform()`
   - `remoteDataUrl(path)` → `${import.meta.env.VITE_REMOTE_DATA_BASE ?? ""}/data/${path}`
-- [ ] `frontend/.env.native`: `VITE_REMOTE_DATA_BASE=https://geohearo.com`
-      (web build leaves it unset → same-origin, unchanged).
+  - `safeAreaInsets()` — px heights of the top and bottom insets (see 1.5).
+- [x] `frontend/.env.native`: `VITE_REMOTE_DATA_BASE=https://geohearo.com`
+      (web build leaves it unset → same-origin, unchanged). It also carries the
+      public Supabase URL/key from `netlify.toml` (so a clean checkout builds
+      the app) and blanks `VITE_DEBUG_MODE` / `VITE_SECRET_COUNTRY` /
+      `VITE_GAME_STAGE` so local `.env` debug values never reach a store build.
 
 ### 1.2 Data URLs
 
-- [ ] `useRadio.loadStations`: `/data/index.json` → `remoteDataUrl("index.json")`.
-- [ ] `useRadio.loadCountryBySeed`: `DATA_URL` → `remoteDataUrl(\`stations\_${fileIndex}.jsonl\`)`.
-- [ ] Leave `useCountryData.ts` (`ne_countries.geojson`) and
+- [x] `useRadio.loadStations`: `/data/index.json` → `remoteDataUrl("index.json")`.
+- [x] `useRadio.loadCountryBySeed`: `DATA_URL` → `remoteDataUrl(\`stations\_${fileIndex}.jsonl\`)`.
+- [x] Leave `useCountryData.ts` (`ne_countries.geojson`) and
       `CountryDetails.vue` (`country_details_with_pics.json`) on relative paths
       — bundled.
 
 ### 1.3 Native build mode in `vite.config.ts`
 
-- [ ] `defineConfig(({ mode }) => …)`; when `mode === "native"`:
+- [x] `defineConfig(({ mode }) => …)`; when `mode === "native"`:
+  - `build.outDir` is `dist-native`;
   - omit `VitePWA(...)` and the `copy-404` plugin;
-  - add a `closeBundle` plugin that deletes `stations_*.jsonl` and `index.json`
-    from `dist-native/data/`.
-- [ ] `package.json` script: `"build:native": "vue-tsc -b && vite build --mode native --outDir dist-native"`.
-- [ ] `.gitignore`: `dist-native`.
+  - a `closeBundle` plugin deletes `stations_*.jsonl` and `index.json` from
+    `dist-native/data/`;
+  - a `transformIndexHtml` plugin appends `viewport-fit=cover` (see 1.5).
+- [x] `package.json` script: `"build:native": "vue-tsc -b && vite build --mode native"`.
+      `prebuild` (geo/JSON minify) does not run for it; it reads the
+      already-minified files in `public/data`.
+- [x] `.gitignore`: `dist-native`.
 
 **Accept when:** `du -sh frontend/dist-native` is < 15 MB and `bun run build`
 output is byte-identical in structure to before (still has `data/stations_*`,
 `sw.js`, `404.html`).
 
+**Result:** `dist-native` is 9.4 MB (`data/` holds only
+`country_details_with_pics.json` and `ne_countries.geojson`). `dist/` file list
+(hashes stripped) is identical to the previous build: 202 files, PWA precache
+23 entries. Tests: 35/35.
+
 ### 1.4 Web-only features
 
-- [ ] `main.ts`: call `usePwaInstall()` only when `!isNative`; `Footer.vue`'s
-      install button then never shows in the app.
-- [ ] `main.ts` Plausible: in native mode send
-      `url: "https://geohearo.com" + to.fullPath` instead of
-      `window.location.origin + …`, and add a `platform` prop (`ios`/`android`)
-      so app traffic is separable. `[verify]` the tracker's localhost
-      suppression option name in `@plausible-analytics/tracker` and enable
-      capture (the iOS/Android hostname is `localhost`).
+- [x] `usePwaInstall()` skips its `beforeinstallprompt` listeners when
+      `isNative` (guarded inside the composable rather than in `main.ts`,
+      because `Footer.vue` also calls it); the install button never shows in
+      the app.
+- [x] `main.ts` Plausible: native sends `url: "https://geohearo.com" + to.fullPath`,
+      `captureOnLocalhost: true` (the tracker drops events when
+      `location.hostname` is `localhost`, which is the app's hostname), and
+      `customProperties: { platform }` (`ios`/`android`). Web is unchanged.
+  - Moved to `todo/docs-todo.md`: add `platform` as a custom property in the
+    Plausible site settings.
 
 ### 1.5 Safe areas
 
-- [ ] `index.html` viewport: add `viewport-fit=cover`.
-- [ ] Add `env(safe-area-inset-*)` padding to the fixed top/bottom chrome in
-      `PlayMobile.vue`, `HamburgerMenu.vue`, and the result/guess panels.
-      No `safe-area` usage exists today `[code]`. Android 15+ is edge-to-edge,
-      so this applies to both platforms.
+- [x] `viewport-fit=cover` is added to `index.html` **only in the native
+      build** (1.3). On the web every `env(safe-area-inset-*)` stays `0`, so
+      the web layout is unchanged, including the installed PWA.
+- [x] `style.css`: `--safe-top/right/bottom/left` and Tailwind utilities
+      `pt-safe-N`, `pb-safe-N`, `top-safe-N`, `right-safe-N`, `bottom-safe-N`,
+      `left-safe-N` (= the `N` spacing step + the inset). Applied to:
+  - the fixed menu button in `Home`, `About`, `Privacy`, `PlayDesktop`,
+    `PlayMobile`; page padding in `Home`, `About`, `Privacy`, `PlayDesktop`;
+  - `PlayMobile` title row, bottom padding and the close-arrows hint;
+  - the `HamburgerMenu` drawer; the "Skip Tour" button in `Play.vue`;
+  - a `.status-bar-scrim` in `App.vue` (cloud-white strip of height
+    `--safe-top`) so scrolled pages don't run under the status bar.
+- [x] `PlayMobile` panel anchors use `safeAreaInsets()`: expanded heights
+      subtract the top inset, collapsed heights add the bottom inset (vant
+      `FloatingPanel` pads its bottom with `safe-area-inset-bottom`). The
+      panel root's transparent background is painted white over that bottom
+      padding, otherwise the dim overlay showed through under the panel.
 
 **Accept when:** iPhone simulator with a notch and an Android 15 emulator show
-no UI under the status bar / home indicator (checked in Phase 2).
+no UI under the status bar / home indicator.
+
+**iOS result (iPhone 17 Pro simulator):** Home, About (scrolled), Play,
+expanded guess panel, menu drawer, tour "Skip" button, results modal and
+results panel all clear the Dynamic Island and home indicator. Android open.
 
 ---
 
 ## Phase 2 — Add Capacitor and run on devices
 
-- [ ] `bun add @capacitor/cli @capacitor/ios @capacitor/android`
-- [ ] `bunx cap init GeoHearo com.geohearo.app --web-dir dist-native`
-- [ ] `capacitor.config.ts`: `backgroundColor: "#fff9f5"` (matches manifest
-      `background_color`).
-- [ ] `bunx cap add ios && bunx cap add android`; commit `ios/` and `android/`.
-- [ ] Scripts:
-  - `"cap:sync": "bun run build:native && cap sync"`
-  - `"cap:ios": "bun run cap:sync && cap run ios"`
-  - `"cap:android": "bun run cap:sync && cap run android"`
-- [ ] Dev loop: `CAP_SERVER_URL=http://<lan-ip>:5173` read in
-      `capacitor.config.ts` as `server.url` (+ `cleartext: true`) only when set,
-      for live reload against `bun run dev`.
-- [ ] Apply Phase 0 autoplay settings if needed.
+iOS first; Android items stay open until Android Studio is installed.
+
+- [ ] Deploy the `netlify.toml` CORS headers to production. Until then an app
+      built with the default `.env.native` (`https://geohearo.com`) cannot load
+      stations; build against the draft deploy with
+      `VITE_REMOTE_DATA_BASE=https://mobile-spike--geohearo.netlify.app bun run cap:sync`.
+
+- [x] `bun add @capacitor/ios` + `bun add -d @capacitor/cli` (8.6.0)
+- [ ] `bun add @capacitor/android`
+- [x] `bunx cap init GeoHearo com.geohearo.app --web-dir dist-native`
+- [x] `capacitor.config.ts`: `backgroundColor: "#fff9f5"` (matches manifest
+      `background_color`). Type-checked via `tsconfig.node.json`.
+- [ ] Android: `plugins.SystemBars.insetsHandling: "native"` so Android
+      WebView < 140 (broken `env(safe-area-inset-*)`) gets native padding
+      instead, per `@capacitor/core/system-bars.md`. Its Android note also asks
+      for `EdgeToEdge.enable(this)` in `MainActivity.onCreate`.
+- [x] `bunx cap add ios` (Swift Package Manager project, no CocoaPods). Commit
+      `ios/`.
+- [ ] `bunx cap add android`; commit `android/`.
+- [x] Scripts: `cap:sync` (`build:native && cap sync`), `cap:ios`
+      (`cap:sync && cap run ios`).
+- [ ] Script `cap:android`.
+- [x] Dev loop: `CAP_SERVER_URL=http://<lan-ip>:5173` sets `server.url`
+      (+ `cleartext: true`) in `capacitor.config.ts` only when set. Serve with
+      `bun run dev:native` (`vite --host --mode native`): plain `bun run dev`
+      lacks `viewport-fit=cover`, so the page ignores the safe areas. Vite now
+      ignores `ios/**` for file watching and the dependency scan (`cap sync`
+      writes copies of `index.html` there, which triggered reloads). Verified:
+      simulator loaded the dev server and played the daily.
+- [x] `.prettierignore`: add `ios/` (Xcode-owned JSON) next to `public/data`.
+- [x] Phase 0 autoplay settings: not needed on the iOS simulator.
 
 ### Smoke test on both platforms
 
-- [ ] Home → Play → stations load, audio plays, skip station works.
-- [ ] Static noise (`utils/audio.ts`) plays on station change. Note: on iOS
-      Web Audio follows the mute switch `[verify]`; acceptable.
-- [ ] Map tiles (ArcGIS) and glyphs (`demotiles.maplibre.org`) render.
-- [ ] Guess, win, lose, results modal, daily stats bar chart (Supabase).
-- [ ] Deep routes survive reload (`createWebHistory` `[code]`; Capacitor serves
-      `index.html` for unknown paths).
-- [ ] External links in About/Footer/Privacy open the system browser, not
-      inside the app view.
-- [ ] Driver.js onboarding tour fits the screen.
+iOS simulator status (iPhone 17 Pro, iOS 26.5, draft-deploy data):
+
+- [x] Home → Play → stations load, audio plays, skip station works.
+- [ ] Static noise (`utils/audio.ts`) plays on station change. Not audible
+      from the automation; check by ear on a device. On iOS, Web Audio follows
+      the mute switch `[verify]`; acceptable.
+- [x] Map tiles (ArcGIS) and glyphs render (results map with labels).
+- [x] Guess, win, results modal, daily stats bar chart (Supabase). Lose not
+      run.
+- [ ] Deep routes survive reload. Not testable on iOS: a relaunch always
+      starts at `/`.
+- [x] External links (station "Visit website") open in Safari with a
+      "◀ GeoHearo" back link, not inside the app view.
+- [x] Driver.js onboarding tours (play, results) fit the screen.
+- First paint on a cold launch: ~2 s; the first launch after a simulator boot
+  took ~8 s.
 
 **Accept when:** a full daily challenge and a free-play round complete on a
 physical iPhone and a physical Android phone.

@@ -3,8 +3,10 @@
 [tools]
 go = "1.27"
 bun = "1.4"
+# keep in sync with data-prep/.python-version
+python = "3.12"
 # keep in sync with frontend/package.json
-oxfmt = "0.40.0"
+oxfmt = "0.77.0"
 ruff = "0.17.4"
 
 # ---- frontend ----

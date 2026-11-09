@@ -74,7 +74,7 @@ const menuItems = [
       <Transition name="slide">
         <div
           v-if="isOpen"
-          class="fixed top-0 left-0 h-full w-[280px] bg-paper-white border-r-3 border-pencil-lead z-[100002] flex flex-col p-6 shadow-2xl"
+          class="fixed top-0 left-0 h-full w-[280px] bg-paper-white border-r-3 border-pencil-lead z-[100002] flex flex-col px-6 pt-safe-6 pb-safe-6 shadow-2xl"
         >
           <!-- Header -->
           <div class="flex justify-between items-center mb-8">

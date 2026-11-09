@@ -13,6 +13,7 @@ import RadioPlayer from "../components/RadioPlayer.vue";
 import ResultsPanel from "../components/ResultsPanel.vue";
 import type { GamePlayState } from "../composables/useGamePlay";
 import { useRadio } from "../composables/useRadio";
+import { safeAreaInsets } from "../lib/platform";
 
 const props = defineProps<{
   gameplay: GamePlayState;
@@ -26,8 +27,13 @@ const { isDailyChallengeMode } = useRadio();
 
 // Vant Floating Panel setup
 const windowHeight = ref(window.innerHeight);
+// Status bar / home indicator heights in the native app (0 on the web): expanded
+// panels stop below the status bar; collapsed panels grow by the home-indicator
+// padding (`safe-area-inset-bottom`) that vant's FloatingPanel adds inside them.
+const safeArea = ref(safeAreaInsets());
 const onResize = () => {
   windowHeight.value = window.innerHeight;
+  safeArea.value = safeAreaInsets();
 };
 
 onMounted(() => {
@@ -39,17 +45,17 @@ onUnmounted(() => {
 });
 
 const anchors = computed(() => [
-  140, // Collapsed height (px)
-  Math.round(windowHeight.value * 0.9), // Fully open
+  140 + safeArea.value.bottom, // Collapsed height (px)
+  Math.round(windowHeight.value * 0.9) - safeArea.value.top, // Fully open
 ]);
-const panelHeight = ref(140);
+const panelHeight = ref(anchors.value[0] ?? 140);
 
 // Results floating panel setup
 const resultsAnchors = computed(() => [
-  160, // Collapsed: station details + new game button visible
-  windowHeight.value - 130, // Expanded: leave room for X buttons at top
+  160 + safeArea.value.bottom, // Collapsed: station details + new game button visible
+  windowHeight.value - 130 - safeArea.value.top, // Expanded: leave room for X buttons at top
 ]);
-const resultsPanelHeight = ref(160);
+const resultsPanelHeight = ref(resultsAnchors.value[0] ?? 160);
 
 const onGuessAdded = () => {
   panelHeight.value = anchors.value[1] ?? 140;
@@ -131,7 +137,7 @@ const overlayOpacity = computed(() => {
       class="animate-blob2 absolute bottom-10 left-[-5%] w-80 h-80 bg-gumball-blue/5 rounded-full blur-3xl pointer-events-none"
     ></div>
 
-    <div class="fixed top-4 left-4 z-[9999] flex gap-2">
+    <div class="fixed top-safe-4 left-safe-4 z-[9999] flex gap-2">
       <HamburgerMenu />
       <button
         v-if="gameplay.dailyItem"
@@ -147,17 +153,17 @@ const overlayOpacity = computed(() => {
     <!-- Animated Arrows Hint -->
     <div class="relative z-[60]" v-show="isPanelFullHeight || isResultsPanelFullHeight">
       <AnimatedClose
-        class="!top-16"
+        class="!top-safe-16"
         @click="isPanelFullHeight ? handleArrowClick() : handleResultsArrowClick()"
       />
     </div>
 
     <!-- Fixed content area -->
     <div
-      class="h-full w-full flex flex-col max-w-md mx-auto pb-[20px] relative z-10 transition-all duration-500"
+      class="h-full w-full flex flex-col max-w-md mx-auto pb-safe-5 relative z-10 transition-all duration-500"
     >
       <!-- Title -->
-      <div class="pt-2 px-4 flex justify-center relative z-10 order-1">
+      <div class="pt-safe-2 px-4 flex justify-center relative z-10 order-1">
         <div class="relative">
           <h1
             class="relative z-10 text-center text-pencil-lead text-2xl font-heading tracking-wider"
@@ -268,7 +274,12 @@ const overlayOpacity = computed(() => {
 
 <style scoped>
 :deep(.van-floating-panel) {
-  background-color: transparent !important;
+  /* Transparent, except the home-indicator padding vant adds at the bottom (0 on the web). */
+  background: linear-gradient(
+    to top,
+    var(--color-paper-white) var(--safe-bottom),
+    transparent var(--safe-bottom)
+  ) !important;
 }
 
 :deep(.van-floating-panel__header) {
@@ -277,13 +288,5 @@ const overlayOpacity = computed(() => {
   align-items: center !important;
   justify-content: center !important;
   background: transparent !important;
-}
-
-:deep(.van-floating-panel__bar) {
-  width: 64px !important;
-  height: 6px !important;
-  background-color: #334155 !important;
-  border-radius: 999px !important;
-  opacity: 0.5;
 }
 </style>

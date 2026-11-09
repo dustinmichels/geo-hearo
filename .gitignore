@@ -5,3 +5,6 @@
 
 # Demo
 /demo
+
+# Local Netlify folder
+.netlify

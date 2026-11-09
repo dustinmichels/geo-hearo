@@ -28,10 +28,10 @@ const handleTuneIn = (_event: Event) => {
 </script>
 <template>
   <div
-    class="min-h-screen w-screen no-scroll-container flex flex-col items-center justify-center p-6 md:p-12 overflow-x-hidden relative"
+    class="min-h-screen w-screen no-scroll-container flex flex-col items-center justify-center px-6 pt-safe-6 pb-safe-6 md:px-12 md:pt-safe-12 md:pb-safe-12 overflow-x-hidden relative"
   >
     <!-- Hamburger Menu (Mobile Only) -->
-    <div class="fixed top-4 left-4 z-[9999]">
+    <div class="fixed top-safe-4 left-safe-4 z-[9999]">
       <HamburgerMenu />
     </div>
 

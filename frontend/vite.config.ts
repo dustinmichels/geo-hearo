@@ -1,73 +1,106 @@
 import tailwindcss from "@tailwindcss/vite";
 import vue from "@vitejs/plugin-vue";
 import { execSync } from "node:child_process";
-import { copyFileSync } from "node:fs";
+import { copyFileSync, readdirSync, rmSync } from "node:fs";
 import { fileURLToPath, URL } from "node:url";
-import { defineConfig } from "vite";
+import { defineConfig, type PluginOption } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 // Get git hash
 const gitHash = execSync("git rev-parse --short HEAD").toString().trim();
 
 // https://vite.dev/config/
-export default defineConfig({
-  define: {
-    "import.meta.env.VITE_GIT_HASH": JSON.stringify(gitHash),
-  },
-  plugins: [
-    vue(),
-    tailwindcss(),
-    {
-      name: "copy-404",
-      closeBundle() {
-        copyFileSync("dist/index.html", "dist/404.html");
-      },
-    },
-    VitePWA({
-      registerType: "autoUpdate",
-      manifest: {
-        name: "GeoHearo",
-        short_name: "GeoHearo",
-        theme_color: "#3b82f6",
-        background_color: "#fff9f5",
-        display: "standalone",
-        icons: [
-          { src: "/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
-          { src: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png" },
-        ],
-      },
-      workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-        runtimeCaching: [
-          {
-            urlPattern: /\/data\//,
-            handler: "NetworkFirst",
-            options: { cacheName: "station-data" },
+export default defineConfig(({ mode }) => {
+  const isNativeBuild = mode === "native";
+  const outDir = isNativeBuild ? "dist-native" : "dist";
+
+  const modePlugins: PluginOption[] = isNativeBuild
+    ? [
+        // Capacitor build: let the page draw under the status bar / home
+        // indicator (safe-area insets are padded in CSS).
+        {
+          name: "native-viewport-fit-cover",
+          transformIndexHtml(html) {
+            return html.replace(/(name="viewport"\s+content="[^"]*)"/, '$1, viewport-fit=cover"');
           },
-        ],
-      },
-    }),
-  ],
-  server: {
-    allowedHosts: true,
-  },
-  resolve: {
-    alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
+        },
+        // Station data and its index are fetched from geohearo.com
+        // (`remoteDataUrl`), so drop them from the app bundle.
+        {
+          name: "native-drop-remote-data",
+          closeBundle() {
+            for (const file of readdirSync(`${outDir}/data`)) {
+              if (/^(stations_\d+\.jsonl|index\.json)$/.test(file))
+                rmSync(`${outDir}/data/${file}`);
+            }
+          },
+        },
+      ]
+    : [
+        {
+          name: "copy-404",
+          closeBundle() {
+            copyFileSync("dist/index.html", "dist/404.html");
+          },
+        },
+        VitePWA({
+          registerType: "autoUpdate",
+          manifest: {
+            name: "GeoHearo",
+            short_name: "GeoHearo",
+            theme_color: "#3b82f6",
+            background_color: "#fff9f5",
+            display: "standalone",
+            icons: [
+              { src: "/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
+              { src: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png" },
+            ],
+          },
+          workbox: {
+            globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+            runtimeCaching: [
+              {
+                urlPattern: /\/data\//,
+                handler: "NetworkFirst",
+                options: { cacheName: "station-data" },
+              },
+            ],
+          },
+        }),
+      ];
+
+  return {
+    define: {
+      "import.meta.env.VITE_GIT_HASH": JSON.stringify(gitHash),
     },
-  },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes("node_modules")) {
-            if (id.includes("maplibre-gl")) return "maplibre";
-            if (id.includes("vant")) return "vant";
-            if (id.includes("node_modules/vue/") || id.includes("node_modules/@vue/")) return "vue";
-            return "vendor";
-          }
+    plugins: [vue(), tailwindcss(), ...modePlugins],
+    server: {
+      allowedHosts: true,
+      // `cap sync` / Xcode write built copies of index.html under ios/; don't reload on them.
+      watch: { ignored: ["**/ios/**"] },
+    },
+    // Without this, the dependency scan crawls every index.html, including those under ios/.
+    optimizeDeps: { entries: ["index.html"] },
+    resolve: {
+      alias: {
+        "@": fileURLToPath(new URL("./src", import.meta.url)),
+      },
+    },
+    build: {
+      outDir,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes("node_modules")) {
+              if (id.includes("maplibre-gl")) return "maplibre";
+              if (id.includes("vant")) return "vant";
+              if (id.includes("node_modules/vue/") || id.includes("node_modules/@vue/"))
+                return "vue";
+              return "vendor";
+            }
+          },
         },
       },
     },
-  },
+  };
 });

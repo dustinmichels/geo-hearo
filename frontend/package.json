@@ -5,8 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:native": "vite --host --mode native",
     "test": "vitest",
     "build": "vue-tsc -b && vite build",
+    "build:native": "vue-tsc -b && vite build --mode native",
+    "cap:sync": "bun run build:native && cap sync",
+    "cap:ios": "bun run cap:sync && cap run ios",
     "preview": "vite preview",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
@@ -16,6 +20,8 @@
     "prebuild": "bun run show-size && bun run optimize-geo && bun run minify && bun run show-size"
   },
   "dependencies": {
+    "@capacitor/core": "^8.6.0",
+    "@capacitor/ios": "^8.6.0",
     "@plausible-analytics/tracker": "^0.4.7",
     "@supabase/postgrest-js": "^2.119.0",
     "@turf/area": "^7.4.0",
@@ -32,6 +38,7 @@
     "vue-router": "^4.6.4"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.6.0",
     "@tailwindcss/vite": "^4.3.5",
     "@types/geojson": "^7946.0.16",
     "@types/node": "^24.19.2",

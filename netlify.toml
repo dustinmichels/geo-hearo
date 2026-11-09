@@ -7,6 +7,15 @@ publish = "dist"
 VITE_SUPABASE_URL = "https://hxxfyqgcnukpravehjqz.supabase.co"
 VITE_SUPABASE_ANON_KEY = "sb_publishable_RJwfAkOncFJeAGkvi9Z0oQ_8OTbcrbJ"
 
+# The mobile app (origin capacitor://localhost / https://localhost) reads
+# index.json and byte ranges of stations_*.jsonl from here.
+[[headers]]
+for = "/data/*"
+[headers.values]
+Access-Control-Allow-Origin = "*"
+Access-Control-Allow-Headers = "Range"
+Access-Control-Expose-Headers = "Content-Range, Content-Length"
+
 [[redirects]]
 from = "/*"
 to = "/index.html"

@@ -1,4 +1,5 @@
 import { ref } from "vue";
+import { isNative } from "../lib/platform";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -11,7 +12,8 @@ const canInstall = ref(false);
 let listenersRegistered = false;
 
 export function usePwaInstall() {
-  if (typeof window !== "undefined" && !listenersRegistered) {
+  // Inside the native app there is nothing to install; canInstall stays false.
+  if (typeof window !== "undefined" && !isNative && !listenersRegistered) {
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
       deferredPrompt.value = e as BeforeInstallPromptEvent;

@@ -2,4 +2,5 @@
 
 <template>
   <router-view />
+  <div class="status-bar-scrim"></div>
 </template>

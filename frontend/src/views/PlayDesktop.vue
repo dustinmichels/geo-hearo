@@ -40,10 +40,10 @@ defineExpose({
 
 <template>
   <div
-    class="h-screen w-full overflow-hidden bg-cloud-white relative text-pencil-lead font-body px-6 pt-3 pb-2 flex flex-col gap-3"
+    class="h-screen w-full overflow-hidden bg-cloud-white relative text-pencil-lead font-body px-6 pt-safe-3 pb-safe-2 flex flex-col gap-3"
   >
     <!-- Hamburger Menu -->
-    <div class="fixed top-4 left-4 z-[9999]">
+    <div class="fixed top-safe-4 left-safe-4 z-[9999]">
       <HamburgerMenu />
     </div>
 
