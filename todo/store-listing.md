@@ -74,13 +74,13 @@ and About page as of 2026-11-09.
 
 ## Graphics
 
-| Asset                       | Store     | Size                              | Status                                                 |
-| --------------------------- | --------- | --------------------------------- | ------------------------------------------------------ |
-| App icon                    | App Store | 1024×1024, no alpha               | In the Xcode asset catalog (Phase 4)                   |
-| Phone screenshots, 6.9"     | App Store | 1320×2868 portrait, 1–10          | `store/screenshots/ios-6.9/` (see below)               |
-| Hi-res icon                 | Play      | 512×512 PNG                       | Downscale `frontend/assets/icon-only.png`              |
-| Feature graphic             | Play      | 1024×500 JPEG/PNG, no alpha       | Not made                                               |
-| Phone screenshots           | Play      | 2–8, 9:16, 1080–3840 px long side | Not made; the iOS shots are accepted (any phone frame) |
+| Asset                       | Store     | Size                              | Status                                                                                 |
+| --------------------------- | --------- | --------------------------------- | -------------------------------------------------------------------------------------- |
+| App icon                    | App Store | 1024×1024, no alpha               | In the Xcode asset catalog (Phase 4)                                                   |
+| Phone screenshots, 6.9"     | App Store | 1320×2868 portrait, 1–10          | `store/screenshots/ios-6.9/` (see below)                                               |
+| Hi-res icon                 | Play      | 512×512, 32-bit PNG               | `store/play-icon-512.png` (from `frontend/assets/icon-only.png`)                       |
+| Feature graphic             | Play      | 1024×500 JPEG/PNG, no alpha       | `store/feature-graphic.png`                                                            |
+| Phone screenshots           | Play      | 2–8, ≤2:1 (9:16 recommended), no alpha | `store/screenshots/android-phone/` (7 shots, 1080×1920, 24-bit PNG; emulator, 9:41 status bar) |
 
 ---
 

@@ -44,27 +44,25 @@ onUnmounted(() => {
   window.removeEventListener("resize", onResize);
 });
 
-const anchors = computed(() => [
-  140 + safeArea.value.bottom, // Collapsed height (px)
-  Math.round(windowHeight.value * 0.9) - safeArea.value.top, // Fully open
-]);
-const panelHeight = ref(anchors.value[0] ?? 140);
+// Guess panel heights (px)
+const guessCollapsed = computed(() => 140 + safeArea.value.bottom);
+const guessExpanded = computed(() => Math.round(windowHeight.value * 0.9) - safeArea.value.top);
+const panelHeight = ref(guessCollapsed.value);
 
-// Results floating panel setup
-const resultsAnchors = computed(() => [
-  160 + safeArea.value.bottom, // Collapsed: station details + new game button visible
-  windowHeight.value - 130 - safeArea.value.top, // Expanded: leave room for X buttons at top
-]);
-const resultsPanelHeight = ref(resultsAnchors.value[0] ?? 160);
+// Results panel heights (px). Collapsed: station details + new game button visible.
+// Expanded: leave room for the X buttons at the top.
+const resultsCollapsed = computed(() => 160 + safeArea.value.bottom);
+const resultsExpanded = computed(() => windowHeight.value - 130 - safeArea.value.top);
+const resultsPanelHeight = ref(resultsCollapsed.value);
 
 const onGuessAdded = () => {
-  panelHeight.value = anchors.value[1] ?? 140;
+  panelHeight.value = guessExpanded.value;
 };
 
 const onNewGame = () => {
   mapRef.value?.resetView();
-  panelHeight.value = anchors.value[0] ?? 140;
-  resultsPanelHeight.value = resultsAnchors.value[0] ?? 160;
+  panelHeight.value = guessCollapsed.value;
+  resultsPanelHeight.value = resultsCollapsed.value;
 };
 
 const onModalClose = () => {
@@ -82,44 +80,33 @@ watch(
   () => gameplay.gameStage,
   (stage) => {
     if (stage !== "guessing") {
-      panelHeight.value = anchors.value[0] ?? 140;
+      panelHeight.value = guessCollapsed.value;
     }
     if (stage === "listening") {
-      resultsPanelHeight.value = resultsAnchors.value[0] ?? 160;
+      resultsPanelHeight.value = resultsCollapsed.value;
     }
   },
 );
 
 const handleArrowClick = () => {
-  panelHeight.value = anchors.value[0] ?? 140;
+  panelHeight.value = guessCollapsed.value;
 };
 
 const handleResultsArrowClick = () => {
-  resultsPanelHeight.value = resultsAnchors.value[0] ?? 160;
+  resultsPanelHeight.value = resultsCollapsed.value;
 };
 
-const isPanelFullHeight = computed(() => {
-  const fullHeight = anchors.value[1];
-  if (typeof fullHeight === "undefined" || typeof panelHeight.value === "undefined") return false;
-  return panelHeight.value >= fullHeight - 10;
-});
+const isPanelFullHeight = computed(() => panelHeight.value >= guessExpanded.value - 10);
 
-const isResultsPanelFullHeight = computed(() => {
-  const fullHeight = resultsAnchors.value[1];
-  if (typeof fullHeight === "undefined" || typeof resultsPanelHeight.value === "undefined")
-    return false;
-  return resultsPanelHeight.value >= fullHeight - 10;
-});
+const isResultsPanelFullHeight = computed(
+  () => resultsPanelHeight.value >= resultsExpanded.value - 10,
+);
 
 const overlayOpacity = computed(() => {
   const isListening = gameplay.gameStage === "listening";
-  const min = isListening ? resultsAnchors.value[0] : anchors.value[0];
-  const max = isListening ? resultsAnchors.value[1] : anchors.value[1];
+  const min = isListening ? resultsCollapsed.value : guessCollapsed.value;
+  const max = isListening ? resultsExpanded.value : guessExpanded.value;
   const current = isListening ? resultsPanelHeight.value : panelHeight.value;
-
-  if (typeof min === "undefined" || typeof max === "undefined" || typeof current === "undefined") {
-    return 0;
-  }
 
   const progress = (current - min) / (max - min);
   const clamped = Math.min(Math.max(progress, 0), 1);
@@ -219,7 +206,7 @@ const overlayOpacity = computed(() => {
     <van-floating-panel
       v-if="gameplay.gameStage === 'listening'"
       v-model:height="resultsPanelHeight"
-      :anchors="resultsAnchors"
+      :anchors="[resultsCollapsed, resultsExpanded]"
       :content-class="'bg-paper-white rounded-t-[24px] border-t-3 border-l-3 border-r-3 border-pencil-lead shadow-[0_-4px_0_0_#334155] flex flex-col'"
       style="z-index: 50"
     >
@@ -249,7 +236,7 @@ const overlayOpacity = computed(() => {
     <van-floating-panel
       v-if="gameplay.gameStage === 'guessing'"
       v-model:height="panelHeight"
-      :anchors="anchors"
+      :anchors="[guessCollapsed, guessExpanded]"
       :content-class="'bg-paper-white rounded-t-[24px] border-t-3 border-l-3 border-r-3 border-pencil-lead shadow-[0_-4px_0_0_#334155] flex flex-col'"
       style="z-index: 50"
     >

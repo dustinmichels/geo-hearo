@@ -31,7 +31,7 @@ const websiteUrl = computed(() => props.station?.homepage ?? "");
     </div>
 
     <div
-      class="font-bold text-eraser-grey uppercase tracking-wide mb-2 truncate text-sm"
+      class="font-bold text-eraser-grey uppercase tracking-wide mb-2 truncate"
       :class="layout === 'desktop' ? 'text-xs' : 'text-sm'"
     >
       {{ formattedLocation }}

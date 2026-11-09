@@ -20,6 +20,7 @@ Try online at [geohearo.com](http://geohearo.com/).
 
 - **Data-prep** - Scrape radio.garden API for radio stations and prepare data for frontend.
 - **Frontend** - Vue app that plays radio stations and asks user to guess the location of the station.
+- **Mobile** - The frontend also ships as an iOS and Android app via Capacitor (`frontend/ios`, `frontend/android`). Prerequisites (Xcode 26, Android SDK, JDK 21 via `mise.toml`) and commands: "Mobile app" in `frontend/README.md`. Plan and status: `todo/mobile-plan.md`.
 
 ## Thanks
 

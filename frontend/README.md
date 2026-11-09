@@ -7,7 +7,7 @@ A geography guessing game where players identify countries by listening to live 
 ```bash
 bun install
 bun run dev       # Start dev server
-bun test          # Run tests
+bun run test      # Run tests (Vitest; plain `bun test` starts Bun's own runner)
 bun run build     # Production build (output: dist/)
 bun run fmt       # Format code
 ```
@@ -19,7 +19,7 @@ The same frontend runs as an iOS and Android app via [Capacitor](https://capacit
 Prerequisites:
 
 - iOS: Xcode 26+ with an iOS simulator (CocoaPods not needed; the project uses Swift Package Manager).
-- Android: an SDK in `~/Library/Android/sdk` with an emulator image, and JDK 21 for Gradle. The Gradle 8.14 wrapper fails on newer JDKs with "Unsupported class file major version"; the repo's `mise.toml` pins `java = "temurin-21"`, so run Gradle/`cap` commands through mise (or point `JAVA_HOME` / Android Studio's Gradle JDK at a JDK 21). Without the Android Studio wizard: `brew install --cask android-commandlinetools`, then `sdkmanager --sdk_root=$HOME/Library/Android/sdk "platform-tools" "platforms;android-36" "build-tools;36.0.0" "emulator" "system-images;android-35;google_apis;arm64-v8a"` and `avdmanager create avd -n Pixel_9_API_35 -k "system-images;android-35;google_apis;arm64-v8a" -d pixel_9`. Start the emulator with `-gpu host`: the default software renderer on Apple Silicon is slow enough that `adb` calls time out.
+- Android: an SDK in `~/Library/Android/sdk` with an emulator image, and JDK 21 for Gradle. The Gradle 8.14 wrapper fails on newer JDKs with "Unsupported class file major version"; the repo's `mise.toml` pins `java = "temurin-21"`, so run Gradle/`cap` commands through mise (or point `JAVA_HOME` / Android Studio's Gradle JDK at a JDK 21). Without the Android Studio wizard: `brew install --cask android-commandlinetools`, then `sdkmanager --sdk_root=$HOME/Library/Android/sdk "platform-tools" "platforms;android-36" "build-tools;36.0.0" "emulator" "cmdline-tools;latest" "system-images;android-35;google_apis;arm64-v8a"`, `ANDROID_HOME=$HOME/Library/Android/sdk $HOME/Library/Android/sdk/cmdline-tools/latest/bin/avdmanager create avd -n Pixel_9_API_35 -k "system-images;android-35;google_apis;arm64-v8a" -d pixel_9` (Homebrew's `avdmanager` looks in its own SDK root and reports "Package path is not valid"), and `echo "sdk.dir=$HOME/Library/Android/sdk" > android/local.properties`. Start the emulator with `-gpu host`: the default software renderer on Apple Silicon is slow enough that `adb` calls time out.
 
 ```bash
 bun run build:native   # Web assets for the app (output: dist-native/, settings from .env.native)
@@ -37,6 +37,7 @@ bunx cap open android  # Open the Android Studio project
 - App-only behaviour is gated on `isNative` (`src/lib/platform.ts`): `src/lib/nativeApp.ts` (resume, Android back button, notification taps), `src/lib/dailyReminder.ts` (09:00 local reminder, toggle in the menu), `src/lib/persist.ts` (localStorage keys mirrored to native Preferences; add new long-lived keys to `PERSISTED_KEYS` and write them with `persist()`).
 - Icon and splash: sources in `assets/` (`icon-only.png` 1024×1024 GH logo on `#0000ff`, no alpha; `icon-foreground.png` / `icon-background.png` for the Android adaptive icon; `splash.png` 2732×2732 globe on `#fff9f5`). After changing them, `bun run cap:assets` regenerates the iOS and Android images. The splash stays up until the first route resolves (`launchAutoHide: false`, hidden in `nativeApp.ts`).
 - iOS release settings live in the Xcode project: iPhone only, portrait only, `ITSAppUsesNonExemptEncryption = NO`, dark status-bar text, privacy manifest `ios/App/App/PrivacyInfo.xcprivacy` (UserDefaults reason `CA92.1` for `@capacitor/preferences`; re-check it when adding a plugin). Version: keep `package.json` `version`, Xcode `MARKETING_VERSION` and Android `versionName` equal; bump Xcode `CURRENT_PROJECT_VERSION` / Android `versionCode` on every upload.
+- Android release: `cd android && mise exec -- ./gradlew bundleRelease` writes `app/build/outputs/bundle/release/app-release.aab`, signed with the Play upload key when `android/keystore.properties` exists (`storeFile`, `storePassword`, `keyAlias`, `keyPassword`; gitignored, like `*.jks`). Without it the bundle is unsigned. Android Studio picks up JDK 21 from `android/.gradle/config.properties` (`java.home=…/mise/installs/java/temurin-21`, machine-local); otherwise set Settings → Build Tools → Gradle → Gradle JDK.
 
 ## Symlinked Files
 
@@ -92,7 +93,7 @@ The env var `VITE_SECRET_COUNTRY` overrides country selection entirely (dev only
 
 **Repetition & distribution notes:** The LCG stride through the country list has a GCD of 1 with the country count, so daily challenge seeds map to distinct countries — empirically verified with zero repeats across 60+ simulated days. Free play has no anti-repetition mechanism; each round draws independently, so repeats are expected after ~√N rounds (~12 with 142 countries). Modulo bias is negligible (~10⁻⁷).
 
-**Data Loading:** The app fetches a country index (`public/data/index.json`), then uses HTTP Range requests to lazily load only the needed station records from `public/data/stations.jsonl`. All geographic data is linked by the `ADMIN` country name field.
+**Data Loading:** The app fetches a country index (`public/data/index.json`), then uses HTTP Range requests to lazily load only the needed station records from `public/data/stations_0.jsonl` … `stations_5.jsonl`. All geographic data is linked by the `ADMIN` country name field.
 
 **Audio Reliability:** To ensure uninterrupted gameplay, the app monitors the audio stream for silence. If a station connects but broadcasts silence for more than 2 seconds, it automatically skips to the next available station.
 

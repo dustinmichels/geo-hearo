@@ -13,7 +13,7 @@ let listenersRegistered = false;
 
 export function usePwaInstall() {
   // Inside the native app there is nothing to install; canInstall stays false.
-  if (typeof window !== "undefined" && !isNative && !listenersRegistered) {
+  if (!isNative && !listenersRegistered) {
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
       deferredPrompt.value = e as BeforeInstallPromptEvent;

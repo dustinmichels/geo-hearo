@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import { useRouter } from "vue-router";
 import Footer from "../components/Footer.vue";
 import HamburgerMenu from "../components/HamburgerMenu.vue";
-
-const router = useRouter();
 
 const steps = [
   {
@@ -19,10 +16,6 @@ const steps = [
     colorClass: "bg-mint-shake",
   },
 ];
-
-const handleTuneIn = () => {
-  router.push({ name: "Play" });
-};
 </script>
 <template>
   <div
@@ -74,21 +67,21 @@ const handleTuneIn = () => {
           <div
             class="hidden lg:flex absolute inset-0 z-30 items-center justify-center gap-4 sm:gap-6 pointer-events-none"
           >
-            <div
-              class="relative group cursor-pointer pointer-events-auto animate-pop-in-delayed"
+            <RouterLink
+              :to="{ name: 'Play' }"
+              class="relative group block pointer-events-auto animate-pop-in-delayed"
               style="animation-duration: 0.5s; animation-delay: 0.6s"
-              @click="handleTuneIn"
             >
               <div class="magic-container">
                 <div class="magic-wave wave-1 rounded-[30px] sm:rounded-[36px]"></div>
                 <div class="magic-wave wave-2 rounded-[30px] sm:rounded-[36px]"></div>
               </div>
-              <button
-                class="btn-pressable hover-scale bg-yuzu-yellow px-12 sm:px-16 py-6 sm:py-8 rounded-[30px] sm:rounded-[36px] text-4xl sm:text-6xl btn-text uppercase tracking-widest text-pencil-lead relative z-10 block transition-transform duration-200"
+              <span
+                class="btn-pressable hover-scale bg-yuzu-yellow px-12 sm:px-16 py-6 sm:py-8 rounded-[30px] sm:rounded-[36px] text-4xl sm:text-6xl btn-text uppercase tracking-widest text-pencil-lead text-center relative z-10 block transition-transform duration-200"
               >
                 PLAY
-              </button>
-            </div>
+              </span>
+            </RouterLink>
           </div>
         </div>
       </div>
@@ -119,7 +112,7 @@ const handleTuneIn = () => {
                 <div :class="['step-badge', step.colorClass]">
                   {{ index + 1 }}
                 </div>
-                <span class="leading-snug" v-html="step.text"></span>
+                <span class="leading-snug">{{ step.text }}</span>
               </li>
             </ul>
           </div>
@@ -128,21 +121,21 @@ const handleTuneIn = () => {
         <!-- Mobile Buttons (Original Position) -->
         <div class="lg:hidden space-y-6 sm:space-y-8">
           <div class="flex justify-center pt-0 pb-6 gap-4 sm:gap-6">
-            <div
-              class="relative group cursor-pointer animate-pop-in-delayed"
+            <RouterLink
+              :to="{ name: 'Play' }"
+              class="relative group block animate-pop-in-delayed"
               style="animation-duration: 0.5s; animation-delay: 0.75s"
-              @click="handleTuneIn"
             >
               <div class="magic-container">
                 <div class="magic-wave wave-1 rounded-[30px] sm:rounded-[36px]"></div>
                 <div class="magic-wave wave-2 rounded-[30px] sm:rounded-[36px]"></div>
               </div>
-              <button
-                class="btn-pressable hover-scale bg-yuzu-yellow px-12 sm:px-16 py-6 sm:py-8 rounded-[30px] sm:rounded-[36px] text-4xl sm:text-6xl btn-text uppercase tracking-widest text-pencil-lead relative z-10 block transition-transform duration-200"
+              <span
+                class="btn-pressable hover-scale bg-yuzu-yellow px-12 sm:px-16 py-6 sm:py-8 rounded-[30px] sm:rounded-[36px] text-4xl sm:text-6xl btn-text uppercase tracking-widest text-pencil-lead text-center relative z-10 block transition-transform duration-200"
               >
                 PLAY
-              </button>
-            </div>
+              </span>
+            </RouterLink>
           </div>
         </div>
       </div>

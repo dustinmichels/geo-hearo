@@ -33,6 +33,10 @@ const DEFAULT_MODAL_CONFIG: ModalConfig = {
   isDailyChallenge: false,
 };
 
+// Dev only: VITE_GAME_STAGE=seeResults|listening skips straight to that stage
+const envStage = import.meta.env.VITE_GAME_STAGE as GamePhase | undefined;
+const DEBUG_STAGE = envStage === "seeResults" || envStage === "listening" ? envStage : undefined;
+
 export function useGamePlay(options: GamePlayOptions) {
   const isPlaying = ref(false);
   const guessInput = ref("");
@@ -135,6 +139,24 @@ export function useGamePlay(options: GamePlayOptions) {
   const getChallengeDate = (): string => {
     const s = (currentSeed.value ?? 0).toString();
     return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
+  };
+
+  const applyDebugStage = (stage: GamePhase) => {
+    setModalConfig({ secretCountry: secretCountry.value });
+    store.gameStage = stage;
+  };
+
+  // After restoring a round, re-populate the modal config if we're restoring into seeResults
+  const restoreResultsModal = (isDaily: boolean) => {
+    if (gameStage.value !== "seeResults") return;
+    setModalConfig({
+      isWin: guesses.value.includes(secretCountry.value),
+      secretCountry: secretCountry.value,
+      dailyChallengeNumber: dailyChallengeNumber.value,
+      isDailyChallenge: isDaily,
+      challengeDate: isDaily ? getChallengeDate() : undefined,
+      trackedPromise: isDaily ? Promise.resolve(true) : undefined,
+    });
   };
 
   const finishRound = (isWin: boolean) => {
@@ -276,37 +298,20 @@ export function useGamePlay(options: GamePlayOptions) {
       // Initialize Daily Challenge Logic
       initDailyChallenge();
 
-      const debugStage = import.meta.env.VITE_GAME_STAGE as GamePhase | undefined;
-      if (debugStage === "seeResults" || debugStage === "listening") {
-        // Debug mode: Skip to specified stage
-
+      if (DEBUG_STAGE) {
         // Try to restore existing session state first so refreshing doesn't change the country
         const restored = await restoreState();
         if (!restored) {
           await selectRandomCountry();
         }
-
-        setModalConfig({
-          secretCountry: secretCountry.value,
-        });
-        store.gameStage = debugStage;
+        applyDebugStage(DEBUG_STAGE);
       } else if (isDailyChallengeMode.value) {
         const dailySeed = getDailyChallengeSeed();
         // Try restoring session state, but only keep it if it matches today's seed
         const restored = await restoreState();
         if (restored && currentSeed.value === dailySeed) {
           populateGuessColors();
-          // Re-populate modal config if we're restoring into seeResults
-          if (gameStage.value === "seeResults") {
-            setModalConfig({
-              isWin: guesses.value.includes(secretCountry.value),
-              secretCountry: secretCountry.value,
-              dailyChallengeNumber: dailyChallengeNumber.value,
-              isDailyChallenge: true,
-              challengeDate: getChallengeDate(),
-              trackedPromise: Promise.resolve(true),
-            });
-          }
+          restoreResultsModal(true);
         } else {
           clearState();
           selectRandomCountry(dailySeed);
@@ -316,19 +321,8 @@ export function useGamePlay(options: GamePlayOptions) {
         const restored = await restoreState();
         if (restored && secretCountry.value) {
           populateGuessColors();
-          // Re-populate modal config if we're restoring into seeResults
-          if (gameStage.value === "seeResults") {
-            const lastHistory = gameHistory.value[gameHistory.value.length - 1];
-            const isDailyHistory = lastHistory?.mode === "daily";
-
-            setModalConfig({
-              isWin: guesses.value.includes(secretCountry.value),
-              secretCountry: secretCountry.value,
-              isDailyChallenge: isDailyHistory,
-              challengeDate: isDailyHistory ? getChallengeDate() : undefined,
-              trackedPromise: isDailyHistory ? Promise.resolve(true) : undefined,
-            });
-          }
+          const lastHistory = gameHistory.value[gameHistory.value.length - 1];
+          restoreResultsModal(lastHistory?.mode === "daily");
         } else {
           selectRandomCountry();
         }
@@ -372,14 +366,7 @@ export function useGamePlay(options: GamePlayOptions) {
       isPlaying.value = false;
       options.onNewGame?.();
       selectRandomCountry().then(() => {
-        // Debug override: Skip to specified stage on new game
-        const debugStage = import.meta.env.VITE_GAME_STAGE as GamePhase | undefined;
-        if (debugStage === "seeResults" || debugStage === "listening") {
-          setModalConfig({
-            secretCountry: secretCountry.value,
-          });
-          store.gameStage = debugStage;
-        }
+        if (DEBUG_STAGE) applyDebugStage(DEBUG_STAGE);
       });
     },
     isStatsView: showStatsOverride,

@@ -10,28 +10,26 @@ import type { Feature, Geometry, Polygon } from "geojson";
 // We calculate the total area of the country and include any polygon
 // that contributes at least 20% to the total area.
 function getMajorLandmasses(feature: Feature<Geometry>): Feature<Polygon>[] {
-  if (!feature || !feature.geometry) return [];
+  const geometry = feature?.geometry;
+  if (!geometry) return [];
 
-  const type = feature.geometry.type;
-
-  if (type === "Polygon") {
+  if (geometry.type === "Polygon") {
     return [feature as Feature<Polygon>];
   }
 
-  if (type === "MultiPolygon") {
-    const coords = (feature.geometry as any).coordinates;
+  if (geometry.type === "MultiPolygon") {
     const polygons: { feature: Feature<Polygon>; area: number }[] = [];
     let totalArea = 0;
 
-    // 1. Calculate areas for all polygons
-    coords.forEach((polyCoords: any) => {
+    // Calculate areas for all polygons
+    for (const polyCoords of geometry.coordinates) {
       const polyFeature = polygon(polyCoords);
       const polyArea = area(polyFeature);
       totalArea += polyArea;
       polygons.push({ feature: polyFeature, area: polyArea });
-    });
+    }
 
-    // 2. Filter for polygons >= 20% of total area
+    // Keep polygons >= 20% of total area
     const threshold = totalArea * 0.2;
     return polygons.filter((p) => p.area >= threshold).map((p) => p.feature);
   }
@@ -66,33 +64,14 @@ function getDistanceLevel(distance: number): number {
   return 6;
 }
 
-function getEmojiForLevel(level: number): string {
-  switch (level) {
-    case 1:
-      return "🤏";
-    case 2:
-      return "🟡";
-    case 3:
-    case 4:
-      return "🟠";
-    case 5:
-    case 6:
-      return "🔴";
-    default:
-      return "🔴";
-  }
-}
+// Hint emoji per level, indexed by level - 1
+const LEVEL_EMOJIS = ["🤏", "🟡", "🟠", "🟠", "🔴", "🔴"];
 
-// Border Distance Logic
-export function nearestBorderDistance(
-  guessFeature: Feature<Geometry>,
-  secretFeature: Feature<Geometry>,
+// Minimum vertex-to-vertex distance (km) between two sets of landmass polygons
+function minPolygonDistance(
+  guessPolys: Feature<Polygon>[],
+  secretPolys: Feature<Polygon>[],
 ): number {
-  const guessPolys = getMajorLandmasses(guessFeature);
-  const secretPolys = getMajorLandmasses(secretFeature);
-
-  if (guessPolys.length === 0 || secretPolys.length === 0) return Infinity;
-
   let globalMinDistance = Infinity;
 
   // Compare every major guess polygon to every major secret polygon
@@ -115,6 +94,14 @@ export function nearestBorderDistance(
   }
 
   return globalMinDistance;
+}
+
+// Border Distance Logic
+export function nearestBorderDistance(
+  guessFeature: Feature<Geometry>,
+  secretFeature: Feature<Geometry>,
+): number {
+  return minPolygonDistance(getMajorLandmasses(guessFeature), getMajorLandmasses(secretFeature));
 }
 
 export function getDistanceHint(
@@ -142,14 +129,14 @@ export function getDistanceHint(
     dist = 0;
   } else if (guessPolys.length > 0 && secretPolys.length > 0) {
     // Calculate distance between nearest border points of major landmasses
-    dist = nearestBorderDistance(guessFeature, secretFeature);
+    dist = minPolygonDistance(guessPolys, secretPolys);
   } else {
     // Fallback if features are missing
     dist = Infinity;
   }
 
   const level = getDistanceLevel(dist);
-  const emoji = getEmojiForLevel(level);
+  const emoji = LEVEL_EMOJIS[level - 1] ?? "🔴";
 
   return {
     emoji,

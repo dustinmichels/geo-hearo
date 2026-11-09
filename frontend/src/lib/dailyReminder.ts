@@ -51,6 +51,9 @@ export async function rescheduleDailyReminders(): Promise<void> {
       title: `GeoHearo #${number} is live`,
       body: "A new mystery country is on the air. Tune in and guess where.",
       schedule: { at, allowWhileIdle: true },
+      // Android: an inexact alarm is fine for a morning reminder. The default (exact)
+      // opens the system "Alarms & reminders" settings screen on Android 12+.
+      isExactNotification: false,
     });
   }
   if (notifications.length > 0) await LocalNotifications.schedule({ notifications });

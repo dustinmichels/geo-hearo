@@ -19,27 +19,35 @@ const emit = defineEmits<{
 }>();
 
 const audioPlayer = useTemplateRef<HTMLAudioElement>("audioPlayer");
-const currentStaticSource = ref<AudioBufferSourceNode | null>(null); // Store the source node
+let currentStaticSource: AudioBufferSourceNode | null = null;
 const isLoading = ref(false);
 let loadingTimeout: ReturnType<typeof setTimeout> | undefined;
 
 const stopStatic = () => {
-  if (currentStaticSource.value) {
+  if (currentStaticSource) {
     try {
-      currentStaticSource.value.stop();
-    } catch (e) {
-      // ignore
-    }
-    currentStaticSource.value = null;
+      currentStaticSource.stop();
+    } catch {}
+    currentStaticSource = null;
   }
 };
 
 const playStatic = async () => {
   stopStatic();
-  const source = await playRadioStatic();
-  if (source) {
-    currentStaticSource.value = source;
-  }
+  currentStaticSource = await playRadioStatic();
+};
+
+// Play static, then start the station stream (if there is one)
+const startPlayback = async () => {
+  isLoading.value = true;
+  await playStatic();
+  if (!props.stationUrl) return;
+  audioPlayer.value?.play().catch((e) => {
+    if (e.name === "AbortError") return;
+    isLoading.value = false;
+    stopStatic();
+    console.error("Playback failed", e);
+  });
 };
 
 const onAudioPlaying = () => {
@@ -56,16 +64,7 @@ watch(
     }
     if (!audioPlayer.value) return;
     if (playing) {
-      isLoading.value = true;
-      await playStatic();
-      if (props.stationUrl) {
-        audioPlayer.value.play().catch((e) => {
-          if (e.name === "AbortError") return;
-          isLoading.value = false;
-          stopStatic();
-          console.error("Playback failed", e);
-        });
-      }
+      await startPlayback();
     } else {
       isLoading.value = false;
       audioPlayer.value.pause();
@@ -84,14 +83,7 @@ watch(
       if (props.isPlaying) {
         // isLoading may already be true (skip while loading), so its watcher won't re-arm.
         armLoadingTimeout();
-        isLoading.value = true;
-        await playStatic();
-        audioPlayer.value.play().catch((e) => {
-          if (e.name === "AbortError") return;
-          isLoading.value = false;
-          stopStatic();
-          console.error("Playback failed", e);
-        });
+        await startPlayback();
       }
     }
   },

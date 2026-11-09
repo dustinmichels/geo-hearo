@@ -75,7 +75,7 @@ watch(
 
 const { getNextEasternMidnight } = useRadio();
 const timeUntilReset = ref("");
-let countdownTimer: ReturnType<typeof setInterval>;
+let countdownTimer: ReturnType<typeof setInterval> | undefined;
 
 const updateCountdown = () => {
   const now = new Date();
@@ -87,10 +87,21 @@ const updateCountdown = () => {
   timeUntilReset.value = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 };
 
+// Tick only while the daily-challenge countdown is on screen
+watch(
+  () => props.show && props.isDailyChallenge,
+  (active) => {
+    clearInterval(countdownTimer);
+    if (active) {
+      updateCountdown();
+      countdownTimer = setInterval(updateCountdown, 1000);
+    }
+  },
+  { immediate: true },
+);
+
 onMounted(() => {
   window.addEventListener("keydown", onKeydown);
-  updateCountdown();
-  countdownTimer = setInterval(updateCountdown, 1000);
 });
 onUnmounted(() => {
   window.removeEventListener("keydown", onKeydown);

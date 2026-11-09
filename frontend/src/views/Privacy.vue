@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import { useRouter } from "vue-router";
 import HamburgerMenu from "../components/HamburgerMenu.vue";
-
-const router = useRouter();
 
 const link = (href: string, text: string) =>
   `<a href="${href}" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">${text}</a>`;
@@ -54,14 +51,6 @@ const sections: { emoji: string; title: string; content: string | string[] }[] =
     content: `Questions about privacy? Email me at ${link("mailto:bronco-eaten-bash@duck.com", "bronco-eaten-bash@duck.com")}.`,
   },
 ];
-
-const handleBackHome = () => {
-  router.push({ name: "Home" });
-};
-
-const handlePlay = () => {
-  router.push({ name: "Play" });
-};
 </script>
 <template>
   <div
@@ -125,20 +114,20 @@ const handlePlay = () => {
 
       <!-- Action Buttons -->
       <div class="flex flex-col md:flex-row justify-center items-center gap-6 pt-6 pb-6">
-        <button
-          class="btn-pressable bg-mint-shake px-8 md:px-12 py-4 md:py-5 rounded-[22px] text-xl md:text-2xl btn-text uppercase tracking-widest text-pencil-lead animate-pop-in-delayed hover-scale"
-          @click="handlePlay"
+        <RouterLink
+          :to="{ name: 'Play' }"
+          class="btn-pressable bg-mint-shake px-8 md:px-12 py-4 md:py-5 rounded-[22px] text-xl md:text-2xl text-center btn-text uppercase tracking-widest text-pencil-lead animate-pop-in-delayed hover-scale"
         >
           Play Game
-        </button>
+        </RouterLink>
 
-        <button
-          class="btn-pressable bg-yuzu-yellow px-8 md:px-12 py-4 md:py-5 rounded-[22px] text-xl md:text-2xl btn-text uppercase tracking-widest text-pencil-lead animate-pop-in-delayed hover-scale"
+        <RouterLink
+          :to="{ name: 'Home' }"
+          class="btn-pressable bg-yuzu-yellow px-8 md:px-12 py-4 md:py-5 rounded-[22px] text-xl md:text-2xl text-center btn-text uppercase tracking-widest text-pencil-lead animate-pop-in-delayed hover-scale"
           style="animation-delay: 0.9s"
-          @click="handleBackHome"
         >
           Back to Home
-        </button>
+        </RouterLink>
       </div>
     </main>
   </div>

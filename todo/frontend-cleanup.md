@@ -162,11 +162,12 @@ about 85 identical lines.
 
 ## 12. Simplify `CountryDetails.vue`
 
-- [ ] Make `local_image_path` required. Delete the `pexels_data.src` fallback
+- [x] Make `local_image_path` required. Delete the `pexels_data.src` fallback
       and the unused `src` fields from `PexelsData`. Keep the "Image coming
       soon" fallback: Kosovo and Puerto Rico have no details.
-- [ ] Cache the fetched JSON in module scope (as `useCountryData` does), so
+- [x] Cache the fetched JSON in module scope (as `useCountryData` does), so
       the 134 KB file is not fetched on every mount (every round).
+      (Both were already in the code.)
 
 ## 13. Remove unused props, options and IDs
 
@@ -187,14 +188,17 @@ about 85 identical lines.
 
 ## 14. Simplify panel heights in `PlayMobile.vue`
 
-- [ ] Replace the `anchors` / `resultsAnchors` arrays with named computeds
+- [x] Replace the `anchors` / `resultsAnchors` arrays with named computeds
       (`collapsed`, `expanded` per panel). Pass `[collapsed, expanded]` to
-      `:anchors`.
-- [ ] Delete the `?? 140` / `?? 160` fallbacks and the
+      `:anchors`. Named `guessCollapsed/guessExpanded`,
+      `resultsCollapsed/resultsExpanded`.
+- [x] Delete the `?? 140` / `?? 160` fallbacks and the
       `typeof … === "undefined"` checks in `isPanelFullHeight`,
       `isResultsPanelFullHeight` and `overlayOpacity`.
-- [ ] Check on a phone-sized viewport: drag, the arrow close button and the
-      overlay dimming all still work.
+- [x] Check on a phone-sized viewport: drag, the arrow close button and the
+      overlay dimming all still work. Checked at 390×844 with touch drag:
+      guess panel 140 → 760 px, results panel 160 → 714 px, overlay 0 → 0.6,
+      the X button collapses both.
 
 ## 15. Fix out-of-date comments
 
@@ -216,13 +220,16 @@ about 85 identical lines.
 
 - [x] Delete `frontend/packages_eval.md` (its four changes are done), or apply
       the corrections in `package-audit-followups.md` §2. Pick one. Deleted.
-- [ ] Delete the empty `frontend/.aiexclude` and `frontend/.gemini-instructions`,
-      or turn them into the symlinks the README describes.
-- [ ] Delete `frontend/src/assets/sounds/` (only a `.DS_Store`).
-- [ ] `frontend/.env`: remove the `PEXELS_API_KEY` comment block (no Netlify
-      functions exist).
-- [ ] `frontend/README.md`: `bun test` → `bun run test`; `stations.jsonl` →
+- [x] Delete the empty `frontend/.aiexclude` and `frontend/.gemini-instructions`,
+      or turn them into the symlinks the README describes. Already symlinks
+      (`→ .claudeignore`, `→ claude.md`), so the README section is accurate.
+- [x] Delete `frontend/src/assets/sounds/` (only a `.DS_Store`). Already gone.
+- [x] `frontend/.env`: remove the `PEXELS_API_KEY` comment block (no Netlify
+      functions exist). `frontend/.env` no longer exists; no `PEXELS` reference
+      is left.
+- [x] `frontend/README.md`: `bun test` → `bun run test`; `stations.jsonl` →
       `stations_0..5.jsonl`; fix or remove the "Symlinked Files" section.
+      The "Symlinked Files" section matches the repo, so it stays.
 
 ## 17. Remove build config that isn't needed
 
@@ -240,40 +247,42 @@ about 85 identical lines.
 
 ### 18. `RadioPlayer.vue`
 
-- [ ] Extract `startPlayback()` for the static-then-play code repeated in the
+- [x] Extract `startPlayback()` for the static-then-play code repeated in the
       `isPlaying` and `stationUrl` watchers (lines ~62–69 and 89–96).
-- [ ] `currentStaticSource` → plain `let` (not rendered).
-- [ ] `catch (e) { // ignore }` → `catch {}`.
+- [x] `currentStaticSource` → plain `let` (not rendered).
+- [x] `catch (e) { // ignore }` → `catch {}`.
 
 ### 19. `utils/geography.ts`
 
-- [ ] `getDistanceHint`: pass the already-computed landmass polygons to the
+- [x] `getDistanceHint`: pass the already-computed landmass polygons to the
       border-distance step instead of calling `getMajorLandmasses` again
       (every polygon's area is currently computed twice per hint). Keep
       `nearestBorderDistance`'s public signature; `geography.test.ts` uses it.
-- [ ] `getEmojiForLevel`: replace the `switch` with a lookup array.
-- [ ] `getMajorLandmasses`: narrow on `feature.geometry.type` directly to drop
+      Both now use the private `minPolygonDistance(guessPolys, secretPolys)`.
+- [x] `getEmojiForLevel`: replace the `switch` with a lookup array.
+      (`LEVEL_EMOJIS`, inlined into `getDistanceHint`.)
+- [x] `getMajorLandmasses`: narrow on `feature.geometry.type` directly to drop
       the `as any` casts.
 
 ### 20. `GameResultModal.vue` countdown
 
-- [ ] Run the 1 s `setInterval` only while `show && isDailyChallenge`. Today it
+- [x] Run the 1 s `setInterval` only while `show && isDailyChallenge`. Today it
       ticks for the whole time `/play` is open.
 
 ### 21. Misc
 
-- [ ] `utils/audio.ts`: drop the `webkitAudioContext` fallback and the
+- [x] `utils/audio.ts`: drop the `webkitAudioContext` fallback and the
       "not supported" branch.
-- [ ] `usePwaInstall.ts`: drop the `typeof window !== "undefined"` check (no
+- [x] `usePwaInstall.ts`: drop the `typeof window !== "undefined"` check (no
       server rendering).
-- [ ] `StatsBarChart.vue`: build `rows` with a map over `1..6`. Compute
+- [x] `StatsBarChart.vue`: build `rows` with a map over `1..6`. Compute
       `maxCount` once instead of `Math.max(...)` per row. Drop `loaded &&` from
       `v-else-if`.
-- [ ] `StationDetails.vue`: remove the static `text-sm` that conflicts with
+- [x] `StationDetails.vue`: remove the static `text-sm` that conflicts with
       the `layout === 'desktop' ? 'text-xs' : 'text-sm'` binding.
-- [ ] `About.vue`, `Privacy.vue`, `Home.vue`: replace `router.push` buttons with
+- [x] `About.vue`, `Privacy.vue`, `Home.vue`: replace `router.push` buttons with
       `RouterLink`. Replace `v-html="step.text"` in Home with `{{ step.text }}`
       (plain text).
-- [ ] `useGamePlay.ts`: merge the debug-stage blocks repeated in `onMounted` and
+- [x] `useGamePlay.ts`: merge the debug-stage blocks repeated in `onMounted` and
       `handleNewGame`, and the two near-identical restore branches that set the
-      modal config.
+      modal config. (`DEBUG_STAGE` + `applyDebugStage`, `restoreResultsModal`.)

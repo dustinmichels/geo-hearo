@@ -3,7 +3,11 @@
 ## 2026-11-09
 
 - **Mobile app, Android build and store listing drafts** (`todo/mobile-plan.md`, in progress):
-  - Android builds (`gradlew assembleDebug`) and runs on an Android 15 emulator; JDK 21 pinned in `mise.toml` for Gradle. SDK/emulator setup without Android Studio documented in `frontend/README.md`. Open: a stray "GeoH…" strip under the status bar.
+  - Android builds (`gradlew assembleDebug`) and runs on an Android 15 emulator; JDK 21 pinned in `mise.toml` for Gradle. SDK/emulator setup without Android Studio documented in `frontend/README.md`. Smoke test passed on the emulator: stations, audio, guess/win, results and stats, share sheet, back button, pause on background, notification permission, reminder toggle and tapping a notification.
+  - Fixed a native action bar ("GeoH…" over squashed globes) under the Android status bar: `MainActivity` now calls `EdgeToEdge.enable` after `super.onCreate`, once the launch theme has been replaced.
+  - Fixed Android sending the player to the "Alarms & reminders" settings screen, again on every return to the app, after allowing notifications: daily reminders are scheduled as inexact alarms (`isExactNotification: false`) and may arrive up to an hour after 09:00.
+  - Android release builds: `./gradlew bundleRelease` signs the AAB with the Play upload key from the gitignored `android/keystore.properties`.
+  - Play store graphics: 7 phone screenshots in `store/screenshots/android-phone/` (1080×1920) and the 512×512 icon `store/play-icon-512.png`.
   - Android notification status-bar icon `ic_stat_geohearo` (white GH, tinted `#0000ff`), set in `capacitor.config.ts`.
   - Draft store copy, age-rating and privacy answers in `todo/store-listing.md`; Play feature graphic `store/feature-graphic.png`.
 - **Mobile app, Phase 4 (branding) and iOS store prep** (`todo/mobile-plan.md`, `todo/app-store-ios.md` §4–4b):

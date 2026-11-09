@@ -16,6 +16,7 @@ interface Row {
 
 const rows = ref<Row[]>([]);
 const totalPlayers = ref(0);
+const maxCount = ref(0);
 const loaded = ref(false);
 
 onMounted(async () => {
@@ -35,16 +36,14 @@ onMounted(async () => {
     countMap[props.playerNumGuesses] = (countMap[props.playerNumGuesses] ?? 0) + 1;
   }
 
-  rows.value = [
-    { label: "1", num: 1, count: countMap[1] ?? 0 },
-    { label: "2", num: 2, count: countMap[2] ?? 0 },
-    { label: "3", num: 3, count: countMap[3] ?? 0 },
-    { label: "4", num: 4, count: countMap[4] ?? 0 },
-    { label: "5", num: 5, count: countMap[5] ?? 0 },
-    { label: "✗", num: 6, count: countMap[6] ?? 0 },
-  ];
+  rows.value = [1, 2, 3, 4, 5, 6].map((num) => ({
+    label: num === 6 ? "✗" : String(num),
+    num,
+    count: countMap[num] ?? 0,
+  }));
 
   totalPlayers.value = rows.value.reduce((sum, r) => sum + r.count, 0);
+  maxCount.value = Math.max(...rows.value.map((r) => r.count));
   loaded.value = true;
 });
 </script>
@@ -66,7 +65,7 @@ onMounted(async () => {
 
   <!-- Data -->
   <div
-    v-else-if="loaded && totalPlayers > 0"
+    v-else-if="totalPlayers > 0"
     class="rounded-2xl border-2 border-pencil-lead/10 bg-pencil-lead/5 px-4 py-3"
   >
     <p class="text-xs font-bold uppercase tracking-widest text-[#B45309] mb-2">
@@ -86,10 +85,7 @@ onMounted(async () => {
                 : 'bg-[#B45309]/40',
             ]"
             :style="{
-              width:
-                row.count > 0
-                  ? `max(18px, ${(row.count / Math.max(...rows.map((r) => r.count))) * 100}%)`
-                  : '0px',
+              width: row.count > 0 ? `max(18px, ${(row.count / maxCount) * 100}%)` : '0px',
             }"
           >
             <span v-if="row.count > 0" class="text-[10px] font-bold text-white leading-none">{{

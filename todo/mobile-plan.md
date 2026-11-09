@@ -85,6 +85,14 @@ real code.
   `access-control-allow-origin: *`, `POST` allowed (from Plausible).
 - Toolchain: Xcode 26 + iOS 26.5 simulators, CocoaPods present (unused: the
   iOS project is SPM). No Android SDK.
+- Toolchain on the current Mac (2026-11-09): macOS 15.2, Xcode 16.3, no iOS
+  simulator runtimes, so **iOS can't build here** until macOS ≥ 15.6 and
+  Xcode 26 are installed (Capacitor 8 needs Xcode 26). Android Studio 2026.2
+  is installed and syncs the project (Gradle JDK: temurin-21 via
+  `android/.gradle/config.properties`). The macOS 15.8.3 update download was
+  started with `softwareupdate --download` (not installed). Next: install it
+  (System Settings → Software Update, restart), install Xcode 26 from the App
+  Store, open it once, `xcodebuild -downloadPlatform iOS`.
 
 **If the `Range` request fails CORS:** add a Netlify Function
 `/api/stations/:file/:start/:len` that reads the byte range server-side and
@@ -183,7 +191,12 @@ no UI under the status bar / home indicator.
 
 **iOS result (iPhone 17 Pro simulator):** Home, About (scrolled), Play,
 expanded guess panel, menu drawer, tour "Skip" button, results modal and
-results panel all clear the Dynamic Island and home indicator. Android open.
+results panel all clear the Dynamic Island and home indicator.
+
+**Android result (Pixel 9 emulator, Android 15, WebView 124):** Home, Play
+(tour, globe, flat map, guess row), menu drawer, results modal and share sheet
+clear the status bar and gesture bar (native padding from
+`insetsHandling: "native"`).
 
 ---
 
@@ -209,8 +222,8 @@ the Gradle 8.14.3 wrapper rejects with "Unsupported class file major version
       `initialViewportFitValueHint: "cover"`) in `capacitor.config.ts`, so
       Android WebView < 140 (broken `env(safe-area-inset-*)`) gets native
       padding instead, per `@capacitor/core/system-bars.md`.
-      `MainActivity.onCreate` calls `EdgeToEdge.enable(this)` before
-      `super.onCreate`. Not built yet.
+      `MainActivity.onCreate` calls `EdgeToEdge.enable(this)` **after**
+      `super.onCreate` (see the action-bar bug below).
 - [x] `bunx cap add ios` (Swift Package Manager project, no CocoaPods). Commit
       `ios/`.
 - [x] `bunx cap add android`; commit `android/`. The project was generated;
@@ -219,33 +232,46 @@ the Gradle 8.14.3 wrapper rejects with "Unsupported class file major version
       (`cap:sync && cap run ios`).
 - [x] Script `cap:android` (`cap:sync && cap run android`).
 - [x] Vite watch ignore and `.prettierignore` also cover `android/`.
-- [ ] Android: run the Phase 1.5 and smoke-test checks on an Android 15
-      emulator. **Stopped here (2026-11-09).** Done so far:
+- [x] Android: run the Phase 1.5 and smoke-test checks on an Android 15
+      emulator (2026-11-09).
   - [x] SDK (platform 36, build-tools 36 + 35, emulator, platform-tools,
-        `android-35` google_apis arm64 image); AVD `Pixel_9_API_35`;
-        `android/local.properties` (gitignored) points at the SDK.
+        `cmdline-tools;latest`, `android-35` google_apis arm64 image); AVD
+        `Pixel_9_API_35`; `android/local.properties` (gitignored) points at
+        the SDK.
   - [x] `mise exec -- ./gradlew assembleDebug` (in `frontend/android`)
-        builds `app-debug.apk`.
-  - [x] Installed and launched on the emulator (WebView 124, so
-        `insetsHandling: "native"` is the path in use). The GH icon splash
-        shows, `SplashScreen.hide` fires, Home renders below the status bar
-        and above the gesture bar; Preferences, App listeners and
-        `LocalNotifications.getPending` calls succeed in logcat. First
-        launch: `Displayed … +30s` (cold, first boot).
-  - [ ] **Open bug:** a native-looking strip under the status bar shows
-        "GeoH…" in Roboto and two squashed globe images (both screenshots
-        after Home rendered). Not in the iOS app or the web; cause not yet
-        investigated (candidates: window title/action bar from the theme
-        switch after `AppTheme.NoActionBarLaunch`, or the Android 12+ splash
-        exit). Check `res/values/styles.xml` and the WebView DOM first.
-  - [ ] Play → stations/audio, guess/win, results, share sheet, haptics,
-        hardware back, notification permission prompt (Android 13+).
+        builds `app-debug.apk`; installed and launched (cold start ~1.1–2.5 s).
+  - [x] **Fixed:** a native strip under the status bar showed "GeoH…" and
+        two squashed globes. It was a framework action bar
+        (`ActionBarOverlayLayout` → `android.widget.Toolbar` in `dumpsys
+        activity top`): `EdgeToEdge.enable` ran before `super.onCreate`, so it
+        installed the window decor while the theme was still
+        `AppTheme.NoActionBarLaunch` (`Theme.SplashScreen`, which has an action
+        bar; its `android:background` painted the splash into the title views).
+        Calling it after `super.onCreate`, once `BridgeActivity` has switched to
+        `AppTheme.NoActionBar`, removes it.
+  - [x] **Fixed:** completing the daily asked for notification permission, then
+        opened the system "Alarms & reminders" screen, and every return to the
+        app opened it again (`resume` → `rescheduleDailyReminders` →
+        `schedule`). `@capacitor/local-notifications` 8.3 defaults to
+        `isExactNotification: true` and opens that screen on Android 12+ when
+        exact alarms aren't allowed. Reminders now set
+        `isExactNotification: false`; Android may deliver them up to 1 h late
+        (alarm window 09:00 +1h in `dumpsys alarm`).
+  - [x] Play → stations load from geohearo.com, audio plays (two `started`
+        AAudio players in `dumpsys audio`; the emulator ran `-no-audio`, so not
+        heard). Guess → win (daily #281), results modal, daily stats bar chart,
+        share sheet ("GeoHearo #281 / https://geohearo.com/ / 🟢"). Haptics
+        `impact` and `notification SUCCESS` reach the plugin (logcat; not felt).
+  - [x] Hardware back: `/about` → `/` → exits the app (real taps). Entries
+        pushed from DevTools without a user gesture are skipped by WebView
+        history, so `canGoBack` is false there; test back with taps.
+  - [x] Notification permission prompt (Android 13+) appears over the results
+        modal after the first completed daily.
   - Tooling notes: start the emulator with `-gpu host` (the default
-    software renderer made `adb` screencap/shell time out);
-    `adb exec-out screencap` still sometimes returns 0 bytes, `adb emu
-    screenrecord screenshot <dir>` works. WebView DevTools: `adb forward
-    tcp:9222 localabstract:webview_devtools_remote_<pid>`, then
-    `http://127.0.0.1:9222/json`.
+    software renderer made `adb` screencap/shell time out). WebView DevTools:
+    `adb forward tcp:9222 localabstract:webview_devtools_remote_<pid>`, then
+    `http://127.0.0.1:9222/json`; `Runtime.evaluate` over its WebSocket drives
+    the app (Pinia: `document.querySelector('#app').__vue_app__.config.globalProperties.$pinia`).
 - [x] Dev loop: `CAP_SERVER_URL=http://<lan-ip>:5173` sets `server.url`
       (+ `cleartext: true`) in `capacitor.config.ts` only when set. Serve with
       `bun run dev:native` (`vite --host --mode native`): plain `bun run dev`
@@ -276,6 +302,14 @@ iOS simulator status (iPhone 17 Pro, iOS 26.5, draft-deploy data):
   took ~8 s.
 - Completing a daily in a test build posts a real result to the production
   Supabase daily stats (daily #281 on 2026-11-09 has one test result, 1 guess).
+  The Android run added a second (1 guess).
+
+Android emulator status (Pixel 9, Android 15, production data): stations,
+audio (player state only), guess/win, results, stats, share, back, pause on
+background all pass; see the Phase 2 Android item. Skip station passes
+(station index and `<audio>` source change on each tap; an unreachable
+stream triggers the loading-timeout auto-skip). A free-play round (Kenya,
+2 guesses) also completed.
 
 **Accept when:** a full daily challenge and a free-play round complete on a
 physical iPhone and a physical Android phone.
@@ -290,7 +324,7 @@ wiring lives in `src/lib/nativeApp.ts` (`setupNativeApp(router)`, called from
 `main.ts` after mount).
 
 **iOS simulator results (2026-11-09, production data):** recorded under each
-item. Android untested (see Phase 2).
+item. Android emulator results are noted where run.
 
 ### 3.1 App lifecycle and audio
 
@@ -298,14 +332,15 @@ item. Android untested (see Phase 2).
 - [x] On `App` `pause`: `useGamePlay` sets `isPlaying = false`, and
       `RadioPlayer`'s existing watcher pauses the `<audio>` element and stops
       the static. Simpler than exposing a `pause()` from `RadioPlayer`.
-      Verified: playing → Home button → reopen shows the player stopped.
+      Verified: playing → Home button → reopen shows the player stopped (iOS;
+      Android: `<audio>` `paused` false → true across Home/reopen).
 - [x] On `resume`: when the Eastern-time challenge number differs from the one
       at launch, `window.location.replace("/")` restarts on Home. Re-running
       `initDailyChallenge()` alone is not enough: `Play` only picks the daily
       on mount. Not exercised (needs the clock to cross Eastern midnight)
       `[verify]`.
 - [x] Android hardware back: `router.back()` when the event's `canGoBack`,
-      else `App.exitApp()`. Not run.
+      else `App.exitApp()`. Verified on the Android emulator.
 
 ### 3.2 Persistence
 
@@ -363,12 +398,16 @@ reminder toggle still on. The values are in
       for the next 7 days; a reminder whose challenge is already completed is
       skipped (today's, once the daily is done). Notification id = challenge
       number. Verified: after winning #281 at 00:30, seven pending
-      notifications #282–#288, Tue–Mon at 09:00.
+      notifications #282–#288, Tue–Mon at 09:00. On Android they are inexact
+      alarms (`isExactNotification: false`, see the Phase 2 Android item):
+      delivered between 09:00 and ~10:00, no exact-alarm permission needed.
 - [x] "Daily reminder" switch in `HamburgerMenu.vue` (app only), stored via
       `persist`. If permission is denied it stays off and says to enable
       notifications in Settings. Verified: off cancels all pending, on
       schedules the seven again. Denied path not run.
-- [x] Tapping a notification navigates to `/` (`nativeApp.ts`).
+- [x] Tapping a notification navigates to `/` (`nativeApp.ts`). Verified on
+      Android: a test notification fired with the app in the background,
+      tapping it opened `/` (from `/about`). Menu toggle off → 0 pending, on → 7.
 
 **Accept when:** with device time advanced, the notification fires once,
 tapping it opens the app on Home with the new daily offered.
@@ -423,8 +462,8 @@ The web gets each feature that has a browser equivalent.
 - [x] Android notification small icon: `res/drawable-{mdpi…xxxhdpi}/ic_stat_geohearo.png`
       (white GH on transparent, 24–96 px, cut from `assets/icon-foreground.png`),
       set as `plugins.LocalNotifications.smallIcon` with `iconColor:
-      "#0000ff"` in `capacitor.config.ts`. Synced and built; not yet seen in a
-      real notification.
+      "#0000ff"` in `capacitor.config.ts`. Seen on Android: the shade shows the
+      white GH on a blue circle.
 
 **iOS result (iPhone 17 Pro simulator, dark mode):** home-screen icon is the
 blue GH logo; launch shows the globe splash until Home renders (no blank
@@ -452,12 +491,19 @@ cream gap); status bar text is dark.
 ### Listing content
 
 - [ ] Screenshots: 6.9" iPhone (iPhone-only for 1.0; 6.5" is scaled from it),
-      Android phone. Show map + guess, results modal, daily stats. Started:
-      the current build is installed on the iPhone 17 Pro Max simulator
-      (1320×2868) with the status bar overridden to 9:41 / full battery
-      (`xcrun simctl status_bar … override`); no shots taken yet. Save them
-      under `store/screenshots/ios-6.9/` (path assumed by
-      `todo/store-listing.md`).
+      Android phone. Show map + guess, results modal, daily stats.
+  - [x] Android phone: 7 shots in `store/screenshots/android-phone/`
+        (1080×1920, 24-bit PNG, demo-mode status bar at 9:41). Play rejects
+        screenshots whose long side is over twice the short side, so the
+        Pixel 9's native 1080×2424 doesn't qualify; taken with
+        `adb shell wm size 1080x1920` (reset with `wm size reset`). The daily
+        stats shot shows "2 players"; retake after launch for a fuller chart.
+  - [ ] iOS 6.9": blocked on Xcode 26 on this Mac (see Phase 0 toolchain).
+        Plan: iPhone 17 Pro Max simulator (1320×2868), status bar overridden
+        to 9:41 / full battery (`xcrun simctl status_bar … override`), saved
+        under `store/screenshots/ios-6.9/` (path assumed by
+        `todo/store-listing.md`).
+- [x] Play hi-res icon: `store/play-icon-512.png` (512×512, 32-bit PNG).
 - [x] Play feature graphic: `store/feature-graphic.png` (1024×500, no
       alpha), source `store/feature-graphic.html` (globe + tagline).
 - [ ] Description, keywords, category, age rating: **drafted** in
@@ -495,6 +541,16 @@ cream gap); status bar text is dark.
 - [ ] Android: signed AAB (upload key in a password manager; enrol in Play App
       Signing) → internal testing → closed testing (12 testers / 14 days) →
       production.
+  - [x] Release signing: `app/build.gradle` signs `release` with
+        `android/keystore.properties` (gitignored, with `*.jks`) when it
+        exists. Upload key generated 2026-11-09:
+        `~/.config/geohearo/geohearo-upload.jks`, alias `upload`, RSA 4096,
+        password in the macOS Keychain (`geohearo-android-upload-key`). Back
+        both up to a password manager; Play App Signing can reset a lost
+        upload key, but not before enrolment.
+  - [x] `./gradlew bundleRelease` → `app/build/outputs/bundle/release/app-release.aab`
+        (12 MB, signed: `keytool -printcert -jarfile` shows `CN=Dustin
+        Michels`). The release APK installs and launches on the emulator.
 - [ ] After launch: the web app's footer/About gains App Store / Play badges;
       `usePwaInstall` stays for web users.
 
@@ -510,8 +566,8 @@ cream gap); status bar text is dark.
   `country-pics/`) and any code change require a store release.
 - **Release checklist:** `bun run test` → `bun run cap:sync` → smoke test
   (Phase 2 list) on both devices → bump versions → upload.
-- **Docs:** add a "Mobile" section to `README.md` (prereqs: Xcode, Android
-  Studio, JDK; commands from Phase 2) and log each phase in `CHANGELOG.md`.
+- **Docs:** prereqs and commands live in "Mobile app" in `frontend/README.md`;
+  the root `README.md` points there. Log each phase in `CHANGELOG.md`.
 
 ## Later (not in this plan)
 

@@ -1,16 +1,8 @@
 let audioCtx: AudioContext | null = null;
 
-export async function playRadioStatic(duration = 2): Promise<AudioBufferSourceNode | undefined> {
+export async function playRadioStatic(duration = 2): Promise<AudioBufferSourceNode> {
   // Initialize AudioContext lazily to handle browser policies
-  if (!audioCtx) {
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-    if (AudioContextClass) {
-      audioCtx = new AudioContextClass();
-    } else {
-      console.warn("AudioContext not supported");
-      return undefined;
-    }
-  }
+  audioCtx ??= new AudioContext();
 
   // Ensure context is running (it might be suspended if created before user interaction)
   if (audioCtx.state === "suspended") {
