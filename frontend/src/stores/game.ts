@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { computed, ref } from "vue";
+import { ref } from "vue";
 import { persist, unpersist } from "../lib/persist";
 import type { GameHistoryItem, GamePhase, RadioStation } from "../types/geo";
 
@@ -18,18 +18,6 @@ export const useGameStore = defineStore("game", () => {
   const gameStage = ref<GamePhase>("guessing");
   const gameHistory = ref<GameHistoryItem[]>([]);
   const STORAGE_KEY_HISTORY = "geo_hearo_history";
-
-  // Getters
-  const roundFinished = computed(() => {
-    // Debug override
-    const debugStage = import.meta.env.VITE_GAME_STAGE;
-    if (debugStage === "seeResults" || debugStage === "listening") return true;
-
-    return (
-      guesses.value.length >= 5 ||
-      guesses.value.some((g) => g.toLowerCase() === secretCountry.value?.toLowerCase())
-    );
-  });
 
   // Actions
   function addGuess(guess: string) {
@@ -86,9 +74,6 @@ export const useGameStore = defineStore("game", () => {
     hasSkippedStation,
     gameStage,
     gameHistory,
-
-    // Getters
-    roundFinished,
 
     // Actions
     addGuess,

@@ -47,52 +47,45 @@ alongside mobile-plan Phase 0–2 so account problems surface early.
 
 ## 4. Xcode project settings
 
-Done once in `frontend/ios/App` after mobile-plan Phase 2–4. Commit the result.
+Done in `frontend/ios/App` (2026-11-09) except signing, which needs your Apple
+account.
 
 - [ ] Target **App** → Signing & Capabilities: Team = your team, "Automatically
-      manage signing" on.
-- [ ] General:
-  - Display Name `GeoHearo`.
-  - Supported destinations: decide **iPhone only** or iPhone + iPad. iPad
-    support means iPad screenshots and iPad layout review (mobile-plan Phase 5
-    already flags this).
-  - Orientation: portrait only unless landscape is tested.
-  - Version (`CFBundleShortVersionString`) and Build (`CFBundleVersion`) per
-    mobile-plan Phase 5 "Versioning". Every upload needs a new Build number.
-- [ ] `Info.plist`: `ITSAppUsesNonExemptEncryption` = `NO`. The app only uses
+      manage signing" on. Sets `DEVELOPMENT_TEAM` in `project.pbxproj`; commit
+      it.
+- [x] General:
+  - Display Name `GeoHearo` (`CFBundleDisplayName`).
+  - **iPhone only** (`TARGETED_DEVICE_FAMILY = 1`). iPad can be added in a
+    later version; it can't be removed once shipped.
+  - Portrait only (`UISupportedInterfaceOrientations`).
+  - Version `1.0.0` (`MARKETING_VERSION`), Build `1`
+    (`CURRENT_PROJECT_VERSION`), per mobile-plan Phase 5 "Versioning". Every
+    upload needs a new Build number.
+- [x] `Info.plist`: `ITSAppUsesNonExemptEncryption` = `NO`. The app only uses
       HTTPS (exempt), so this skips the export-compliance question on every
       build.
-- [ ] Privacy manifest: Xcode → File → New File → **App Privacy File**
-      (`PrivacyInfo.xcprivacy`, App target). `@capacitor/preferences` uses
+- [x] Privacy manifest `App/PrivacyInfo.xcprivacy` (in the App target's
+      resources; present in the built `.app`). `@capacitor/preferences` uses
       `UserDefaults`, a required-reason API; without a declaration the upload
       gets an ITMS-91053 rejection
-      ([Capacitor docs](https://capacitorjs.com/docs/ios/privacy-manifest)):
-  ```xml
-  <key>NSPrivacyTracking</key><false/>
-  <key>NSPrivacyTrackingDomains</key><array/>
-  <key>NSPrivacyAccessedAPITypes</key>
-  <array>
-    <dict>
-      <key>NSPrivacyAccessedAPIType</key>
-      <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
-      <key>NSPrivacyAccessedAPITypeReasons</key>
-      <array><string>CA92.1</string></array>
-    </dict>
-  </array>
-  ```
-  Re-check after adding any plugin (the warning email lists missing APIs).
-- [ ] App icon: the 1024×1024 asset from mobile-plan Phase 4 has **no alpha
-      channel** (upload validation rejects transparency).
+      ([Capacitor docs](https://capacitorjs.com/docs/ios/privacy-manifest)).
+      Declares: no tracking, no tracking domains, UserDefaults reason
+      `CA92.1`, and collected data "Product Interaction" (not linked, not
+      tracking, Analytics) to match the App Privacy answers in step 5.
+      Re-check after adding any plugin (the warning email lists missing APIs).
+- [x] App icon: `AppIcon-512@2x.png` is 1024×1024 RGB, no alpha (mobile-plan
+      Phase 4).
 
 ## 4b. Website prerequisites
 
-- [ ] **Support URL** (required field): a page on geohearo.com with a way to
-      reach you. No contact address exists in `frontend/src` today; add an
-      email to About or a `/support` page.
-- [ ] **Privacy policy** update (mobile-plan Phase 5): mention the iOS app,
-      local notifications, on-device storage, Plausible, and the anonymous
-      Supabase daily counts (`increment_daily_stats` in `lib/supabase.ts`).
-      Must be live before submitting.
+Both exist locally, not yet on geohearo.com; deploy to production before
+submitting.
+
+- [x] **Support URL**: `https://geohearo.com/about` ("Contact" section,
+      `bronco-eaten-bash@duck.com`).
+- [x] **Privacy policy** (`https://geohearo.com/privacy`): apps,
+      notifications, on-device storage, Plausible, the anonymous Supabase
+      daily counts, third-party streams/tiles/fonts, contact email.
 
 ## 5. App Store Connect app record
 

@@ -266,7 +266,6 @@ const overlayOpacity = computed(() => {
       :show="gameplay.showModal"
       :history="gameplay.gameHistory"
       :stats-view="gameplay.isStatsView"
-      @confirm="gameplay.handleModalConfirm"
       @close="gameplay.handleModalClose"
     />
   </div>

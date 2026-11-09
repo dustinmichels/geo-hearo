@@ -1,6 +1,6 @@
 {
   "name": "geo-hearo",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,6 +12,7 @@
     "cap:sync": "bun run build:native && cap sync",
     "cap:ios": "bun run cap:sync && cap run ios",
     "cap:android": "bun run cap:sync && cap run android",
+    "cap:assets": "capacitor-assets generate --ios --android --assetPath assets",
     "preview": "vite preview",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
@@ -29,6 +30,7 @@
     "@capacitor/local-notifications": "^8.3.1",
     "@capacitor/preferences": "^8.0.1",
     "@capacitor/share": "^8.0.3",
+    "@capacitor/splash-screen": "^8.0.2",
     "@plausible-analytics/tracker": "^0.4.7",
     "@supabase/postgrest-js": "^2.119.0",
     "@turf/area": "^7.4.0",
@@ -45,6 +47,7 @@
     "vue-router": "^4.6.4"
   },
   "devDependencies": {
+    "@capacitor/assets": "^4.0.0",
     "@capacitor/cli": "^8.6.0",
     "@tailwindcss/vite": "^4.3.5",
     "@types/geojson": "^7946.0.16",

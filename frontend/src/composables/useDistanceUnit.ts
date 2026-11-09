@@ -1,7 +1,7 @@
 import { ref } from "vue";
 import { persist } from "../lib/persist";
 
-export type DistanceUnit = "mi" | "km";
+type DistanceUnit = "mi" | "km";
 
 const KM_TO_MI = 0.621371;
 const MILE_REGIONS = ["US", "GB", "LR", "MM"];

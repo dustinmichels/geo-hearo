@@ -16,8 +16,12 @@ const emit = defineEmits<{
 
 const { getDailyChallengeNumber } = useRadio();
 
-// The app opens the native share sheet; the web copies to the clipboard.
-const idleLabel = isNative ? "Share score" : "Copy shareable score";
+// The app and phone browsers open a share sheet; desktop browsers copy to the clipboard.
+const webShareSheet =
+  !isNative &&
+  typeof navigator.share === "function" &&
+  window.matchMedia("(pointer: coarse)").matches;
+const idleLabel = isNative || webShareSheet ? "Share score" : "Copy shareable score";
 const copyButtonText = ref(idleLabel);
 
 const handleShare = async (item: GameHistoryItem) => {
@@ -28,6 +32,15 @@ const handleShare = async (item: GameHistoryItem) => {
     // Rejects when the sheet is dismissed; nothing to report.
     await NativeShare.share({ text }).catch(() => {});
     return;
+  }
+  if (webShareSheet) {
+    try {
+      await navigator.share({ text });
+      return;
+    } catch (err) {
+      // AbortError: the sheet was dismissed. Anything else: fall back to copying.
+      if (err instanceof DOMException && err.name === "AbortError") return;
+    }
   }
   try {
     await navigator.clipboard.writeText(text);

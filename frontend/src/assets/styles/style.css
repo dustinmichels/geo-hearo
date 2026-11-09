@@ -28,14 +28,8 @@
   --font-body: "Nunito", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Fredoka", ui-sans-serif, system-ui, sans-serif;
 
-  /* Border widths */
-  --border-2: 2px;
-  --border-3: 3px;
-
   /* Border radius */
   --radius-btn: 16px;
-  --radius-card: 24px;
-  --radius-badge: 12px;
 }
 
 /* Apply fonts globally */
@@ -50,14 +44,6 @@ h2,
 h3,
 .btn-text {
   font-family: "Fredoka", sans-serif;
-}
-
-.font-heading {
-  font-family: "Fredoka", sans-serif;
-}
-
-.font-body {
-  font-family: "Nunito", sans-serif;
 }
 
 :root {
@@ -124,7 +110,7 @@ h3,
   box-shadow: 0 4px 0 0 var(--color-pencil-lead);
 }
 
-/* Decorative blob animations (Play views) */
+/* Decorative blob animations (all pages) */
 @keyframes blob1 {
   0%,
   100% {
@@ -152,7 +138,6 @@ h3,
   }
   50% {
     transform: scale(1.2);
-    opacity: 1;
   }
 }
 
@@ -166,6 +151,56 @@ h3,
 
 .animate-close-pulse {
   animation: close-pulse 1.2s ease-in-out infinite;
+}
+
+/* Page entrance animations (Home, About, Privacy) */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* opacity: 0 hides elements until a delayed animation starts. */
+.animate-slide-up {
+  opacity: 0;
+  animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scale-up-fade {
+  opacity: 0;
+  animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-pop-in-delayed {
+  opacity: 0;
+  animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s forwards;
+}
+
+/* Lift on hover for .btn-pressable buttons. Must come after .btn-pressable:active. */
+.hover-scale:hover {
+  transform: scale(1.05) rotate(-2deg);
+  box-shadow: 0 12px 0 0 var(--color-pencil-lead);
+}
+
+.hover-scale:active {
+  transform: scale(0.95);
+  box-shadow: 0 4px 0 0 var(--color-pencil-lead);
 }
 
 /* Magic Ripple Effect */
@@ -195,15 +230,14 @@ h3,
   width: 100%;
   height: 100%;
   opacity: 0;
+  background-color: rgba(244, 114, 182, 0.5); /* Bubblegum Pop */
   animation: ripple 3s infinite cubic-bezier(0, 0, 0.2, 1);
 }
 
 .magic-wave.wave-1 {
-  background-color: rgba(244, 114, 182, 0.5); /* Bubblegum Pop */
   animation-delay: 0s;
 }
 
 .magic-wave.wave-2 {
-  background-color: rgba(244, 114, 182, 0.5); /* Bubblegum Pop */
   animation-delay: 1.5s;
 }

@@ -5,18 +5,10 @@ const props = defineProps<{
   history?: GameHistoryItem[];
 }>();
 
-const getScore = (item: GameHistoryItem): number => {
-  if (typeof item.numericScore === "number") return item.numericScore;
-
-  // Fallback: Compute from emoji string
-  const emojis = [...(item.score || "")];
-  return emojis.includes("🟢") ? emojis.length : 6;
-};
-
 const averageScore = computed(() => {
   if (!props.history || props.history.length === 0) return "0.0";
 
-  const total = props.history.reduce((sum, item) => sum + getScore(item), 0);
+  const total = props.history.reduce((sum, item) => sum + item.numericScore, 0);
   return (total / props.history.length).toFixed(1);
 });
 </script>
@@ -37,7 +29,7 @@ const averageScore = computed(() => {
         class="grid grid-cols-[1fr_auto_auto] gap-3 items-center text-sm p-2 rounded-lg border-2 transition-colors bg-paper-white/50 text-pencil-lead"
         :class="
           idx === 0
-            ? item.score.includes('🟢')
+            ? item.numericScore < 6
               ? 'border-mint-shake'
               : 'border-berry-oops'
             : 'border-pencil-lead/5'
@@ -46,7 +38,7 @@ const averageScore = computed(() => {
         <span class="font-bold truncate">{{ item.country }}</span>
         <span class="tracking-widest">{{ item.score }}</span>
         <span class="font-mono font-bold text-pencil-lead/70 w-6 text-right">{{
-          getScore(item)
+          item.numericScore
         }}</span>
       </div>
     </div>

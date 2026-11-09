@@ -13,11 +13,10 @@ const supabase =
     : null;
 
 /**
- * Atomically increments the daily challenge result counter.
- * Fire-and-forget — never throws, never blocks the UI.
+ * Fetches the per-guess-count result totals for one daily challenge.
+ * Never throws; returns [] when Supabase is unconfigured or the request fails.
  *
- * @param challengeDate  "YYYY-MM-DD" derived from the seed
- * @param numGuesses     1–5 for a win, 6 for a loss
+ * @param date  "YYYY-MM-DD" of the daily challenge
  */
 export async function fetchDailyStats(
   date: string,
@@ -40,6 +39,13 @@ export async function fetchDailyStats(
   }
 }
 
+/**
+ * Atomically increments the daily challenge result counter.
+ * Fire-and-forget — never throws, never blocks the UI.
+ *
+ * @param challengeDate  "YYYY-MM-DD" derived from the seed
+ * @param numGuesses     1–5 for a win, 6 for a loss
+ */
 export async function trackDailyResult(
   challengeDate: string,
   numGuesses: number,

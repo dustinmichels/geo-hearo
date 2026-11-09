@@ -1,8 +1,9 @@
 import { App } from "@capacitor/app";
 import { LocalNotifications } from "@capacitor/local-notifications";
+import { SplashScreen } from "@capacitor/splash-screen";
 import type { Router } from "vue-router";
-import { useRadio } from "../composables/useRadio";
 import { rescheduleDailyReminders } from "./dailyReminder";
+import { createDayRolloverCheck } from "./dayRollover";
 
 /**
  * App-wide native behaviour. Call once, after the app is mounted (uses the
@@ -10,16 +11,14 @@ import { rescheduleDailyReminders } from "./dailyReminder";
  * the play state.
  */
 export function setupNativeApp(router: Router): void {
-  const { getDailyChallengeNumber } = useRadio();
-  const launchDay = getDailyChallengeNumber();
+  const restartIfNewDay = createDayRolloverCheck();
+
+  // The launch splash stays up (launchAutoHide: false) until the first route resolves;
+  // its 200 ms fade-out covers the render that follows.
+  void router.isReady().then(() => SplashScreen.hide());
 
   App.addListener("resume", () => {
-    // Play only picks the daily when it mounts, so an app left open overnight
-    // would keep offering yesterday's. Restart on Home with the new one.
-    if (getDailyChallengeNumber() !== launchDay) {
-      window.location.replace("/");
-      return;
-    }
+    if (restartIfNewDay()) return;
     void rescheduleDailyReminders();
   });
 

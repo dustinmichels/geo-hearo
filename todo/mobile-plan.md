@@ -189,10 +189,11 @@ results panel all clear the Dynamic Island and home indicator. Android open.
 
 ## Phase 2 — Add Capacitor and run on devices
 
-iOS first. Android is scaffolded but not yet built or run: the SDK folder
-(`~/Library/Android/sdk`) is empty until Android Studio's setup wizard runs, and
-Gradle needs JDK 21 (the default `java` is 27, which the Gradle 8.14.3 wrapper
-rejects with "Unsupported class file major version 71").
+iOS first. Android now builds and launches (2026-11-09): SDK via
+`android-commandlinetools` + `sdkmanager` (no Android Studio wizard), JDK 21
+pinned in `mise.toml` (`java = "temurin-21"`; the default `java` is 27, which
+the Gradle 8.14.3 wrapper rejects with "Unsupported class file major version
+71"). Setup commands are in `frontend/README.md`.
 
 - [x] Deploy the `netlify.toml` CORS headers to production (2026-11-09,
       `b5a1ae8`; previous production tagged `v1.0.0`). `OPTIONS` and `GET` with
@@ -218,9 +219,33 @@ rejects with "Unsupported class file major version 71").
       (`cap:sync && cap run ios`).
 - [x] Script `cap:android` (`cap:sync && cap run android`).
 - [x] Vite watch ignore and `.prettierignore` also cover `android/`.
-- [ ] Android: finish Android Studio setup (SDK + emulator image), set the
-      Gradle JDK to 21, then `bun run cap:android` and run the Phase 1.5 and
-      smoke-test checks on an Android 15 emulator.
+- [ ] Android: run the Phase 1.5 and smoke-test checks on an Android 15
+      emulator. **Stopped here (2026-11-09).** Done so far:
+  - [x] SDK (platform 36, build-tools 36 + 35, emulator, platform-tools,
+        `android-35` google_apis arm64 image); AVD `Pixel_9_API_35`;
+        `android/local.properties` (gitignored) points at the SDK.
+  - [x] `mise exec -- ./gradlew assembleDebug` (in `frontend/android`)
+        builds `app-debug.apk`.
+  - [x] Installed and launched on the emulator (WebView 124, so
+        `insetsHandling: "native"` is the path in use). The GH icon splash
+        shows, `SplashScreen.hide` fires, Home renders below the status bar
+        and above the gesture bar; Preferences, App listeners and
+        `LocalNotifications.getPending` calls succeed in logcat. First
+        launch: `Displayed … +30s` (cold, first boot).
+  - [ ] **Open bug:** a native-looking strip under the status bar shows
+        "GeoH…" in Roboto and two squashed globe images (both screenshots
+        after Home rendered). Not in the iOS app or the web; cause not yet
+        investigated (candidates: window title/action bar from the theme
+        switch after `AppTheme.NoActionBarLaunch`, or the Android 12+ splash
+        exit). Check `res/values/styles.xml` and the WebView DOM first.
+  - [ ] Play → stations/audio, guess/win, results, share sheet, haptics,
+        hardware back, notification permission prompt (Android 13+).
+  - Tooling notes: start the emulator with `-gpu host` (the default
+    software renderer made `adb` screencap/shell time out);
+    `adb exec-out screencap` still sometimes returns 0 bytes, `adb emu
+    screenrecord screenshot <dir>` works. WebView DevTools: `adb forward
+    tcp:9222 localabstract:webview_devtools_remote_<pid>`, then
+    `http://127.0.0.1:9222/json`.
 - [x] Dev loop: `CAP_SERVER_URL=http://<lan-ip>:5173` sets `server.url`
       (+ `cleartext: true`) in `capacitor.config.ts` only when set. Serve with
       `bun run dev:native` (`vite --host --mode native`): plain `bun run dev`
@@ -259,7 +284,8 @@ physical iPhone and a physical Android phone.
 
 ## Phase 3 — Native behaviour
 
-Each item branches on `isNative`; web keeps the current code path. App-wide
+Goal: the web app works as well as the app. App-only features branch on
+`isNative`; where the web has an equivalent it gets it too (3.6). App-wide
 wiring lives in `src/lib/nativeApp.ts` (`setupNativeApp(router)`, called from
 `main.ts` after mount).
 
@@ -350,20 +376,59 @@ tapping it opens the app on Home with the new daily offered.
 **Status:** open. The simulator follows the Mac clock; check on a device by
 setting the time past 09:00.
 
+### 3.6 Web parity
+
+The web gets each feature that has a browser equivalent.
+
+- [x] Day rollover: `lib/dayRollover.ts` `createDayRolloverCheck()` is shared.
+      The app runs it on `App` `resume`, the web on `visibilitychange` →
+      visible (`watchTabDayRollover()` in `main.ts`). A tab left open past
+      Eastern midnight used to keep yesterday's round under today's number.
+      Verified in Chromium with a faked clock: same-day return stays on
+      `/about`, next-day return restarts on `/`.
+- [x] Share: phone browsers (`navigator.share` + `(pointer: coarse)`) open
+      the Web Share sheet, labelled "Share score"; desktop keeps "Copy
+      shareable score" (clipboard). A failed share falls back to copying.
+      Verified in Chromium: desktop copies, phone calls `navigator.share`
+      with the same text.
+- [x] Vibration: `lib/haptics.ts` (`guessFeedback`, `roundResultFeedback`)
+      serves both; the web uses `navigator.vibrate` (Android browsers: 200 ms
+      on a guess, two short pulses on a win, one long buzz on a loss; iOS
+      Safari has no vibration).
+- Not mirrored: settings persistence (browsers don't evict a site's
+  `localStorage` the way WKWebView can; Safari clears it only after 7 days
+  without a visit), pausing audio when hidden (a background tab playing is
+  normal on the web), daily reminders (see Later).
+
 ---
 
 ## Phase 4 — Branding assets
 
-- [ ] Source art: 1024×1024 icon (no transparency for iOS) and a 2732×2732
-      splash, derived from `public/globe.png` / `android-chrome-512x512.png`.
-- [ ] `bun add -d @capacitor/assets` → `bunx capacitor-assets generate`.
-- [ ] `bun add @capacitor/splash-screen @capacitor/status-bar`; hide splash
-      after first route renders; status bar style matches the light theme.
-- [ ] Android adaptive icon foreground/background layers.
-- [ ] Android notification small icon: a monochrome drawable set as
-      `plugins.LocalNotifications.smallIcon` in `capacitor.config.ts`. Without
-      it Android shows the app icon, which renders as a blank square in the
-      status bar `[verify]`.
+- [x] Source art in `frontend/assets/`: `icon-only.png` (1024×1024 RGB, the
+      GH logo from `android-chrome-512x512.png` upscaled onto `#0000ff`; no
+      vector source exists, so a crisper redraw is optional), `splash.png`
+      (2732×2732, `globe.png` on `#fff9f5`).
+- [x] `bun add -d @capacitor/assets` (4.0.0); script `cap:assets`
+      (`capacitor-assets generate --ios --android --assetPath assets`).
+      Replaced the Capacitor placeholder icon and splash.
+- [x] `bun add @capacitor/splash-screen` (8.0.2): `launchAutoHide: false`,
+      `nativeApp.ts` hides it once the first route resolves.
+- [x] Status bar: no `@capacitor/status-bar` needed. Capacitor 8 core's
+      `SystemBars` takes `style: "LIGHT"` (dark text), and `Info.plist`
+      `UIStatusBarStyle = UIStatusBarStyleDarkContent` covers the launch
+      screen. Without it, phones in dark mode showed white text over the
+      light status-bar scrim.
+- [x] Android adaptive icon foreground/background layers (generated, not yet
+      seen on a device).
+- [x] Android notification small icon: `res/drawable-{mdpi…xxxhdpi}/ic_stat_geohearo.png`
+      (white GH on transparent, 24–96 px, cut from `assets/icon-foreground.png`),
+      set as `plugins.LocalNotifications.smallIcon` with `iconColor:
+      "#0000ff"` in `capacitor.config.ts`. Synced and built; not yet seen in a
+      real notification.
+
+**iOS result (iPhone 17 Pro simulator, dark mode):** home-screen icon is the
+blue GH logo; launch shows the globe splash until Home renders (no blank
+cream gap); status bar text is dark.
 
 ---
 
@@ -379,18 +444,34 @@ setting the time past 09:00.
 
 ### Versioning
 
-- [ ] `package.json` `version` is `0.0.0` `[code]`. Adopt semver, set
-      `CFBundleShortVersionString`/`versionName` from it, and increment
-      `CFBundleVersion`/`versionCode` per upload.
+- [x] Semver from `package.json` `version` (`1.0.0`); Xcode `MARKETING_VERSION`
+      and Android `versionName` set to match by hand (Capacitor doesn't sync
+      them). Increment Xcode `CURRENT_PROJECT_VERSION` / Android
+      `versionCode` per upload.
 
 ### Listing content
 
-- [ ] Screenshots: 6.9" and 6.5" iPhone, 13" iPad (or mark iPhone-only), Android
-      phone. Show map + guess, results modal, daily stats.
-- [ ] Description, keywords, category (Games › Trivia / Word), age rating.
-- [ ] Privacy policy URL: `https://geohearo.com/privacy` (exists,
-      `views/Privacy.vue`). Update it to mention the apps, notifications, and
-      Preferences storage.
+- [ ] Screenshots: 6.9" iPhone (iPhone-only for 1.0; 6.5" is scaled from it),
+      Android phone. Show map + guess, results modal, daily stats. Started:
+      the current build is installed on the iPhone 17 Pro Max simulator
+      (1320×2868) with the status bar overridden to 9:41 / full battery
+      (`xcrun simctl status_bar … override`); no shots taken yet. Save them
+      under `store/screenshots/ios-6.9/` (path assumed by
+      `todo/store-listing.md`).
+- [x] Play feature graphic: `store/feature-graphic.png` (1024×500, no
+      alpha), source `store/feature-graphic.html` (globe + tagline).
+- [ ] Description, keywords, category, age rating: **drafted** in
+      `todo/store-listing.md` (also subtitle, Play short description,
+      promotional text, privacy/Data safety answers, Play "App content"
+      declarations). Needs your review before pasting into the stores.
+- [x] Privacy policy (`views/Privacy.vue`) rewritten: no accounts/ads,
+      Plausible page views (+ app platform), Supabase daily stats (date +
+      guess count), on-device storage, local-only reminders, third-party
+      streams/tiles/fonts, contact email. Live after the next production
+      deploy.
+- [x] Support contact: "Contact" section on About
+      (`bronco-eaten-bash@duck.com`), so the Support URL is
+      `https://geohearo.com/about`. Live after the next production deploy.
 - [ ] App Store privacy label / Play Data safety form: Plausible (anonymous,
       no identifiers), Supabase (anonymous aggregate daily counts), no account.
 
@@ -436,5 +517,8 @@ setting the time past 09:00.
 
 - Live updates (Capgo / Appflow) to ship JS fixes without review.
 - Universal links / App Links so shared `geohearo.com` links open the app.
+- Web push daily reminders: needs a push service (VAPID keys, a scheduled
+  sender, e.g. a Netlify scheduled function) and a push-capable service
+  worker; on iOS only for sites added to the Home Screen.
 - Lock-screen media controls + background audio.
 - Desktop builds.

@@ -40,15 +40,16 @@ function getMajorLandmasses(feature: Feature<Geometry>): Feature<Polygon>[] {
 }
 
 // Distance Hint Result
-// emoji: The visual hint string (e.g., 🟣🟣🟣🟣)
-// level: 1-4 scale (1=closest/yellow, 4=farthest/purple)
+// emoji: one hint emoji for the level (🤏 🟡 🟠 🔴)
+// level: 1-6 scale (1=closest, 6=farthest)
+// distance: nearest-border distance in km (0 if touching, Infinity if a feature is missing)
 interface DistanceHintResult {
   emoji: string;
   level: number;
   distance: number;
 }
 
-// 2. Distance Magnitude Logic
+// Distance Magnitude Logic
 // Distance is in KILOMETERS.
 // Level 1: 0-50 km     (Yellow 2) -> 🤏
 // Level 2: 50-250 km   (Yellow 1) -> 🟡
@@ -82,7 +83,7 @@ function getEmojiForLevel(level: number): string {
   }
 }
 
-// 4. Border Distance Logic
+// Border Distance Logic
 export function nearestBorderDistance(
   guessFeature: Feature<Geometry>,
   secretFeature: Feature<Geometry>,

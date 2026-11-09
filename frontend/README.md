@@ -19,7 +19,7 @@ The same frontend runs as an iOS and Android app via [Capacitor](https://capacit
 Prerequisites:
 
 - iOS: Xcode 26+ with an iOS simulator (CocoaPods not needed; the project uses Swift Package Manager).
-- Android: Android Studio with an SDK and an emulator image (its setup wizard installs them into `~/Library/Android/sdk`), and JDK 21 for Gradle. The Gradle 8.14 wrapper fails on newer JDKs with "Unsupported class file major version"; point `JAVA_HOME` (or Android Studio's Gradle JDK setting) at a JDK 21.
+- Android: an SDK in `~/Library/Android/sdk` with an emulator image, and JDK 21 for Gradle. The Gradle 8.14 wrapper fails on newer JDKs with "Unsupported class file major version"; the repo's `mise.toml` pins `java = "temurin-21"`, so run Gradle/`cap` commands through mise (or point `JAVA_HOME` / Android Studio's Gradle JDK at a JDK 21). Without the Android Studio wizard: `brew install --cask android-commandlinetools`, then `sdkmanager --sdk_root=$HOME/Library/Android/sdk "platform-tools" "platforms;android-36" "build-tools;36.0.0" "emulator" "system-images;android-35;google_apis;arm64-v8a"` and `avdmanager create avd -n Pixel_9_API_35 -k "system-images;android-35;google_apis;arm64-v8a" -d pixel_9`. Start the emulator with `-gpu host`: the default software renderer on Apple Silicon is slow enough that `adb` calls time out.
 
 ```bash
 bun run build:native   # Web assets for the app (output: dist-native/, settings from .env.native)
@@ -35,6 +35,8 @@ bunx cap open android  # Open the Android Studio project
 - Live reload: `bun run dev:native` (Vite on the LAN in `native` mode, so `.env.native` and `viewport-fit=cover` apply), then `CAP_SERVER_URL=http://<lan-ip>:5173 bun run cap:ios`. Run a plain `bun run cap:sync` afterwards to remove the dev URL from the native project. Debug flags for this mode go in `.env.native.local`.
 - Debug the WebView with Safari → Develop → Simulator → GeoHearo.
 - App-only behaviour is gated on `isNative` (`src/lib/platform.ts`): `src/lib/nativeApp.ts` (resume, Android back button, notification taps), `src/lib/dailyReminder.ts` (09:00 local reminder, toggle in the menu), `src/lib/persist.ts` (localStorage keys mirrored to native Preferences; add new long-lived keys to `PERSISTED_KEYS` and write them with `persist()`).
+- Icon and splash: sources in `assets/` (`icon-only.png` 1024×1024 GH logo on `#0000ff`, no alpha; `icon-foreground.png` / `icon-background.png` for the Android adaptive icon; `splash.png` 2732×2732 globe on `#fff9f5`). After changing them, `bun run cap:assets` regenerates the iOS and Android images. The splash stays up until the first route resolves (`launchAutoHide: false`, hidden in `nativeApp.ts`).
+- iOS release settings live in the Xcode project: iPhone only, portrait only, `ITSAppUsesNonExemptEncryption = NO`, dark status-bar text, privacy manifest `ios/App/App/PrivacyInfo.xcprivacy` (UserDefaults reason `CA92.1` for `@capacitor/preferences`; re-check it when adding a plugin). Version: keep `package.json` `version`, Xcode `MARKETING_VERSION` and Android `versionName` equal; bump Xcode `CURRENT_PROJECT_VERSION` / Android `versionCode` on every upload.
 
 ## Symlinked Files
 

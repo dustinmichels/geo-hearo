@@ -1,13 +1,11 @@
 import type { Feature, Geometry, FeatureCollection } from "geojson";
-import { ref, shallowRef } from "vue";
+import { shallowRef } from "vue";
 import type { NeCountryProperties } from "../types/geo";
 
 // State
 // Maps ADMIN name -> GeoJSON Feature
 const adminToFeature = shallowRef<Map<string, Feature<Geometry, NeCountryProperties>>>(new Map());
 const geoJsonData = shallowRef<FeatureCollection<Geometry, NeCountryProperties> | null>(null);
-const isLoading = ref(false);
-const error = ref<string | null>(null);
 let loadPromise: Promise<void> | null = null;
 
 export function useCountryData() {
@@ -15,8 +13,6 @@ export function useCountryData() {
     if (loadPromise) return loadPromise;
 
     loadPromise = (async () => {
-      isLoading.value = true;
-      error.value = null;
       try {
         // Load Country Geometries
         const countriesResponse = await fetch("/data/ne_countries.geojson");
@@ -40,11 +36,8 @@ export function useCountryData() {
         adminToFeature.value = adminToF;
       } catch (e: unknown) {
         console.error("Failed to load country data:", e);
-        error.value = e instanceof Error ? e.message : "Unknown error";
         loadPromise = null; // Reset promise to allow retry on error
         throw e;
-      } finally {
-        isLoading.value = false;
       }
     })();
 
@@ -56,8 +49,6 @@ export function useCountryData() {
   };
 
   return {
-    isLoading,
-    error,
     geoJsonData,
     loadCountryData,
     getFeature,

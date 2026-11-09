@@ -17,27 +17,27 @@ Not audited: `frontend/ios/`, `frontend-old/`, `data-prep/`.
 on the `esri-world-topo` source is never shown. The comment in the empty
 `<style>` block at the end of the file says the opposite.
 
-- [ ] Change the map option to `attributionControl: { compact: true }`.
-- [ ] Delete the empty `<style scoped>` block and its comment.
-- [ ] Check: finish a round. The topo tiles show an (i) attribution button.
+- [x] Change the map option to `attributionControl: { compact: true }`.
+- [x] Delete the empty `<style scoped>` block and its comment.
+- [x] Check: finish a round. The topo tiles show an (i) attribution button.
 
 ## 2. Remove the dead "confirm" path from the results modal
 
 `GameResultModal.vue` declares a `confirm` emit but never emits it, so
 `handleModalConfirm` never runs.
 
-- [ ] `GameResultModal.vue`: remove `(e: "confirm"): void` from `defineEmits`.
-- [ ] `PlayDesktop.vue`, `PlayMobile.vue`: remove `@confirm="gameplay.handleModalConfirm"`.
-- [ ] `useGamePlay.ts`: delete `handleModalConfirm` (it nearly duplicates
+- [x] `GameResultModal.vue`: remove `(e: "confirm"): void` from `defineEmits`.
+- [x] `PlayDesktop.vue`, `PlayMobile.vue`: remove `@confirm="gameplay.handleModalConfirm"`.
+- [x] `useGamePlay.ts`: delete `handleModalConfirm` (it nearly duplicates
       `handleNewGame`) and remove it from the return.
 
 ## 3. Remove unused returns from `useGamePlay`
 
-- [ ] Delete `generateShareText` and `handleShare`. `DailyChallengeCard.vue`
+- [x] Delete `generateShareText` and `handleShare`. `DailyChallengeCard.vue`
       has its own share logic.
-- [ ] Remove `debugCountry` and `currentStations` from the return. They are
+- [x] Remove `debugCountry` and `currentStations` from the return. They are
       still used inside the composable (`mapProps`), but no view reads them.
-- [ ] Remove `export` from `ModalConfig` (unused type export).
+- [x] Remove `export` from `ModalConfig` (unused type export).
 
 ## 4. Use `===` for country names
 
@@ -45,82 +45,85 @@ Guesses only come from map clicks (the input is `readonly`), so every guess is
 an exact `ADMIN` name. The `country` field in the country-details JSON matches
 `ADMIN` exactly (checked: all 168 entries).
 
-- [ ] `useGamePlay.ts`: replace the `.toLowerCase()` comparisons (lines ~128,
+- [x] `useGamePlay.ts`: replace the `.toLowerCase()` comparisons (lines ~128,
       153, 192, 237, 360, 385) with `===` or `guesses.includes(secret)`.
-- [ ] `useGamePlay.ts`: `isWin: roundFinished.value && guesses.some(...)`
+- [x] `useGamePlay.ts`: `isWin: roundFinished.value && guesses.some(...)`
       becomes `guesses.value.includes(secretCountry.value)` (in two places). The
       `roundFinished &&` part is redundant.
-- [ ] `stores/game.ts`: delete the `roundFinished` getter, including its
+- [x] `stores/game.ts`: delete the `roundFinished` getter, including its
       `VITE_GAME_STAGE` override. It has no other users.
-- [ ] `useRadio.ts`: delete `checkGuess` and use `guess === secretCountry.value`
+- [x] `useRadio.ts`: delete `checkGuess` and use `guess === secretCountry.value`
       in `handleAddGuess`.
-- [ ] `useGamePlay.ts` `handleAddGuess`: drop `.trim()` and the exact-match
+- [x] `useGamePlay.ts` `handleAddGuess`: drop `.trim()` and the exact-match
       color branch that can't be reached after the win check.
-- [ ] `GuessDisplay.vue` (lines ~22, 50) and `CountryDetails.vue:50`: plain `===`.
+- [x] `GuessDisplay.vue` (lines ~22, 50) and `CountryDetails.vue:50`: plain `===`.
 
 ## 5. Compute guess hints in one place
 
 The color/hint for a guess is computed in three places, and the fallback colors
 already disagree (map `#FB923C`, list `#FFFFFF`).
 
-- [ ] Add one helper in `useGamePlay.ts` (or `utils/`), e.g.
+- [x] Add one helper in `useGamePlay.ts` (or `utils/`), e.g.
       `hintFor(guess) → { color, emoji, level, distance }`: win → green
       `#4ade80` + 🟢, missing feature → one agreed fallback.
-- [ ] Use it in `populateGuessColors`, `handleAddGuess` and `generateEmojiString`.
-- [ ] Use it in `GuessDisplay.vue` `guessRows` instead of
+      Done as `utils/guessHint.ts` `hintFor(guess, secret, getFeature)`;
+      fallback is white `#FFFFFF` + ⬜ (no hint).
+- [x] Use it in `populateGuessColors`, `handleAddGuess` and `generateEmojiString`.
+- [x] Use it in `GuessDisplay.vue` `guessRows` instead of
       `getHintForGuess` + `getColorForDistanceLevel`.
-- [ ] `utils/colors.ts`: remove `export` from `DISTANCE_COLORS`, drop the
+- [x] `utils/colors.ts`: remove `export` from `DISTANCE_COLORS`, drop the
       unreachable purple `#A855F7` fallback and the comment block that repeats
-      `geography.ts`.
+      `geography.ts`. The table moved into `guessHint.ts` (its only user) and
+      `colors.ts` is deleted.
 
 ## 6. Use `numericScore` everywhere
 
 `numericScore` was added on 2026-02-11 (`7b0a31b`). `initDailyChallenge` clears
 history whenever a new daily starts, so no saved item is missing it.
 
-- [ ] `GameHistoryList.vue`: delete the emoji fallback in `getScore`. Use
+- [x] `GameHistoryList.vue`: delete the emoji fallback in `getScore`. Use
       `item.numericScore`, and `numericScore < 6` for the win/loss border.
-- [ ] `GameResultModal.vue` `playerNumGuesses`: `displayItem.value?.numericScore`.
-- [ ] `useGamePlay.ts` `handleShowStats`: `isWin: dailyItem.numericScore < 6`
+- [x] `GameResultModal.vue` `playerNumGuesses`: `displayItem.value?.numericScore`.
+- [x] `useGamePlay.ts` `handleShowStats`: `isWin: dailyItem.numericScore < 6`
       instead of `score.includes("🟢")`. Use the `dailyItem` computed instead
       of running `find` again.
 
 ## 7. Clean up `useRadio.ts`
 
-- [ ] `selectRandomCountry`: drop the `string` seed branch. Callers pass a
+- [x] `selectRandomCountry`: drop the `string` seed branch. Callers pass a
       number or nothing.
-- [ ] `loadCountryBySeed`: remove the three `isLoading.value = false` lines in
+- [x] `loadCountryBySeed`: remove the three `isLoading.value = false` lines in
       early returns. `isLoading` is not set to `true` until later.
-- [ ] Delete the stale "Refactor note: we use local '2026-02-02'…" comment.
-- [ ] Remove `isLoading` and `getEasternDateParts` from the return (only used
-      inside the composable).
-- [ ] `addGuess`: drop the duplicate check; `store.addGuess` already dedupes.
+- [x] Delete the stale "Refactor note: we use local '2026-02-02'…" comment.
+- [x] Remove `isLoading` and `getEasternDateParts` from the return (only used
+      inside the composable). `isLoading` had no reader left, so it is deleted.
+- [x] `addGuess`: drop the duplicate check; `store.addGuess` already dedupes.
 
 ## 8. Merge the duplicate onboarding tours
 
 `useOnboarding.ts` builds the same driver.js setup twice, and both
 `onDestroyStarted` handlers repeat `skipTour`.
 
-- [ ] Add `runTour(key, steps)` holding the shared setup.
+- [x] Add `runTour(key, steps)` holding the shared setup.
       `onDestroyStarted: skipTour`.
-- [ ] Rewrite `startTour` and `startResultsTour` as `runTour` calls.
-- [ ] Remove the `// Export this` comment.
-- [ ] Check: fresh `localStorage` shows both tours. "Skip Tour" still works.
-- [ ] Coordinate with `package-audit-followups.md` §1 (lazy-loading driver.js)
-      if both are done.
+- [x] Rewrite `startTour` and `startResultsTour` as `runTour` calls.
+- [x] Remove the `// Export this` comment.
+- [x] Check: fresh `localStorage` shows both tours. "Skip Tour" still works.
+- [x] Coordinate with `package-audit-followups.md` §1 (lazy-loading driver.js)
+      if both are done. Its step 3 now targets `runTour`.
 
 ## 9. Fix tests that test copies of the code
 
-- [ ] `useRadio.ts`: move the pure pick step out of `loadCountryBySeed` into an
+- [x] `useRadio.ts`: move the pure pick step out of `loadCountryBySeed` into an
       exported `pickCountryAndStations(seed, names, countries)`. Call it from
       `loadCountryBySeed`.
-- [ ] `composables/__tests__/dailyChallenge.test.ts`: test that function
+- [x] `composables/__tests__/dailyChallenge.test.ts`: test that function
       instead of the local copy `selectCountryAndStations`. Import
       `IndexStructure` from `types/geo` instead of redeclaring it.
-- [ ] Delete the "same seed produces same country and station indices" test
+- [x] Delete the "same seed produces same country and station indices" test
       (it runs the same copy twice) and the `console.log`.
-- [ ] Fix the `npm test -- dailyChallenge` usage comment (`bun run test dailyChallenge`).
-- [ ] Delete `utils/challenge.test.ts`. Its `numericScore` test only checks a
+- [x] Fix the `npm test -- dailyChallenge` usage comment (`bun run test dailyChallenge`).
+- [x] Delete `utils/challenge.test.ts`. Its `numericScore` test only checks a
       formula defined inside the test, and its other two tests repeat
       `countdown.test.ts`.
 
@@ -129,30 +132,33 @@ history whenever a new daily starts, so no saved item is missing it.
 `style.css` already defines `.animate-blob1/2`. About and Privacy also share
 about 85 identical lines.
 
-- [ ] `Home.vue`, `About.vue`, `Privacy.vue`: delete the scoped `blobMove1/2`
+- [x] `Home.vue`, `About.vue`, `Privacy.vue`: delete the scoped `blobMove1/2`
       keyframes and `.animate-blob1/2`.
-- [ ] Move the shared About/Privacy rules (`hover-scale`, `slideUp`,
+- [x] Move the shared About/Privacy rules (`hover-scale`, `slideUp`,
       `scaleUpFade`, `popIn`, `.animate-*`) into `style.css` once, then delete
       them from both views. Check that Home's own `slideUp`/`popIn` timings
-      differ before merging them too.
-- [ ] Check: `fallow dupes --format json --quiet` no longer reports these
-      groups.
+      differ before merging them too. They differ (0.6 s / 0.5 s vs 1 s /
+      0.8 s), so Home uses the shared classes with inline duration/delay.
+      `scaleUpFade` was identical to `slideUp` and is removed.
+- [x] Check: `fallow dupes --format json --quiet` no longer reports these
+      groups. Two template groups remain (Home's two PLAY buttons, the
+      About/Privacy card/button markup); not CSS, out of scope here.
 
 ## 11. Remove Tailwind classes and settings that do nothing
 
-- [ ] `bg-sea-blue/10` (`PlayDesktop.vue`, `CountryDetails.vue` ×2): no
+- [x] `bg-sea-blue/10` (`PlayDesktop.vue`, `CountryDetails.vue` ×2): no
       `--color-sea-blue` is defined, so these produce no CSS. Either add the
-      color to `@theme` or remove the class.
-- [ ] `Map.vue:706`: drop `animate-in fade-in duration-500`. No animation
+      color to `@theme` or remove the class. Removed (keeps today's look).
+- [x] `Map.vue:706`: drop `animate-in fade-in duration-500`. No animation
       plugin is installed.
-- [ ] `style.css` `@theme`: delete `--border-2`, `--border-3` (Tailwind v4
+- [x] `style.css` `@theme`: delete `--border-2`, `--border-3` (Tailwind v4
       handles `border-3` without them), `--radius-card`, `--radius-badge`
       (unused).
-- [ ] `style.css`: delete the hand-written `.font-heading` / `.font-body`
+- [x] `style.css`: delete the hand-written `.font-heading` / `.font-body`
       classes. `@theme` `--font-heading` / `--font-body` already create them.
-- [ ] `style.css`: drop `opacity: 1` from `close-pulse`. Merge
+- [x] `style.css`: drop `opacity: 1` from `close-pulse`. Merge
       `.magic-wave.wave-1/2` background into `.magic-wave` (same color).
-- [ ] `Home.vue:50`: drop `scale-100 sm:scale-100` (no-op).
+- [x] `Home.vue:50`: drop `scale-100 sm:scale-100` (no-op).
 
 ## 12. Simplify `CountryDetails.vue`
 
@@ -164,18 +170,19 @@ about 85 identical lines.
 
 ## 13. Remove unused props, options and IDs
 
-- [ ] `GuessPanel.vue`: delete the `disabled` prop and `v-if="!disabled"`
+- [x] `GuessPanel.vue`: delete the `disabled` prop and `v-if="!disabled"`
       (no caller passes it).
-- [ ] `GuessPanel.vue`: drop `id="tour-guess-input"` and `id="tour-guess-btn"`.
+- [x] `GuessPanel.vue`: drop `id="tour-guess-input"` and `id="tour-guess-btn"`.
       `RadioPlayer.vue`: drop `id="tour-skip-back-btn"`. No tour step uses them.
-- [ ] `Map.vue`: make `defaultProjection` required and delete the
+- [x] `Map.vue`: make `defaultProjection` required and delete the
       `window.innerWidth < 768` fallback (both layouts pass it).
-- [ ] `Map.vue`: `resizeObserver` → plain `let` (not rendered). Delete the
+      `isGlobe` is now initialised from the prop directly.
+- [x] `Map.vue`: `resizeObserver` → plain `let` (not rendered). Delete the
       stray `// Sync zoom level` comment.
-- [ ] `useCountryData.ts`: remove the unused `isLoading` and `error` refs and
+- [x] `useCountryData.ts`: remove the unused `isLoading` and `error` refs and
       their returns.
-- [ ] `useDistanceUnit.ts`: remove `export` from `DistanceUnit`.
-- [ ] `PlayDesktop.vue`: drop `mapRef` from `defineExpose` and delete the
+- [x] `useDistanceUnit.ts`: remove `export` from `DistanceUnit`.
+- [x] `PlayDesktop.vue`: drop `mapRef` from `defineExpose` and delete the
       empty `<style scoped>` block.
 
 ## 14. Simplify panel heights in `PlayMobile.vue`
@@ -191,24 +198,24 @@ about 85 identical lines.
 
 ## 15. Fix out-of-date comments
 
-- [ ] `lib/supabase.ts:15-21`: the JSDoc above `fetchDailyStats` belongs to
+- [x] `lib/supabase.ts:15-21`: the JSDoc above `fetchDailyStats` belongs to
       `trackDailyResult`. Move it and write one for `fetchDailyStats`.
-- [ ] `utils/geography.ts`: fix the `DistanceHintResult` comment (6 levels, no
+- [x] `utils/geography.ts`: fix the `DistanceHintResult` comment (6 levels, no
       purple, no 🟣) and the orphan numbering ("2.", "4.").
-- [ ] `main.ts`: drop "1. Initialize and store the instance". Move
-      `import { createPinia }` to the top.
-- [ ] `Home.vue`, `About.vue`, `Privacy.vue`: "Hamburger Menu (Mobile Only)"
+- [x] `main.ts`: drop "1. Initialize and store the instance". Move
+      `import { createPinia }` to the top. (Also dropped the matching "2.".)
+- [x] `Home.vue`, `About.vue`, `Privacy.vue`: "Hamburger Menu (Mobile Only)"
       → the menu shows on all sizes.
-- [ ] `Home.vue` `handleTuneIn`: delete the "small JS delay" comment and the
+- [x] `Home.vue` `handleTuneIn`: delete the "small JS delay" comment and the
       unused `_event` parameter.
-- [ ] `GameResultModal.vue`: remove the duplicated
+- [x] `GameResultModal.vue`: remove the duplicated
       `<!-- Game History or Share View -->` comment. Move
       `import { computed, … } from "vue"` to the top of the script.
 
 ## 16. Remove out-of-date repo files and docs
 
-- [ ] Delete `frontend/packages_eval.md` (its four changes are done), or apply
-      the corrections in `package-audit-followups.md` §2. Pick one.
+- [x] Delete `frontend/packages_eval.md` (its four changes are done), or apply
+      the corrections in `package-audit-followups.md` §2. Pick one. Deleted.
 - [ ] Delete the empty `frontend/.aiexclude` and `frontend/.gemini-instructions`,
       or turn them into the symlinks the README describes.
 - [ ] Delete `frontend/src/assets/sounds/` (only a `.DS_Store`).
@@ -219,12 +226,13 @@ about 85 identical lines.
 
 ## 17. Remove build config that isn't needed
 
-- [ ] `vite.config.ts`: delete the `copy-404` plugin. `netlify.toml` already
+- [x] `vite.config.ts`: delete the `copy-404` plugin. `netlify.toml` already
       rewrites `/*` to `/index.html`, so `dist/404.html` is never served.
-- [ ] `tsconfig.app.json`: delete `"baseUrl": "."`. `paths` works without it,
+- [x] `tsconfig.app.json`: delete `"baseUrl": "."`. `paths` works without it,
       and TypeScript 6 deprecates `baseUrl`.
 - [ ] Check: `bun run build`, then a deep link (`/about`) still loads on a
-      Netlify deploy preview.
+      Netlify deploy preview. `bun run build` passes; deploy preview not
+      checked yet.
 
 ---
 

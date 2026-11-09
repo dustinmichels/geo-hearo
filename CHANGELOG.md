@@ -2,6 +2,30 @@
 
 ## 2026-11-09
 
+- **Mobile app, Android build and store listing drafts** (`todo/mobile-plan.md`, in progress):
+  - Android builds (`gradlew assembleDebug`) and runs on an Android 15 emulator; JDK 21 pinned in `mise.toml` for Gradle. SDK/emulator setup without Android Studio documented in `frontend/README.md`. Open: a stray "GeoH…" strip under the status bar.
+  - Android notification status-bar icon `ic_stat_geohearo` (white GH, tinted `#0000ff`), set in `capacitor.config.ts`.
+  - Draft store copy, age-rating and privacy answers in `todo/store-listing.md`; Play feature graphic `store/feature-graphic.png`.
+- **Mobile app, Phase 4 (branding) and iOS store prep** (`todo/mobile-plan.md`, `todo/app-store-ios.md` §4–4b):
+  - App icon (GH logo on blue, 1024×1024, no alpha) and launch splash (globe on `#fff9f5`) replace the Capacitor placeholders on iOS and Android. Sources in `frontend/assets/`, regenerated with `bun run cap:assets` (`@capacitor/assets`).
+  - `@capacitor/splash-screen`: the splash stays up until the first route resolves, instead of a blank screen while the page loads.
+  - Dark status-bar text in the app, also when the phone is in dark mode (`SystemBars.style: "LIGHT"`, `UIStatusBarStyle`).
+  - Xcode project: iPhone only, portrait only, `ITSAppUsesNonExemptEncryption = NO`, privacy manifest `PrivacyInfo.xcprivacy` (UserDefaults reason `CA92.1`, analytics product-interaction data).
+  - Version `1.0.0` in `package.json`, Xcode `MARKETING_VERSION` and Android `versionName`.
+  - Website: "Contact" section on About (App Store support URL) and a rewritten privacy policy covering the apps, notifications, on-device storage, daily stats and third-party services.
+- **Web parity with the app** (`todo/mobile-plan.md` §3.6): a tab left open past Eastern midnight restarts on Home with the new daily when it becomes visible again (shared `lib/dayRollover.ts`, also used by the app's resume); phone browsers share the score through the Web Share sheet, desktop keeps copying; Android browsers vibrate on win/lose (shared `lib/haptics.ts`).
+- **Frontend cleanup §1–11** (`todo/frontend-cleanup.md`):
+  - `Map.vue` shows the compact (i) attribution control, so the Esri tile credit is visible again. Removed the empty `<style>` block whose comment claimed this already worked.
+  - Removed the never-emitted `confirm` event from `GameResultModal` and the unused `useGamePlay.handleModalConfirm`.
+  - `useGamePlay` no longer returns `debugCountry` / `currentStations`. `ModalConfig` is no longer exported.
+  - Country names are compared with `===` (guesses are always exact `ADMIN` names from map clicks). Removed the `game` store's `roundFinished` getter and `useRadio.checkGuess`. The restored-results win flag is now `guesses.includes(secretCountry)`.
+  - Guess hints come from one helper, `utils/guessHint.ts` `hintFor`, used by the map colors, the guess list and the share grid. A guess without geometry now shows white + ⬜ everywhere (the map used orange, the list white). `utils/colors.ts` is folded into it.
+  - History, the stats chart and "show stats" read `numericScore` instead of parsing the emoji grid.
+  - `useRadio`: the seed pick is the exported pure `pickCountryAndStations`, and `dailyChallenge.test.ts` tests it instead of a copy (same countries and stations as before for 2000 seeds). Removed the write-only `isLoading`, the string-seed branch and the duplicate dedupe in `addGuess`. Deleted `utils/challenge.test.ts` (it tested its own formula and repeated `countdown.test.ts`).
+  - `useOnboarding`: both tours go through `runTour`, and `skipTour` is the `onDestroyStarted` handler.
+  - Page CSS: Home, About and Privacy use the `animate-blob1/2` rules already in `style.css`. The About/Privacy entrance animations (`slideUp`, `popIn`, `.animate-slide-up`, `.animate-scale-up-fade`, `.animate-pop-in-delayed`) and `.hover-scale` moved into `style.css`. `scaleUpFade` was a copy of `slideUp` and is gone. Home keeps its faster timings via inline `animation-duration`/`animation-delay`, and its PLAY buttons carry `hover-scale` directly.
+  - Removed Tailwind classes and settings that produced no CSS: `bg-sea-blue/10` (no such color), `animate-in fade-in` on the map's reload hint (no plugin), `scale-100 sm:scale-100`, the `--border-2/3` and `--radius-card/badge` theme vars, and the hand-written `.font-heading` / `.font-body` (the `@theme` fonts generate them). `.magic-wave` holds the shared ripple color.
+  - Deleted the out-of-date `frontend/packages_eval.md` (all four changes landed). `todo/package-audit-followups.md` keeps the vant `base.css` note and the open `oxlint` item.
 - **Production deploy** of `dev` (`b5a1ae8`), including the `/data/*` CORS headers the app needs. The previous production commit is tagged `v1.0.0`.
 - **Mobile app, Phase 3 (native behaviour)** (`todo/mobile-plan.md`). All of it is gated on `isNative`; the web keeps its current behaviour.
   - Plugins: `@capacitor/app`, `preferences`, `haptics`, `share`, `local-notifications`.

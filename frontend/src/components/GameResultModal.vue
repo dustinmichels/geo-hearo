@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ArrowRight, X } from "lucide-vue-next";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import type { GameHistoryItem } from "../types/geo";
 import DailyChallengeCard from "./DailyChallengeCard.vue";
 import GameHistoryList from "./GameHistoryList.vue";
@@ -19,11 +20,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "confirm"): void;
   (e: "close"): void;
 }>();
-
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 const modalRef = ref<HTMLElement | null>(null);
 
@@ -107,11 +105,8 @@ const displayItem = computed(() => {
   return props.history[props.history.length - 1];
 });
 
-// Number of guesses the current player used: emoji string length for a win, 6 (loss sentinel) for a loss
-const playerNumGuesses = computed(() => {
-  if (!displayItem.value) return undefined;
-  return props.isWin ? Array.from(displayItem.value.score).length : 6;
-});
+// Guesses the player used; 6 means a loss
+const playerNumGuesses = computed(() => displayItem.value?.numericScore);
 </script>
 
 <template>
@@ -169,7 +164,6 @@ const playerNumGuesses = computed(() => {
           </p>
         </div>
 
-        <!-- Game History or Share View -->
         <!-- Game History or Share View -->
         <div
           v-if="isDailyChallenge && displayItem"

@@ -37,6 +37,12 @@ const sections = [
       "Sometimes a station is just being weird, which is why I give you five to choose from!",
     ],
   },
+  {
+    emoji: "✉️",
+    title: "Contact",
+    content:
+      'Found a bug, have an idea, or run a station you\'d like removed from the game? Email me at <a href="mailto:bronco-eaten-bash@duck.com" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">bronco-eaten-bash@duck.com</a>.',
+  },
 ];
 
 const handleBackHome = () => {
@@ -51,7 +57,7 @@ const handlePlay = () => {
   <div
     class="min-h-screen w-screen flex flex-col items-center justify-center px-6 pt-safe-6 pb-safe-6 md:px-12 md:pt-safe-12 md:pb-safe-12 overflow-x-hidden relative"
   >
-    <!-- Hamburger Menu (Mobile Only) -->
+    <!-- Hamburger Menu -->
     <div class="fixed top-safe-4 left-safe-4 z-[9999]">
       <HamburgerMenu />
     </div>
@@ -131,91 +137,3 @@ const handlePlay = () => {
     <Footer class="text-sm" />
   </div>
 </template>
-
-<style scoped>
-.hover-scale:hover {
-  transform: scale(1.05) rotate(-2deg);
-  box-shadow: 0 12px 0 0 #334155;
-}
-
-.hover-scale:active {
-  transform: scale(0.95);
-  box-shadow: 0 4px 0 0 #334155;
-}
-
-/* Animations */
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes scaleUpFade {
-  from {
-    opacity: 0;
-    transform: translateY(40px); /* Matches typical fadeInUp but kept simple */
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes popIn {
-  from {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.animate-slide-up {
-  opacity: 0; /* Flash prevention */
-  animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-scale-up-fade {
-  opacity: 0;
-  animation: scaleUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-pop-in-delayed {
-  opacity: 0;
-  animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s forwards;
-}
-
-/* Blobs */
-@keyframes blobMove1 {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(50px, 30px) scale(1.1);
-  }
-}
-.animate-blob1 {
-  animation: blobMove1 16s ease-in-out infinite;
-}
-
-@keyframes blobMove2 {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(-30px, -40px) scale(1.2);
-  }
-}
-.animate-blob2 {
-  animation: blobMove2 20s ease-in-out infinite;
-}
-</style>

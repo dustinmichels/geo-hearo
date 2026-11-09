@@ -32,7 +32,6 @@ const onModalClose = () => {
 };
 
 defineExpose({
-  mapRef,
   onNewGame,
   onModalClose,
 });
@@ -60,7 +59,7 @@ defineExpose({
       <!-- Left: Map Area -->
       <div
         id="tour-map-container"
-        class="flex-1 ml-12 bg-sea-blue/10 rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] overflow-hidden relative z-10"
+        class="flex-1 ml-12 rounded-3xl border-3 border-pencil-lead shadow-[8px_8px_0_0_#334155] overflow-hidden relative z-10"
       >
         <Map
           ref="mapRef"
@@ -177,12 +176,7 @@ defineExpose({
       :show="gameplay.showModal"
       :history="gameplay.gameHistory"
       :stats-view="gameplay.isStatsView"
-      @confirm="gameplay.handleModalConfirm"
       @close="gameplay.handleModalClose"
     />
   </div>
 </template>
-
-<style scoped>
-/* No specific styles needed as we're using Tailwind utilities */
-</style>

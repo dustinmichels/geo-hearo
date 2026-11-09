@@ -1,3 +1,43 @@
+<script lang="ts">
+import { shallowRef } from "vue";
+
+interface PexelsData {
+  url: string;
+  photographer: string;
+  photographer_url: string;
+  alt: string;
+}
+
+interface CountryDetail {
+  country: string;
+  iso_a3: string;
+  official_languages: string;
+  regional_languages: string;
+  local_image_path: string;
+  pexels_data: PexelsData;
+}
+
+// Module scope: the 134 KB file is fetched once, not on every mount (every round).
+const allCountryDetails = shallowRef<CountryDetail[]>([]);
+let loadPromise: Promise<void> | null = null;
+
+function loadCountryDetails(): Promise<void> {
+  loadPromise ??= fetch("/data/country_details_with_pics.json")
+    .then((response) => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json() as Promise<CountryDetail[]>;
+    })
+    .then((data) => {
+      allCountryDetails.value = data;
+    })
+    .catch((e) => {
+      console.error("Failed to load country details", e);
+      loadPromise = null; // retry on the next mount
+    });
+  return loadPromise;
+}
+</script>
+
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 
@@ -10,54 +50,17 @@ const props = withDefaults(
   { showName: true, smallImage: false },
 );
 
-interface PexelsData {
-  url: string;
-  photographer: string;
-  photographer_url: string;
-  src: {
-    large: string;
-    medium: string;
-    small: string;
-  };
-  alt: string;
-}
-
-interface CountryDetail {
-  country: string;
-  iso_a3: string;
-  official_languages: string;
-  regional_languages: string;
-  local_image_path?: string;
-  pexels_data: PexelsData;
-}
-
-const allCountryDetails = ref<CountryDetail[]>([]);
 const imageError = ref(false);
 
-onMounted(async () => {
-  try {
-    const response = await fetch("/data/country_details_with_pics.json");
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    allCountryDetails.value = await response.json();
-  } catch (e) {
-    console.error("Failed to load country details", e);
-  }
-});
+onMounted(loadCountryDetails);
 
-const currentCountry = computed(() => {
-  if (!allCountryDetails.value.length) return null;
-  return allCountryDetails.value.find(
-    (c) => c.country.toLowerCase() === props.countryName.toLowerCase(),
-  );
-});
+const currentCountry = computed(() =>
+  allCountryDetails.value.find((c) => c.country === props.countryName),
+);
 
-const imageUrl = computed(() => {
-  if (!currentCountry.value) return null;
-  if (currentCountry.value.local_image_path) {
-    return "/" + currentCountry.value.local_image_path;
-  }
-  return currentCountry.value.pexels_data?.src?.medium ?? null;
-});
+const imageUrl = computed(() =>
+  currentCountry.value ? "/" + currentCountry.value.local_image_path : undefined,
+);
 
 // Reset error state when URL changes
 watch(imageUrl, () => {
@@ -78,12 +81,12 @@ watch(imageUrl, () => {
         :href="currentCountry.pexels_data.url"
         target="_blank"
         rel="noopener noreferrer"
-        class="block w-full aspect-video rounded-2xl border-3 border-pencil-lead overflow-hidden shadow-sm hover:opacity-95 transition-opacity relative group bg-sea-blue/10"
+        class="block w-full aspect-video rounded-2xl border-3 border-pencil-lead overflow-hidden shadow-sm hover:opacity-95 transition-opacity relative group"
         :class="smallImage ? 'max-w-[200px]' : 'max-w-xs'"
       >
         <!-- Image -->
         <img
-          v-if="imageUrl && !imageError"
+          v-if="!imageError"
           :src="imageUrl"
           :alt="currentCountry.pexels_data.alt"
           referrerpolicy="no-referrer"
@@ -98,7 +101,7 @@ watch(imageUrl, () => {
 
         <!-- Error State / Fallback -->
         <div
-          v-if="imageError || !imageUrl"
+          v-if="imageError"
           class="absolute inset-0 flex items-center justify-center bg-gray-200"
         >
           <span class="text-eraser-grey text-xs">Image unavailable</span>
@@ -132,7 +135,7 @@ watch(imageUrl, () => {
     <!-- Fallback if no country data -->
     <div
       v-else
-      class="w-full aspect-video rounded-2xl border-3 border-pencil-lead bg-sea-blue/10 flex items-center justify-center"
+      class="w-full aspect-video rounded-2xl border-3 border-pencil-lead flex items-center justify-center"
       :class="smallImage ? 'max-w-[200px]' : 'max-w-xs'"
     >
       <span class="text-eraser-grey text-sm font-bold uppercase tracking-wider">

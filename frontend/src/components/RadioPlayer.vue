@@ -162,7 +162,6 @@ onUnmounted(() => {
           <div class="magic-wave wave-2"></div>
         </div>
         <button
-          id="tour-skip-back-btn"
           type="button"
           class="relative z-10 flex items-center justify-center rounded-xl border-3 border-pencil-lead bg-white text-pencil-lead h-10 w-10 cursor-pointer active:brightness-90"
           @click="onPrevious"

@@ -8,6 +8,8 @@ python = "3.15"
 # keep in sync with frontend/package.json
 oxfmt = "0.77.0"
 ruff = "0.17.4"
+# Gradle for frontend/android (wrapper 8.14.3) rejects newer JDKs
+java = "temurin-21"
 
 # ---- frontend ----
 

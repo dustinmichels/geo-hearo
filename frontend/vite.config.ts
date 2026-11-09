@@ -1,7 +1,7 @@
 import tailwindcss from "@tailwindcss/vite";
 import vue from "@vitejs/plugin-vue";
 import { execSync } from "node:child_process";
-import { copyFileSync, readdirSync, rmSync } from "node:fs";
+import { readdirSync, rmSync } from "node:fs";
 import { fileURLToPath, URL } from "node:url";
 import { defineConfig, type PluginOption } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
@@ -37,12 +37,6 @@ export default defineConfig(({ mode }) => {
         },
       ]
     : [
-        {
-          name: "copy-404",
-          closeBundle() {
-            copyFileSync("dist/index.html", "dist/404.html");
-          },
-        },
         VitePWA({
           registerType: "autoUpdate",
           manifest: {

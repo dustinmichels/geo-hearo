@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { Haptics, ImpactStyle } from "@capacitor/haptics";
 import { ref } from "vue";
-import { isNative } from "../lib/platform";
+import { guessFeedback } from "../lib/haptics";
 import PanelFooter from "./Footer.vue";
 import GuessDisplay from "./GuessDisplay.vue";
 
@@ -11,11 +10,9 @@ const props = withDefaults(
   defineProps<{
     guesses: string[];
     withFooter?: boolean;
-    disabled?: boolean;
   }>(),
   {
     withFooter: true,
-    disabled: false,
   },
 );
 
@@ -32,12 +29,7 @@ const handleGuess = () => {
     isShaking.value = false;
   }, 500);
 
-  // navigator.vibrate is a no-op on iOS.
-  if (isNative) {
-    void Haptics.impact({ style: ImpactStyle.Medium });
-  } else if (navigator.vibrate) {
-    navigator.vibrate(200);
-  }
+  guessFeedback();
   emit("add-guess");
 };
 </script>
@@ -48,18 +40,15 @@ const handleGuess = () => {
       <!-- Input Area -->
       <div class="flex gap-3 items-center">
         <input
-          id="tour-guess-input"
           v-model="modelValue"
           placeholder="Select a country"
-          :disabled="guesses.length >= 5 || disabled"
+          :disabled="guesses.length >= 5"
           readonly
           @keypress.enter="handleGuess"
           class="flex-1 min-w-0 border-3 rounded-2xl py-3 px-4 !text-[18px] !leading-6 font-body text-pencil-lead placeholder:text-eraser-grey disabled:!text-eraser-grey disabled:cursor-not-allowed transition-colors bg-white"
           :class="modelValue ? 'border-[#f472b6]' : 'border-pencil-lead'"
         />
         <button
-          id="tour-guess-btn"
-          v-if="!disabled"
           @click="handleGuess"
           :disabled="!modelValue.trim() || guesses.length >= 5"
           :class="{ shake: isShaking }"

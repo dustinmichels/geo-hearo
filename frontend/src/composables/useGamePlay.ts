@@ -1,15 +1,14 @@
 import { App } from "@capacitor/app";
-import { Haptics, NotificationType } from "@capacitor/haptics";
 import type { PluginListenerHandle } from "@capacitor/core";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, type UnwrapNestedRefs } from "vue";
 import { offerDailyReminder } from "../lib/dailyReminder";
+import { roundResultFeedback } from "../lib/haptics";
 import { isNative } from "../lib/platform";
 import { trackDailyResult } from "../lib/supabase";
 import { useGameStore } from "../stores/game";
 import type { GamePhase } from "../types/geo";
-import { getColorForDistanceLevel } from "../utils/colors";
-import { getDistanceHint } from "../utils/geography";
+import { hintFor } from "../utils/guessHint";
 import { useCountryData } from "./useCountryData";
 import { useRadio } from "./useRadio";
 
@@ -20,7 +19,7 @@ interface GamePlayOptions {
   setupKeyboardShortcuts?: boolean;
 }
 
-export interface ModalConfig {
+interface ModalConfig {
   isWin: boolean;
   secretCountry?: string;
   dailyChallengeNumber?: number;
@@ -50,7 +49,7 @@ export function useGamePlay(options: GamePlayOptions) {
 
   // State
   const store = useGameStore();
-  const { roundFinished, gameHistory, gameStage } = storeToRefs(store);
+  const { gameHistory, gameStage } = storeToRefs(store);
   const { addToHistory, loadHistory } = store;
 
   const showStatsOverride = ref(false);
@@ -68,7 +67,6 @@ export function useGamePlay(options: GamePlayOptions) {
     currentStationIndex: currentStation,
     currentSeed,
     saveState,
-    checkGuess,
     restoreState,
     // Daily Challenge
     initDailyChallenge,
@@ -125,52 +123,12 @@ export function useGamePlay(options: GamePlayOptions) {
     saveState();
   };
 
+  const hint = (guess: string) => hintFor(guess, secretCountry.value, getFeature);
+
   const populateGuessColors = () => {
     guesses.value.forEach((guess) => {
-      if (guessColors.value[guess]) return;
-
-      // Explicit check for exact match (Win) -> Green
-      if (guess.toLowerCase() === secretCountry.value?.toLowerCase()) {
-        guessColors.value[guess] = "#4ade80"; // Green-400
-        return;
-      }
-
-      const secretFeature = getFeature(secretCountry.value);
-      const guessFeature = getFeature(guess);
-
-      if (secretFeature && guessFeature) {
-        const { level } = getDistanceHint(guessFeature, secretFeature);
-        const color = getColorForDistanceLevel(level);
-        guessColors.value[guess] = color;
-      } else {
-        guessColors.value[guess] = "#FB923C";
-      }
+      guessColors.value[guess] ??= hint(guess).color;
     });
-  };
-
-  const generateEmojiString = () => {
-    // Clone guesses to avoid modifying the reactive array during this operation if needed
-    const currentGuesses = [...guesses.value];
-
-    let emojiLine = "";
-    currentGuesses.forEach((guess) => {
-      // Check for win
-      if (guess.toLowerCase() === secretCountry.value?.toLowerCase()) {
-        emojiLine += "🟢";
-        return;
-      }
-
-      const secretFeature = getFeature(secretCountry.value);
-      const guessFeature = getFeature(guess);
-
-      if (secretFeature && guessFeature) {
-        const { emoji } = getDistanceHint(guessFeature, secretFeature);
-        emojiLine += emoji;
-      } else {
-        emojiLine += "⬜"; // Fallback
-      }
-    });
-    return emojiLine;
   };
 
   // currentSeed is YYYYMMDD as a number (e.g. 20260319) — convert to "2026-03-19"
@@ -180,19 +138,13 @@ export function useGamePlay(options: GamePlayOptions) {
   };
 
   const finishRound = (isWin: boolean) => {
-    if (isNative) {
-      void Haptics.notification({
-        type: isWin ? NotificationType.Success : NotificationType.Error,
-      });
-    }
-    const resultsGrid = generateEmojiString();
+    roundResultFeedback(isWin);
+    const resultsGrid = guesses.value.map((guess) => hint(guess).emoji).join("");
     let dayNumber: number | undefined;
     const gameMode = isDailyChallengeMode.value ? "daily" : "free";
     const isDaily = isDailyChallengeMode.value;
 
-    const numericScore =
-      guesses.value.findIndex((g) => g.toLowerCase() === secretCountry.value?.toLowerCase()) + 1 ||
-      6;
+    const numericScore = guesses.value.indexOf(secretCountry.value) + 1 || 6;
 
     let trackedPromise: Promise<boolean> | undefined;
     if (isDaily) {
@@ -224,28 +176,16 @@ export function useGamePlay(options: GamePlayOptions) {
   };
 
   const handleAddGuess = () => {
-    const guess = guessInput.value.trim();
+    const guess = guessInput.value;
     if (!guess || guesses.value.length >= 5) return;
 
-    if (checkGuess(guess)) {
+    if (guess === secretCountry.value) {
       addGuess(guess); // Ensure winning guess is added to state
       finishRound(true);
       return;
     }
 
-    const secretFeature = getFeature(secretCountry.value);
-    const guessFeature = getFeature(guess);
-
-    // Check for exact match first (Win condition color)
-    if (guess.toLowerCase() === secretCountry.value?.toLowerCase()) {
-      guessColors.value[guess] = "#4ade80";
-    } else if (secretFeature && guessFeature) {
-      const { level } = getDistanceHint(guessFeature, secretFeature);
-      const color = getColorForDistanceLevel(level);
-      guessColors.value[guess] = color;
-    } else {
-      guessColors.value[guess] = "#FB923C";
-    }
+    guessColors.value[guess] = hint(guess).color;
 
     addGuess(guess);
     guessInput.value = "";
@@ -258,16 +198,16 @@ export function useGamePlay(options: GamePlayOptions) {
   };
 
   const handleShowStats = () => {
-    const dailyItem = gameHistory.value.find((item) => item.mode === "daily");
-    if (!dailyItem) return;
+    const item = dailyItem.value;
+    if (!item) return;
 
     // Results are recorded under the Eastern date (seed), not the UTC timestamp's date
-    const challengeDate = getEasternDateString(new Date(dailyItem.date));
+    const challengeDate = getEasternDateString(new Date(item.date));
     const dayNumber = getDailyChallengeNumber();
 
     setModalConfig({
-      isWin: dailyItem.score.includes("🟢"),
-      secretCountry: dailyItem.country,
+      isWin: item.numericScore < 6,
+      secretCountry: item.country,
       dailyChallengeNumber: dayNumber,
       isDailyChallenge: true,
       challengeDate,
@@ -284,15 +224,6 @@ export function useGamePlay(options: GamePlayOptions) {
     store.gameStage = "listening";
     saveState();
     options.onModalClose?.();
-  };
-
-  const handleModalConfirm = () => {
-    clearState();
-    guessInput.value = "";
-    guessColors.value = {};
-    isPlaying.value = false;
-    options.onNewGame?.();
-    selectRandomCountry();
   };
 
   const handleCountrySelect = (name: string) => {
@@ -368,9 +299,7 @@ export function useGamePlay(options: GamePlayOptions) {
           // Re-populate modal config if we're restoring into seeResults
           if (gameStage.value === "seeResults") {
             setModalConfig({
-              isWin:
-                roundFinished.value &&
-                guesses.value.some((g) => g.toLowerCase() === secretCountry.value?.toLowerCase()),
+              isWin: guesses.value.includes(secretCountry.value),
               secretCountry: secretCountry.value,
               dailyChallengeNumber: dailyChallengeNumber.value,
               isDailyChallenge: true,
@@ -393,9 +322,7 @@ export function useGamePlay(options: GamePlayOptions) {
             const isDailyHistory = lastHistory?.mode === "daily";
 
             setModalConfig({
-              isWin:
-                roundFinished.value &&
-                guesses.value.some((g) => g.toLowerCase() === secretCountry.value?.toLowerCase()),
+              isWin: guesses.value.includes(secretCountry.value),
               secretCountry: secretCountry.value,
               isDailyChallenge: isDailyHistory,
               challengeDate: isDailyHistory ? getChallengeDate() : undefined,
@@ -425,10 +352,8 @@ export function useGamePlay(options: GamePlayOptions) {
     gameHistory,
     guesses,
     currentStation,
-    currentStations,
     currentStationUrl,
     secretCountry,
-    debugCountry,
     activeStation,
     dailyItem,
     mapProps,
@@ -439,7 +364,6 @@ export function useGamePlay(options: GamePlayOptions) {
     handleAddGuess,
     handleModalClose,
     handleShowStats,
-    handleModalConfirm,
     handleCountrySelect,
     handleNewGame: () => {
       clearState();

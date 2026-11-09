@@ -3,8 +3,7 @@ import { computed } from "vue";
 import { useCountryData } from "../composables/useCountryData";
 import { useDistanceUnit } from "../composables/useDistanceUnit";
 import { useRadio } from "../composables/useRadio";
-import { getColorForDistanceLevel } from "../utils/colors";
-import { getDistanceHint } from "../utils/geography";
+import { hintFor } from "../utils/guessHint";
 
 const props = defineProps<{
   guesses: string[];
@@ -14,26 +13,6 @@ const maxGuesses = 5;
 const { secretCountry } = useRadio();
 const { getFeature } = useCountryData();
 const { toggleUnit, formatDistance } = useDistanceUnit();
-
-const getHintForGuess = (guessName: string | undefined) => {
-  if (!guessName || !secretCountry.value) return null;
-
-  // Exact match override (Win)
-  if (guessName.toLowerCase() === secretCountry.value.toLowerCase()) {
-    return {
-      emoji: "🟢",
-      level: 0, // Special case
-      distance: 0,
-    };
-  }
-
-  const guessFeature = getFeature(guessName);
-  const secretFeature = getFeature(secretCountry.value);
-
-  if (!guessFeature || !secretFeature) return null;
-
-  return getDistanceHint(guessFeature, secretFeature);
-};
 
 const guessRows = computed(() => {
   return Array.from({ length: maxGuesses }, (_, i) => {
@@ -45,29 +24,20 @@ const guessRows = computed(() => {
       };
     }
 
-    const hint = getHintForGuess(guessName);
-    const isDark = hint != null && hint.level >= 5;
-    const isExact = guessName.toLowerCase() === secretCountry.value?.toLowerCase();
-
-    let color = "#FFFFFF";
-    if (isExact) {
-      color = "#4ade80"; // Green-400
-    } else if (hint) {
-      color = getColorForDistanceLevel(hint.level);
-    }
-
-    const isTouching = hint?.distance === 0 && hint?.level !== 0;
-    const formattedDistance = hint ? formatDistance(hint.distance) : "";
+    const hint = hintFor(guessName, secretCountry.value, getFeature);
+    const isDark = hint.level != null && hint.level >= 5;
+    const isTouching = hint.distance === 0 && hint.level !== 0;
+    const formattedDistance = hint.distance != null ? formatDistance(hint.distance) : "";
 
     return {
       hasGuess: true,
       num: i + 1,
       name: guessName,
-      color,
+      color: hint.color,
       isDark,
       isTouching,
       formattedDistance,
-      emoji: hint?.emoji || "",
+      emoji: hint.emoji,
     };
   });
 });

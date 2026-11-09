@@ -14,7 +14,7 @@ const props = defineProps<{
   guessColors?: Record<string, string>; // ADMIN -> Color
   selectedCountry?: string; // ADMIN name
   secretCountry?: string; // ADMIN name
-  defaultProjection?: "globe" | "mercator";
+  defaultProjection: "globe" | "mercator";
   stations?: RadioStation[];
   areStationsVisible?: boolean;
   activeStationId?: string;
@@ -28,9 +28,9 @@ const { geoJsonData } = useCountryData();
 const mapContainer = useTemplateRef<HTMLElement>("mapContainer");
 const map = shallowRef<maplibregl.Map | null>(null);
 const loaded = ref(false);
-const resizeObserver = shallowRef<ResizeObserver | null>(null);
 const showReloadInfo = ref(false);
-const isGlobe = ref(false);
+const isGlobe = ref(props.defaultProjection === "globe");
+let resizeObserver: ResizeObserver | undefined;
 
 let loadingTimeout: ReturnType<typeof setTimeout> | null = null;
 let spinFrameId: number | null = null;
@@ -202,23 +202,16 @@ watch(
 onMounted(() => {
   if (!mapContainer.value) return;
 
-  // Default to globe on mobile, flat map on desktop
-  if (props.defaultProjection) {
-    isGlobe.value = props.defaultProjection === "globe";
-  } else {
-    isGlobe.value = window.innerWidth < 768;
-  }
-
   // Start initialization
   initMap();
 
   // Setup resize observer
-  resizeObserver.value = new ResizeObserver(() => {
+  resizeObserver = new ResizeObserver(() => {
     if (map.value) {
       map.value.resize();
     }
   });
-  resizeObserver.value.observe(mapContainer.value);
+  resizeObserver.observe(mapContainer.value);
 });
 
 const initMap = () => {
@@ -259,7 +252,7 @@ const initMap = () => {
       pitchWithRotate: false,
       touchZoomRotate: true,
       keyboard: false,
-      attributionControl: false,
+      attributionControl: { compact: true },
     });
 
     // Disable touch rotation but keep pinch-to-zoom
@@ -570,8 +563,6 @@ const setupInteractions = () => {
 
   // Start idle spin
   startSpinning();
-
-  // Sync zoom level
 };
 
 // --- Idle globe spin ---
@@ -683,7 +674,7 @@ defineExpose({ resetView, zoomToStations: zoomToStationsWrapped });
 onUnmounted(() => {
   stopSpinning();
   if (loadingTimeout) clearTimeout(loadingTimeout);
-  resizeObserver.value?.disconnect();
+  resizeObserver?.disconnect();
   cleanupStations();
   map.value?.remove();
 });
@@ -703,7 +694,7 @@ onUnmounted(() => {
       </div>
       <div
         v-if="showReloadInfo"
-        class="flex flex-col items-center gap-2 animate-in fade-in duration-500"
+        class="flex flex-col items-center gap-2"
       >
         <p class="text-slate-400 text-xs">Taking a while?</p>
         <button
@@ -744,7 +735,3 @@ onUnmounted(() => {
     </div>
   </div>
 </template>
-
-<style scoped>
-/* MapLibre attribution is kept visible for license compliance */
-</style>

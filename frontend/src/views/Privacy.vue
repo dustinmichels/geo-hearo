@@ -4,6 +4,57 @@ import HamburgerMenu from "../components/HamburgerMenu.vue";
 
 const router = useRouter();
 
+const link = (href: string, text: string) =>
+  `<a href="${href}" target="_blank" class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors">${text}</a>`;
+
+const sections: { emoji: string; title: string; content: string | string[] }[] = [
+  {
+    emoji: "🙈",
+    title: "The Short Version",
+    content:
+      "GeoHearo, on the web and in the iOS and Android apps, has no accounts and no ads. It doesn't know who you are, and nothing is sold to anyone.",
+  },
+  {
+    emoji: "🔒",
+    title: "Analytics",
+    content: [
+      `I do some simple, privacy-preserving analytics through ${link("https://plausible.io", "Plausible.io")}: which pages are visited. No cookies, no device identifiers, and no effort is made to track users around the web (as with Google Analytics). In the apps, each page view also notes the platform (iOS or Android).`,
+      `You can see what I see in the analytics dashboard here: ${link("https://plausible.io/geohearo.com", "https://plausible.io/geohearo.com")}`,
+    ],
+  },
+  {
+    emoji: "🏆",
+    title: "Daily Challenge Stats",
+    content:
+      "When you finish a daily challenge, the game sends the challenge date and your number of guesses to a small database (hosted by Supabase), so everyone can see how the day went. Nothing else is sent with it: no name, device ID or location.",
+  },
+  {
+    emoji: "💾",
+    title: "On Your Device",
+    content:
+      "Your game history, settings and whether you've played today's challenge are stored on your device: in browser storage on the web, and also in the app's own storage in the apps. They are never uploaded. Clearing your browser data or deleting the app deletes them.",
+  },
+  {
+    emoji: "🔔",
+    title: "Notifications (Apps)",
+    content:
+      'The apps can remind you when a new daily challenge is live. They ask first, after your first daily. Reminders are scheduled on your phone: there is no push server and nothing is sent anywhere. Turn them off with "Daily reminder" in the menu or in your phone\'s settings.',
+  },
+  {
+    emoji: "📡",
+    title: "Other Services",
+    content: [
+      "Radio streams play directly from each station's own server, and \"Visit website\" opens the station's site. Like any web request, these servers see your IP address, and their own privacy policies apply.",
+      "Map tiles come from Esri (ArcGIS), map labels from MapLibre and fonts from Google Fonts. Station and country data are loaded from geohearo.com (hosted by Netlify).",
+    ],
+  },
+  {
+    emoji: "✉️",
+    title: "Contact",
+    content: `Questions about privacy? Email me at ${link("mailto:bronco-eaten-bash@duck.com", "bronco-eaten-bash@duck.com")}.`,
+  },
+];
+
 const handleBackHome = () => {
   router.push({ name: "Home" });
 };
@@ -16,7 +67,7 @@ const handlePlay = () => {
   <div
     class="min-h-screen w-screen flex flex-col items-center justify-center px-6 pt-safe-6 pb-safe-6 md:px-12 md:pt-safe-12 md:pb-safe-12 overflow-x-hidden relative"
   >
-    <!-- Hamburger Menu (Mobile Only) -->
+    <!-- Hamburger Menu -->
     <div class="fixed top-safe-4 left-safe-4 z-[9999]">
       <HamburgerMenu />
     </div>
@@ -42,34 +93,34 @@ const handlePlay = () => {
       <!-- Content Sections -->
       <div class="space-y-8 md:space-y-10">
         <section
+          v-for="(section, index) in sections"
+          :key="index"
           class="bg-paper-white border-3 border-pencil-lead rounded-3xl p-6 md:p-8 shadow-[6px_6px_0px_0px_#334155] animate-scale-up-fade"
-          style="animation-delay: 0.2s"
+          :style="{ animationDelay: `${0.2 + index * 0.15}s` }"
         >
           <h2
             class="text-2xl md:text-3xl font-heading text-pencil-lead mb-4 flex items-center gap-3"
           >
-            <span class="text-3xl md:text-4xl">🔒</span>
-            Analytics
+            <span class="text-3xl md:text-4xl">{{ section.emoji }}</span>
+            {{ section.title }}
           </h2>
-          <div class="text-base md:text-lg text-pencil-lead/90 font-body leading-relaxed">
-            I do some simple, privacy-preserving analytics through
-            <a
-              href="https://plausible.io"
-              target="_blank"
-              class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors"
-              >Plausible.io</a
-            >. No effort is made to track users around the web (as with Google Analytics). <br />
-            <br />
-            You can see what I see in the analytics dashboard here:
-            <a
-              href="https://plausible.io/geohearo.com"
-              target="_blank"
-              class="text-gumball-blue underline hover:text-gumball-blue/80 transition-colors"
+          <ul v-if="Array.isArray(section.content)" class="space-y-3">
+            <li
+              v-for="(item, i) in section.content"
+              :key="i"
+              class="flex items-start gap-3 text-base md:text-lg text-pencil-lead/90 font-body leading-relaxed"
             >
-              https://plausible.io/geohearo.com
-            </a>
-          </div>
+              <span class="text-gumball-blue shrink-0 mt-[6px] text-sm">⟡</span>
+              <span v-html="item"></span>
+            </li>
+          </ul>
+          <div
+            v-else
+            class="text-base md:text-lg text-pencil-lead/90 font-body leading-relaxed"
+            v-html="section.content"
+          ></div>
         </section>
+        <p class="text-center text-sm text-pencil-lead/60 font-body">Last updated November 2026</p>
       </div>
 
       <!-- Action Buttons -->
@@ -92,91 +143,3 @@ const handlePlay = () => {
     </main>
   </div>
 </template>
-
-<style scoped>
-.hover-scale:hover {
-  transform: scale(1.05) rotate(-2deg);
-  box-shadow: 0 12px 0 0 #334155;
-}
-
-.hover-scale:active {
-  transform: scale(0.95);
-  box-shadow: 0 4px 0 0 #334155;
-}
-
-/* Animations */
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes scaleUpFade {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes popIn {
-  from {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.animate-slide-up {
-  opacity: 0;
-  animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-scale-up-fade {
-  opacity: 0;
-  animation: scaleUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-pop-in-delayed {
-  opacity: 0;
-  animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s forwards;
-}
-
-/* Blobs */
-@keyframes blobMove1 {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(50px, 30px) scale(1.1);
-  }
-}
-.animate-blob1 {
-  animation: blobMove1 16s ease-in-out infinite;
-}
-
-@keyframes blobMove2 {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(-30px, -40px) scale(1.2);
-  }
-}
-.animate-blob2 {
-  animation: blobMove2 20s ease-in-out infinite;
-}
-</style>

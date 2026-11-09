@@ -18,6 +18,19 @@ const config: CapacitorConfig = {
       // the WebView there instead. On newer WebViews it honours viewport-fit=cover.
       insetsHandling: "native",
       initialViewportFitValueHint: "cover",
+      // Dark status bar text: the app is light-only, also when the phone is in dark mode.
+      style: "LIGHT",
+    },
+    SplashScreen: {
+      // Hidden by `setupNativeApp` once the first route has rendered.
+      launchAutoHide: false,
+      backgroundColor: "#fff9f5",
+    },
+    LocalNotifications: {
+      // Android status-bar icon: white GH on transparent (res/drawable-*dpi/ic_stat_geohearo.png),
+      // tinted with the logo blue in the notification shade. Ignored on iOS.
+      smallIcon: "ic_stat_geohearo",
+      iconColor: "#0000ff",
     },
   },
 };

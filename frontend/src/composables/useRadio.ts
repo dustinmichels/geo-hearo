@@ -24,10 +24,36 @@ export class SeededRandom {
   }
 }
 
+/**
+ * Deterministic pick for a seed: a country from the sorted `names`, then up to 5
+ * distinct station offsets within it. Every player gets the same daily from this,
+ * so its output must not change. `forcedCountry` (debug) skips the country draw.
+ */
+export function pickCountryAndStations(
+  seed: number,
+  names: string[],
+  countries: IndexStructure["countries"],
+  forcedCountry?: string,
+): { country: string; stationIndices: number[] } | null {
+  const rng = new SeededRandom(seed);
+  const country =
+    forcedCountry && names.includes(forcedCountry)
+      ? forcedCountry
+      : names[rng.nextInt(names.length)];
+  const countryData = country ? countries[country] : undefined;
+  if (!country || !countryData) return null;
+
+  const pool = Array.from({ length: countryData.count }, (_, i) => i);
+  const stationIndices: number[] = [];
+  for (let i = 0; i < Math.min(5, countryData.count); i++) {
+    stationIndices.push(pool.splice(rng.nextInt(pool.length), 1)[0]!);
+  }
+  return { country, stationIndices };
+}
+
 // Data Cache (kept local as it is resource data, not game state)
 const countriesIndex = ref<IndexStructure | null>(null);
 const countryList = ref<string[]>([]);
-const isLoading = ref(false);
 
 const STORAGE_KEY = "geo_hearo_state";
 export const STORAGE_KEY_DAILY_DATE = "dailyChallengeDate";
@@ -70,7 +96,6 @@ export function useRadio() {
   const loadStations = async () => {
     if (countriesIndex.value) return; // Already loaded index
 
-    isLoading.value = true;
     try {
       // 1. Load Index
       const indexResponse = await fetch(remoteDataUrl("index.json"));
@@ -83,8 +108,6 @@ export function useRadio() {
       // after daily challenge mode is determined
     } catch (error) {
       console.error("Failed to load data:", error);
-    } finally {
-      isLoading.value = false;
     }
   };
 
@@ -115,59 +138,31 @@ export function useRadio() {
     if (!countriesIndex.value) return;
     if (store.currentSeed === seed && store.secretCountry) return;
 
-    const rng = new SeededRandom(seed);
     store.currentSeed = seed;
 
     const idx = countriesIndex.value;
-    const countries = idx.countries;
-    const names = countryList.value;
-    if (names.length === 0) {
-      console.warn("No countries found in index");
-      isLoading.value = false;
-      return;
-    }
-
-    const envCountry = import.meta.env.VITE_SECRET_COUNTRY;
-    const countryName =
-      envCountry && names.includes(envCountry) ? envCountry : names[rng.nextInt(names.length)];
-
-    if (!countryName) {
-      console.error("Failed to select country");
-      isLoading.value = false;
+    const picked = pickCountryAndStations(
+      seed,
+      countryList.value,
+      idx.countries,
+      import.meta.env.VITE_SECRET_COUNTRY,
+    );
+    if (!picked) {
+      console.error(`No country picked for seed ${seed}`);
       return;
     }
 
     store.guesses = [];
-    store.secretCountry = countryName;
+    store.secretCountry = picked.country;
     store.currentStationIndex = 3;
 
-    const countryData = countries[countryName];
-    if (!countryData) {
-      console.error(`Missing data for country: ${countryName}`);
-      isLoading.value = false;
-      return;
-    }
-
-    const { start, count, file: fileIndex } = countryData;
-    const targetCount = Math.min(5, count);
-    const selectedIndices: number[] = [];
-    const pool = Array.from({ length: count }, (_, i) => i);
-
-    for (let i = 0; i < targetCount; i++) {
-      const poolIdx = rng.nextInt(pool.length);
-      const selectedIndex = pool.splice(poolIdx, 1)[0];
-      if (selectedIndex !== undefined) {
-        selectedIndices.push(selectedIndex);
-      }
-    }
-
-    isLoading.value = true;
+    const { start, file: fileIndex } = idx.countries[picked.country]!;
     try {
       const lineLength = idx.config.line_length;
       const DATA_URL = remoteDataUrl(`stations_${fileIndex}.jsonl`);
 
       const stations = await Promise.all(
-        selectedIndices.map((offsetIdx) => {
+        picked.stationIndices.map((offsetIdx) => {
           const stationOffset = start + offsetIdx * lineLength;
           return fetchStationAt(DATA_URL, stationOffset, lineLength);
         }),
@@ -177,24 +172,13 @@ export function useRadio() {
       updatePreconnectLinks(stations);
     } catch (err) {
       console.error("Error fetching stations:", err);
-    } finally {
-      isLoading.value = false;
     }
   };
 
   /**
    * Start a new round: pick a country (optionally from a seed) and persist to sessionStorage.
    */
-  const selectRandomCountry = async (seedInput?: number | string) => {
-    let seed: number;
-    if (typeof seedInput === "number") {
-      seed = seedInput;
-    } else if (typeof seedInput === "string") {
-      seed = parseInt(seedInput, 10);
-    } else {
-      seed = Math.floor(Math.random() * 10000000);
-    }
-
+  const selectRandomCountry = async (seed: number = Math.floor(Math.random() * 10000000)) => {
     await loadCountryBySeed(seed);
     saveState();
   };
@@ -251,26 +235,11 @@ export function useRadio() {
   };
 
   const addGuess = (guessAdmin: string) => {
-    if (!guessAdmin) return;
-    // Avoid duplicates
-    if (!guesses.value.includes(guessAdmin)) {
-      store.addGuess(guessAdmin);
-      saveState();
-    }
-  };
-
-  const checkGuess = (guessAdmin: string): boolean => {
-    if (!guessAdmin) return false;
-
-    // Direct match check (ADMIN === ADMIN)
-    if (guessAdmin === secretCountry.value) return true;
-
-    return false;
+    store.addGuess(guessAdmin);
+    saveState();
   };
 
   // --- Daily Challenge Logic ---
-
-  // Refactor note: we use local '2026-02-02' construction in getDailyChallengeNumber directly.
 
   /**
    * Returns the current date parts (year, month, day) in US/Eastern time.
@@ -368,7 +337,6 @@ export function useRadio() {
     secretCountry,
     currentStationIndex,
     currentSeed,
-    isLoading,
     loadStations,
     selectRandomCountry,
     guesses,
@@ -376,7 +344,6 @@ export function useRadio() {
     saveState,
     clearState,
     restoreState,
-    checkGuess,
     // Daily Challenge
     isDailyChallengeMode,
     dailyChallengeNumber,
@@ -384,7 +351,6 @@ export function useRadio() {
     completeDailyChallenge,
     getDailyChallengeSeed,
     getDailyChallengeNumber,
-    getEasternDateParts,
     getEasternDateString,
     getNextEasternMidnight,
   };

@@ -20,9 +20,7 @@ const steps = [
   },
 ];
 
-const handleTuneIn = (_event: Event) => {
-  // Simple click animation feedback handled by :active CSS or small JS delay if critical
-  // For now, just navigate immediately as CSS active state provides feedback
+const handleTuneIn = () => {
   router.push({ name: "Play" });
 };
 </script>
@@ -30,7 +28,7 @@ const handleTuneIn = (_event: Event) => {
   <div
     class="min-h-screen w-screen no-scroll-container flex flex-col items-center justify-center px-6 pt-safe-6 pb-safe-6 md:px-12 md:pt-safe-12 md:pb-safe-12 overflow-x-hidden relative"
   >
-    <!-- Hamburger Menu (Mobile Only) -->
+    <!-- Hamburger Menu -->
     <div class="fixed top-safe-4 left-safe-4 z-[9999]">
       <HamburgerMenu />
     </div>
@@ -47,7 +45,7 @@ const handleTuneIn = (_event: Event) => {
     <main class="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-16 items-center">
       <!-- Globe Section: Top on Mobile, Right on Desktop -->
       <div class="order-1 lg:order-2 flex justify-center items-center py-2 lg:py-0">
-        <div class="relative scale-100 sm:scale-100 animate-fade-in-delayed">
+        <div class="relative animate-fade-in-delayed">
           <!-- Squishy Background Glow -->
           <div
             class="absolute inset-0 bg-mint-shake rounded-full blur-3xl opacity-25 scale-125"
@@ -77,7 +75,8 @@ const handleTuneIn = (_event: Event) => {
             class="hidden lg:flex absolute inset-0 z-30 items-center justify-center gap-4 sm:gap-6 pointer-events-none"
           >
             <div
-              class="relative group cursor-pointer pointer-events-auto animate-pop-in-delayed hover-scale"
+              class="relative group cursor-pointer pointer-events-auto animate-pop-in-delayed"
+              style="animation-duration: 0.5s; animation-delay: 0.6s"
               @click="handleTuneIn"
             >
               <div class="magic-container">
@@ -85,7 +84,7 @@ const handleTuneIn = (_event: Event) => {
                 <div class="magic-wave wave-2 rounded-[30px] sm:rounded-[36px]"></div>
               </div>
               <button
-                class="btn-pressable bg-yuzu-yellow px-12 sm:px-16 py-6 sm:py-8 rounded-[30px] sm:rounded-[36px] text-4xl sm:text-6xl btn-text uppercase tracking-widest text-pencil-lead relative z-10 block transition-transform duration-200"
+                class="btn-pressable hover-scale bg-yuzu-yellow px-12 sm:px-16 py-6 sm:py-8 rounded-[30px] sm:rounded-[36px] text-4xl sm:text-6xl btn-text uppercase tracking-widest text-pencil-lead relative z-10 block transition-transform duration-200"
               >
                 PLAY
               </button>
@@ -99,6 +98,7 @@ const handleTuneIn = (_event: Event) => {
         <div class="space-y-6 lg:space-y-10">
           <h1
             class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-[1.1] tracking-tight text-pencil-lead animate-slide-up"
+            style="animation-duration: 0.6s"
           >
             <span class="text-gumball-blue">GeoHearo</span> is the geo-guessing game where you
             <span class="text-gumball-blue inline-block italic">win with your ears.</span>
@@ -129,7 +129,8 @@ const handleTuneIn = (_event: Event) => {
         <div class="lg:hidden space-y-6 sm:space-y-8">
           <div class="flex justify-center pt-0 pb-6 gap-4 sm:gap-6">
             <div
-              class="relative group cursor-pointer animate-pop-in-late hover-scale"
+              class="relative group cursor-pointer animate-pop-in-delayed"
+              style="animation-duration: 0.5s; animation-delay: 0.75s"
               @click="handleTuneIn"
             >
               <div class="magic-container">
@@ -137,7 +138,7 @@ const handleTuneIn = (_event: Event) => {
                 <div class="magic-wave wave-2 rounded-[30px] sm:rounded-[36px]"></div>
               </div>
               <button
-                class="btn-pressable bg-yuzu-yellow px-12 sm:px-16 py-6 sm:py-8 rounded-[30px] sm:rounded-[36px] text-4xl sm:text-6xl btn-text uppercase tracking-widest text-pencil-lead relative z-10 block transition-transform duration-200"
+                class="btn-pressable hover-scale bg-yuzu-yellow px-12 sm:px-16 py-6 sm:py-8 rounded-[30px] sm:rounded-[36px] text-4xl sm:text-6xl btn-text uppercase tracking-widest text-pencil-lead relative z-10 block transition-transform duration-200"
               >
                 PLAY
               </button>
@@ -155,16 +156,6 @@ const handleTuneIn = (_event: Event) => {
 </template>
 
 <style scoped>
-.hover-scale:hover .btn-pressable {
-  transform: scale(1.05) rotate(-2deg);
-  box-shadow: 0 12px 0 0 #334155;
-}
-
-.hover-scale:active .btn-pressable {
-  transform: scale(0.95);
-  box-shadow: 0 4px 0 0 #334155;
-}
-
 /* Badge Style and List Item Hover */
 .step-badge {
   display: flex;
@@ -214,22 +205,7 @@ const handleTuneIn = (_event: Event) => {
   }
 }
 
-/* ------------------
-   New CSS Animations
-   ------------------ */
-
-/* Fade/Slide In Animations */
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
+/* Entrance animations (slideUp and popIn are in style.css) */
 @keyframes slideInRight {
   from {
     opacity: 0;
@@ -250,21 +226,6 @@ const handleTuneIn = (_event: Event) => {
   }
 }
 
-@keyframes popIn {
-  from {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.animate-slide-up {
-  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
 .animate-slide-in-right {
   opacity: 0; /* Starts hidden */
   animation: slideInRight 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
@@ -273,16 +234,6 @@ const handleTuneIn = (_event: Event) => {
 .animate-fade-in-delayed {
   opacity: 0;
   animation: fadeIn 1s ease-out 0.5s forwards;
-}
-
-.animate-pop-in-delayed {
-  opacity: 0;
-  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.6s forwards;
-}
-
-.animate-pop-in-late {
-  opacity: 0;
-  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.75s forwards;
 }
 
 /* Floating / Continuous Animations */
@@ -327,32 +278,5 @@ const handleTuneIn = (_event: Event) => {
 }
 .animate-float-sticker2 {
   animation: floatSticker2 7s ease-in-out 1s infinite normal backwards;
-}
-
-/* Blobs */
-@keyframes blobMove1 {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(50px, 30px) scale(1.1);
-  }
-}
-.animate-blob1 {
-  animation: blobMove1 16s ease-in-out infinite;
-}
-
-@keyframes blobMove2 {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(-30px, -40px) scale(1.2);
-  }
-}
-.animate-blob2 {
-  animation: blobMove2 20s ease-in-out infinite;
 }
 </style>
