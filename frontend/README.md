@@ -14,7 +14,7 @@ bun run fmt       # Format code
 
 ## Mobile app (iOS and Android, Capacitor)
 
-The same frontend runs as an iOS and Android app via [Capacitor](https://capacitorjs.com/). Plan and status: `todo/mobile-plan.md`.
+The same frontend runs as an iOS and Android app via [Capacitor](https://capacitorjs.com/). Remaining release work: `todo/mobile-release.md`.
 
 Prerequisites:
 

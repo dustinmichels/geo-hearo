@@ -1,10 +1,10 @@
 # Store listing content (draft)
 
-Copy and form answers for the App Store and Google Play listings
-([mobile-plan.md](mobile-plan.md) Phase 5, [app-store-ios.md](app-store-ios.md)
-§5). Character counts are checked against each store's limit. Edit freely;
-the facts (station count, guess count, data collection) are taken from the code
-and About page as of 2026-11-09.
+Copy and form answers for the App Store and Google Play listings (checklist in
+[mobile-release.md](mobile-release.md) §4–5). Character counts are checked
+against each store's limit. Edit freely; the facts (station count, guess
+count, data collection) are taken from the code and About page as of
+2026-11-09. Needs your review before pasting into the stores.
 
 ---
 
@@ -74,13 +74,13 @@ and About page as of 2026-11-09.
 
 ## Graphics
 
-| Asset                       | Store     | Size                              | Status                                                                                 |
-| --------------------------- | --------- | --------------------------------- | -------------------------------------------------------------------------------------- |
-| App icon                    | App Store | 1024×1024, no alpha               | In the Xcode asset catalog (Phase 4)                                                   |
-| Phone screenshots, 6.9"     | App Store | 1320×2868 portrait, 1–10          | `store/screenshots/ios-6.9/` (see below)                                               |
-| Hi-res icon                 | Play      | 512×512, 32-bit PNG               | `store/play-icon-512.png` (from `frontend/assets/icon-only.png`)                       |
-| Feature graphic             | Play      | 1024×500 JPEG/PNG, no alpha       | `store/feature-graphic.png`                                                            |
-| Phone screenshots           | Play      | 2–8, ≤2:1 (9:16 recommended), no alpha | `store/screenshots/android-phone/` (7 shots, 1080×1920, 24-bit PNG; emulator, 9:41 status bar) |
+| Asset                   | Store     | Size                                   | Status                                                                                         |
+| ----------------------- | --------- | -------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| App icon                | App Store | 1024×1024, no alpha                    | In the Xcode asset catalog (Phase 4)                                                           |
+| Phone screenshots, 6.9" | App Store | 1320×2868 portrait, 1–10               | `store/screenshots/ios-6.9/` (see below)                                                       |
+| Hi-res icon             | Play      | 512×512, 32-bit PNG                    | `store/play-icon-512.png` (from `frontend/assets/icon-only.png`)                               |
+| Feature graphic         | Play      | 1024×500 JPEG/PNG, no alpha            | `store/feature-graphic.png`                                                                    |
+| Phone screenshots       | Play      | 2–8, ≤2:1 (9:16 recommended), no alpha | `store/screenshots/android-phone/` (7 shots, 1080×1920, 24-bit PNG; emulator, 9:41 status bar) |
 
 ---
 
@@ -115,12 +115,12 @@ live third-party radio where the form allows a note.
 
 What the app sends, from the code:
 
-| Data                                                     | Where                                              | Linked to a person | Purpose   |
-| -------------------------------------------------------- | -------------------------------------------------- | ------------------ | --------- |
-| Page views + `platform` (`ios`/`android`)                | Plausible (`main.ts`)                              | No: no cookies/IDs | Analytics |
-| Daily challenge date, guess count (`increment_daily_stats`) | Supabase daily stats                            | No                 | Analytics |
-| Game history, settings, reminder on/off                  | On the device only (`localStorage` + Preferences)  | n/a, not collected | —         |
-| IP address (network-level, to stream/tile/font servers)  | Radio stations, ArcGIS tiles, Google Fonts         | Not by GeoHearo    | —         |
+| Data                                                        | Where                                             | Linked to a person | Purpose   |
+| ----------------------------------------------------------- | ------------------------------------------------- | ------------------ | --------- |
+| Page views + `platform` (`ios`/`android`)                   | Plausible (`main.ts`)                             | No: no cookies/IDs | Analytics |
+| Daily challenge date, guess count (`increment_daily_stats`) | Supabase daily stats                              | No                 | Analytics |
+| Game history, settings, reminder on/off                     | On the device only (`localStorage` + Preferences) | n/a, not collected | —         |
+| IP address (network-level, to stream/tile/font servers)     | Radio stations, ArcGIS tiles, Google Fonts        | Not by GeoHearo    | —         |
 
 ### App Store "App Privacy"
 
@@ -160,5 +160,16 @@ What the app sends, from the code:
 
 ## Review notes
 
-App Store: see app-store-ios.md §8. Play has no review notes field for
-production; the "App access" answer above covers it.
+App Store (App Review Information → Notes):
+
+- Native features: daily local notification reminder, haptics on
+  guess/win/lose, native share sheet for results, map and country data
+  bundled in the app, game history kept on the device.
+- How to test: "Tap Play, listen to the station, pick a country on the map.
+  If a station is silent, tap skip; streams are live third-party broadcasts."
+- Content: the app plays publicly broadcast internet radio streams listed in
+  public directories (credited on the About page); it does not record,
+  download, or redistribute audio. Relevant guideline: 5.2.3.
+
+Play has no review notes field for production; the "App access" answer above
+covers it.
