@@ -28,35 +28,34 @@ Simulator/emulator smoke tests pass on iPhone 17 Pro (iOS 26.5) and Pixel 9
 
 ## 1. Toolchain and accounts (do early)
 
-- [ ] iOS simulator runtime: Xcode 27.2 is installed (macOS 27.2.1) but
-      `xcrun simctl list runtimes` is empty. Run `xcodebuild -downloadPlatform iOS`.
-- [ ] Xcode → Settings → Accounts: add the Apple ID. Target **App** → Signing &
-      Capabilities: Team, "Automatically manage signing" on. Commit the
-      resulting `DEVELOPMENT_TEAM` in `project.pbxproj` (not set yet).
+- [x] iOS simulator runtime: iOS 27.2 installed (`xcodebuild -downloadPlatform iOS`).
+- [x] `DEVELOPMENT_TEAM = LLM5F36KYW` set for target **App** (Debug and
+      Release) in `project.pbxproj`; signing stays automatic.
+- [ ] Xcode → Settings → Accounts: add the Apple ID (no signing identity on
+      this Mac yet). Then open Signing & Capabilities once so Xcode creates the
+      Apple Development certificate and provisioning profile.
 - [ ] Register a physical iPhone (first run with automatic signing does it).
-- [ ] Apple Developer account → Membership details: active, note Team ID and
-      renewal date. Enrolment type: **Individual** shows your legal name as
-      seller; **Organization** needs a D-U-N-S number. Decide now.
+- [x] Apple Developer Program: **Individual** (legal name shown as seller),
+      Team ID `LLM5F36KYW`. Still note the renewal date (§6).
 - [ ] Accept pending agreements (developer account and App Store Connect →
       Business). Uploads fail while one is unaccepted.
-- [ ] App Store Connect → Business: **EU DSA trader status**. A free,
-      non-commercial app can usually declare non-trader; "trader" publishes
-      address, phone and email.
-- [ ] Google Play Console ($25 once). New personal accounts must run a **closed
-      test with ≥12 testers for 14 days** before production access. Start it as
-      soon as possible to overlap the wait.
+- [ ] App Store Connect → Business → EU DSA: declare **non-trader** (decided).
+- [x] Google Play Console account exists (personal, new): the **closed test
+      with ≥12 testers for 14 days** applies before production access. Start
+      it as soon as possible (§5) to overlap the wait; recruit testers now.
 - Not needed: Paid Apps Agreement, tax/banking (free, no IAP), Push
   Notifications capability (reminders are local).
 
 ## 2. Production deploy of `dev`
 
-Production is still `b5a1ae8`. The store listings point at pages that only
-exist on `dev`.
+Deployed: `main` fast-forwarded to `dev` (`b0bbae9`) on 2026-11-09. Live
+bundle contains the new About "Contact" copy; `/about` and `/privacy` deep
+links return 200.
 
-- [ ] Deploy `dev` to production.
-- [ ] Check `https://geohearo.com/about` shows the "Contact" section (Support
+- [x] Deploy `dev` to production.
+- [x] Check `https://geohearo.com/about` shows the "Contact" section (Support
       URL) and `https://geohearo.com/privacy` the rewritten policy.
-- [ ] Deep link `/about` still loads (the `copy-404` Vite plugin was removed;
+- [x] Deep link `/about` still loads (the `copy-404` Vite plugin was removed;
       `netlify.toml` rewrites `/*` to `/index.html`).
 - [ ] Plausible → Site settings → **Custom properties**: add `platform`. The
       app sends it on every event (`ios` / `android`, `main.ts`
@@ -86,8 +85,9 @@ physical Android phone (TestFlight / Play internal testing builds work).
 
 ### App record (App Store Connect → Apps → +)
 
-- [ ] iOS, name `GeoHearo` (unique store-wide; creating the record reserves
+- [x] iOS, name `GeoHearo` (unique store-wide; creating the record reserves
       it), English (U.S.), bundle ID `com.geohearo.app`, SKU `geohearo-ios`.
+      Explicit App ID registered in the developer portal.
 - [ ] App Information: subtitle, category, content rights ("Yes",
       third-party live streams), age rating. Answers in
       [store-listing.md](store-listing.md).
@@ -103,10 +103,10 @@ physical Android phone (TestFlight / Play internal testing builds work).
 
 ### Build, TestFlight, review
 
-- [ ] Bump Build (`CURRENT_PROJECT_VERSION`), `bun run cap:sync`,
-      `bunx cap open ios`, destination Any iOS Device → Product → Archive →
-      Distribute App → App Store Connect. Fix validation errors with a new
-      Build number. Watch email for ITMS warnings.
+- [x] Build 1.0.0 (1) archived and uploaded from the CLI (2026-11-09;
+      commands in "Mobile app" in `frontend/README.md`, `ios/ExportOptions.plist`).
+      Next upload: bump `CURRENT_PROJECT_VERSION` to 2 first. Watch email for
+      ITMS warnings.
 - [ ] TestFlight internal testing: run §3 on the iPhone.
 - [ ] Optional external TestFlight (Beta App Review, beta description,
       feedback email) to catch stream/region issues.
