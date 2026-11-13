@@ -8,6 +8,7 @@ import DailyChallengeCard from "../components/DailyChallengeCard.vue";
 import GameResultModal from "../components/GameResultModal.vue";
 import GuessPanel from "../components/GuessPanel.vue";
 import HamburgerMenu from "../components/HamburgerMenu.vue";
+import HeroMascot from "../components/HeroMascot.vue";
 import Map from "../components/Map.vue";
 import RadioPlayer from "../components/RadioPlayer.vue";
 import ResultsPanel from "../components/ResultsPanel.vue";
@@ -48,12 +49,17 @@ onUnmounted(() => {
 const guessCollapsed = computed(() => 140 + safeArea.value.bottom);
 const guessExpanded = computed(() => Math.round(windowHeight.value * 0.9) - safeArea.value.top);
 const panelHeight = ref(guessCollapsed.value);
+// Anchors must be stable arrays: vant snaps the height to the closest anchor whenever
+// the `anchors` prop changes, and an inline `[a, b]` is a new array on every render,
+// i.e. on every drag step (the height feeds `overlayOpacity`), pinning the panel.
+const guessAnchors = computed(() => [guessCollapsed.value, guessExpanded.value]);
 
 // Results panel heights (px). Collapsed: station details + new game button visible.
 // Expanded: leave room for the X buttons at the top.
 const resultsCollapsed = computed(() => 160 + safeArea.value.bottom);
 const resultsExpanded = computed(() => windowHeight.value - 130 - safeArea.value.top);
 const resultsPanelHeight = ref(resultsCollapsed.value);
+const resultsAnchors = computed(() => [resultsCollapsed.value, resultsExpanded.value]);
 
 const onGuessAdded = () => {
   panelHeight.value = guessExpanded.value;
@@ -164,9 +170,9 @@ const overlayOpacity = computed(() => {
             <template v-if="isDailyChallengeMode"> Daily Challenge! 📣 </template>
             <template v-else> Free play mode </template>
           </div>
-          <img
-            src="/emoji.png"
-            class="absolute left-full bottom-0 h-12 ml-4 z-[-1] transition-transform duration-700 ease-out"
+          <HeroMascot
+            :playing="gameplay.isPlaying"
+            class="absolute left-full bottom-0 h-12 w-12 ml-4 z-[-1] transition-transform duration-700 ease-out"
             style="will-change: transform"
             :class="gameplay.isPlaying ? 'translate-y-0' : 'translate-y-16'"
           />
@@ -206,7 +212,7 @@ const overlayOpacity = computed(() => {
     <van-floating-panel
       v-if="gameplay.gameStage === 'listening'"
       v-model:height="resultsPanelHeight"
-      :anchors="[resultsCollapsed, resultsExpanded]"
+      :anchors="resultsAnchors"
       :content-class="'bg-paper-white rounded-t-[24px] border-t-3 border-l-3 border-r-3 border-pencil-lead shadow-[0_-4px_0_0_#334155] flex flex-col'"
       style="z-index: 50"
     >
@@ -236,7 +242,7 @@ const overlayOpacity = computed(() => {
     <van-floating-panel
       v-if="gameplay.gameStage === 'guessing'"
       v-model:height="panelHeight"
-      :anchors="[guessCollapsed, guessExpanded]"
+      :anchors="guessAnchors"
       :content-class="'bg-paper-white rounded-t-[24px] border-t-3 border-l-3 border-r-3 border-pencil-lead shadow-[0_-4px_0_0_#334155] flex flex-col'"
       style="z-index: 50"
     >

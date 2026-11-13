@@ -8,6 +8,7 @@ import GameResultModal from "../components/GameResultModal.vue";
 import GuessPanel from "../components/GuessPanel.vue";
 import HamburgerMenu from "../components/HamburgerMenu.vue";
 import Map from "../components/Map.vue";
+import HeroMascot from "../components/HeroMascot.vue";
 import RadioPlayer from "../components/RadioPlayer.vue";
 import StationDetails from "../components/StationDetails.vue";
 import type { GamePlayState } from "../composables/useGamePlay";
@@ -93,9 +94,9 @@ defineExpose({
               <template v-if="isDailyChallengeMode"> Daily Challenge! 📣 </template>
               <template v-else> Free play mode </template>
             </div>
-            <img
-              src="/emoji.png"
-              class="absolute left-full bottom-0 h-12 ml-4 z-[-1] transition-transform duration-700 ease-out"
+            <HeroMascot
+              :playing="gameplay.isPlaying"
+              class="absolute left-full bottom-0 h-12 w-12 ml-4 z-[-1] transition-transform duration-700 ease-out"
               style="will-change: transform"
               :class="gameplay.isPlaying ? 'translate-y-4' : 'translate-y-16'"
             />

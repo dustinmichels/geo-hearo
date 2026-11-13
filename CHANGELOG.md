@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-12
+
+- **Animated superhero mascot**: the 🦸 PNG that peeks out next to the title while the radio plays is now a vector component (`frontend/src/components/HeroMascot.vue`) wearing headphones, hands on the ear cups. Cape, hips and belt stay put while the upper body sways side to side from the waist, with a head bob, blinks and floating music notes. The animation freezes while the mascot slides away on pause and is off under `prefers-reduced-motion`. `public/emoji.png` removed.
+- **Mobile panels drag again**: the guess and results panels in `PlayMobile` stuck at their anchor while being dragged and jumped only once the finger passed the midpoint. The inline `:anchors="[a, b]"` array was rebuilt on every render (each drag step re-renders via `overlayOpacity`), and vant's `FloatingPanel` snaps to the closest anchor whenever `anchors` changes. The anchors are now stable computed arrays.
+
 ## 2026-11-09
 
 - **Mobile app, Android build and store listing drafts** (`todo/mobile-plan.md`, in progress):
