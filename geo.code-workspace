@@ -9,16 +9,16 @@
       "path": "frontend",
     },
     {
-      "name": "frontend-old",
-      "path": "frontend-old",
+      "name": "archive/frontend-old",
+      "path": "archive/frontend-old",
     },
     {
       "name": "data-prep",
       "path": "data-prep",
     },
     {
-      "name": "icy",
-      "path": "icy",
+      "name": "archive/icy",
+      "path": "archive/icy",
     },
     {
       "name": "data-prep/crawl",
